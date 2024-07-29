@@ -9,6 +9,7 @@ namespace Xui.Web.HttpX;
 
 public abstract partial class UI<T> where T : IViewModel
 {
+    static int c = 0;
     public class Context
     {
         private readonly UI<T> ui;
@@ -28,6 +29,7 @@ public abstract partial class UI<T> where T : IViewModel
             var sessionId = httpContext.GetHttpXSessionId();
             if (cache.Get(sessionId) is not Context context)
             {
+                Console.WriteLine($"Context: {c++} {httpContext.Connection.Id}");
                 context = new Context(ui);
                 Set(sessionId, context);
             }
@@ -65,11 +67,12 @@ public abstract partial class UI<T> where T : IViewModel
 
         internal async Task WriteResponseAsync(HttpContext httpContext)
         {
-            // TODO: Optimize.  No need to convert to a single string when we 
-            // have streams and pipes.
             Compose();
 
-            await httpContext.Response.WriteAsync(htmlString.ToStringWithExtras());
+            httpContext.Response.ContentLength = htmlString.GetContentLength();
+
+            var pipeWriter = httpContext.Response.BodyWriter;
+            await pipeWriter.WriteAsync(ref htmlString);
         }
 
         internal async Task Recompose()
