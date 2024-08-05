@@ -12,10 +12,8 @@ public partial struct HtmlString
     readonly int start;
     int end;
 
-    readonly int goalLiteral;
-    readonly int goalFormatted;
-    int progressLiteral;
-    int progressFormatted;
+    int literalLengthRemaining;
+    int formattedValuesRemaining;
 
     public HtmlString(int literalLength, int formattedCount)
     {
@@ -26,8 +24,8 @@ public partial struct HtmlString
         start = composition.cursor;
         end = start;
 
-        goalLiteral = literalLength;
-        goalFormatted = formattedCount;
+        literalLengthRemaining = literalLength;
+        formattedValuesRemaining = formattedCount;
 
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
@@ -46,7 +44,7 @@ public partial struct HtmlString
         end++;
         composition.cursor = end;
 
-        if (progressLiteral == goalLiteral && progressFormatted == goalFormatted)
+        if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
             Clear();
         }
@@ -69,7 +67,7 @@ public partial struct HtmlString
         chunk.Integer = start;
         chunk.Type = FormatType.StringLiteral;
 
-        progressLiteral += s.Length;
+        literalLengthRemaining -= s.Length;
         MoveNext();
     }
 
@@ -81,7 +79,7 @@ public partial struct HtmlString
         chunk.Type = FormatType.String;
         chunk.Format = format;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -93,7 +91,7 @@ public partial struct HtmlString
         chunk.Type = FormatType.Integer;
         chunk.Format = format;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -105,7 +103,7 @@ public partial struct HtmlString
         chunk.Type = FormatType.Boolean;
         chunk.Format = format;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -117,7 +115,7 @@ public partial struct HtmlString
         chunk.Type = FormatType.DateTime;
         chunk.Format = format;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -138,19 +136,19 @@ public partial struct HtmlString
         ref var start = ref composition.chunks[h.start];
         start.Integer = end;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
     public void AppendFormatted(Func<HtmlString> f)
     {
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
     public void AppendFormatted(Func<string, HtmlString> f)
     {
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -165,7 +163,7 @@ public partial struct HtmlString
         chunk.Action = a;
         chunk.Type = FormatType.Action;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -176,7 +174,7 @@ public partial struct HtmlString
         chunk.ActionEvent = a;
         chunk.Type = FormatType.ActionEvent;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -187,7 +185,7 @@ public partial struct HtmlString
         chunk.ActionAsync = f;
         chunk.Type = FormatType.ActionAsync;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
@@ -198,7 +196,7 @@ public partial struct HtmlString
         chunk.ActionEventAsync = f;
         chunk.Type = FormatType.ActionEventAsync;
 
-        progressFormatted++;
+        formattedValuesRemaining--;
         MoveNext();
     }
 
