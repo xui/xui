@@ -9,7 +9,6 @@ namespace Xui.Web.HttpX;
 
 public abstract partial class UI<T> where T : IViewModel
 {
-    static int c = 0;
     public class Context
     {
         private readonly UI<T> ui;
@@ -29,7 +28,6 @@ public abstract partial class UI<T> where T : IViewModel
             var sessionId = httpContext.GetHttpXSessionId();
             if (cache.Get(sessionId) is not Context context)
             {
-                Console.WriteLine($"Context: {c++} {httpContext.Connection.Id}");
                 context = new Context(ui);
                 Set(sessionId, context);
             }
