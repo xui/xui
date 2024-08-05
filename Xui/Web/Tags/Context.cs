@@ -223,10 +223,5 @@ public abstract partial class UI<T> where T : IViewModel
                 return (slot, @event);
             }
         }
-
-        public override string ToString()
-        {
-            return htmlString.ToString();
-        }
     }
 }
