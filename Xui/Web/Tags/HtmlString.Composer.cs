@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.IO.Pipelines;
 using System.Text;
 
 namespace Xui.Web.Html;
@@ -105,23 +107,99 @@ public partial struct HtmlString
         }
     }
 
-    public override string ToString()
+    public int? GetContentLengthIfConvenient()
     {
-        var builder = new StringBuilder();
-        // -2 since we can ignore that final HtmlString chunk.
-        for (int i = start; i < end - 2; i++)
+        // Only return a number if it doesn't involve a bunch of extra work 
+        // like parsing/applying a formatter.
+
+        int contentLength = 0;
+        for (int i = 1; i < end; i++)
+        {
+            ref var chunk = ref composition.chunks[i];
+
+            if (chunk.Format != null)
+                return null;
+
+            if (chunk.Type != FormatType.StringLiteral)
+                return null;
+
+            contentLength += chunk.String!.Length;
+        }
+        return contentLength;
+    }
+
+    internal ValueTask<FlushResult> WriteAsync(PipeWriter writer, CancellationToken cancellationToken = default)
+    {
+        bool hackProbablyAnAttributeNext = false;
+
+        for (int i = start; i < end; i++)
         {
             var chunk = composition.chunks[i];
-            chunk.Append(builder);
+
+            switch (chunk.Type)
+            {
+                case FormatType.Boolean:
+                case FormatType.DateTime:
+                case FormatType.Integer:
+                case FormatType.String:
+                    if (hackProbablyAnAttributeNext)
+                    {
+                        writer.Write(ref chunk);
+                    }
+                    else
+                    {
+                        writer.WriteStringLiteral("<!-- -->");
+                        writer.Write(ref chunk);
+                        writer.WriteStringLiteral("<script>r(\"slot");
+                        writer.Write(chunk.Id);
+                        writer.WriteStringLiteral("\")</script>");
+                    }
+                    break;
+                case FormatType.View:
+                case FormatType.HtmlString:
+                    // Only render extras for HtmlString's trailing sentinel, ignore for the leading sentinel.
+                    if (chunk.Id > chunk.Integer)
+                    {
+                        writer.WriteStringLiteral("<script>r(\"slot");
+                        writer.Write(chunk.Id);
+                        writer.WriteStringLiteral("\")</script>");
+                    }
+                    break;
+                case FormatType.Action:
+                case FormatType.ActionAsync:
+                    writer.WriteStringLiteral("h(");
+                    writer.Write(chunk.Id);
+                    writer.WriteStringLiteral(")");
+                    break;
+                case FormatType.ActionEvent:
+                case FormatType.ActionEventAsync:
+                    writer.WriteStringLiteral("h(");
+                    writer.Write(chunk.Id);
+                    writer.WriteStringLiteral(",event)");
+                    break;
+                default:
+                    writer.Write(ref chunk);
+                    break;
+            }
+
+            if (chunk.Type == FormatType.StringLiteral && chunk.String?[^1] == '"')
+            {
+                hackProbablyAnAttributeNext = true;
+            }
+            else
+            {
+                hackProbablyAnAttributeNext = false;
+            }
         }
-        return builder.ToString();
+
+        return writer.FlushAsync();
     }
 
     public string ToStringWithExtras()
     {
-        // -2 since we can ignore that final HtmlString chunk.
+        // -1 since we can ignore that final HtmlString chunk.
         var builder = new StringBuilder();
-        ToStringWithExtras(start, end - 2, builder);
+        ToStringWithExtras(start + 1, end - 1, builder);
         return builder.ToString();
     }
 
@@ -162,11 +240,23 @@ public partial struct HtmlString
                         builder.Append(chunk.Id);
                         builder.Append("\")</script>");
                     }
-                    else
-                    {
-                        builder.AppendLine();
-                    }
+                    // else
+                    // {
+                    //     builder.AppendLine();
+                    // }
 
+                    break;
+                case FormatType.Action:
+                case FormatType.ActionAsync:
+                    builder.Append("h(");
+                    builder.Append(chunk.Id);
+                    builder.Append(")");
+                    break;
+                case FormatType.ActionEvent:
+                case FormatType.ActionEventAsync:
+                    builder.Append("h(");
+                    builder.Append(chunk.Id);
+                    builder.Append(",event)");
                     break;
                 default:
                     chunk.Append(builder);

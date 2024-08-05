@@ -67,7 +67,9 @@ public abstract partial class UI<T> where T : IViewModel
         {
             Compose();
 
-            httpContext.Response.ContentLength = htmlString.GetContentLength();
+            var contentLength = htmlString.GetContentLengthIfConvenient();
+            if (contentLength.HasValue)
+                httpContext.Response.ContentLength = contentLength.Value;
 
             var pipeWriter = httpContext.Response.BodyWriter;
             await pipeWriter.WriteAsync(ref htmlString);
@@ -143,7 +145,7 @@ public abstract partial class UI<T> where T : IViewModel
 
             // TODO: Optimize.  Skip the string?
             Encoding.Default.GetBytes(eval, 0, eval.Length, sendBuffer, 0);
-            await webSocket.SendAsync(
+            await webSocket!.SendAsync(
                 new ArraySegment<byte>(sendBuffer, 0, eval.Length),
                 WebSocketMessageType.Text,
                 true,

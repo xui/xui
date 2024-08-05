@@ -1,5 +1,8 @@
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Pipelines;
 using System.Text;
+using Microsoft.AspNetCore.Routing.Tree;
 
 namespace Xui.Web.Html;
 
@@ -98,18 +101,65 @@ internal struct Chunk
                 break;
             case FormatType.Action:
             case FormatType.ActionAsync:
-                builder.Append("h(");
-                builder.Append(this.Id);
-                builder.Append(")");
-                break;
             case FormatType.ActionEvent:
             case FormatType.ActionEventAsync:
-                builder.Append("h(");
-                builder.Append(this.Id);
-                builder.Append(",event)");
+                // No values to write.  The parent iterator might output sentinels.
                 break;
             default:
                 throw new Exception($"Unsupported type: {this.Type}");
+        }
+    }
+}
+
+internal static class ChunkExtensions
+{
+    public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
+    {
+        Span<byte> destination;
+        int length;
+        switch (chunk.Type)
+        {
+            case FormatType.StringLiteral:
+                destination = writer.GetSpan(chunk.String!.Length);
+                length = Encoding.UTF8.GetBytes(chunk.String, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.String:
+                // TODO: Support chunk.Format
+                destination = writer.GetSpan(chunk.String!.Length);
+                length = Encoding.UTF8.GetBytes(chunk.String, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.Integer:
+                destination = writer.GetSpan();
+                chunk.Integer!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
+            case FormatType.Boolean:
+                // bool has no custom formatters
+                var value = chunk.Boolean!.Value ? Boolean.TrueString : Boolean.FalseString;
+                destination = writer.GetSpan(value.Length);
+                length = Encoding.UTF8.GetBytes(value, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.DateTime:
+                destination = writer.GetSpan();
+                chunk.DateTime!.Value.TryFormat(destination, out length, chunk.Format);
+                writer.Advance(length);
+                break;
+            case FormatType.View:
+            case FormatType.HtmlString:
+                // When Composing, HtmlString is a no-op since all their children are already unrolled.
+                // When Recomposing, HtmlString must "compose" a range of slots instead.
+                break;
+            case FormatType.Action:
+            case FormatType.ActionAsync:
+            case FormatType.ActionEvent:
+            case FormatType.ActionEventAsync:
+                // No values to write.  The parent iterator might output sentinels.
+                break;
+            default:
+                throw new Exception($"Unsupported type: {chunk.Type}");
         }
     }
 }
