@@ -47,33 +47,31 @@ public partial struct HtmlString
             max = range.End.Value;
         }
 
-        // TODO: Remove this StringBuilder once we know how we need to optimize for PushMutations & WebSockets.
-        var ugh = new StringBuilder();
         foreach (var range in ranges)
         {
             var chunk = compare.composition.chunks[range.Start.Value];
             if (range.Start.Value == range.End.Value)
             {
                 // Not a range, just a single value.  Mutate with nodeValue-precision.
-                chunk.Append(ugh);
+                var output = new StringBuilder();
+                chunk.Append(output);
                 yield return new Delta(
                     Id: chunk.Id,
                     Type: DeltaType.NodeValue, // TODO: Support attribute!
-                    ValueAsString: ugh.ToString()
+                    Output: output
                 );
             }
             else
             {
                 // This is a range of changes.  Replace the whole HTML partial.
-                // TODO: Optimize.  Any way to cleanly and efficiently trim and escape without calling ToString first?
-                compare.ToStringWithExtras(range.Start.Value, range.End.Value - 1, ugh);
+                var output = new StringBuilder();
+                compare.ToStringWithExtras(range.Start.Value, range.End.Value - 1, output);
                 yield return new Delta(
                     Id: chunk.Id,
                     Type: DeltaType.HtmlPartial,
-                    ValueAsString: ugh.ToString().Trim()
+                    Output: output
                 );
             }
-            ugh.Clear();
         }
     }
 
@@ -193,14 +191,6 @@ public partial struct HtmlString
         }
 
         return writer.FlushAsync();
-    }
-
-    public string ToStringWithExtras()
-    {
-        // -1 since we can ignore that final HtmlString chunk.
-        var builder = new StringBuilder();
-        ToStringWithExtras(start + 1, end - 1, builder);
-        return builder.ToString();
     }
 
     internal void ToStringWithExtras(int start, int end, StringBuilder builder)

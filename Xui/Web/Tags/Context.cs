@@ -103,7 +103,7 @@ public abstract partial class UI<T> where T : IViewModel
                         output.Append("slot");
                         output.Append(delta.Id);
                         output.Append(".nodeValue='");
-                        output.Append(delta.ValueAsString);
+                        output.Append(delta.Output);
                         output.Append("';");
                         break;
                     case DeltaType.NodeAttribute:
@@ -113,7 +113,7 @@ public abstract partial class UI<T> where T : IViewModel
                         output.Append("replaceNode(slot");
                         output.Append(delta.Id);
                         output.Append(",`");
-                        output.Append(delta.ValueAsString);
+                        output.Append(delta.Output);
                         output.Append("`);");
                         break;
                 }
@@ -138,10 +138,6 @@ public abstract partial class UI<T> where T : IViewModel
         {
             if (!IsWebSocketOpen)
                 return;
-
-            // eval = eval
-            //     .Replace("\"", "\\\"")
-            //     .Replace("\n", "");
 
             // TODO: Optimize.  Skip the string?
             Encoding.Default.GetBytes(eval, 0, eval.Length, sendBuffer, 0);
