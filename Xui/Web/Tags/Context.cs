@@ -159,6 +159,7 @@ public abstract partial class UI<T> where T : IViewModel
 
         private async Task Receive(WebSocket webSocket)
         {
+            // TODO: Replace receiveBuffer with pooled memory instead.
             WebSocketReceiveResult? receiveResult;
             do
             {
