@@ -17,7 +17,6 @@ public abstract partial class UI<T> where T : IViewModel
         private HtmlString htmlString;
         private HtmlString htmlStringCompare;
         private readonly byte[] receiveBuffer = new byte[1024 * 4];
-        private readonly byte[] sendBuffer = new byte[1024 * 4];
 
         private static readonly MemoryCache cache = new(new MemoryCacheOptions());
         private static readonly MemoryCacheEntryOptions entryOptions =
