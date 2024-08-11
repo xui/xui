@@ -24,4 +24,29 @@ internal static class PipeWriterExtensions
         ReadOnlyMemory<byte> memory = new(Encoding.UTF8.GetBytes(value));
         writer.Write(memory.Span);
     }
+
+    public static ValueTask SendAsync(this WebSocket webSocket, StringBuilder output)
+    {
+        int length = output.Length;
+        using (var owner = MemoryPool<byte>.Shared.Rent(length))
+        {
+            var memory = owner.Memory;
+            Copy(output, memory);
+            return webSocket!.SendAsync(
+                memory[..length],
+                WebSocketMessageType.Text,
+                true,
+                CancellationToken.None
+            );
+        }
+    }
+
+    private static void Copy(StringBuilder source, Memory<byte> destination)
+    {
+        int position = 0;
+        foreach (var chunk in source.GetChunks())
+        {
+            position += Encoding.UTF8.GetBytes(chunk.Span, destination[position..].Span);
+        }
+    }
 }

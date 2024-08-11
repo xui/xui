@@ -122,31 +122,24 @@ public abstract partial class UI<T> where T : IViewModel
             // Swap buffers.
             (htmlStringCompare, htmlString) = (htmlString, htmlStringCompare);
 
-            if (output is not null)
+            if (output is not null && IsWebSocketOpen)
             {
-                // TODO:  Never call ToString()! Change Push() to take in some kind of buffer.
-                await Push(output.ToString());
+                await webSocket!.SendAsync(output);
             }
         }
 
-        internal async Task PushHistoryState(string path)
+        internal ValueTask PushHistoryState(string path)
         {
-            await Push($"window.history.pushState({{}},'', '{path}')");
-        }
-
-        private async Task Push(string eval)
-        {
-            if (!IsWebSocketOpen)
-                return;
-
-            // TODO: Optimize.  Skip the string?
-            Encoding.Default.GetBytes(eval, 0, eval.Length, sendBuffer, 0);
-            await webSocket!.SendAsync(
-                new ArraySegment<byte>(sendBuffer, 0, eval.Length),
-                WebSocketMessageType.Text,
-                true,
-                CancellationToken.None
-            );
+            if (IsWebSocketOpen)
+            {
+                var output = new StringBuilder();
+                output.Append($"window.history.pushState({{}},'', '{path}')");
+                return webSocket!.SendAsync(output);
+            }
+            else
+            {
+                return ValueTask.CompletedTask;
+            }
         }
 
         internal async Task AssignWebSocket(WebSocketManager webSocketManager)
