@@ -43,7 +43,7 @@ internal static class PipeWriterExtensions
                 writer.Advance(length);
                 break;
             case FormatType.String:
-                // TODO: Support chunk.Format
+                // string has no formatters (and its alignment isn't helpful in HTML)
                 destination = writer.GetSpan(chunk.String!.Length);
                 length = Encoding.UTF8.GetBytes(chunk.String, destination);
                 writer.Advance(length);
@@ -59,7 +59,7 @@ internal static class PipeWriterExtensions
                 writer.Advance(length);
                 break;
             case FormatType.Boolean:
-                // bool has no custom formatters
+                // bool has no formatters
                 var value = chunk.Boolean!.Value ? Boolean.TrueString : Boolean.FalseString;
                 destination = writer.GetSpan(value.Length);
                 length = Encoding.UTF8.GetBytes(value, destination);

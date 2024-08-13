@@ -71,19 +71,19 @@ public partial struct HtmlString
         MoveNext();
     }
 
-    public void AppendFormatted(string s, string? format = null)
+    public void AppendFormatted(string s)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
         chunk.String = s;
         chunk.Type = FormatType.String;
-        chunk.Format = format;
+        chunk.Format = null;
 
         formattedValuesRemaining--;
         MoveNext();
     }
 
-    public void AppendFormatted(int? i, string? format = null)
+    public void AppendFormatted(int i, string? format = null)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
@@ -95,7 +95,7 @@ public partial struct HtmlString
         MoveNext();
     }
 
-    public void AppendFormatted(double? d, string? format = null)
+    public void AppendFormatted(double d, string? format = null)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
@@ -107,19 +107,19 @@ public partial struct HtmlString
         MoveNext();
     }
 
-    public void AppendFormatted(bool? b, string? format = null)
+    public void AppendFormatted(bool b)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
         chunk.Boolean = b;
         chunk.Type = FormatType.Boolean;
-        chunk.Format = format;
+        chunk.Format = null;
 
         formattedValuesRemaining--;
         MoveNext();
     }
 
-    public void AppendFormatted(DateTime? d, string? format = null)
+    public void AppendFormatted(DateTime d, string? format = null)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
