@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -13,10 +15,10 @@ public abstract partial class UI<T> where T : IViewModel
     {
         private readonly UI<T> ui;
         public T ViewModel { get; init; }
-        private WebSocket? webSocket;
+        private WebSocketPipe? pipe;
         private HtmlString htmlString;
         private HtmlString htmlStringCompare;
-        private readonly byte[] receiveBuffer = new byte[1024 * 4];
+        public bool IsWebSocketOpen => pipe?.State == WebSocketState.Open;
 
         private static readonly MemoryCache cache = new(new MemoryCacheOptions());
         private static readonly MemoryCacheEntryOptions entryOptions =
@@ -36,11 +38,6 @@ public abstract partial class UI<T> where T : IViewModel
         private static void Set(string id, Context context)
         {
             cache.Set(id, context, entryOptions);
-        }
-
-        public bool IsWebSocketOpen
-        {
-            get => webSocket != null && webSocket.State == WebSocketState.Open;
         }
 
         public Context(UI<T> ui)
@@ -71,126 +68,84 @@ public abstract partial class UI<T> where T : IViewModel
                 httpContext.Response.ContentLength = contentLength.Value;
 
             var pipeWriter = httpContext.Response.BodyWriter;
-            await pipeWriter.WriteAsync(ref htmlString);
+            htmlString.Write(pipeWriter);
+            await pipeWriter.FlushAsync();
         }
 
-        internal async Task Recompose()
+        internal async Task Recompose(WebSocketPipe pipe)
         {
             using (htmlStringCompare.ReuseBuffer())
             {
                 htmlStringCompare = ui.MainLayout(ViewModel);
             }
 
-            var deltas = htmlString.GetDeltas(htmlStringCompare);
-            await PushMutations(deltas);
-        }
-
-        internal async Task PushMutations(IEnumerable<Delta> deltas)
-        {
             if (!IsWebSocketOpen)
                 return;
 
-            StringBuilder? output = null;
-            foreach (var delta in deltas)
-            {
-                output ??= new();
+            var deltas = htmlString.GetDeltas(htmlStringCompare);
+            if (deltas is null)
+                return;
 
-                switch (delta.Type)
-                {
-                    case DeltaType.NodeValue:
-                        // TODO: Eventually these "eval commands" will already be a part of the DOM.
-                        output.Append("slot");
-                        output.Append(delta.Id);
-                        output.Append(".nodeValue='");
-                        output.Append(delta.Output);
-                        output.Append("';");
-                        break;
-                    case DeltaType.NodeAttribute:
-                        // TODO: Support this.
-                        break;
-                    case DeltaType.HtmlPartial:
-                        output.Append("replaceNode(slot");
-                        output.Append(delta.Id);
-                        output.Append(",`");
-                        output.Append(delta.Output);
-                        output.Append("`);");
-                        break;
-                }
-            }
+            var writer = pipe.Output;
+            writer.Write(deltas);
+            await writer.FlushAsync();
 
             // Swap buffers.
             (htmlStringCompare, htmlString) = (htmlString, htmlStringCompare);
+        }
 
-            if (output is not null && IsWebSocketOpen)
+        internal async Task PushHistoryState(string path)
+        {
+            if (IsWebSocketOpen && pipe is not null)
             {
-                await webSocket!.SendAsync(output);
+                var writer = pipe.Output;
+                writer.WriteStringLiteral($"window.history.pushState({{}},'', '{path}')");
+                writer.Write(path);
+                writer.WriteStringLiteral("')");
+                await writer.FlushAsync();
             }
         }
 
-        internal ValueTask PushHistoryState(string path)
+        internal async Task AssignWebSocket(WebSocketManager webSocketManager, HttpContext httpContext)
         {
-            if (IsWebSocketOpen)
-            {
-                var output = new StringBuilder();
-                output.Append($"window.history.pushState({{}},'', '{path}')");
-                return webSocket!.SendAsync(output);
-            }
-            else
-            {
-                return ValueTask.CompletedTask;
-            }
-        }
-
-        internal async Task AssignWebSocket(WebSocketManager webSocketManager)
-        {
-            // TODO: This is almost correct.  Works across multiple browsers but multiple tabs gets its Action stolen.
-            // Rework this once you figure out the various ViewModel state levels.
-            ViewModel.OnChanged = async () => await Recompose();
-
-#if DEBUG
-            using (new HotReloadContext<T>(this))
-#endif
             using (var webSocket = await webSocketManager.AcceptWebSocketAsync())
             {
-                this.webSocket = webSocket;
-                await Receive(webSocket);
+                using (this.pipe = new WebSocketPipe(webSocket))
+                {
+                    #if DEBUG
+                    using (new HotReloadContext<T>(() => Recompose(pipe)))
+                    #endif
+
+                    // TODO: This is almost correct.  
+                    // Works across multiple browsers but multiple tabs gets its Action stolen.
+                    // Rework this once you figure out the various ViewModel state levels.
+                    ViewModel.OnChanged = async () => await Recompose(pipe);
+
+                    await Task.WhenAll(Receive(pipe), pipe.RunAsync(httpContext.RequestAborted));
+                }
             }
+
+            pipe = null;
+            // TODO: Should ViewModel.OnChange unsubscribe here?
         }
 
-        private async Task Receive(WebSocket webSocket)
+        private async Task Receive(IDuplexPipe pipe)
         {
-            // TODO: Replace receiveBuffer with pooled memory instead.
-            WebSocketReceiveResult? receiveResult;
-            do
+            while (await pipe.Input.ReadAsync() is var result && !result.IsCompleted)
             {
-                receiveResult = await webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(receiveBuffer),
-                    CancellationToken.None
-                );
-
-                if (receiveResult.Count == 0)
-                    continue;
-
-                var (slotId, domEvent) = ParseEvent(receiveBuffer, receiveResult.Count);
+                // TODO: Buffer might be multiple segments one day.
+                var buffer = result.Buffer.First;
+                var (slotId, domEvent) = ParseEvent(buffer.Span);
                 using (this.ViewModel.Batch())
                 {
                     htmlString.HandleEvent(slotId, domEvent);
                 }
+
+                pipe.Input.AdvanceTo(result.Buffer.End);
             }
-            while (!receiveResult.CloseStatus.HasValue);
-
-            Console.WriteLine("Closing the connection...");
-
-            await webSocket.CloseAsync(
-                receiveResult.CloseStatus.Value,
-                receiveResult.CloseStatusDescription,
-                CancellationToken.None
-            );
-
-            Console.WriteLine("Connection closed.");
         }
 
-        private (int, Event?) ParseEvent(byte[] buffer, int length)
+        private (int, Event?) ParseEvent(ReadOnlySpan<byte> buffer)
         {
             int i = 0, slot = 0;
             while (true)
@@ -203,11 +158,10 @@ public abstract partial class UI<T> where T : IViewModel
                     continue;
                 }
 
-                if (i >= length - 1)
+                if (i >= buffer.Length - 1)
                     return (slot, null);
                 
-                // TODO: Optimize (or hopefully move to SignalR).
-                var message = Encoding.UTF8.GetString(buffer, i, length - i);
+                var message = buffer[i..];
                 var @event = JsonSerializer.Deserialize<Event>(message);
                 return (slot, @event);
             }

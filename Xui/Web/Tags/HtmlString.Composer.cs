@@ -8,7 +8,7 @@ public partial struct HtmlString
 {
     readonly Composition composition;
 
-    public IEnumerable<Delta> GetDeltas(HtmlString compare)
+    internal IEnumerable<Memory<Chunk>> GetDeltas(HtmlString compare)
     {
         List<Range>? ranges = null;
         for (int index = 0; index < end; index++)
@@ -49,29 +49,13 @@ public partial struct HtmlString
 
         foreach (var range in ranges)
         {
-            var chunk = compare.composition.chunks[range.Start.Value];
-            if (range.Start.Value == range.End.Value)
-            {
-                // Not a range, just a single value.  Mutate with nodeValue-precision.
-                var output = new StringBuilder();
-                chunk.Append(output);
-                yield return new Delta(
-                    Id: chunk.Id,
-                    Type: DeltaType.NodeValue, // TODO: Support attribute!
-                    Output: output
-                );
-            }
-            else
-            {
-                // This is a range of changes.  Replace the whole HTML partial.
-                var output = new StringBuilder();
-                compare.ToStringWithExtras(range.Start.Value, range.End.Value - 1, output);
-                yield return new Delta(
-                    Id: chunk.Id,
-                    Type: DeltaType.HtmlPartial,
-                    Output: output
-                );
-            }
+            var start = range.Start.Value;
+            var end = range.End.Value;
+            yield return new(
+                array: compare.composition.chunks, 
+                start: start, 
+                length: end - start + 1
+            );
         }
     }
 
@@ -126,13 +110,13 @@ public partial struct HtmlString
         return contentLength;
     }
 
-    internal ValueTask<FlushResult> WriteAsync(PipeWriter writer, CancellationToken cancellationToken = default)
+    internal readonly void Write(PipeWriter writer)
     {
         bool hackProbablyAnAttributeNext = false;
 
         for (int i = start; i < end; i++)
         {
-            var chunk = composition.chunks[i];
+            ref var chunk = ref composition.chunks[i];
 
             switch (chunk.Type)
             {
@@ -177,79 +161,6 @@ public partial struct HtmlString
                     break;
                 default:
                     writer.Write(ref chunk);
-                    break;
-            }
-
-            if (chunk.Type == FormatType.StringLiteral && chunk.String?[^1] == '"')
-            {
-                hackProbablyAnAttributeNext = true;
-            }
-            else
-            {
-                hackProbablyAnAttributeNext = false;
-            }
-        }
-
-        return writer.FlushAsync();
-    }
-
-    internal void ToStringWithExtras(int start, int end, StringBuilder builder)
-    {
-        bool hackProbablyAnAttributeNext = false;
-
-        for (int i = start; i <= end; i++)
-        {
-            var chunk = composition.chunks[i];
-
-            switch (chunk.Type)
-            {
-                case FormatType.Boolean:
-                case FormatType.DateTime:
-                case FormatType.Integer:
-                case FormatType.String:
-                    if (hackProbablyAnAttributeNext)
-                    {
-                        chunk.Append(builder);
-                    }
-                    else
-                    {
-                        // TODO: After "attribute support" is baked in, this block needs to move back to... Context.cs?
-                        builder.Append("<!-- -->");
-                        chunk.Append(builder);
-                        builder.Append("<script>r(\"slot");
-                        builder.Append(chunk.Id);
-                        builder.Append("\")</script>");
-                    }
-                    break;
-                case FormatType.View:
-                case FormatType.HtmlString:
-                    // Only render extras for HtmlString's trailing sentinel, ignore for the leading sentinel.
-                    if (chunk.Id > chunk.Integer)
-                    {
-                        builder.Append("<script>r(\"slot");
-                        builder.Append(chunk.Id);
-                        builder.Append("\")</script>");
-                    }
-                    // else
-                    // {
-                    //     builder.AppendLine();
-                    // }
-
-                    break;
-                case FormatType.Action:
-                case FormatType.ActionAsync:
-                    builder.Append("h(");
-                    builder.Append(chunk.Id);
-                    builder.Append(")");
-                    break;
-                case FormatType.ActionEvent:
-                case FormatType.ActionEventAsync:
-                    builder.Append("h(");
-                    builder.Append(chunk.Id);
-                    builder.Append(",event)");
-                    break;
-                default:
-                    chunk.Append(builder);
                     break;
             }
 

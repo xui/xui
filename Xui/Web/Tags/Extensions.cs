@@ -49,7 +49,7 @@ public static class Extensions
             // Switch protocols and await the event loop inside which reads from the stream.
             if (httpContext.WebSockets.IsWebSocketRequest)
             {
-                await context.AssignWebSocket(httpContext.WebSockets);
+                await context.AssignWebSocket(httpContext.WebSockets, httpContext);
             }
 
             // Here is a "normal" request.  There is no websocket yet so we cannot push mutations.
@@ -94,7 +94,7 @@ public static class Extensions
             // Switch protocols and await the event loop inside which reads from the stream.
             if (httpContext.WebSockets.IsWebSocketRequest)
             {
-                await context.AssignWebSocket(httpContext.WebSockets);
+                await context.AssignWebSocket(httpContext.WebSockets, httpContext);
             }
 
             // Here is a "normal" request.  There is no websocket yet so we cannot push mutations.

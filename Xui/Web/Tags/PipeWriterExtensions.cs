@@ -7,11 +7,6 @@ namespace Xui.Web.Html;
 
 internal static class PipeWriterExtensions
 {
-    public static ValueTask<FlushResult> WriteAsync(this PipeWriter writer, ref HtmlString htmlString, CancellationToken cancellationToken = default)
-    {
-        return htmlString.WriteAsync(writer, cancellationToken);
-    }
-
     public static void Write(this PipeWriter writer, int value)
     {
         var destination = writer.GetSpan();
@@ -19,35 +14,100 @@ internal static class PipeWriterExtensions
         writer.Advance(length);
     }
 
-    public static void WriteStringLiteral(this PipeWriter writer, string value)
+    public static void Write(this PipeWriter writer, ReadOnlySpan<char> value)
     {
-        // TODO: Cache this.
-        ReadOnlyMemory<byte> memory = new(Encoding.UTF8.GetBytes(value));
-        writer.Write(memory.Span);
+        Encoding.UTF8.GetBytes(value, writer);
     }
 
-    public static ValueTask SendAsync(this WebSocket webSocket, StringBuilder output)
+    public static void Write(this PipeWriter writer, string value)
     {
-        int length = output.Length;
-        using (var owner = MemoryPool<byte>.Shared.Rent(length))
+        Write(writer, value.AsSpan());
+    }
+
+    public static void WriteStringLiteral(this PipeWriter writer, string value)
+    {
+        // TODO: Does it help to cache the UTF16 -> UTF8 encodings?  
+        // Maybe not because of SIMD optimizations?
+        Write(writer, value);
+    }
+
+    public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
+    {
+        Span<byte> destination;
+        int length;
+        switch (chunk.Type)
         {
-            var memory = owner.Memory;
-            Copy(output, memory);
-            return webSocket!.SendAsync(
-                memory[..length],
-                WebSocketMessageType.Text,
-                true,
-                CancellationToken.None
-            );
+            case FormatType.StringLiteral:
+                destination = writer.GetSpan(chunk.String!.Length);
+                length = Encoding.UTF8.GetBytes(chunk.String, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.String:
+                // TODO: Support chunk.Format
+                destination = writer.GetSpan(chunk.String!.Length);
+                length = Encoding.UTF8.GetBytes(chunk.String, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.Integer:
+                destination = writer.GetSpan();
+                chunk.Integer!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
+            case FormatType.Boolean:
+                // bool has no custom formatters
+                var value = chunk.Boolean!.Value ? Boolean.TrueString : Boolean.FalseString;
+                destination = writer.GetSpan(value.Length);
+                length = Encoding.UTF8.GetBytes(value, destination);
+                writer.Advance(length);
+                break;
+            case FormatType.DateTime:
+                destination = writer.GetSpan();
+                chunk.DateTime!.Value.TryFormat(destination, out length, chunk.Format);
+                writer.Advance(length);
+                break;
+            case FormatType.View:
+            case FormatType.HtmlString:
+                // When Composing, HtmlString is a no-op since all their children are already unrolled.
+                // When Recomposing, HtmlString must "compose" a range of slots instead.
+                break;
+            case FormatType.Action:
+            case FormatType.ActionAsync:
+            case FormatType.ActionEvent:
+            case FormatType.ActionEventAsync:
+                // No values to write.  The parent iterator might output sentinels.
+                break;
+            default:
+                throw new Exception($"Unsupported type: {chunk.Type}");
         }
     }
 
-    private static void Copy(StringBuilder source, Memory<byte> destination)
+    public static void Write(this PipeWriter writer, IEnumerable<Memory<Chunk>> deltas)
     {
-        int position = 0;
-        foreach (var chunk in source.GetChunks())
+        foreach (var delta in deltas)
         {
-            position += Encoding.UTF8.GetBytes(chunk.Span, destination[position..].Span);
+            ref var chunk = ref delta.Span[0];
+
+            if (delta.Length == 1)
+            {
+                writer.WriteStringLiteral("slot");
+                writer.Write(chunk.Id);
+                writer.WriteStringLiteral(".nodeValue='");
+                writer.Write(ref chunk);
+                writer.WriteStringLiteral("';");
+            }
+            else
+            {
+                writer.WriteStringLiteral("replaceNode(slot");
+                writer.Write(chunk.Id);
+                writer.WriteStringLiteral(",`");
+                var span = delta.Span;
+                for (int i = 0; i <= delta.Length; i++)
+                {
+                    var c = span[i];
+                    writer.Write(ref c);
+                }
+                writer.WriteStringLiteral("`);");
+            }
         }
     }
 }
