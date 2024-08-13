@@ -7,7 +7,7 @@ partial class UI
 
             <link rel="stylesheet" href="/css/preflight.css" />
             <link rel="stylesheet" href="/css/site.css" />
-            <meta name="viewport" content="width=device-width, user-scalable-no">
+            <meta name="viewport" content="width=device-width, user-scalable=no">
             {Register()}
         </head>
         <body>
