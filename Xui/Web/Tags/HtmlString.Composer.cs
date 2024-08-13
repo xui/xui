@@ -120,24 +120,6 @@ public partial struct HtmlString
 
             switch (chunk.Type)
             {
-                case FormatType.Boolean:
-                case FormatType.DateTime:
-                case FormatType.Integer:
-                case FormatType.Double:
-                case FormatType.String:
-                    if (hackProbablyAnAttributeNext)
-                    {
-                        writer.Write(ref chunk);
-                    }
-                    else
-                    {
-                        writer.WriteStringLiteral("<!-- -->");
-                        writer.Write(ref chunk);
-                        writer.WriteStringLiteral("<script>r(\"slot");
-                        writer.Write(chunk.Id);
-                        writer.WriteStringLiteral("\")</script>");
-                    }
-                    break;
                 case FormatType.View:
                 case FormatType.HtmlString:
                     // Only render extras for HtmlString's trailing sentinel, ignore for the leading sentinel.
@@ -161,7 +143,18 @@ public partial struct HtmlString
                     writer.WriteStringLiteral(",event)");
                     break;
                 default:
-                    writer.Write(ref chunk);
+                    if (hackProbablyAnAttributeNext)
+                    {
+                        writer.Write(ref chunk);
+                    }
+                    else
+                    {
+                        writer.WriteStringLiteral("<!-- -->");
+                        writer.Write(ref chunk);
+                        writer.WriteStringLiteral("<script>r(\"slot");
+                        writer.Write(chunk.Id);
+                        writer.WriteStringLiteral("\")</script>");
+                    }
                     break;
             }
 

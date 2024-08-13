@@ -12,9 +12,13 @@ internal struct Chunk
     public FormatType Type;
     public string? String;
     public int? Integer;
+    public long? Long;
+    public float? Float;
     public double? Double;
+    public decimal? Decimal;
     public bool? Boolean;
     public DateTime? DateTime;
+    public TimeSpan? TimeSpan;
     public IView? View;
     public string? Format;
     public Action Action;

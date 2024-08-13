@@ -95,12 +95,48 @@ public partial struct HtmlString
         MoveNext();
     }
 
+    public void AppendFormatted(long l, string? format = null)
+    {
+        ref var chunk = ref composition.chunks[end];
+        chunk.Id = end;
+        chunk.Long = l;
+        chunk.Type = FormatType.Long;
+        chunk.Format = format;
+
+        formattedValuesRemaining--;
+        MoveNext();
+    }
+
+    public void AppendFormatted(float f, string? format = null)
+    {
+        ref var chunk = ref composition.chunks[end];
+        chunk.Id = end;
+        chunk.Float = f;
+        chunk.Type = FormatType.Float;
+        chunk.Format = format;
+
+        formattedValuesRemaining--;
+        MoveNext();
+    }
+
     public void AppendFormatted(double d, string? format = null)
     {
         ref var chunk = ref composition.chunks[end];
         chunk.Id = end;
         chunk.Double = d;
         chunk.Type = FormatType.Double;
+        chunk.Format = format;
+
+        formattedValuesRemaining--;
+        MoveNext();
+    }
+
+    public void AppendFormatted(decimal d, string? format = null)
+    {
+        ref var chunk = ref composition.chunks[end];
+        chunk.Id = end;
+        chunk.Decimal = d;
+        chunk.Type = FormatType.Decimal;
         chunk.Format = format;
 
         formattedValuesRemaining--;
@@ -125,6 +161,18 @@ public partial struct HtmlString
         chunk.Id = end;
         chunk.DateTime = d;
         chunk.Type = FormatType.DateTime;
+        chunk.Format = format;
+
+        formattedValuesRemaining--;
+        MoveNext();
+    }
+
+    public void AppendFormatted(TimeSpan t, string? format = null)
+    {
+        ref var chunk = ref composition.chunks[end];
+        chunk.Id = end;
+        chunk.TimeSpan = t;
+        chunk.Type = FormatType.TimeSpan;
         chunk.Format = format;
 
         formattedValuesRemaining--;

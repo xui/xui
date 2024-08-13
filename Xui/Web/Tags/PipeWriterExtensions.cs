@@ -53,9 +53,24 @@ internal static class PipeWriterExtensions
                 chunk.Integer!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
                 writer.Advance(length);
                 break;
+            case FormatType.Long:
+                destination = writer.GetSpan();
+                chunk.Long!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
+            case FormatType.Float:
+                destination = writer.GetSpan();
+                chunk.Float!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
             case FormatType.Double:
                 destination = writer.GetSpan();
                 chunk.Double!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
+            case FormatType.Decimal:
+                destination = writer.GetSpan();
+                chunk.Decimal!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
                 writer.Advance(length);
                 break;
             case FormatType.Boolean:
@@ -68,6 +83,11 @@ internal static class PipeWriterExtensions
             case FormatType.DateTime:
                 destination = writer.GetSpan();
                 chunk.DateTime!.Value.TryFormat(destination, out length, chunk.Format);
+                writer.Advance(length);
+                break;
+            case FormatType.TimeSpan:
+                destination = writer.GetSpan();
+                chunk.TimeSpan!.Value.TryFormat(destination, out length, chunk.Format);
                 writer.Advance(length);
                 break;
             case FormatType.View:
