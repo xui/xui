@@ -112,16 +112,17 @@ public abstract partial class UI<T> where T : IViewModel
             {
                 using (this.pipe = new WebSocketPipe(webSocket))
                 {
-                    #if DEBUG
-                    using (new HotReloadContext<T>(() => Recompose(pipe)))
-                    #endif
+                    // HotReload is a no-op in RELEASE mode.
+                    using (HotReload.Listen(async () => await Recompose(pipe)))
+                    {
 
-                    // TODO: This is almost correct.  
-                    // Works across multiple browsers but multiple tabs gets its Action stolen.
-                    // Rework this once you figure out the various ViewModel state levels.
-                    ViewModel.OnChanged = async () => await Recompose(pipe);
+                        // TODO: This is almost correct.  
+                        // Works across multiple browsers but multiple tabs gets its Action stolen.
+                        // Rework this once you figure out the various ViewModel state levels.
+                        ViewModel.OnChanged = async () => await Recompose(pipe);
 
-                    await Task.WhenAll(Receive(pipe), pipe.RunAsync(httpContext.RequestAborted));
+                        await Task.WhenAll(Receive(pipe), pipe.RunAsync(httpContext.RequestAborted));
+                    }
                 }
             }
 

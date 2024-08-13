@@ -5,6 +5,11 @@ namespace Xui.Web.HttpX;
 public static class HotReload
 {
     public static int ReloadCount { get; private set; } = 0;
+    public static IDisposable Listen(Func<Task> action) => new NoOp();
+    class NoOp : IDisposable
+    {
+        public void Dispose() { }
+    }
 }
 
 #else
@@ -18,10 +23,11 @@ namespace Xui.Web.HttpX;
 public static class HotReload
 {
     public static int ReloadCount { get; private set; } = 0;
+    public static IDisposable Listen(Func<Task> action) => new HotReloadContext(action);
 
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+    #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
     public static event Action<Type[]?>? UpdateApplicationEvent;
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+    #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
     internal static void ClearCache(Type[]? types)
     {
@@ -38,7 +44,7 @@ public static class HotReload
     }
 }
 
-internal class HotReloadContext<T> : IDisposable where T : IViewModel
+internal class HotReloadContext : IDisposable
 {
     private readonly Func<Task> action;
     public HotReloadContext(Func<Task> action)
