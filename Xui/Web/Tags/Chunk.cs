@@ -39,10 +39,18 @@ internal struct Chunk
                 return c1.String == c2.String && c1.Format == c2.Format;
             case FormatType.Integer:
                 return c1.Integer == c2.Integer && c1.Format == c2.Format;
+            case FormatType.Long:
+                return c1.Long == c2.Long && c1.Format == c2.Format;
+            case FormatType.Float:
+                return c1.Float == c2.Float && c1.Format == c2.Format;
             case FormatType.Double:
                 return c1.Double == c2.Double && c1.Format == c2.Format;
+            case FormatType.Decimal:
+                return c1.Decimal == c2.Decimal && c1.Format == c2.Format;
             case FormatType.DateTime:
                 return c1.DateTime == c2.DateTime && c1.Format == c2.Format;
+            case FormatType.TimeSpan:
+                return c1.TimeSpan == c2.TimeSpan && c1.Format == c2.Format;
             case FormatType.Boolean:
                 return c1.Boolean == c2.Boolean && c1.Format == c2.Format;
             case FormatType.View:
