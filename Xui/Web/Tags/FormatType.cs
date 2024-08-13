@@ -5,6 +5,7 @@ enum FormatType
     StringLiteral,
     String,
     Integer,
+    Double,
     Boolean,
     DateTime,
     View,

@@ -95,6 +95,18 @@ public partial struct HtmlString
         MoveNext();
     }
 
+    public void AppendFormatted(double? d, string? format = null)
+    {
+        ref var chunk = ref composition.chunks[end];
+        chunk.Id = end;
+        chunk.Double = d;
+        chunk.Type = FormatType.Double;
+        chunk.Format = format;
+
+        formattedValuesRemaining--;
+        MoveNext();
+    }
+
     public void AppendFormatted(bool? b, string? format = null)
     {
         ref var chunk = ref composition.chunks[end];

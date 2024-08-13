@@ -53,6 +53,11 @@ internal static class PipeWriterExtensions
                 chunk.Integer!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
                 writer.Advance(length);
                 break;
+            case FormatType.Double:
+                destination = writer.GetSpan();
+                chunk.Double!.Value.TryFormat(destination, out length, chunk.Format ?? string.Empty);
+                writer.Advance(length);
+                break;
             case FormatType.Boolean:
                 // bool has no custom formatters
                 var value = chunk.Boolean!.Value ? Boolean.TrueString : Boolean.FalseString;

@@ -123,6 +123,7 @@ public partial struct HtmlString
                 case FormatType.Boolean:
                 case FormatType.DateTime:
                 case FormatType.Integer:
+                case FormatType.Double:
                 case FormatType.String:
                     if (hackProbablyAnAttributeNext)
                     {

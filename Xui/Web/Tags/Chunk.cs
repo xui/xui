@@ -12,6 +12,7 @@ internal struct Chunk
     public FormatType Type;
     public string? String;
     public int? Integer;
+    public double? Double;
     public bool? Boolean;
     public DateTime? DateTime;
     public IView? View;
@@ -34,6 +35,8 @@ internal struct Chunk
                 return c1.String == c2.String && c1.Format == c2.Format;
             case FormatType.Integer:
                 return c1.Integer == c2.Integer && c1.Format == c2.Format;
+            case FormatType.Double:
+                return c1.Double == c2.Double && c1.Format == c2.Format;
             case FormatType.DateTime:
                 return c1.DateTime == c2.DateTime && c1.Format == c2.Format;
             case FormatType.Boolean:
