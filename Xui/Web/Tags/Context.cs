@@ -27,6 +27,7 @@ public abstract partial class UI<T> where T : IViewModel
         static int tmpCountSessions = 0; // TODO: Remove this after benchmarking is under control.
         public static Context Get(HttpContext httpContext, UI<T> ui)
         {
+            // var sessionId = httpContext.Connection.Id;  // TODO: Remove this after benchmarking is under control.
             var sessionId = httpContext.GetHttpXSessionId();
             if (cache.Get(sessionId) is not Context context)
             {
