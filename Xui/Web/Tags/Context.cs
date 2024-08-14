@@ -126,7 +126,6 @@ public abstract partial class UI<T> where T : IViewModel
                             Receive(pipe), 
                             pipe.RunAsync(httpContext.RequestAborted)
                         );
-                        tmp = false;
                     }
                 }
             }
