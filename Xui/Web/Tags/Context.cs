@@ -110,10 +110,10 @@ public abstract partial class UI<T> where T : IViewModel
         {
             using (var webSocket = await webSocketManager.AcceptWebSocketAsync())
             {
-                using (this.pipe = new WebSocketPipe(webSocket))
+                using (pipe = new WebSocketPipe(webSocket))
                 {
                     // HotReload is a no-op in RELEASE mode.
-                    using (HotReload.Listen(async () => await Recompose(pipe)))
+                    using (HotReload.Listen(async () => await Recompose(this.pipe)))
                     {
 
                         // TODO: This is almost correct.  
