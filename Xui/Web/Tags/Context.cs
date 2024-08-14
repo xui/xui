@@ -24,11 +24,13 @@ public abstract partial class UI<T> where T : IViewModel
         private static readonly MemoryCacheEntryOptions entryOptions =
             new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromDays(1));
 
+        static int tmpCountSessions = 0; // TODO: Remove this after benchmarking is under control.
         public static Context Get(HttpContext httpContext, UI<T> ui)
         {
             var sessionId = httpContext.GetHttpXSessionId();
             if (cache.Get(sessionId) is not Context context)
             {
+                Console.WriteLine($"Context: {tmpCountSessions++} {httpContext.Connection.Id}");
                 context = new Context(ui);
                 Set(sessionId, context);
             }
@@ -115,13 +117,16 @@ public abstract partial class UI<T> where T : IViewModel
                     // HotReload is a no-op in RELEASE mode.
                     using (HotReload.Listen(async () => await Recompose(this.pipe)))
                     {
-
                         // TODO: This is almost correct.  
                         // Works across multiple browsers but multiple tabs gets its Action stolen.
                         // Rework this once you figure out the various ViewModel state levels.
                         ViewModel.OnChanged = async () => await Recompose(pipe);
 
-                        await Task.WhenAll(Receive(pipe), pipe.RunAsync(httpContext.RequestAborted));
+                        await Task.WhenAll(
+                            Receive(pipe), 
+                            pipe.RunAsync(httpContext.RequestAborted)
+                        );
+                        tmp = false;
                     }
                 }
             }
