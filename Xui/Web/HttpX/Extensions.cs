@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
+using Xui.Web.Html;
 
 namespace Xui.Web.HttpX;
 

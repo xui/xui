@@ -1,6 +1,6 @@
 namespace Xui.Web.Html;
 
-enum FormatType
+public enum FormatType
 {
     StringLiteral,
     String,

@@ -1,6 +1,9 @@
+using System.Buffers;
+using System.IO.Pipelines;
 using System.Net.WebSockets;
+using System.Text;
 
-namespace System.IO.Pipelines;
+namespace Xui.Web.HttpX;
 
 class WebSocketPipe(WebSocket webSocket) : IDuplexPipe, IDisposable
 {
@@ -88,7 +91,7 @@ class WebSocketPipe(WebSocket webSocket) : IDuplexPipe, IDisposable
     }
 }
 
-internal class WebSocketStream(WebSocket webSocket) : Stream
+class WebSocketStream(WebSocket webSocket) : Stream
 {
     public override bool CanRead => throw new NotImplementedException();
     public override bool CanSeek => throw new NotImplementedException();

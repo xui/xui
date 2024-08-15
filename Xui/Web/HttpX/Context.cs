@@ -71,7 +71,7 @@ public abstract partial class UI<T> where T : IViewModel
                 httpContext.Response.ContentLength = contentLength.Value;
 
             var pipeWriter = httpContext.Response.BodyWriter;
-            htmlString.Write(pipeWriter);
+            pipeWriter.Write(htmlString.AsSpan());
             await pipeWriter.FlushAsync();
         }
 

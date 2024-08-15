@@ -1,4 +1,4 @@
-namespace Xui.Web.HttpX;
+namespace Xui.Web.Html;
 
 public interface IViewModel
 {

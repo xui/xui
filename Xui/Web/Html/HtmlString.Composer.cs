@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.IO.Pipelines;
 using System.Text;
 
 namespace Xui.Web.Html;
@@ -8,7 +7,12 @@ public partial struct HtmlString
 {
     readonly Composition composition;
 
-    internal IEnumerable<Memory<Chunk>> GetDeltas(HtmlString compare)
+    public readonly Span<Chunk> AsSpan()
+    {
+        return composition.chunks.AsSpan(start, end - start);
+    }
+
+    public IEnumerable<Memory<Chunk>> GetDeltas(HtmlString compare)
     {
         List<Range>? ranges = null;
         for (int index = 0; index < end; index++)
@@ -108,75 +112,5 @@ public partial struct HtmlString
             contentLength += chunk.String!.Length;
         }
         return contentLength;
-    }
-
-    internal readonly void Write(PipeWriter writer)
-    {
-        bool hackProbablyAnAttributeNext = false;
-
-        for (int i = start; i < end; i++)
-        {
-            ref var chunk = ref composition.chunks[i];
-
-            switch (chunk.Type)
-            {
-                case FormatType.Boolean:
-                case FormatType.DateTime:
-                case FormatType.TimeSpan:
-                case FormatType.Integer:
-                case FormatType.Long:
-                case FormatType.Float:
-                case FormatType.Double:
-                case FormatType.Decimal:
-                case FormatType.String:
-                    if (hackProbablyAnAttributeNext)
-                    {
-                        writer.Write(ref chunk);
-                    }
-                    else
-                    {
-                        writer.WriteStringLiteral("<!-- -->");
-                        writer.Write(ref chunk);
-                        writer.WriteStringLiteral("<script>r(\"slot");
-                        writer.Write(chunk.Id);
-                        writer.WriteStringLiteral("\")</script>");
-                    }
-                    break;
-                case FormatType.View:
-                case FormatType.HtmlString:
-                    // Only render extras for HtmlString's trailing sentinel, ignore for the leading sentinel.
-                    if (chunk.Id > chunk.Integer)
-                    {
-                        writer.WriteStringLiteral("<script>r(\"slot");
-                        writer.Write(chunk.Id);
-                        writer.WriteStringLiteral("\")</script>");
-                    }
-                    break;
-                case FormatType.Action:
-                case FormatType.ActionAsync:
-                    writer.WriteStringLiteral("h(");
-                    writer.Write(chunk.Id);
-                    writer.WriteStringLiteral(")");
-                    break;
-                case FormatType.ActionEvent:
-                case FormatType.ActionEventAsync:
-                    writer.WriteStringLiteral("h(");
-                    writer.Write(chunk.Id);
-                    writer.WriteStringLiteral(",event)");
-                    break;
-                default:
-                    writer.Write(ref chunk);
-                    break;
-            }
-
-            if (chunk.Type == FormatType.StringLiteral && chunk.String?[^1] == '"')
-            {
-                hackProbablyAnAttributeNext = true;
-            }
-            else
-            {
-                hackProbablyAnAttributeNext = false;
-            }
-        }
     }
 }
