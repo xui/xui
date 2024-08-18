@@ -107,10 +107,10 @@ public static class Extensions
                 // so they can receive the final state as a single 200 GET response.
                 // FOR HUMANS: The best UX is to start by immediately sending a 200 GET with 
                 // zero blocking and then push DOM mutations caused by any subsequent state changes.
-                if (httpContext.IsHuman())
-                    _ = mutateStateAsync(context);
-                else
+                if (httpContext.IsBot())
                     await mutateStateAsync(context);
+                else
+                    _ = mutateStateAsync(context);
 
                 await context.WriteResponseAsync(httpContext);
             }
@@ -129,17 +129,17 @@ public static class Extensions
         });
     }
 
-    static bool IsHuman(this HttpContext httpContext)
+    static bool IsBot(this HttpContext httpContext)
     {
         string? userAgent = httpContext.Request.Headers.UserAgent;
 
-        if (userAgent is null || string.IsNullOrWhiteSpace(userAgent)) return false;
-        if (userAgent.Contains("bot", StringComparison.CurrentCultureIgnoreCase)) return false;
-        if (userAgent.Contains("crawl", StringComparison.CurrentCultureIgnoreCase)) return false;
-        if (userAgent.Contains("spider", StringComparison.CurrentCultureIgnoreCase)) return false;
-        if (userAgent.Contains("curl", StringComparison.CurrentCultureIgnoreCase)) return false;
+        if (userAgent is null || string.IsNullOrWhiteSpace(userAgent)) return true;
+        if (userAgent.Contains("bot", StringComparison.CurrentCultureIgnoreCase)) return true;
+        if (userAgent.Contains("crawl", StringComparison.CurrentCultureIgnoreCase)) return true;
+        if (userAgent.Contains("spider", StringComparison.CurrentCultureIgnoreCase)) return true;
+        if (userAgent.Contains("curl", StringComparison.CurrentCultureIgnoreCase)) return true;
 
-        return true;
+        return false;
     }
 
     internal static string GetHttpXSessionId(this HttpContext httpContext)
