@@ -9,6 +9,7 @@ public class UI : UI<ViewModel>
     Context ctx;
     int c = 15;
     string s = "name";
+    static DateTime dt = DateTime.Now;
 
     public UI() : base()
     {
@@ -25,11 +26,11 @@ public class UI : UI<ViewModel>
     protected override HtmlString MainLayout(ViewModel vm)
     {
         return $"""
-            123{c}456{DateTime.Now}789{c}0123
+            123{c}456{dt}789{c}0123
 
             {new Component2(s)}
             
-            {DateTime.Now:O} {c} {c:x} {c} {c} {c} {c}
+            {dt:O} {c} {c:x} {c} {c} {c} {c}
         """;
     }
 
@@ -43,11 +44,11 @@ public class UI : UI<ViewModel>
     public Placebo Placebo()
     {
         return $"""
-            123{c}456{DateTime.Now}789{c}0123
+            123{c}456{dt}789{c}0123
 
             {GetPlaceboComponent(s)}
 
-            {DateTime.Now:O} {c} {c:x} {c} {c} {c} {c}
+            {dt:O} {c} {c:x} {c} {c} {c} {c}
         """;
     }
 
