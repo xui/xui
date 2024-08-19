@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroScript", "Xui\Web\ZeroScript\ZeroScript.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tags", "Xui\Web\Tags\Tags.csproj", "{F92424F6-33C1-4D76-9454-6299519AEC47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tags", "Xui\Web\Web\Web.csproj", "{F92424F6-33C1-4D76-9454-6299519AEC47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
