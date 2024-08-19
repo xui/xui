@@ -1,10 +1,11 @@
 using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Xui.Web.Html;
 
 namespace Xui.Web.Html;
 
-public static class PipeWriterExtensions
+public static class IBufferWriterExtensions
 {
     public static void Write(this IBufferWriter<byte> writer, int value)
     {
