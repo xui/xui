@@ -1,6 +1,6 @@
 readonly record struct VirtualDom() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-virtual-dom">
             <div>
                 <img src="img/zero_virtual_dom.svg" />

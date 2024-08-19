@@ -1,6 +1,6 @@
 readonly record struct Benchmarks() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section>
             <div>
                 <img src="benchmarks/benchmarks.svg" />

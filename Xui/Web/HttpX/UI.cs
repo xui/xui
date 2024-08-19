@@ -1,12 +1,6 @@
-using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Http;
-using System.Net;
 using System.Diagnostics.CodeAnalysis;
-using Xui.Web.Html;
+using Xui.Web;
 
 namespace Xui.Web.HttpX;
 
@@ -16,7 +10,7 @@ public abstract partial class UI<T> where T : IViewModel
     {
     }
 
-    protected abstract HtmlString MainLayout(T viewModel);
+    protected abstract Html MainLayout(T viewModel);
 
     // TODO: Connect() should be injected automatically 
     // once you have string literal parsing in place.  Then make this private.

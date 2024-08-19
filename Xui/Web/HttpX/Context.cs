@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
-using Xui.Web.Html;
+using Xui.Web;
 
 namespace Xui.Web.HttpX;
 
@@ -16,8 +16,8 @@ public abstract partial class UI<T> where T : IViewModel
         private readonly UI<T> ui;
         public T ViewModel { get; init; }
         private WebSocketPipe? pipe;
-        private HtmlString htmlString;
-        private HtmlString htmlStringCompare;
+        private Html htmlString;
+        private Html htmlStringCompare;
         public bool IsWebSocketOpen => pipe?.State == WebSocketState.Open;
 
         private static readonly MemoryCache cache = new(new MemoryCacheOptions());

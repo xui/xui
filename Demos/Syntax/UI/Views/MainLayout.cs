@@ -1,6 +1,6 @@
 partial class UI
 {
-    protected override HtmlString MainLayout(MyViewModel vm) => $"""
+    protected override Html MainLayout(MyViewModel vm) => $"""
         <html>
             <head>
                 <!-- Zero script refs.  Such fast. -->
@@ -20,7 +20,7 @@ partial class UI
                 <h3>Supported primitives and formatting</h3>
                 <ul>
                     <li>string: {vm.Name ?? "(none)"}</li>
-                    <li>int: {vm.Count}</li>
+                    <li>int: {vm.Count ?? -1}</li>
                     <li>DateTime:H:mm:ss: {DateTime.Now}</li>
                     <li>DateTime:H:mm:ss: {DateTime.Now:H:mm:ss}</li>
                     <li>DateTime:0: {DateTime.Now:O}</li>
@@ -32,7 +32,7 @@ partial class UI
                 </p>
 
                 <h3>Conditional (ternary) operator</h3>
-                <p>{vm.Count} {(vm.Count % 2 == 0 ? "is even" : "is odd")}</p>
+                <p>{vm.Count ?? -1} {(vm.Count % 2 == 0 ? "is even" : "is odd")}</p>
                 <p>
                     {(vm.Name == null
                         ? $"Welcome {vm.Name}"
@@ -41,8 +41,8 @@ partial class UI
                 </p>
 
                 <h3 onmouseover="{this.UpdateTheRecordThings}">Event listener expressions</h3>
-                <button onClick="{this.UpdateTheRecordThings}">Click: {vm.Count}</button>
-                <button onClick="{() => vm.Count -= 10}">Click: {vm.Count}</button>
+                <button onClick="{this.UpdateTheRecordThings}">Click: {vm.Count ?? -1}</button>
+                <button onClick="{() => vm.Count -= 10}">Click: {vm.Count ?? -1}</button>
                 <button onClick="{this.UpdateTheRecordsAsync}">Async</button>
                 <button onClick="{this.StartTimer}">Tick</button>
 
@@ -84,7 +84,7 @@ partial class UI
                 <p>
                     {_ =>
                     {
-                        HtmlString message;
+                        Html message;
                         if (vm.Name != null)
                             message = $"Welcome {vm.Name}";
                         else

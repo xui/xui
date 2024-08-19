@@ -1,6 +1,6 @@
 readonly record struct Sense() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-sense">
             <div>
                 &#128548

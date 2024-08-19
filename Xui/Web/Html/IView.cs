@@ -1,6 +1,6 @@
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
 public interface IView
 {
-    HtmlString Render();
+    Html Render();
 }

@@ -1,6 +1,6 @@
 partial class UI
 {
-    HtmlString Header(MyViewModel vm, string? nameOverride = null) => $"""
+    Html Header(MyViewModel vm, string? nameOverride = null) => $"""
         <p>I am a header that might override name: {nameOverride ?? vm.Name ?? "(none)"}</p>
         """;
 }

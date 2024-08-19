@@ -1,9 +1,9 @@
 using System.Buffers;
 using System.Text;
 
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
-public partial struct HtmlString
+public partial struct Html
 {
     readonly Composition composition;
 
@@ -12,7 +12,7 @@ public partial struct HtmlString
         return composition.chunks.AsSpan(start, end - start);
     }
 
-    public IEnumerable<Memory<Chunk>> GetDeltas(HtmlString compare)
+    public IEnumerable<Memory<Chunk>> GetDeltas(Html compare)
     {
         List<Range>? ranges = null;
         for (int index = 0; index < end; index++)

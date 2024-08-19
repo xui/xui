@@ -1,6 +1,6 @@
 readonly record struct Allocations() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-allocations">
             <div>
                 <h2>

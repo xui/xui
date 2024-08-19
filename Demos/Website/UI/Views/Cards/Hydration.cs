@@ -1,6 +1,6 @@
 readonly record struct Hydration() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-hydration">
             <div>
                 

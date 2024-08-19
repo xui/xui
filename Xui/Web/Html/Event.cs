@@ -1,4 +1,4 @@
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
 #pragma warning disable IDE1006 // Naming Styles
 

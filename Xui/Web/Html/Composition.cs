@@ -1,4 +1,4 @@
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
 internal class Composition
 {

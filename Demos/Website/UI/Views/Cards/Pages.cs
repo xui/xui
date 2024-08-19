@@ -1,6 +1,6 @@
 readonly record struct Pages() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-pages">
             <div>
                 <a href="zero-pages">xui.ai/zero-pages</a>

@@ -23,7 +23,7 @@ public class UI : UI<ViewModel>
         ctx.Compose();
     }
 
-    protected override HtmlString MainLayout(ViewModel vm)
+    protected override Html MainLayout(ViewModel vm)
     {
         return $"""
             123{c}456{dt}789{c}0123
@@ -34,7 +34,7 @@ public class UI : UI<ViewModel>
         """;
     }
 
-    HtmlString GetComponent1(string name)
+    Html GetComponent1(string name)
     {
         return $"<p>I am {name} a component</p>";
     }
@@ -60,7 +60,7 @@ public class UI : UI<ViewModel>
 
 readonly record struct Component2(string Name) : IView
 {
-    public HtmlString Render() => $"<p>I am {Name} a component</p>";
+    public Html Render() => $"<p>I am {Name} a component</p>";
 }
 
 class Wat

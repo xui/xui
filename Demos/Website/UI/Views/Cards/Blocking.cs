@@ -1,6 +1,6 @@
 readonly record struct Blocking() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section>
             <div>
                 <pre>

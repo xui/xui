@@ -1,9 +1,8 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Xui.Web.Html;
 
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
 public static class IBufferWriterExtensions
 {

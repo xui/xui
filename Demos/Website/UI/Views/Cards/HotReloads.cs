@@ -1,6 +1,6 @@
 readonly record struct HotReloads() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="hot-reload">
             <div>
                 <h1>

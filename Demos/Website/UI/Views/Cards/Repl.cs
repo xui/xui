@@ -1,6 +1,6 @@
 readonly record struct Repl() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section>
             <div>
                 <img src="repl/repl.svg" />

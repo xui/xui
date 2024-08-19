@@ -1,6 +1,6 @@
 using System.Buffers;
 using System.IO.Pipelines;
-using Xui.Web.Html;
+using Xui.Web;
 
 namespace Xui.Web.HttpX;
 

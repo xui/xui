@@ -1,6 +1,6 @@
 readonly record struct Hooks() : IView
 {
-    public HtmlString Render() => $$"""
+    public Html Render() => $$"""
         <section id="zero-hooks">
             <div class="vstack">
                 <div class="hstack">

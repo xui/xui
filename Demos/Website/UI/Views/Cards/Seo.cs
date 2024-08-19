@@ -1,6 +1,6 @@
 readonly record struct Seo() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section>
             <div>
                 <button onclick="{FetchHtml}">

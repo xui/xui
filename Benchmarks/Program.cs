@@ -1,4 +1,4 @@
-﻿global using Xui.Web.Html;
+﻿global using Xui.Web;
 global using Xui.Web.HttpX;
 using BenchmarkDotNet;
 using BenchmarkDotNet.Attributes;

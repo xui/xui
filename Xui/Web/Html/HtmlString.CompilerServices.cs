@@ -1,11 +1,11 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Xui.Web.Html;
+namespace Xui.Web;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
-public partial struct HtmlString
+public partial struct Html
 {
     [ThreadStatic] static Composition? root;
 
@@ -15,7 +15,7 @@ public partial struct HtmlString
     int literalLengthRemaining;
     int formattedValuesRemaining;
 
-    public HtmlString(int literalLength, int formattedCount)
+    public Html(int literalLength, int formattedCount)
     {
         root ??= new();
         composition = root;
@@ -184,7 +184,7 @@ public partial struct HtmlString
         AppendFormatted(v.Render());
     }
 
-    public void AppendFormatted(HtmlString h)
+    public void AppendFormatted(Html h)
     {
         end = h.end;
 
@@ -200,13 +200,13 @@ public partial struct HtmlString
         MoveNext();
     }
 
-    public void AppendFormatted(Func<HtmlString> f)
+    public void AppendFormatted(Func<Html> f)
     {
         formattedValuesRemaining--;
         MoveNext();
     }
 
-    public void AppendFormatted(Func<string, HtmlString> f)
+    public void AppendFormatted(Func<string, Html> f)
     {
         formattedValuesRemaining--;
         MoveNext();

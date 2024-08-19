@@ -2,7 +2,7 @@ readonly record struct JavaScript(
     ViewModel ViewModel
 ) : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-javascript">
             <div>
                 <button onclick="{Increment}">Clicks: {ViewModel.Count ?? 0}</button>

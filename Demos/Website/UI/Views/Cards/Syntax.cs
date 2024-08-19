@@ -1,6 +1,6 @@
 readonly record struct Syntax() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-syntax">
             <div>
                 <img src="img/zero_syntax.svg" />

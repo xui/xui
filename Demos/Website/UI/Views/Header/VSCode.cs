@@ -1,6 +1,6 @@
 readonly record struct VSCode() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section class="vscode">
             <div class="sidebar">
                 <details open>
@@ -43,7 +43,7 @@ readonly record struct VSCode() : IView
         </section>
         """;
 
-    HtmlString File(string name) => $"""
+    Html File(string name) => $"""
         <label for="{name}">
             <input type="radio" name="file" id="{name}">{name}</input>
         </label>

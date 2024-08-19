@@ -1,6 +1,6 @@
 readonly record struct Api() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-api">
             <div class="vstack">
                 <img src="img/3d_rotate.png" />

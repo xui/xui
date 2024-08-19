@@ -1,6 +1,6 @@
 readonly record struct Latency() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="zero-latency">
             <div>
                 <h1>

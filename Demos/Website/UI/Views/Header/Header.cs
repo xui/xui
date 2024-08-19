@@ -1,6 +1,6 @@
 readonly record struct Header() : IView
 {
-    public HtmlString Render() => $"""
+    public Html Render() => $"""
         <section id="header" class="hstack">
 
             <img src="img/xui_logo.svg" />

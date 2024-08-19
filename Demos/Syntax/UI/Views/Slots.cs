@@ -3,16 +3,16 @@ partial class UI
     // Problem here, Func<T> isn't a value type.
     // Find another way to pass children without them jumping the gun onto the buffer.
 
-    HtmlString HasContent(Func<HtmlString> content) => $"""
+    Html HasContent(Func<Html> content) => $"""
         <h2 style="color: red">
             {content()}
         </h2>
     """;
 
-    HtmlString Slots(
-        Func<HtmlString> title,
-        Func<HtmlString> caption,
-        Func<HtmlString> content
+    Html Slots(
+        Func<Html> title,
+        Func<Html> caption,
+        Func<Html> content
     ) => $"""
         <h2>{title()}</h2>
         <code>{caption()}</code>
