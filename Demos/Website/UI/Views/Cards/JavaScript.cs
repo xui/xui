@@ -5,7 +5,7 @@ readonly record struct JavaScript(
     public HtmlString Render() => $"""
         <section id="zero-javascript">
             <div>
-                <button onclick="{Increment}">Clicks: {ViewModel.Count}</button>
+                <button onclick="{Increment}">Clicks: {ViewModel.Count ?? 0}</button>
             </div>
             <article>
                 <h2>
