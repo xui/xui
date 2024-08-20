@@ -11,19 +11,19 @@ partial class UI : UI<ViewModel>
         MapPage("/zero-javascript", ZeroJavaScript);
     }
 
-    void Index(Context context)
+    void Index(HttpXContext context)
     {
         context.ViewModel.Name = "Twas clicked";
         context.ViewModel.ShowAdditional = false;
     }
 
-    void ZeroPages(Context context)
+    void ZeroPages(HttpXContext context)
     {
         context.ViewModel.Name = "Twas clicked";
         context.ViewModel.ShowAdditional = true;
     }
 
-    void ZeroJavaScript(Context context)
+    void ZeroJavaScript(HttpXContext context)
     {
         context.ViewModel.Name = "OK, back to normal: Rylan Barnes";
         context.ViewModel.ShowAdditional = true;

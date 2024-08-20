@@ -147,12 +147,12 @@ public abstract partial class UI<T> where T : IViewModel
         this.group = null;
     }
 
-    protected void MapPage([StringSyntax("Route")] string pattern, Action<Context> mutateState)
+    protected void MapPage([StringSyntax("Route")] string pattern, Action<HttpXContext> mutateState)
     {
         group?.MapPage(this, pattern, mutateState);
     }
 
-    protected void MapPage([StringSyntax("Route")] string pattern, Func<UI<T>.Context, Task> mutateStateAsync)
+    protected void MapPage([StringSyntax("Route")] string pattern, Func<UI<T>.HttpXContext, Task> mutateStateAsync)
     {
         group?.MapPage(this, pattern, mutateStateAsync);
     }

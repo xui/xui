@@ -16,17 +16,17 @@ partial class UI : UI<MyViewModel>
         MapPage("last-page", LastPage);
     }
 
-    void SomePage(Context context)
+    void SomePage(HttpXContext context)
     {
         context.ViewModel.Count = 999;
     }
 
-    void OtherPage(Context context)
+    void OtherPage(HttpXContext context)
     {
         context.ViewModel.Count = 666;
     }
 
-    void LastPage(Context context)
+    void LastPage(HttpXContext context)
     {
         context.ViewModel.Count = 333;
     }

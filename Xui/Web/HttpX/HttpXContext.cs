@@ -11,7 +11,7 @@ namespace Xui.Web.HttpX;
 
 public abstract partial class UI<T> where T : IViewModel
 {
-    public class Context
+    public class HttpXContext
     {
         private readonly UI<T> ui;
         public T ViewModel { get; init; }
@@ -25,25 +25,25 @@ public abstract partial class UI<T> where T : IViewModel
             new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromDays(1));
 
         static int tmpCountSessions = 0; // TODO: Remove this after benchmarking is under control.
-        public static Context Get(HttpContext httpContext, UI<T> ui)
+        public static HttpXContext Get(HttpContext httpContext, UI<T> ui)
         {
             // var sessionId = httpContext.Connection.Id;  // TODO: Remove this after benchmarking is under control.
             var sessionId = httpContext.GetHttpXSessionId();
-            if (cache.Get(sessionId) is not Context context)
+            if (cache.Get(sessionId) is not HttpXContext context)
             {
                 Console.WriteLine($"Context: {tmpCountSessions++} {httpContext.Connection.Id}");
-                context = new Context(ui);
+                context = new HttpXContext(ui);
                 Set(sessionId, context);
             }
             return context;
         }
 
-        private static void Set(string id, Context context)
+        private static void Set(string id, HttpXContext context)
         {
             cache.Set(id, context, entryOptions);
         }
 
-        public Context(UI<T> ui)
+        public HttpXContext(UI<T> ui)
         {
             this.ui = ui;
 

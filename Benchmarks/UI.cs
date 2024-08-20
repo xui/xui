@@ -6,7 +6,7 @@ using BenchmarkDotNet.Running;
 [MemoryDiagnoser]
 public class UI : UI<ViewModel>
 {
-    Context ctx;
+    HttpXContext ctx;
     int c = 15;
     string s = "name";
     static DateTime dt = DateTime.Now;

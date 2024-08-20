@@ -40,11 +40,11 @@ public static class WebExtensions
         this RouteGroupBuilder group,
         UI<T> ui,
         [StringSyntax("Route")] string pattern,
-        Action<UI<T>.Context> mutateState) where T : IViewModel
+        Action<UI<T>.HttpXContext> mutateState) where T : IViewModel
     {
         group.MapGet(pattern, async httpContext =>
         {
-            var context = UI<T>.Context.Get(httpContext, ui);
+            var context = UI<T>.HttpXContext.Get(httpContext, ui);
 
             // Here is the request for a websocket connection.  
             // Switch protocols and await the event loop inside which reads from the stream.
@@ -85,11 +85,11 @@ public static class WebExtensions
         this RouteGroupBuilder group,
         UI<T> ui,
         [StringSyntax("Route")] string pattern,
-        Func<UI<T>.Context, Task> mutateStateAsync) where T : IViewModel
+        Func<UI<T>.HttpXContext, Task> mutateStateAsync) where T : IViewModel
     {
         group.MapGet(pattern, async httpContext =>
         {
-            var context = UI<T>.Context.Get(httpContext, ui);
+            var context = UI<T>.HttpXContext.Get(httpContext, ui);
 
             // Here is the request for a websocket connection.  
             // Switch protocols and await the event loop inside which reads from the stream.
