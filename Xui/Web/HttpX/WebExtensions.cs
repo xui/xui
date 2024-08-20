@@ -8,7 +8,7 @@ using Xui.Web;
 
 namespace Xui.Web.HttpX;
 
-public static class Extensions
+public static class WebExtensions
 {
     public static void AddXui(this IServiceCollection services)
     {
