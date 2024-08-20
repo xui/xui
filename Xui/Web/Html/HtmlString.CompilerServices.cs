@@ -8,7 +8,9 @@ namespace Xui.Web;
 [StructLayout(LayoutKind.Auto)]
 public partial struct Html
 {
-    [ThreadStatic] static Composer? root;
+    [ThreadStatic]
+    static Composer? root;
+    readonly Composer composer;
 
     readonly int start;
     int end;

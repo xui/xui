@@ -5,8 +5,6 @@ namespace Xui.Web;
 
 public partial struct Html
 {
-    readonly Composer composer;
-
     public readonly Span<Chunk> AsSpan()
     {
         return composer.chunks.AsSpan(start, end - start);
