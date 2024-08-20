@@ -1,6 +1,6 @@
 namespace Xui.Web;
 
-internal class Composition
+internal class Composer
 {
     internal Chunk[] chunks = new Chunk[1000];
     internal int cursor = 0;

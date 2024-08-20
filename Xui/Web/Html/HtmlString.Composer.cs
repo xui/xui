@@ -5,11 +5,11 @@ namespace Xui.Web;
 
 public partial struct Html
 {
-    readonly Composition composition;
+    readonly Composer composer;
 
     public readonly Span<Chunk> AsSpan()
     {
-        return composition.chunks.AsSpan(start, end - start);
+        return composer.chunks.AsSpan(start, end - start);
     }
 
     public IEnumerable<Memory<Chunk>> GetDeltas(Html compare)
@@ -17,8 +17,8 @@ public partial struct Html
         List<Range>? ranges = null;
         for (int index = 0; index < end; index++)
         {
-            var oldChunk = composition.chunks[index];
-            var newChunk = compare.composition.chunks[index];
+            var oldChunk = composer.chunks[index];
+            var newChunk = compare.composer.chunks[index];
             if (oldChunk == newChunk) {
                 continue;
             }
@@ -31,7 +31,7 @@ public partial struct Html
             }
             else
             {
-                var htmlStringStart = compare.composition.chunks[newChunk.Integer!.Value];
+                var htmlStringStart = compare.composer.chunks[newChunk.Integer!.Value];
                 ranges.Add(new Range(newChunk.Integer.Value, htmlStringStart.Integer!.Value));
             }
         }
@@ -56,7 +56,7 @@ public partial struct Html
             var start = range.Start.Value;
             var end = range.End.Value;
             yield return new(
-                array: compare.composition.chunks, 
+                array: compare.composer.chunks, 
                 start: start, 
                 length: end - start + 1
             );
@@ -71,7 +71,7 @@ public partial struct Html
         // in order?  Do I need a queue?  But this queue should belong to the Context?
 
         // TODO: Optimize.  Bypass the O(n).  Lazy Dict gets reset on each compose?
-        var chunk = composition.chunks.First(c => c.Id == slotId);
+        var chunk = composer.chunks.First(c => c.Id == slotId);
         switch (chunk.Type)
         {
             case FormatType.Action:
@@ -101,7 +101,7 @@ public partial struct Html
         int contentLength = 0;
         for (int i = 1; i < end; i++)
         {
-            ref var chunk = ref composition.chunks[i];
+            ref var chunk = ref composer.chunks[i];
 
             if (chunk.Format != null)
                 return null;

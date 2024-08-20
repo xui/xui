@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,7 +8,7 @@ namespace Xui.Web;
 [StructLayout(LayoutKind.Auto)]
 public partial struct Html
 {
-    [ThreadStatic] static Composition? root;
+    [ThreadStatic] static Composer? root;
 
     readonly int start;
     int end;
@@ -18,16 +19,16 @@ public partial struct Html
     public Html(int literalLength, int formattedCount)
     {
         root ??= new();
-        composition = root;
+        composer = root;
 
-        composition.depth++;
-        start = composition.cursor;
+        composer.depth++;
+        start = composer.cursor;
         end = start;
 
         literalLengthRemaining = literalLength;
         formattedValuesRemaining = formattedCount;
 
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Integer = start;
         chunk.Type = FormatType.HtmlString;
@@ -42,7 +43,7 @@ public partial struct Html
     private void MoveNext()
     {
         end++;
-        composition.cursor = end;
+        composer.cursor = end;
 
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
@@ -52,16 +53,16 @@ public partial struct Html
 
     private void Clear()
     {
-        if (--composition.depth == 0)
+        if (--composer.depth == 0)
         {
-            composition.cursor = 0;
+            composer.cursor = 0;
             root = null;
         }
     }
 
     public void AppendLiteral(string s)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.String = s;
         chunk.Integer = start;
@@ -73,7 +74,7 @@ public partial struct Html
 
     public void AppendFormatted(string s)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.String = s;
         chunk.Type = FormatType.String;
@@ -85,7 +86,7 @@ public partial struct Html
 
     public void AppendFormatted(int i, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Integer = i;
         chunk.Type = FormatType.Integer;
@@ -97,7 +98,7 @@ public partial struct Html
 
     public void AppendFormatted(long l, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Long = l;
         chunk.Type = FormatType.Long;
@@ -109,7 +110,7 @@ public partial struct Html
 
     public void AppendFormatted(float f, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Float = f;
         chunk.Type = FormatType.Float;
@@ -121,7 +122,7 @@ public partial struct Html
 
     public void AppendFormatted(double d, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Double = d;
         chunk.Type = FormatType.Double;
@@ -133,7 +134,7 @@ public partial struct Html
 
     public void AppendFormatted(decimal d, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Decimal = d;
         chunk.Type = FormatType.Decimal;
@@ -145,7 +146,7 @@ public partial struct Html
 
     public void AppendFormatted(bool b)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Boolean = b;
         chunk.Type = FormatType.Boolean;
@@ -157,7 +158,7 @@ public partial struct Html
 
     public void AppendFormatted(DateTime d, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.DateTime = d;
         chunk.Type = FormatType.DateTime;
@@ -169,7 +170,7 @@ public partial struct Html
 
     public void AppendFormatted(TimeSpan t, string? format = null)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.TimeSpan = t;
         chunk.Type = FormatType.TimeSpan;
@@ -188,12 +189,12 @@ public partial struct Html
     {
         end = h.end;
 
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Integer = h.start;
         chunk.Type = FormatType.HtmlString;
 
-        ref var start = ref composition.chunks[h.start];
+        ref var start = ref composer.chunks[h.start];
         start.Integer = end;
 
         formattedValuesRemaining--;
@@ -218,7 +219,7 @@ public partial struct Html
 
     public void AppendFormatted(Action a)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.Action = a;
         chunk.Type = FormatType.Action;
@@ -229,7 +230,7 @@ public partial struct Html
 
     public void AppendFormatted(Action<Event> a)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.ActionEvent = a;
         chunk.Type = FormatType.ActionEvent;
@@ -240,7 +241,7 @@ public partial struct Html
 
     public void AppendFormatted(Func<Task> f)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.ActionAsync = f;
         chunk.Type = FormatType.ActionAsync;
@@ -251,7 +252,7 @@ public partial struct Html
 
     public void AppendFormatted(Func<Event, Task> f)
     {
-        ref var chunk = ref composition.chunks[end];
+        ref var chunk = ref composer.chunks[end];
         chunk.Id = end;
         chunk.ActionEventAsync = f;
         chunk.Type = FormatType.ActionEventAsync;
@@ -262,14 +263,14 @@ public partial struct Html
 
     public readonly IDisposable ReuseBuffer()
     {
-        return new Reuseable(composition);
+        return new Reuseable(composer);
     }
 
     private class Reuseable : IDisposable
     {
-        public Reuseable(Composition composition)
+        public Reuseable(Composer composer)
         {
-            root = composition;
+            root = composer;
         }
 
         public void Dispose()
