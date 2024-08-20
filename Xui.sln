@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Demos\Website\We
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xui", "Xui", "{810B8863-9155-487D-8B5B-6B4DA65EB3B0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{D23FFA41-A51A-4726-B2A0-F00F0D65D339}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpX", "Xui\Web\HttpX\HttpX.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Html", "Xui\Web\Html\Html.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
@@ -21,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroScript", "Xui\Web\ZeroScript\ZeroScript.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tags", "Xui\Web\Web\Web.csproj", "{F92424F6-33C1-4D76-9454-6299519AEC47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Xui\Web\Web\Web.csproj", "{F92424F6-33C1-4D76-9454-6299519AEC47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
