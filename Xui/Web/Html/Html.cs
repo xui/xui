@@ -4,9 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace Xui.Web;
 
+public delegate Html Slot();
+
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
-public partial struct Html
+public ref struct Html
 {
     readonly Composer composer;
 
@@ -201,16 +203,9 @@ public partial struct Html
         MoveNext();
     }
 
-    public void AppendFormatted(Func<Html> f)
+    public void AppendFormatted(Slot s)
     {
-        formattedValuesRemaining--;
-        MoveNext();
-    }
-
-    public void AppendFormatted(Func<string, Html> f)
-    {
-        formattedValuesRemaining--;
-        MoveNext();
+        AppendFormatted(s());
     }
 
     // public void AppendFormatted<T>(T t)

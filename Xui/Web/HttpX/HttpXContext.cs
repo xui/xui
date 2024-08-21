@@ -72,12 +72,17 @@ public abstract partial class UI<T> where T : IViewModel
             await pipeWriter.FlushAsync();
         }
 
-        internal async Task Recompose(WebSocketPipe pipe)
+        internal void Recompose()
         {
             using (composerCompare.ReuseBuffer())
             {
                 var html = ui.MainLayout(ViewModel);
             }
+        }
+
+        internal async Task Recompose(WebSocketPipe pipe)
+        {
+            Recompose();
 
             if (!IsWebSocketOpen)
                 return;
