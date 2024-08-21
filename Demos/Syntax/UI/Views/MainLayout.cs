@@ -82,15 +82,7 @@ partial class UI
 
                 <h3><span style="text-decoration: line-through">Conditionals with if statements</span> Inline blocks</h3>
                 <p>
-                    {_ =>
-                    {
-                        Html message;
-                        if (vm.Name != null)
-                            message = $"Welcome {vm.Name}";
-                        else
-                            message = $"Please log in <button>Login</button>";
-                        return $"<p class='message'>{message}</p>";
-                    }}
+                    TODO: if-block
                 </p>
 
                 <h3>Async/await blocks</h3>
