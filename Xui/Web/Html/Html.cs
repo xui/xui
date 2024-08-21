@@ -8,8 +8,6 @@ namespace Xui.Web;
 [StructLayout(LayoutKind.Auto)]
 public partial struct Html
 {
-    [ThreadStatic]
-    static Composer? root;
     readonly Composer composer;
 
     readonly int start;
@@ -20,8 +18,7 @@ public partial struct Html
 
     public Html(int literalLength, int formattedCount)
     {
-        root ??= new();
-        composer = root;
+        composer = Composer.Current ??= new();
 
         composer.depth++;
         start = composer.cursor;
@@ -58,7 +55,8 @@ public partial struct Html
         if (--composer.depth == 0)
         {
             composer.cursor = 0;
-            root = null;
+            composer.tempEnd = end;
+            Composer.Current = null;
         }
     }
 
@@ -261,23 +259,5 @@ public partial struct Html
 
         formattedValuesRemaining--;
         MoveNext();
-    }
-
-    public readonly IDisposable ReuseBuffer()
-    {
-        return new Reuseable(composer);
-    }
-
-    private class Reuseable : IDisposable
-    {
-        public Reuseable(Composer composer)
-        {
-            root = composer;
-        }
-
-        public void Dispose()
-        {
-            root = null;
-        }
     }
 }

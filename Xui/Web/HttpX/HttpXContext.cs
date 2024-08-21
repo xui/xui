@@ -16,8 +16,8 @@ public abstract partial class UI<T> where T : IViewModel
         private readonly UI<T> ui;
         public T ViewModel { get; init; }
         private WebSocketPipe? pipe;
-        private Html htmlString;
-        private Html htmlStringCompare;
+        private Composer composer = new();
+        private Composer composerCompare = new();
         public bool IsWebSocketOpen => pipe?.State == WebSocketState.Open;
 
         private static readonly MemoryCache cache = new(new MemoryCacheOptions());
@@ -47,18 +47,15 @@ public abstract partial class UI<T> where T : IViewModel
         {
             this.ui = ui;
 
-            htmlString = $"";
-            htmlStringCompare = $"";
-
             // TODO: Need to be more clever about how a new ViewModel is created.
             ViewModel = (T)T.New();
         }
 
         public void Compose()
         {
-            using (htmlString.ReuseBuffer())
+            using (composer.ReuseBuffer())
             {
-                htmlString = ui.MainLayout(ViewModel);
+                var html = ui.MainLayout(ViewModel);
             }
         }
 
@@ -66,26 +63,26 @@ public abstract partial class UI<T> where T : IViewModel
         {
             Compose();
 
-            var contentLength = htmlString.GetContentLengthIfConvenient();
+            var contentLength = composer.GetContentLengthIfConvenient();
             if (contentLength.HasValue)
                 httpContext.Response.ContentLength = contentLength.Value;
 
             var pipeWriter = httpContext.Response.BodyWriter;
-            pipeWriter.Write(htmlString.AsSpan());
+            pipeWriter.Write(composer.AsSpan());
             await pipeWriter.FlushAsync();
         }
 
         internal async Task Recompose(WebSocketPipe pipe)
         {
-            using (htmlStringCompare.ReuseBuffer())
+            using (composerCompare.ReuseBuffer())
             {
-                htmlStringCompare = ui.MainLayout(ViewModel);
+                var html = ui.MainLayout(ViewModel);
             }
 
             if (!IsWebSocketOpen)
                 return;
 
-            var deltas = htmlString.GetDeltas(htmlStringCompare);
+            var deltas = composer.GetDeltas(composerCompare);
             if (deltas is null)
                 return;
 
@@ -94,7 +91,7 @@ public abstract partial class UI<T> where T : IViewModel
             await writer.FlushAsync();
 
             // Swap buffers.
-            (htmlStringCompare, htmlString) = (htmlString, htmlStringCompare);
+            (composer, composerCompare) = (composerCompare, composer);
         }
 
         internal async Task PushHistoryState(string path)
@@ -144,7 +141,7 @@ public abstract partial class UI<T> where T : IViewModel
                 var (slotId, domEvent) = ParseEvent(buffer.Span);
                 using (this.ViewModel.Batch())
                 {
-                    htmlString.HandleEvent(slotId, domEvent);
+                    composer.HandleEvent(slotId, domEvent);
                 }
 
                 pipe.Input.AdvanceTo(result.Buffer.End);
