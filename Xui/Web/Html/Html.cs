@@ -55,7 +55,7 @@ public partial struct Html
         if (--composer.depth == 0)
         {
             composer.cursor = 0;
-            composer.tempEnd = end;
+            composer.end = end;
             Composer.Current = null;
         }
     }

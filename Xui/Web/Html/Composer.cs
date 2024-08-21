@@ -10,12 +10,11 @@ public class Composer
     internal int cursor = 0;
     internal int depth = 0;
 
-    // TODO: Remove tempEnd!
-    public int tempEnd = 0;
+    public int end = 0;
 
     public Span<Chunk> AsSpan()
     {
-        return chunks.AsSpan(0, tempEnd);
+        return chunks.AsSpan(0, end);
     }
 
     public void HandleEvent(int slotId, Event? domEvent)
@@ -54,7 +53,7 @@ public class Composer
         // like parsing/applying a formatter.
 
         int contentLength = 0;
-        for (int i = 1; i < tempEnd; i++)
+        for (int i = 1; i < end; i++)
         {
             ref var chunk = ref chunks[i];
 
@@ -72,7 +71,7 @@ public class Composer
     public IEnumerable<Memory<Chunk>> GetDeltas(Composer compare)
     {
         List<Range>? ranges = null;
-        for (int index = 0; index < tempEnd; index++)
+        for (int index = 0; index < end; index++)
         {
             var oldChunk = chunks[index];
             var newChunk = compare.chunks[index];
