@@ -119,10 +119,7 @@ public class Composer
         }
     }
 
-    public IDisposable ReuseBuffer()
-    {
-        return new Reuseable(this);
-    }
+    public IDisposable ReuseBuffer() => new Reuseable(this);
 
     private class Reuseable : IDisposable
     {
