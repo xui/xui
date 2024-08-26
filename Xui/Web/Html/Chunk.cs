@@ -119,7 +119,7 @@ public struct Chunk
                 writer.Advance(length);
                 break;
             case FormatType.Boolean:
-                // bool has no formatters
+                // bool has no formatters and doesn't implement IUtf8SpanFormattable
                 var value = Boolean!.Value ? System.Boolean.TrueString : System.Boolean.FalseString;
                 destination = writer.GetSpan(value.Length);
                 length = Encoding.UTF8.GetBytes(value, destination);
