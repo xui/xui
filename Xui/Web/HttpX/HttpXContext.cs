@@ -105,7 +105,7 @@ public abstract partial class UI<T> where T : IViewModel
             {
                 var writer = pipe.Output;
                 writer.WriteStringLiteral($"window.history.pushState({{}},'', '{path}')");
-                writer.Write(path);
+                Encoding.UTF8.GetBytes(path.AsSpan(), writer);
                 writer.WriteStringLiteral("')");
                 await writer.FlushAsync();
             }
