@@ -3,7 +3,7 @@ readonly record struct Benchmarks() : IView
     public Html Render() => $"""
         <section>
             <div>
-                <img src="benchmarks/benchmarks.svg" />
+                <!-- <img src="benchmarks/benchmarks.svg" /> -->
             </div>
             <article>
                 <h2>

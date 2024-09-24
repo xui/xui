@@ -3,7 +3,7 @@ readonly record struct Repl() : IView
     public Html Render() => $"""
         <section>
             <div>
-                <img src="repl/repl.svg" />
+                <!-- <img src="repl/repl.svg" /> -->
             </div>
             <article>
                 <h2>
