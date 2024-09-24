@@ -3,7 +3,7 @@ readonly record struct Seo() : IView
     public Html Render() => $"""
         <section>
             <div>
-                <button onclick="{FetchHtml}">
+                <button onclick="">
                     curl https://xui.ai/seo
                 </button>
             </div>
