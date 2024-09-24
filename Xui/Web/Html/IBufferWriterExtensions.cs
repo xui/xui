@@ -31,4 +31,12 @@ public static class IBufferWriterExtensions
     {
         return 4;
     }
+
+    public static int Write(
+        this IBufferWriter<byte> writer, 
+        Composer composer,
+        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
+    {
+        return 4;
+    }
 }
