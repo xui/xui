@@ -1,3 +1,7 @@
+using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+
 namespace Xui.Web;
 
 public class Composer
@@ -5,132 +9,129 @@ public class Composer
     [ThreadStatic]
     static Composer? current;
     public static Composer? Current { get => current; set => current = value; }
+    public IBufferWriter<byte> Writer { get; set; }
 
-    internal Chunk[] chunks = new Chunk[1000];
-    internal int cursor = 0;
-    internal int depth = 0;
+    private int literalLengthRemaining = 0;
+    private int formattedValuesRemaining = 0;
 
-    public int end = 0;
-
-    public Span<Chunk> AsSpan()
+    public Composer(IBufferWriter<byte> writer)
     {
-        return chunks.AsSpan(0, end);
+        this.Writer = writer;
     }
 
-    public void HandleEvent(int slotId, Event? domEvent)
+    public void GrowStatic(int literalLength)
     {
-        // TODO: These should not block the Context.Receive event loop.
-        // So none of these will be awaiting.  But that could cause some 
-        // tricky overlapping.  I bet the user is expecting them to execute
-        // in order?  Do I need a queue?  But this queue should belong to the Context?
-
-        // TODO: Optimize.  Bypass the O(n).  Lazy Dict gets reset on each compose?
-        var chunk = chunks.First(c => c.Id == slotId);
-        switch (chunk.Type)
-        {
-            case FormatType.Action:
-                chunk.Action();
-                break;
-            case FormatType.ActionEvent:
-                chunk.ActionEvent(domEvent ?? Event.Empty);
-                break;
-            case FormatType.ActionAsync:
-                // Do not batch.  Mutations should go immediately.
-                // Do not await. That'd block this event loop.
-                _ = chunk.ActionAsync();
-                break;
-            case FormatType.ActionEventAsync:
-                // Do not batch.  Mutations should go immediately.
-                // Do not await. That'd block this event loop.
-                _ = chunk.ActionEventAsync(domEvent ?? Event.Empty);
-                break;
-        }
+        literalLengthRemaining += literalLength;
     }
 
-    public int? GetContentLengthIfConvenient()
+    public void GrowDynamic(int formattedCount)
     {
-        // Only return a number if it doesn't involve a bunch of extra work 
-        // like parsing/applying a formatter.
-
-        int contentLength = 0;
-        for (int i = 1; i < end; i++)
-        {
-            ref var chunk = ref chunks[i];
-
-            if (chunk.Format != null)
-                return null;
-
-            if (chunk.Type != FormatType.StringLiteral)
-                return null;
-
-            contentLength += chunk.String!.Length;
-        }
-        return contentLength;
+        formattedValuesRemaining += formattedCount;
     }
 
-    public IEnumerable<Memory<Chunk>> GetDeltas(Composer compare)
+    private void CompleteStatic(int literalLength)
     {
-        List<Range>? ranges = null;
-        for (int index = 0; index < end; index++)
+        literalLengthRemaining -= literalLength;
+        MoveNext();
+    }
+
+    private void CompleteDynamic(int formattedCount)
+    {
+        formattedValuesRemaining -= formattedCount;
+        MoveNext();
+    }
+
+    private void MoveNext()
+    {
+        if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
-            var oldChunk = chunks[index];
-            var newChunk = compare.chunks[index];
-            if (oldChunk == newChunk) {
-                continue;
-            }
-
-            ranges ??= [];
-
-            if (newChunk.Type != FormatType.StringLiteral)
-            {
-                ranges.Add(new Range(newChunk.Id, newChunk.Id));
-            }
-            else
-            {
-                var htmlStringStart = compare.chunks[newChunk.Integer!.Value];
-                ranges.Add(new Range(newChunk.Integer.Value, htmlStringStart.Integer!.Value));
-            }
-        }
-
-        if (ranges == null)
-            yield break;
-
-        ranges.Sort((a, b) => a.Start.Value - b.Start.Value);
-        int i = 0, max = -1;
-        while (i < ranges.Count)
-        {
-            var range = ranges[i];
-            if (max >= range.Start.Value)
-                ranges.RemoveAt(i);
-            else
-                i++;
-            max = range.End.Value;
-        }
-
-        foreach (var range in ranges)
-        {
-            var start = range.Start.Value;
-            var end = range.End.Value;
-            yield return new(
-                array: compare.chunks, 
-                start: start, 
-                length: end - start + 1
-            );
+            Clear();
         }
     }
 
-    public IDisposable ReuseBuffer() => new Reuseable(this);
-
-    private class Reuseable : IDisposable
+    private void Clear()
     {
-        public Reuseable(Composer composer)
-        {
-            Composer.Current = composer;
-        }
+        current = null;
+    }
 
-        public void Dispose()
-        {
-            Composer.Current = null;
-        }
+    public void AppendLiteral(string s)
+    {
+        Span<byte> destination = Writer.GetSpan(s.Length);
+        int length = Encoding.UTF8.GetBytes(s, destination);
+        Writer.Advance(length);
+
+        CompleteStatic(s.Length);
+    }
+
+    public void AppendFormatted(string s)
+    {
+        // string has no formatters (and alignment isn't helpful in HTML)
+        Span<byte> destination = Writer.GetSpan(s.Length);
+        int length = Encoding.UTF8.GetBytes(s, destination);
+        Writer.Advance(length);
+
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted<T>(T value, ReadOnlySpan<char> format = default) where T : IUtf8SpanFormattable
+    {
+        Span<byte> destination = Writer.GetSpan();
+        value.TryFormat(destination, out int length, format, null);
+        Writer.Advance(length);
+
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted(bool b)
+    {
+        // bool has no formatters and doesn't implement IUtf8SpanFormattable
+        var value = b ? System.Boolean.TrueString : System.Boolean.FalseString;
+        Span<byte> destination = Writer.GetSpan(value.Length);
+        int length = Encoding.UTF8.GetBytes(value, destination);
+        Writer.Advance(length);
+
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted<TView>(TView v) where TView : IView
+    {
+        AppendFormatted(v.Render());
+    }
+
+    public void AppendFormatted(Html h)
+    {
+        // Nothing to write.
+        // It was already written as "h" (above) was being created.
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted(Slot s)
+    {
+        // Calls AppendFormatted(Html h).
+        AppendFormatted(s());
+    }
+
+    public void AppendFormatted(Action a)
+    {
+        // Nothing to write.  Possibly throw if SSG?
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted(Action<Event> a)
+    {
+        // Nothing to write.  Possibly throw if SSG?
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted(Func<Task> f)
+    {
+        // Nothing to write.  Possibly throw if SSG?
+        CompleteDynamic(1);
+    }
+
+    public void AppendFormatted(Func<Event, Task> f)
+    {
+        // Nothing to write.  Possibly throw if SSG?
+        CompleteDynamic(1);
     }
 }
