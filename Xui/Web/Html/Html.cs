@@ -18,7 +18,6 @@ public readonly ref struct Html
     {
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = Composer.Current ?? throw new ArgumentNullException("Composer.Current");
-
         composer.GrowStatic(literalLength);
         composer.GrowDynamic(formattedCount);
     }
