@@ -36,6 +36,40 @@ public static class WebExtensions
         return app;
     }
 
+    public delegate Html HtmlDelegate();
+    [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
+    [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
+    public static IEndpointConventionBuilder MapGet(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlDelegate requestDelegate)
+    {
+        return endpoints.Map(
+            pattern,
+            async httpContext => {
+                var pipeWriter = httpContext.Response.BodyWriter;
+                var eventHandlers = pipeWriter.Write($"{requestDelegate()}");
+                await pipeWriter.FlushAsync();
+            }
+        );
+    }
+    
+    public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
+    public static IEndpointConventionBuilder MapGet(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlHttpContextDelegate requestDelegate)
+    {
+        return endpoints.Map(
+            pattern,
+            async httpContext => {
+                var pipeWriter = httpContext.Response.BodyWriter;
+                var eventHandlers = pipeWriter.Write($"{requestDelegate(httpContext)}");
+                await pipeWriter.FlushAsync();
+            }
+        );
+    }
+
     public static void MapPage<T>(
         this RouteGroupBuilder group,
         UI<T> ui,
