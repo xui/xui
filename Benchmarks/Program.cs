@@ -11,9 +11,24 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 public class Tests
 {
     Pipe pipe = new();
-    Composer composer = new Composer(null);
+    Composer composer = new DefaultComposer(null);
     string name = "Rylan";
     int c = 3;
+
+    [Benchmark]
+    public void Baseline()
+    {
+        Placebo placebo = $"""
+        <html>
+            <body>
+                Hello {name}
+                <button>
+                    Clicks: {c}
+                </button>
+            </body>
+        </html>
+        """;
+    }
 
     [Benchmark]
     public async Task Small()
