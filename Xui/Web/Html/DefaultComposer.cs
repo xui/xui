@@ -50,7 +50,7 @@ public class DefaultComposer : Composer
     public override void AppendFormatted(bool b)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
-        var value = b ? System.Boolean.TrueString : System.Boolean.FalseString;
+        var value = b ? Boolean.TrueString : Boolean.FalseString;
         Span<byte> destination = Writer.GetSpan(value.Length);
         int length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
