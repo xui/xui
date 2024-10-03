@@ -24,7 +24,7 @@ public readonly ref struct Html
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
-        this.composer = Composer.Current ??= new(writer);
+        this.composer = Composer.Current ??= new DefaultComposer(writer);
         composer.GrowStatic(literalLength);
         composer.GrowDynamic(formattedCount);
     }
