@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Xui.Web;
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -47,6 +49,28 @@ public record class Event(
     double? y = null
 ) {
     public static readonly Event Empty = new();
+
+    public static (int, Event?) ParseEvent(ReadOnlySpan<byte> buffer)
+    {
+        int i = 0, slot = 0;
+        while (true)
+        {
+            // Convert from ASCII to int, digit by digit.
+            int d = buffer[i] - 48;
+            if (d >= 0 && d <= 9) {
+                slot = slot * 10 + d;
+                ++i;
+                continue;
+            }
+
+            if (i >= buffer.Length - 1)
+                return (slot, null);
+            
+            var message = buffer[i..];
+            var @event = JsonSerializer.Deserialize<Event>(message);
+            return (slot, @event);
+        }
+    }
 }
 
 public record class HtmlElement(
