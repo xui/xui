@@ -4,13 +4,8 @@ using System.Text;
 
 namespace Xui.Web;
 
-public class DefaultComposer : Composer
+public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(writer)
 {
-    public DefaultComposer(IBufferWriter<byte> writer)
-        : base(writer)
-    {
-    }
-
     public override void AppendLiteral(string s)
     {
         Span<byte> destination = Writer.GetSpan(s.Length);

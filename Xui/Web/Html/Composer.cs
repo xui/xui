@@ -9,15 +9,9 @@ public abstract class Composer
     [ThreadStatic]
     static Composer? current;
     public static Composer? Current { get => current; set => current = value; }
-    public IBufferWriter<byte> Writer { get; set; }
 
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
-
-    public Composer(IBufferWriter<byte> writer)
-    {
-        this.Writer = writer;
-    }
 
     public void Grow(int literalLength, int formattedCount)
     {

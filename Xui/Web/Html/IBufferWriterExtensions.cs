@@ -34,7 +34,7 @@ public static class IBufferWriterExtensions
 
     public static int Write(
         this IBufferWriter<byte> writer, 
-        Composer composer,
+        BufferWriterComposer composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
     {
         return 4;
