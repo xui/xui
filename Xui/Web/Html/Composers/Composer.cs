@@ -2,13 +2,13 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Xui.Web;
+namespace Xui.Web.Composers;
 
-public abstract class Composer
+public abstract class BaseComposer
 {
     [ThreadStatic]
-    static Composer? current;
-    public static Composer? Current { get => current; set => current = value; }
+    static BaseComposer? current;
+    public static BaseComposer? Current { get => current; set => current = value; }
 
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;

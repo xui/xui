@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Xui.Web;
+namespace Xui.Web.Composers;
 
 public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(writer)
 {

@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Xui.Web.Composers;
 
 namespace Xui.Web;
 
@@ -12,24 +13,24 @@ public delegate Html Slot();
 [StructLayout(LayoutKind.Auto)]
 public readonly ref struct Html
 {
-    readonly Composer composer;
+    readonly BaseComposer composer;
 
     public Html(int literalLength, int formattedCount)
     {
         // For now, do not allow the creation of Html instances detached from the root-node.
-        this.composer = Composer.Current ?? throw new ArgumentNullException("Composer.Current");
+        this.composer = BaseComposer.Current ?? throw new ArgumentNullException("Composer.Current");
         composer.Grow(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
-        this.composer = Composer.Current ??= new DefaultComposer(writer);
+        this.composer = BaseComposer.Current ??= new DefaultComposer(writer);
         composer.Grow(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, BufferWriterComposer composer)
     {
-        this.composer = Composer.Current ??= composer;
+        this.composer = BaseComposer.Current ??= composer;
         composer.Writer = writer;
         composer.Grow(literalLength, formattedCount);
     }
