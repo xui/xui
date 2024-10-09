@@ -19,23 +19,19 @@ public abstract class Composer
         this.Writer = writer;
     }
 
-    public void GrowStatic(int literalLength)
+    public void Grow(int literalLength, int formattedCount)
     {
         literalLengthRemaining += literalLength;
-    }
-
-    public void GrowDynamic(int formattedCount)
-    {
         formattedValuesRemaining += formattedCount;
     }
 
-    protected void CompleteStatic(int literalLength)
+    private void CompleteStatic(int literalLength)
     {
         literalLengthRemaining -= literalLength;
         MoveNext();
     }
 
-    protected void CompleteDynamic(int formattedCount)
+    private void CompleteDynamic(int formattedCount)
     {
         formattedValuesRemaining -= formattedCount;
         MoveNext();
@@ -54,21 +50,21 @@ public abstract class Composer
         current = null;
     }
 
-    public abstract void AppendLiteral(string s);
-    public abstract void AppendFormatted(string s);
-    public abstract void AppendFormatted(int i, string? format = null);
-    public abstract void AppendFormatted(long l, string? format = null);
-    public abstract void AppendFormatted(float f, string? format = null);
-    public abstract void AppendFormatted(double d, string? format = null);
-    public abstract void AppendFormatted(decimal d, string? format = null);
-    public abstract void AppendFormatted(DateTime d, string? format = null);
-    public abstract void AppendFormatted(TimeSpan t, string? format = null);
-    public abstract void AppendFormatted(bool b);
-    public abstract void AppendFormatted<TView>(TView v) where TView : IView;
-    public abstract void AppendFormatted(Html h);
-    public abstract void AppendFormatted(Slot s);
-    public abstract void AppendFormatted(Action a);
-    public abstract void AppendFormatted(Action<Event> a);
-    public abstract void AppendFormatted(Func<Task> f);
-    public abstract void AppendFormatted(Func<Event, Task> f);
+    public virtual void AppendLiteral(string s) => CompleteStatic(s.Length);
+    public virtual void AppendFormatted(string s) => CompleteDynamic(1);
+    public virtual void AppendFormatted(int i, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(long l, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(float f, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(double d, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(decimal d, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(DateTime d, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(TimeSpan t, string? format = null) => CompleteDynamic(1);
+    public virtual void AppendFormatted(bool b) => CompleteDynamic(1);
+    public virtual void AppendFormatted<TView>(TView v) where TView : IView => CompleteDynamic(1);
+    public virtual void AppendFormatted(Html h) => CompleteDynamic(1);
+    public virtual void AppendFormatted(Slot s) => CompleteDynamic(1);
+    public virtual void AppendFormatted(Action a) => CompleteDynamic(1);
+    public virtual void AppendFormatted(Action<Event> a) => CompleteDynamic(1);
+    public virtual void AppendFormatted(Func<Task> f) => CompleteDynamic(1);
+    public virtual void AppendFormatted(Func<Event, Task> f) => CompleteDynamic(1);
 }

@@ -18,23 +18,20 @@ public readonly ref struct Html
     {
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = Composer.Current ?? throw new ArgumentNullException("Composer.Current");
-        composer.GrowStatic(literalLength);
-        composer.GrowDynamic(formattedCount);
+        composer.Grow(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
         this.composer = Composer.Current ??= new DefaultComposer(writer);
-        composer.GrowStatic(literalLength);
-        composer.GrowDynamic(formattedCount);
+        composer.Grow(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, Composer composer)
     {
         this.composer = Composer.Current ??= composer;
         composer.Writer = writer;
-        composer.GrowStatic(literalLength);
-        composer.GrowDynamic(formattedCount);
+        composer.Grow(literalLength, formattedCount);
     }
 
     public readonly void AppendLiteral(string value) => composer.AppendLiteral(value);
