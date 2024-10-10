@@ -14,11 +14,6 @@ public static class IBufferWriterExtensions
         writer.Advance(length);
     }
 
-    public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
-    {
-        chunk.Write(writer);
-    }
-
     public static void WriteStringLiteral(this IBufferWriter<byte> writer, string value)
     {
         // TODO: Does it help to cache the UTF16 -> UTF8 encodings?  

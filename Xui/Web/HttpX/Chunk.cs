@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Xui.Web;
+namespace Xui.Web.HttpX;
 
 public struct Chunk
 {
