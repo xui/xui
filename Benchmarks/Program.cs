@@ -3,6 +3,7 @@ global using Xui.Web.HttpX;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Xui.Web.Composers;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
@@ -11,7 +12,7 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 public class Tests
 {
     Pipe pipe = new();
-    Composer composer = new DefaultComposer(null);
+    DefaultComposer composer = new(null);
     string name = "Rylan";
     int c = 3;
 
