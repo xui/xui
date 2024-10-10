@@ -18,7 +18,8 @@ public struct HttpXContext(WebSocketPipe? pipe)
     {
         // TODO: Move to header approach?
         var key = httpContext.Connection.Id;
-        return new HttpXContext(WebSocketPipe.Get(key));
+        var pipe = WebSocketPipe.Get(key);
+        return new HttpXContext(pipe);
     }
 
     public async readonly Task UpdatePath(PathString path)
