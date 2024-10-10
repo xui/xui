@@ -17,7 +17,7 @@ public class HttpXComposer : BufferWriterComposer
     {
     }
 
-    public override void AppendLiteral(string s)
+    public override bool AppendLiteral(string s)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -25,10 +25,10 @@ public class HttpXComposer : BufferWriterComposer
         // chunk.Integer = start; // TODO: Must reference start of Html partial?
         chunk.Type = FormatType.StringLiteral;
 
-        base.AppendLiteral(s);
+        return base.AppendLiteral(s);
     }
 
-    public override void AppendFormatted(string s)
+    public override bool AppendFormatted(string s)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -36,10 +36,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.String;
         chunk.Format = null;
 
-        base.AppendFormatted(s);
+        return base.AppendFormatted(s);
     }
 
-    public override void AppendFormatted(int i, string? format = null)
+    public override bool AppendFormatted(int i, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -47,10 +47,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Integer;
         chunk.Format = format;
 
-        base.AppendFormatted(i, format);
+        return base.AppendFormatted(i, format);
     }
 
-    public override void AppendFormatted(long l, string? format = null)
+    public override bool AppendFormatted(long l, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -58,10 +58,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Long;
         chunk.Format = format;
 
-        base.AppendFormatted(l, format);
+        return base.AppendFormatted(l, format);
     }
 
-    public override void AppendFormatted(float f, string? format = null)
+    public override bool AppendFormatted(float f, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -69,10 +69,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Float;
         chunk.Format = format;
 
-        base.AppendFormatted(f, format);
+        return base.AppendFormatted(f, format);
     }
 
-    public override void AppendFormatted(double d, string? format = null)
+    public override bool AppendFormatted(double d, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -80,10 +80,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Double;
         chunk.Format = format;
 
-        base.AppendFormatted(d, format);
+        return base.AppendFormatted(d, format);
     }
 
-    public override void AppendFormatted(decimal d, string? format = null)
+    public override bool AppendFormatted(decimal d, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -91,10 +91,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Decimal;
         chunk.Format = format;
 
-        base.AppendFormatted(d, format);
+        return base.AppendFormatted(d, format);
     }
 
-    public override void AppendFormatted(DateTime d, string? format = null)
+    public override bool AppendFormatted(DateTime d, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -102,10 +102,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.DateTime;
         chunk.Format = format;
 
-        base.AppendFormatted(d, format);
+        return base.AppendFormatted(d, format);
     }
 
-    public override void AppendFormatted(TimeSpan t, string? format = null)
+    public override bool AppendFormatted(TimeSpan t, string? format = null)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -113,10 +113,10 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.TimeSpan;
         chunk.Format = format;
 
-        base.AppendFormatted(t, format);
+        return base.AppendFormatted(t, format);
     }
 
-    public override void AppendFormatted(bool b)
+    public override bool AppendFormatted(bool b)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
@@ -124,13 +124,13 @@ public class HttpXComposer : BufferWriterComposer
         chunk.Type = FormatType.Boolean;
         chunk.Format = null;
 
-        base.AppendFormatted(b);
+        return base.AppendFormatted(b);
     }
 
-    public override void AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
-    public override void AppendFormatted(Slot s) => AppendFormatted(s());
+    public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
+    public override bool AppendFormatted(Slot s) => AppendFormatted(s());
 
-    public override void AppendFormatted(Html h)
+    public override bool AppendFormatted(Html h)
     {
         // end = h.end; // TODO: For the cursor or for the partial boundary?
 
@@ -142,48 +142,48 @@ public class HttpXComposer : BufferWriterComposer
         ref var start = ref chunks[end];//h.start]; // For partial boundaries.
         start.Integer = end;
 
-        base.AppendFormatted(h);
+        return base.AppendFormatted(h);
     }
 
 
-    public override void AppendFormatted(Action a)
+    public override bool AppendFormatted(Action a)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
         chunk.Action = a;
         chunk.Type = FormatType.Action;
 
-        base.AppendFormatted(a);
+        return base.AppendFormatted(a);
     }
 
-    public override void AppendFormatted(Action<Event> a)
+    public override bool AppendFormatted(Action<Event> a)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
         chunk.ActionEvent = a;
         chunk.Type = FormatType.ActionEvent;
 
-        base.AppendFormatted(a);
+        return base.AppendFormatted(a);
     }
 
-    public override void AppendFormatted(Func<Task> f)
+    public override bool AppendFormatted(Func<Task> f)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
         chunk.ActionAsync = f;
         chunk.Type = FormatType.ActionAsync;
 
-        base.AppendFormatted(f);
+        return base.AppendFormatted(f);
     }
 
-    public override void AppendFormatted(Func<Event, Task> f)
+    public override bool AppendFormatted(Func<Event, Task> f)
     {
         ref var chunk = ref chunks[end];
         chunk.Id = end;
         chunk.ActionEventAsync = f;
         chunk.Type = FormatType.ActionEventAsync;
 
-        base.AppendFormatted(f);
+        return base.AppendFormatted(f);
     }
 
     public void HandleEvent(int slotId, Event? domEvent)

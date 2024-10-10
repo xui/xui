@@ -7,25 +7,69 @@ namespace Xui.Web.HttpX.Composers;
 
 public class IndexerComposer(int slotId) : BaseComposer
 {
-    public Func<Event?, Task>? EventHandler { get; set; } = null;
+    public int SlotId { get; init; } = slotId;
 
-    public override void AppendFormatted(Action a)
+    public Func<Event, Task>? EventHandler { get; set; } = null;
+
+    private int cursor = 0;
+
+    public override bool AppendFormatted(Action a)
     {
-        base.AppendFormatted(a);
+        if (cursor == SlotId)
+        {
+            EventHandler = @event => {
+                a();
+                return Task.CompletedTask;
+            };
+            
+            // Save time. Short circuits any following appends.
+            return false;
+        }
+
+        return base.AppendFormatted(a);
     }
 
-    public override void AppendFormatted(Action<Event> a)
+    public override bool AppendFormatted(Action<Event> a)
     {
-        base.AppendFormatted(a);
+        if (cursor == SlotId)
+        {
+            EventHandler = @event => {
+                a(@event);
+                return Task.CompletedTask;
+            };
+            
+            // Save time. Short circuits any following appends.
+            return false;
+        }
+
+        return base.AppendFormatted(a);
     }
 
-    public override void AppendFormatted(Func<Task> f)
+    public override bool AppendFormatted(Func<Task> f)
     {
-        base.AppendFormatted(f);
+        if (cursor == SlotId)
+        {
+            EventHandler = @event => {
+                return f();
+            };
+            
+            // Save time. Short circuits any following appends.
+            return false;
+        }
+
+        return base.AppendFormatted(f);
     }
 
-    public override void AppendFormatted(Func<Event, Task> f)
+    public override bool AppendFormatted(Func<Event, Task> f)
     {
-        base.AppendFormatted(f);
+        if (cursor == SlotId)
+        {
+            EventHandler = f;
+            
+            // Save time. Short circuits any following appends.
+            return false;
+        }
+
+        return base.AppendFormatted(f);
     }
 }
