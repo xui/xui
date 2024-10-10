@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Xui.Web;
+using Xui.Web.HttpX.Composers;
 
 namespace Xui.Web.HttpX;
 
@@ -58,12 +59,21 @@ public struct HttpXContext(WebSocketPipe? pipe)
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
             var eventHandler = GetEventHandlerById(slotId, html);
-            EventLoop.Enqueue(eventHandler);
+            if (eventHandler != null)
+            {
+                EventLoop.Enqueue(eventHandler);
+            }
+            else
+            {
+                // TODO: Interesting consideration.  What if it's gone?  
+                // This is possible by race condition as messages pass 
+                // each other across the network.
+            }
         }
     }
 
-    private static Func<Event, Task> GetEventHandlerById(int slotId, HtmlDelegate html)
+    private readonly Func<Event, Task>? GetEventHandlerById(int slotId, HtmlDelegate html)
     {
-        return null;
+        return IndexerComposer.GetSlot(slotId, html);
     }
 }

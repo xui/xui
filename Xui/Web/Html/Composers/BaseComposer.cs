@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Xui.Web.Composers;
@@ -62,4 +63,16 @@ public abstract class BaseComposer
     public virtual bool AppendFormatted(Action<Event> a) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Task> f) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, Task> f) => CompleteDynamic(1);
+}
+
+public static class ComposerExtensions
+{
+    // This strange gymnastics is required because InterpolatedStringHandlerArgument
+    // must have at least one arg before it in order for the compiler to pick it up right.  
+    // Extension methods help create the illusion of a simple composer.Compose($"...").
+    public static void Compose(
+        this BaseComposer composer, 
+        [InterpolatedStringHandlerArgument("composer")] Html html)
+    {
+    }
 }

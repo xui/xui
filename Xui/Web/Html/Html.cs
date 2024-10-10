@@ -21,6 +21,12 @@ public readonly ref struct Html
         composer.Grow(literalLength, formattedCount);
     }
 
+    public Html(int literalLength, int formattedCount, BaseComposer composer)
+    {
+        this.composer = BaseComposer.Current ??= composer;
+        composer.Grow(literalLength, formattedCount);
+    }
+
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
         this.composer = BaseComposer.Current ??= new DefaultComposer(writer);

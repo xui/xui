@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Xui.Web.Composers;
 
@@ -12,6 +13,13 @@ public class IndexerComposer(int slotId) : BaseComposer
     public Func<Event, Task>? EventHandler { get; set; } = null;
 
     private int cursor = 0;
+
+    public static Func<Event, Task>? GetSlot(int slotId, HtmlDelegate html)
+    {
+        var composer = new IndexerComposer(slotId);
+        composer.Compose($"{html()}");
+        return composer.EventHandler;
+    }
 
     public override bool AppendFormatted(Action a)
     {
