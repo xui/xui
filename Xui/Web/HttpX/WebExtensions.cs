@@ -5,8 +5,17 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Xui.Web;
+using Microsoft.AspNetCore.Routing.Patterns;
+using Microsoft.Extensions.Logging;
+using System.Text;
+using System.Net.WebSockets;
+using Microsoft.AspNetCore.Components.Web;
+using Xui.Web.HttpX.Composers;
 
 namespace Xui.Web.HttpX;
+
+public delegate Html HtmlDelegate();
+public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
 
 public static class WebExtensions
 {
@@ -36,7 +45,6 @@ public static class WebExtensions
         return app;
     }
 
-    public delegate Html HtmlDelegate();
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
     [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
     public static IEndpointConventionBuilder MapGet(
@@ -54,7 +62,6 @@ public static class WebExtensions
         );
     }
     
-    public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
     public static IEndpointConventionBuilder MapGet(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
@@ -68,6 +75,70 @@ public static class WebExtensions
                 await pipeWriter.FlushAsync();
             }
         );
+    }
+
+    public static RouteGroupBuilder MapHttpX(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlDelegate html)
+    {
+        var group = endpoints.MapGroup(pattern);
+        group.Map(
+            "/",
+            async httpContext => {
+                if (httpContext.WebSockets.IsWebSocketRequest)
+                {
+                    // --- ws:// ---
+                    // Here is the request for upgrading to a websocket connection.  
+                    // Switch protocols and await the pipe reader which receives
+                    // DOM events that have been bubbled up beyond the browser.
+
+                    using (var pipe = await WebSocketPipe.Upgrade(httpContext))
+                    {
+                        var httpxContext = new HttpXContext(pipe);
+                        await httpxContext.AwaitEventListeners(html, httpContext.RequestAborted);
+                    }
+
+                    var logger = endpoints.ServiceProvider.GetService<ILogger>();
+                    logger?.LogInformation("WebSocket has disconnected.");
+                }
+                else if (
+                    HttpXContext.Get(httpContext) is var httpxContext && 
+                    httpxContext.IsWebSocketOpen)
+                {
+                    // --- 204 ---
+                    // Looks like the browser already has the page AND a websocket.
+                    // Respond with a 204 - No Content which will not alter the page.
+                    // Then update the browser's route using window.history.pushState. After that, 
+                    // execute this route's code (which contains no output, only state changes)
+                    // This may or may not trigger mutations to be pushed to the browser.
+
+                    httpContext.Response.StatusCode = 204; // No Content
+                    await httpContext.Response.CompleteAsync();
+
+                    await httpxContext.UpdatePath(httpContext.Request.Path);
+                }
+                else
+                {
+                    // --- 200 ---
+                    // If in here, this is a "normal" GET request.
+                    // There is no websocket yet so we cannot push mutations.
+                    // Respond with an old fashioned 200 response with HTML.
+                    // Note! 200/GETs never await for external data (e.g. from a DB).
+                    // Instead, they render immediately with whatever state they have in RAM.  
+                    // Once the browser receives this HTML it will upgrade to 
+                    // bidirectional communication via websocket.  Then it will be
+                    // ready to fetch external data, mutate its UI state, and react to it
+                    // by pushing DOM mutation instructions to the browser.
+
+                    var pipeWriter = httpContext.Response.BodyWriter;
+                    var composer = new HttpXComposer(pipeWriter);
+                    var eventHandlers = pipeWriter.Write(composer, $"{html()}");
+                    await pipeWriter.FlushAsync();
+                }
+            }
+        );
+        return group;
     }
 
     public static void MapPage<T>(
@@ -106,7 +177,10 @@ public static class WebExtensions
             {
                 httpContext.Response.StatusCode = 204; // No Content
                 await httpContext.Response.CompleteAsync();
-                await context.PushHistoryState(httpContext.Request.Path);
+
+                var httpXContext = new HttpXContext(context.Pipe);
+                await httpXContext.UpdatePath(httpContext.Request.Path);
+
                 using (context.ViewModel.Batch())
                 {
                     mutateState(context);
@@ -157,7 +231,10 @@ public static class WebExtensions
             {
                 httpContext.Response.StatusCode = 204; // No Content
                 await httpContext.Response.CompleteAsync();
-                await context.PushHistoryState(httpContext.Request.Path);
+
+                var httpXContext = new HttpXContext(context.Pipe);
+                await httpXContext.UpdatePath(httpContext.Request.Path);
+
                 _ = mutateStateAsync(context);
             }
         });
