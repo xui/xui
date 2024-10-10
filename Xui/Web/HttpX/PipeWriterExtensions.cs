@@ -1,11 +1,17 @@
 using System.Buffers;
 using System.IO.Pipelines;
+using System.Runtime.CompilerServices;
 using Xui.Web;
 
 namespace Xui.Web.HttpX;
 
 internal static class PipeWriterExtensions
 {
+    public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
+    {
+        chunk.Write(writer);
+    }
+
     public static void Write(this PipeWriter writer, IEnumerable<Memory<Chunk>> deltas)
     {
         foreach (var delta in deltas)
