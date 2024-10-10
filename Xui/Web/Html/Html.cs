@@ -7,7 +7,6 @@ using Xui.Web.Composers;
 namespace Xui.Web;
 
 public delegate Html Slot();
-// public delegate void EventHandler(Event e);
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
