@@ -1,18 +1,45 @@
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace Xui.Web.HttpX;
 
-class WebSocketPipe(WebSocket webSocket) : IDuplexPipe, IDisposable
+public class WebSocketPipe : IDuplexPipe, IDisposable
 {
+    private static readonly ConcurrentDictionary<string, WebSocketPipe> pipeMap = [];
     const int receiveBufferSize = 1024;
+    private readonly WebSocket webSocket;
     readonly Pipe inputPipe = new();
-    readonly PipeWriter pipeWriter = PipeWriter.Create(new WebSocketStream(webSocket));
+    readonly PipeWriter pipeWriter;
     public PipeReader Input => inputPipe.Reader;
     public PipeWriter Output => pipeWriter;
     public WebSocketState State => webSocket.State;
+    public string Key { get; init; }
+
+    public static async Task<WebSocketPipe> Upgrade(HttpContext httpContext)
+    {
+        // TODO: Switch to header.
+        var key = httpContext.Connection.Id;
+
+        var webSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
+        var pipe = new WebSocketPipe(key, webSocket);
+
+        pipeMap[key] = pipe;
+
+        return pipe;
+    }
+
+    public static WebSocketPipe? Get(string key) => pipeMap[key];
+
+    private WebSocketPipe(string key, WebSocket webSocket)
+    {
+        this.Key = key;
+        this.webSocket = webSocket;
+        pipeWriter = PipeWriter.Create(new WebSocketStream(webSocket));
+    }
 
     public async Task RunAsync(CancellationToken cancellation = default)
     {
@@ -88,6 +115,7 @@ class WebSocketPipe(WebSocket webSocket) : IDuplexPipe, IDisposable
     public void Dispose()
     {
         webSocket.Dispose();
+        pipeMap.Remove(Key, out WebSocketPipe? value);
     }
 }
 
