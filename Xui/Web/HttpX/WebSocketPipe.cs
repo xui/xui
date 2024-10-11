@@ -32,7 +32,7 @@ public class WebSocketPipe : IDuplexPipe, IDisposable
         return pipe;
     }
 
-    public static WebSocketPipe? Get(string key) => pipeMap[key];
+    public static WebSocketPipe? Get(string key) => pipeMap.GetValueOrDefault(key);
 
     private WebSocketPipe(string key, WebSocket webSocket)
     {
