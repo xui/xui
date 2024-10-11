@@ -1,269 +1,244 @@
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public class HttpXComposer : BufferWriterComposer
+public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
-    internal Chunk[] chunks = new Chunk[1000];
-    internal int cursor = 0;
-    // internal int depth = 0;
+    // Fear not, this Dictionary will not grow unbounded.  
+    // Since it's only ever called from AppendLiteral, that means the universe of
+    // possible keys is finite - only what is already compiled into the executable.
+    private static readonly Dictionary<string, int> jsInjectionIndexes = [];
 
-    public int end = 0;
-
-    public HttpXComposer(IBufferWriter<byte> writer)
-        : base(writer)
-    {
-    }
+    private bool isJsRegisterWritten = false;
+    private int slotId = 0;
 
     public override bool AppendLiteral(string s)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.String = s;
-        // chunk.Integer = start; // TODO: Must reference start of Html partial?
-        chunk.Type = FormatType.StringLiteral;
+        if (IsFinalAppend(s))
+        {
+            var index = jsInjectionIndexes.GetValueOrDefault(s, s.IndexOf("</body>"));
+            if (index < 0)
+            {
+                return base.AppendLiteral(s);
+            }
+
+            WriteSpan(s.AsSpan(0, index));
+            WriteSpan(JS.AsSpan());
+            WriteSpan(s.AsSpan(index, s.Length - index));
+
+            CompleteStatic(s.Length);
+            return true;
+        }
 
         return base.AppendLiteral(s);
     }
 
-    public override bool AppendFormatted(string s)
+    private void WriteSpan(ReadOnlySpan<char> span)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.String = s;
-        chunk.Type = FormatType.String;
-        chunk.Format = null;
+        Writer.Advance(
+            Encoding.UTF8.GetBytes(
+                span, 
+                Writer.GetSpan(span.Length)
+            )
+        );
+    }
 
+    public override bool AppendFormatted(string s) => WriteDynamicValue(s);
+    public override bool AppendFormatted(int i, string? format = null) => WriteDynamicValue(i, format);
+    public override bool AppendFormatted(long l, string? format = null) => WriteDynamicValue(l, format);
+    public override bool AppendFormatted(float f, string? format = null) => WriteDynamicValue(f, format);
+    public override bool AppendFormatted(double d, string? format = null) => WriteDynamicValue(d, format);
+    public override bool AppendFormatted(decimal d, string? format = null) => WriteDynamicValue(d, format);
+    public override bool AppendFormatted(DateTime d, string? format = null) => WriteDynamicValue(d, format);
+    public override bool AppendFormatted(TimeSpan t, string? format = null) => WriteDynamicValue(t, format);
+    public override bool AppendFormatted(bool b) => WriteDynamicValue(b ? Boolean.TrueString : Boolean.FalseString);
+
+    private bool WriteDynamicValue<T>(T value, ReadOnlySpan<char> format = default) 
+        where T : IUtf8SpanFormattable
+    {
+        // Wraps the dynamic value with a comment tag on one side 
+        // to separate it from any preceding text and a script tag 
+        // on the other side which registers it without the need 
+        // for id= or document.getElementById().
+        // It should end up looking like this:
+        // $"<!-- -->{value:format}<script>r('slot{id}')</script>"
+
+        WriteSpan("<!-- -->".AsSpan());
+
+        Span<byte> destination = Writer.GetSpan();
+        value.TryFormat(destination, out int length, format, null);
+        Writer.Advance(length);
+
+        if (EnsureJsRegisterIsWritten())
+        {
+            WriteSpan("<script>r(\"slot".AsSpan());
+            writer.Write(++slotId);
+            WriteSpan("\")</script>".AsSpan());
+        }
+
+        return CompleteDynamic(1);
+    }
+
+    private bool WriteDynamicValue(string value) 
+    {
+        EnsureJsRegisterIsWritten();
+
+        WriteSpan("<!-- -->".AsSpan());
+
+        Writer.Advance(
+            Encoding.UTF8.GetBytes(
+                value.AsSpan(), 
+                Writer.GetSpan(value.Length)
+            )
+        );
+
+        if (EnsureJsRegisterIsWritten())
+        {
+            WriteSpan("<script>r(\"slot".AsSpan());
+            writer.Write(++slotId);
+            WriteSpan("\")</script>".AsSpan());
+        }
+
+        return CompleteDynamic(1);
+    }
+
+
+    public override bool AppendFormatted<TView>(TView v)
+    {
+        return base.AppendFormatted(v);
+    }
+    public override bool AppendFormatted(Slot s)
+    {
         return base.AppendFormatted(s);
     }
 
-    public override bool AppendFormatted(int i, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Integer = i;
-        chunk.Type = FormatType.Integer;
-        chunk.Format = format;
-
-        return base.AppendFormatted(i, format);
-    }
-
-    public override bool AppendFormatted(long l, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Long = l;
-        chunk.Type = FormatType.Long;
-        chunk.Format = format;
-
-        return base.AppendFormatted(l, format);
-    }
-
-    public override bool AppendFormatted(float f, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Float = f;
-        chunk.Type = FormatType.Float;
-        chunk.Format = format;
-
-        return base.AppendFormatted(f, format);
-    }
-
-    public override bool AppendFormatted(double d, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Double = d;
-        chunk.Type = FormatType.Double;
-        chunk.Format = format;
-
-        return base.AppendFormatted(d, format);
-    }
-
-    public override bool AppendFormatted(decimal d, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Decimal = d;
-        chunk.Type = FormatType.Decimal;
-        chunk.Format = format;
-
-        return base.AppendFormatted(d, format);
-    }
-
-    public override bool AppendFormatted(DateTime d, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.DateTime = d;
-        chunk.Type = FormatType.DateTime;
-        chunk.Format = format;
-
-        return base.AppendFormatted(d, format);
-    }
-
-    public override bool AppendFormatted(TimeSpan t, string? format = null)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.TimeSpan = t;
-        chunk.Type = FormatType.TimeSpan;
-        chunk.Format = format;
-
-        return base.AppendFormatted(t, format);
-    }
-
-    public override bool AppendFormatted(bool b)
-    {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Boolean = b;
-        chunk.Type = FormatType.Boolean;
-        chunk.Format = null;
-
-        return base.AppendFormatted(b);
-    }
-
-    public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
-    public override bool AppendFormatted(Slot s) => AppendFormatted(s());
-
     public override bool AppendFormatted(Html h)
     {
-        // end = h.end; // TODO: For the cursor or for the partial boundary?
-
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        // chunk.Integer = h.start; // TODO: For partial boundaries.
-        chunk.Type = FormatType.HtmlString;
-
-        ref var start = ref chunks[end];//h.start]; // For partial boundaries.
-        start.Integer = end;
-
         return base.AppendFormatted(h);
     }
 
 
     public override bool AppendFormatted(Action a)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.Action = a;
-        chunk.Type = FormatType.Action;
-
         return base.AppendFormatted(a);
     }
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.ActionEvent = a;
-        chunk.Type = FormatType.ActionEvent;
-
         return base.AppendFormatted(a);
     }
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.ActionAsync = f;
-        chunk.Type = FormatType.ActionAsync;
-
         return base.AppendFormatted(f);
     }
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        ref var chunk = ref chunks[end];
-        chunk.Id = end;
-        chunk.ActionEventAsync = f;
-        chunk.Type = FormatType.ActionEventAsync;
-
         return base.AppendFormatted(f);
     }
 
-    public void HandleEvent(int slotId, Event? domEvent)
+    protected override void Clear()
     {
-        // TODO: These should not block the Context.Receive event loop.
-        // So none of these will be awaiting.  But that could cause some 
-        // tricky overlapping.  I bet the user is expecting them to execute
-        // in order?  Do I need a queue?  But this queue should belong to the Context?
+        // Set to false in case this composer instance is reused.
+        isJsRegisterWritten = false;
 
-        // TODO: Optimize.  Bypass the O(n).  Lazy Dict gets reset on each compose?
-        var chunk = chunks.First(c => c.Id == slotId);
-        switch (chunk.Type)
-        {
-            case FormatType.Action:
-                chunk.Action();
-                break;
-            case FormatType.ActionEvent:
-                chunk.ActionEvent(domEvent ?? Event.Empty);
-                break;
-            case FormatType.ActionAsync:
-                // Do not batch.  Mutations should go immediately.
-                // Do not await. That'd block this event loop.
-                _ = chunk.ActionAsync();
-                break;
-            case FormatType.ActionEventAsync:
-                // Do not batch.  Mutations should go immediately.
-                // Do not await. That'd block this event loop.
-                _ = chunk.ActionEventAsync(domEvent ?? Event.Empty);
-                break;
-        }
+        base.Clear();
     }
 
-    public IEnumerable<Memory<Chunk>> GetDeltas(HttpXComposer compare)
+    private bool EnsureJsRegisterIsWritten()
     {
-        List<Range>? ranges = null;
-        for (int index = 0; index < end; index++)
+        if (!isJsRegisterWritten)
         {
-            var oldChunk = chunks[index];
-            var newChunk = compare.chunks[index];
-            if (oldChunk == newChunk) {
-                continue;
-            }
-
-            ranges ??= [];
-
-            if (newChunk.Type != FormatType.StringLiteral)
-            {
-                ranges.Add(new Range(newChunk.Id, newChunk.Id));
-            }
-            else
-            {
-                var htmlStringStart = compare.chunks[newChunk.Integer!.Value];
-                ranges.Add(new Range(newChunk.Integer.Value, htmlStringStart.Integer!.Value));
-            }
+            WriteSpan(JS_REGISTER.AsSpan());
+            isJsRegisterWritten = true;
+            return false;
         }
-
-        if (ranges == null)
-            yield break;
-
-        ranges.Sort((a, b) => a.Start.Value - b.Start.Value);
-        int i = 0, max = -1;
-        while (i < ranges.Count)
-        {
-            var range = ranges[i];
-            if (max >= range.Start.Value)
-                ranges.RemoveAt(i);
-            else
-                i++;
-            max = range.End.Value;
-        }
-
-        foreach (var range in ranges)
-        {
-            var start = range.Start.Value;
-            var end = range.End.Value;
-            yield return new(
-                array: compare.chunks, 
-                start: start, 
-                length: end - start + 1
-            );
-        }
+        return true;
     }
+
+    private static readonly string JS_REGISTER = """
+        <script>
+            slots={};
+            function r(k) {
+                slots[k]=document.currentScript.previousSibling;
+            }
+            r('slot0');
+        </script>
+        """
+        .Replace("\n", "")
+        .Replace("  ", "");
+
+    private static readonly string JS = """
+
+                <script>
+                    for (let k in slots) {
+                        let n = slots[k];
+                        if (n.nodeType == 8) {
+                            let v = document.createTextNode("");
+                            n.parentNode.insertBefore(v, n);
+                            slots[k]=v;
+                        }
+                    }
+
+                    function h(id,ev) {
+                        console.debug("executing slot " + id);
+                        if (ev) {
+                            ws.send(`${id}${encodeEvent(ev)}`);
+                        } else {
+                            ws.send(id);
+                        }
+                    }
+
+                    function debugSocket(name, ws) {
+                        ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
+                        ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
+                        ws.onerror = (event) => { console.error(`${name} onerror`, event); };
+                    }
+
+                    var l = location;
+                    const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
+                    debugSocket("xui", ws);
+                    ws.onmessage = (event) => {
+                        console.debug("onmessage: ", event);
+                        eval(event.data);
+                    };
+
+                    function encodeEvent(e) {
+                        const obj = {};
+                        for (let k in e) { obj[k] = e[k]; }
+                        return JSON.stringify(obj, (k, v) => {
+                            /* TODO: There are a few more properties that can be shaved off. */
+                            if (v instanceof Node) return {id: v.id,name: v.name,type: v.type,value: v.value};
+                            if (v instanceof Window) return null;
+                            return v;
+                        }, '');
+                    }
+
+                    function replaceNode(node, content) {
+                        const regScript = node.nextSibling;
+                        node.outerHTML = content;
+                        node = regScript.previousSibling;
+                        reRegister(regScript);
+                        for (let s of node.getElementsByTagName("script")) {
+                            reRegister(s);
+                        }
+                    }
+
+                    function reRegister(node) {
+                        if (node.tagName == "SCRIPT") {
+                            const s = document.createElement("script");
+                            s.textContent = node.textContent;
+                            node.replaceWith(s);
+                        }
+                    }
+
+                </script>
+
+        """
+        .Replace("\n", "")
+        .Replace("  ", "");
 }

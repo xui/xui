@@ -20,19 +20,19 @@ public abstract class BaseComposer
         formattedValuesRemaining += formattedCount;
     }
 
-    private bool CompleteStatic(int literalLength)
+    protected bool CompleteStatic(int literalLength)
     {
         literalLengthRemaining -= literalLength;
         return MoveNext();
     }
 
-    private bool CompleteDynamic(int formattedCount)
+    protected bool CompleteDynamic(int formattedCount)
     {
         formattedValuesRemaining -= formattedCount;
         return MoveNext();
     }
 
-    private bool MoveNext()
+    protected bool MoveNext()
     {
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
@@ -41,10 +41,13 @@ public abstract class BaseComposer
         return true;
     }
 
-    private void Clear()
+    protected virtual void Clear()
     {
         current = null;
     }
+
+    // Note: formattedValuesRemaining is 1, not 0 because we kick it off with a wrapper, e.g. $"{ html() }".
+    protected bool IsFinalAppend(string s) => formattedValuesRemaining == 1 && literalLengthRemaining == s.Length;
 
     public virtual bool AppendLiteral(string s) => CompleteStatic(s.Length);
     public virtual bool AppendFormatted(string s) => CompleteDynamic(1);
