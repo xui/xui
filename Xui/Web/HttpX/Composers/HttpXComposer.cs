@@ -16,20 +16,27 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendLiteral(string s)
     {
+        // Inject the necessary JavaScript before the end of the </body> tag.
         if (IsFinalAppend(s))
         {
-            var index = jsInjectionIndexes.GetValueOrDefault(s, s.IndexOf("</body>"));
-            if (index < 0)
+            int index;
+            if (!jsInjectionIndexes.TryGetValue(s, out index))
             {
-                return base.AppendLiteral(s);
+                // Avoid expensive operation?
+                index = s.IndexOf("</body>");
+                jsInjectionIndexes[s] = index;
+            }
+            if (index >= 0)
+            {
+                WriteSpan(s.AsSpan(0, index));
+                WriteSpan(JS.AsSpan());
+                WriteSpan(s.AsSpan(index, s.Length - index));
+
+                CompleteStatic(s.Length);
+                return true;
             }
 
-            WriteSpan(s.AsSpan(0, index));
-            WriteSpan(JS.AsSpan());
-            WriteSpan(s.AsSpan(index, s.Length - index));
-
-            CompleteStatic(s.Length);
-            return true;
+            return base.AppendLiteral(s);
         }
 
         return base.AppendLiteral(s);
