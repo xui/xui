@@ -12,8 +12,6 @@ public class IndexerComposer(int slotId) : BaseComposer
 
     public Func<Event, Task>? EventHandler { get; set; } = null;
 
-    private int cursor = 0;
-
     public static Func<Event, Task>? GetSlot(int slotId, HtmlDelegate html)
     {
         var composer = new IndexerComposer(slotId);
@@ -23,13 +21,14 @@ public class IndexerComposer(int slotId) : BaseComposer
 
     public override bool AppendFormatted(Action a)
     {
-        if (cursor == SlotId)
+        if (Cursor == SlotId)
         {
             EventHandler = @event => {
                 a();
                 return Task.CompletedTask;
             };
             
+            base.Clear();
             // Save time. Short circuits any following appends.
             return false;
         }
@@ -39,13 +38,14 @@ public class IndexerComposer(int slotId) : BaseComposer
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        if (cursor == SlotId)
+        if (Cursor == SlotId)
         {
             EventHandler = @event => {
                 a(@event);
                 return Task.CompletedTask;
             };
             
+            base.Clear();
             // Save time. Short circuits any following appends.
             return false;
         }
@@ -55,12 +55,13 @@ public class IndexerComposer(int slotId) : BaseComposer
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        if (cursor == SlotId)
+        if (Cursor == SlotId)
         {
             EventHandler = @event => {
                 return f();
             };
             
+            base.Clear();
             // Save time. Short circuits any following appends.
             return false;
         }
@@ -70,10 +71,11 @@ public class IndexerComposer(int slotId) : BaseComposer
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        if (cursor == SlotId)
+        if (Cursor == SlotId)
         {
             EventHandler = f;
             
+            base.Clear();
             // Save time. Short circuits any following appends.
             return false;
         }

@@ -13,7 +13,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     private static readonly Dictionary<string, int> jsInjectionIndexes = [];
 
     private bool isJsRegisterWritten = false;
-    private int slotId = 0;
 
     public override bool AppendLiteral(string s)
     {
@@ -75,7 +74,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (EnsureJsRegisterIsWritten())
         {
             WriteSpan("<script>r(\"slot".AsSpan());
-            writer.Write(++slotId);
+            writer.Write(Cursor);
             WriteSpan("\")</script>".AsSpan());
         }
 
@@ -98,7 +97,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (EnsureJsRegisterIsWritten())
         {
             WriteSpan("<script>r(\"slot".AsSpan());
-            writer.Write(++slotId);
+            writer.Write(Cursor);
             WriteSpan("\")</script>".AsSpan());
         }
 
@@ -106,39 +105,54 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     }
 
 
-    public override bool AppendFormatted<TView>(TView v)
-    {
-        return base.AppendFormatted(v);
-    }
-    public override bool AppendFormatted(Slot s)
-    {
-        return base.AppendFormatted(s);
-    }
-
+    public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
+    public override bool AppendFormatted(Slot s) => AppendFormatted(s());
     public override bool AppendFormatted(Html h)
     {
-        return base.AppendFormatted(h);
-    }
+        if (!IsFinalAppend())
+        {
+            WriteSpan("<script>r(\"slot".AsSpan());
+            writer.Write(Cursor);
+            WriteSpan("\")</script>".AsSpan());
+        }
 
+        return CompleteDynamic(1);
+    }
 
     public override bool AppendFormatted(Action a)
     {
-        return base.AppendFormatted(a);
+        writer.WriteStringLiteral("h(");
+        writer.Write(Cursor);
+        writer.WriteStringLiteral(")");
+
+        return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        return base.AppendFormatted(a);
+        writer.WriteStringLiteral("h(");
+        writer.Write(Cursor);
+        writer.WriteStringLiteral(",event)");
+
+        return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        return base.AppendFormatted(f);
+        writer.WriteStringLiteral("h(");
+        writer.Write(Cursor);
+        writer.WriteStringLiteral(")");
+
+        return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        return base.AppendFormatted(f);
+        writer.WriteStringLiteral("h(");
+        writer.Write(Cursor);
+        writer.WriteStringLiteral(",event)");
+
+        return CompleteDynamic(1);
     }
 
     protected override void Clear()
@@ -173,71 +187,68 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         .Replace("  ", "");
 
     private static readonly string JS = """
+        <script>
+            for (let k in slots) {
+                let n = slots[k];
+                if (n.nodeType == 8) {
+                    let t = document.createTextNode("");
+                    n.parentNode.insertBefore(t, n.nextSibling);
+                    slots[k]=t;
+                }
+            }
 
-                <script>
-                    for (let k in slots) {
-                        let n = slots[k];
-                        if (n.nodeType == 8) {
-                            let v = document.createTextNode("");
-                            n.parentNode.insertBefore(v, n);
-                            slots[k]=v;
-                        }
-                    }
+            function h(id,ev) {
+                console.debug("executing slot " + id);
+                if (ev) {
+                    ws.send(`${id}${encodeEvent(ev)}`);
+                } else {
+                    ws.send(id);
+                }
+            }
 
-                    function h(id,ev) {
-                        console.debug("executing slot " + id);
-                        if (ev) {
-                            ws.send(`${id}${encodeEvent(ev)}`);
-                        } else {
-                            ws.send(id);
-                        }
-                    }
+            function debugSocket(name, ws) {
+                ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
+                ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
+                ws.onerror = (event) => { console.error(`${name} onerror`, event); };
+            }
 
-                    function debugSocket(name, ws) {
-                        ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
-                        ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
-                        ws.onerror = (event) => { console.error(`${name} onerror`, event); };
-                    }
+            var l = location;
+            const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
+            debugSocket("xui", ws);
+            ws.onmessage = (event) => {
+                console.debug("onmessage: ", event);
+                eval(event.data);
+            };
 
-                    var l = location;
-                    const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
-                    debugSocket("xui", ws);
-                    ws.onmessage = (event) => {
-                        console.debug("onmessage: ", event);
-                        eval(event.data);
-                    };
+            function encodeEvent(e) {
+                const obj = {};
+                for (let k in e) { obj[k] = e[k]; }
+                return JSON.stringify(obj, (k, v) => {
+                    /* TODO: There are a few more properties that can be shaved off. */
+                    if (v instanceof Node) return {id: v.id,name: v.name,type: v.type,value: v.value};
+                    if (v instanceof Window) return null;
+                    return v;
+                }, '');
+            }
 
-                    function encodeEvent(e) {
-                        const obj = {};
-                        for (let k in e) { obj[k] = e[k]; }
-                        return JSON.stringify(obj, (k, v) => {
-                            /* TODO: There are a few more properties that can be shaved off. */
-                            if (v instanceof Node) return {id: v.id,name: v.name,type: v.type,value: v.value};
-                            if (v instanceof Window) return null;
-                            return v;
-                        }, '');
-                    }
+            function replaceNode(node, content) {
+                const regScript = node.nextSibling;
+                node.outerHTML = content;
+                node = regScript.previousSibling;
+                reRegister(regScript);
+                for (let s of node.getElementsByTagName("script")) {
+                    reRegister(s);
+                }
+            }
 
-                    function replaceNode(node, content) {
-                        const regScript = node.nextSibling;
-                        node.outerHTML = content;
-                        node = regScript.previousSibling;
-                        reRegister(regScript);
-                        for (let s of node.getElementsByTagName("script")) {
-                            reRegister(s);
-                        }
-                    }
-
-                    function reRegister(node) {
-                        if (node.tagName == "SCRIPT") {
-                            const s = document.createElement("script");
-                            s.textContent = node.textContent;
-                            node.replaceWith(s);
-                        }
-                    }
-
-                </script>
-
+            function reRegister(node) {
+                if (node.tagName == "SCRIPT") {
+                    const s = document.createElement("script");
+                    s.textContent = node.textContent;
+                    node.replaceWith(s);
+                }
+            }
+        </script>
         """
         .Replace("\n", "")
         .Replace("  ", "");

@@ -11,6 +11,8 @@ public abstract class BaseComposer
     static BaseComposer? current;
     public static BaseComposer? Current { get => current; set => current = value; }
 
+    public int Cursor { get; set; } = 0;
+
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
@@ -34,6 +36,7 @@ public abstract class BaseComposer
 
     protected bool MoveNext()
     {
+        Cursor++;
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
             Clear();
@@ -43,11 +46,13 @@ public abstract class BaseComposer
 
     protected virtual void Clear()
     {
+        Cursor = 0;
         current = null;
     }
 
     // Note: formattedValuesRemaining is 1, not 0 because we kick it off with a wrapper, e.g. $"{ html() }".
     protected bool IsFinalAppend(string s) => formattedValuesRemaining == 1 && literalLengthRemaining == s.Length;
+    protected bool IsFinalAppend() => formattedValuesRemaining == 1 && literalLengthRemaining == 0;
 
     public virtual bool AppendLiteral(string s) => CompleteStatic(s.Length);
     public virtual bool AppendFormatted(string s) => CompleteDynamic(1);
