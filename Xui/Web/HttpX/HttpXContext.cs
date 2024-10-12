@@ -61,7 +61,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
             var eventHandler = GetEventHandlerById(slotId, html);
             if (eventHandler != null)
             {
-                EventLoop.Enqueue(eventHandler);
+                EventLoop.Enqueue(eventHandler, domEvent);
             }
             else
             {
