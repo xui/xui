@@ -71,7 +71,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (EnsureJsRegisterIsWritten())
         {
             WriteSpan("<script>r(\"slot".AsSpan());
-            writer.Write(Cursor);
+            Writer.Write(Cursor);
             WriteSpan("\")</script>".AsSpan());
         }
 
@@ -94,7 +94,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (EnsureJsRegisterIsWritten())
         {
             WriteSpan("<script>r(\"slot".AsSpan());
-            writer.Write(Cursor);
+            Writer.Write(Cursor);
             WriteSpan("\")</script>".AsSpan());
         }
 
@@ -108,7 +108,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!IsFinalAppend())
         {
             WriteSpan("<script>r(\"slot".AsSpan());
-            writer.Write(Cursor);
+            Writer.Write(Cursor);
             WriteSpan("\")</script>".AsSpan());
         }
 
@@ -117,36 +117,36 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendFormatted(Action a)
     {
-        writer.WriteStringLiteral("h(");
-        writer.Write(Cursor);
-        writer.WriteStringLiteral(")");
+        Writer.WriteStringLiteral("h(");
+        Writer.Write(Cursor);
+        Writer.WriteStringLiteral(")");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        writer.WriteStringLiteral("h(");
-        writer.Write(Cursor);
-        writer.WriteStringLiteral(",event)");
+        Writer.WriteStringLiteral("h(");
+        Writer.Write(Cursor);
+        Writer.WriteStringLiteral(",event)");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        writer.WriteStringLiteral("h(");
-        writer.Write(Cursor);
-        writer.WriteStringLiteral(")");
+        Writer.WriteStringLiteral("h(");
+        Writer.Write(Cursor);
+        Writer.WriteStringLiteral(")");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        writer.WriteStringLiteral("h(");
-        writer.Write(Cursor);
-        writer.WriteStringLiteral(",event)");
+        Writer.WriteStringLiteral("h(");
+        Writer.Write(Cursor);
+        Writer.WriteStringLiteral(",event)");
 
         return CompleteDynamic(1);
     }
