@@ -40,7 +40,7 @@ public readonly ref struct Html
         composer.Grow(literalLength, formattedCount);
     }
 
-    public readonly bool AppendLiteral(string value) => composer.AppendLiteral(value);
+    public readonly bool AppendLiteral(string markup) => composer.AppendLiteral(markup);
     public readonly bool AppendFormatted(string value) => composer.AppendFormatted(value);
     public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(long value, string? format = null) => composer.AppendFormatted(value, format);
@@ -50,11 +50,14 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(bool value) => composer.AppendFormatted(value);
     public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendFormatted(value, format);
-    public readonly bool AppendFormatted<TView>(TView v) where TView : IView => AppendFormatted(v.Render());
-    public readonly bool AppendFormatted(Html html) => composer.AppendFormatted(html);
+    public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, format, expression);
+    public readonly bool AppendFormatted(Func<string, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted<TView>(TView partial) where TView : IView => AppendFormatted(partial.Render());
+    public readonly bool AppendFormatted(Html partial) => composer.AppendFormatted(partial);
     public readonly bool AppendFormatted(Slot slot) => AppendFormatted(slot());
-    public readonly bool AppendFormatted(Action action) => composer.AppendFormatted(action);
-    public readonly bool AppendFormatted(Action<Event> action) => composer.AppendFormatted(action);
-    public readonly bool AppendFormatted(Func<Task> actionAsync) => composer.AppendFormatted(actionAsync);
-    public readonly bool AppendFormatted(Func<Event, Task> actionAsync) => composer.AppendFormatted(actionAsync);
+    public readonly bool AppendFormatted(Action eventHandler) => composer.AppendFormatted(eventHandler);
+    public readonly bool AppendFormatted(Action<Event> eventHandler) => composer.AppendFormatted(eventHandler);
+    public readonly bool AppendFormatted(Func<Task> eventHandler) => composer.AppendFormatted(eventHandler);
+    public readonly bool AppendFormatted(Func<Event, Task> eventHandler) => composer.AppendFormatted(eventHandler);
 }

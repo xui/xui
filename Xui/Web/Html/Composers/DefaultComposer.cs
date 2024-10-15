@@ -92,6 +92,42 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         return base.AppendFormatted(b);
     }
 
+    public override bool AppendFormatted(Func<string, Html> attribute, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        WriteSpan(name);
+        WriteSpan("=\"");
+        // attribute(string.Empty);
+        WriteSpan("\"");
+
+        return base.AppendFormatted(attribute, expression);
+    }
+
+    public override bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        WriteSpan(name);
+        WriteSpan("=\"");
+        var value = attribute(string.Empty);
+        AppendUtf8SpanFormattable(value, format);
+        WriteSpan("\"");
+
+        return base.AppendFormatted(attribute, expression);
+    }
+
+    public override bool AppendFormatted(Func<string, bool> attribute, string? expression = null)
+    {
+        var value = attribute(string.Empty);
+
+        if (value)
+        {
+            var name = GetAttributeName(expression);
+            WriteSpan(name);
+        }
+
+        return base.AppendFormatted(attribute, expression);
+    }
+
     public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
     public override bool AppendFormatted(Slot s) => AppendFormatted(s());
 
@@ -129,5 +165,29 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         // Nothing to write.  Possibly throw if SSG?
         
         return base.AppendFormatted(f);
+    }
+
+    protected void WriteSpan(ReadOnlySpan<char> span)
+    {
+        Writer.Advance(
+            Encoding.UTF8.GetBytes(
+                span, 
+                Writer.GetSpan(span.Length)
+            )
+        );
+    }
+
+    protected static ReadOnlySpan<char> GetAttributeName(string? expression)
+    {
+        if (expression is not null && expression.Length >= 2)
+        {
+            var end = expression.IndexOf('=');
+            if (end > 0)
+            {
+                var start = expression[0] == '@' ? 1 : 0;
+                return expression.AsSpan(start, end - start);
+            }
+        }
+        return "attribute-name-unspecified";
     }
 }

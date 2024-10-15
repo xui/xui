@@ -42,16 +42,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return base.AppendLiteral(s);
     }
 
-    private void WriteSpan(ReadOnlySpan<char> span)
-    {
-        Writer.Advance(
-            Encoding.UTF8.GetBytes(
-                span, 
-                Writer.GetSpan(span.Length)
-            )
-        );
-    }
-
     public override bool AppendFormatted(string s) => WriteDynamicValue(s);
     public override bool AppendFormatted(int i, string? format = null) => WriteDynamicValue(i, format);
     public override bool AppendFormatted(long l, string? format = null) => WriteDynamicValue(l, format);
