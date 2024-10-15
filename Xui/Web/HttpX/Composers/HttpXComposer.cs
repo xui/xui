@@ -62,7 +62,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool AppendFormatted(TimeSpan t, string? format = null) => WriteDynamicValue(t, format);
     public override bool AppendFormatted(bool b) => WriteDynamicValue(b ? Boolean.TrueString : Boolean.FalseString);
 
-    private bool WriteDynamicValue<T>(T value, ReadOnlySpan<char> format = default) 
+    private bool WriteDynamicValue<T>(T value, ReadOnlySpan<char> format = default)
         where T : IUtf8SpanFormattable
     {
         // Wraps the dynamic value with a comment tag on one side 
@@ -88,7 +88,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    private bool WriteDynamicValue(string value) 
+    private bool WriteDynamicValue(string value)
     {
         EnsureJsRegisterIsWritten();
 
@@ -110,7 +110,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         return CompleteDynamic(1);
     }
-
 
     public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
     public override bool AppendFormatted(Slot s) => AppendFormatted(s());
