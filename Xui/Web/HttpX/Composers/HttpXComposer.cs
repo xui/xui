@@ -182,9 +182,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private static readonly string JS_REGISTER = """
         <script>
-            slots={};
+            app={};
             function r(k) {
-                slots[k]=document.currentScript.previousSibling;
+                app[k]=document.currentScript.previousSibling;
             }
             r('slot0');
         </script>
@@ -194,12 +194,12 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private static readonly string JS = """
         <script>
-            for (let k in slots) {
-                let n = slots[k];
+            for (let k in app) {
+                let n = app[k];
                 if (n.nodeType == 8) {
                     let t = document.createTextNode("");
                     n.parentNode.insertBefore(t, n.nextSibling);
-                    slots[k]=t;
+                    app[k]=t;
                 }
             }
 
