@@ -55,16 +55,19 @@ public record class Event(
         int i = 0, slot = 0;
         while (true)
         {
+            if (i >= buffer.Length)
+            {
+                return (slot, null);
+            }
+
             // Convert from ASCII to int, digit by digit.
             int d = buffer[i] - 48;
-            if (d >= 0 && d <= 9) {
+            if (d >= 0 && d <= 9)
+            {
                 slot = slot * 10 + d;
                 ++i;
                 continue;
             }
-
-            if (i >= buffer.Length - 1)
-                return (slot, null);
             
             var message = buffer[i..];
             var @event = JsonSerializer.Deserialize<Event>(message);
