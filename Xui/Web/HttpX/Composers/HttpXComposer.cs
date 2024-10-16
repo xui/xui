@@ -152,28 +152,36 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendFormatted(Action a)
     {
-        Writer.WriteRaw($"""h({Cursor})""");
+        Writer.WriteRaw($"""
+            "h({Cursor})"
+            """);
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        Writer.WriteRaw($"""h({Cursor},event)""");
+        Writer.WriteRaw($"""
+            "h({Cursor},event)"
+            """);
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        Writer.WriteRaw($"""h({Cursor})""");
+        Writer.WriteRaw($"""
+            "h({Cursor})"
+            """);
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        Writer.WriteRaw($"""h({Cursor},event)""");
+        Writer.WriteRaw($"""
+            "h({Cursor},event)"
+            """);
 
         return CompleteDynamic(1);
     }
