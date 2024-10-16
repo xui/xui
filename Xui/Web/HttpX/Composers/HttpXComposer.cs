@@ -144,7 +144,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         if (!suppressDynamicValues)
         {
-            Writer.WriteRaw($"""<script>r("slot{Cursor}")</script>""");
+            Writer.WriteRaw($"""
+                <script>r("slot{Cursor}")</script>
+                """);
         }
 
         return CompleteDynamic(1);
