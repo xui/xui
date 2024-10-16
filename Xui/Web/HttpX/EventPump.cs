@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace Xui.Web.HttpX;
 
-static class EventLoop
+static class EventPump
 {
     private static readonly ConcurrentQueue<Action> queue = [];
 
