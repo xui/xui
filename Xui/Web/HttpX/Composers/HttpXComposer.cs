@@ -13,14 +13,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     private static readonly Dictionary<string, int> jsInjectionIndexes = [];
 
     private bool isJsRegisterWritten = false;
+    private bool suppressDynamicValues = false;
 
     public override bool AppendLiteral(string s)
     {
         // Inject the necessary JavaScript before the end of the </body> tag.
         if (IsFinalAppend(s))
         {
-            int index;
-            if (!jsInjectionIndexes.TryGetValue(s, out index))
+            if (!jsInjectionIndexes.TryGetValue(s, out int index))
             {
                 // Avoid expensive operation?
                 index = s.IndexOf("</body>");
@@ -28,9 +28,11 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             }
             if (index >= 0)
             {
-                WriteSpan(s.AsSpan(0, index));
-                WriteSpan(JS.AsSpan());
-                WriteSpan(s.AsSpan(index, s.Length - index));
+                var beforeBody = s.AsSpan(0, index);
+                var afterBody = s.AsSpan(index, s.Length - index);
+                Writer.WriteRaw($"{beforeBody}{JS}{afterBody}");
+
+                suppressDynamicValues = true;
 
                 CompleteStatic(s.Length);
                 return true;
@@ -62,17 +64,18 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // It should end up looking like this:
         // $"<!-- -->{value:format}<script>r('slot{id}')</script>"
 
-        WriteSpan("<!-- -->".AsSpan());
+        if (!suppressDynamicValues)
+        {
+            Writer.WriteRaw($"<!-- -->");
+        }
 
         Span<byte> destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        if (EnsureJsRegisterIsWritten())
+        if (!suppressDynamicValues && EnsureJsRegisterIsWritten())
         {
-            WriteSpan("<script>r(\"slot".AsSpan());
-            Writer.Write(Cursor);
-            WriteSpan("\")</script>".AsSpan());
+            Writer.WriteRaw($"""<script>r("slot{Cursor}")</script>""");
         }
 
         return CompleteDynamic(1);
@@ -80,23 +83,57 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private bool WriteDynamicValue(string value)
     {
-        EnsureJsRegisterIsWritten();
-
-        WriteSpan("<!-- -->".AsSpan());
-
-        Writer.Advance(
-            Encoding.UTF8.GetBytes(
-                value.AsSpan(), 
-                Writer.GetSpan(value.Length)
-            )
-        );
-
-        if (EnsureJsRegisterIsWritten())
+        if (!suppressDynamicValues)
         {
-            WriteSpan("<script>r(\"slot".AsSpan());
-            Writer.Write(Cursor);
-            WriteSpan("\")</script>".AsSpan());
+            Writer.WriteRaw($"<!-- -->{value}");
         }
+        else
+        {
+            Writer.WriteRaw($"{value}");
+        }
+
+        if (!suppressDynamicValues && EnsureJsRegisterIsWritten())
+        {
+            Writer.WriteRaw($"""<script>r("slot{Cursor}")</script>""");
+        }
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted(Func<string, Html> attribute, string? expression = null)
+    {
+        suppressDynamicValues = true;
+
+        var name = GetAttributeName(expression);
+        Writer.WriteRaw($"{name}=\"");
+        attribute(string.Empty);
+        Writer.WriteRaw($"\" slot{Cursor}={name}\"");
+
+        suppressDynamicValues = false;
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        var value = attribute(string.Empty);
+        Writer.WriteRaw($"{name}=\"{value}\" slot{Cursor}=\"{name}\"");
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted(Func<string, bool> attribute, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        var value = attribute(string.Empty);
+
+        if (value)
+        {
+            Writer.WriteRaw($"{name}");
+        }
+
+        Writer.WriteRaw($" slot{Cursor}=\"{name}\"");
 
         return CompleteDynamic(1);
     }
@@ -105,11 +142,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool AppendFormatted(Slot s) => AppendFormatted(s());
     public override bool AppendFormatted(Html h)
     {
-        if (!IsFinalAppend())
+        if (!suppressDynamicValues)
         {
-            WriteSpan("<script>r(\"slot".AsSpan());
-            Writer.Write(Cursor);
-            WriteSpan("\")</script>".AsSpan());
+            Writer.WriteRaw($"""<script>r("slot{Cursor}")</script>""");
         }
 
         return CompleteDynamic(1);
@@ -117,36 +152,28 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendFormatted(Action a)
     {
-        Writer.WriteStringLiteral("h(");
-        Writer.Write(Cursor);
-        Writer.WriteStringLiteral(")");
+        Writer.WriteRaw($"""h({Cursor})""");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Action<Event> a)
     {
-        Writer.WriteStringLiteral("h(");
-        Writer.Write(Cursor);
-        Writer.WriteStringLiteral(",event)");
+        Writer.WriteRaw($"""h({Cursor},event)""");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Task> f)
     {
-        Writer.WriteStringLiteral("h(");
-        Writer.Write(Cursor);
-        Writer.WriteStringLiteral(")");
+        Writer.WriteRaw($"""h({Cursor})""");
 
         return CompleteDynamic(1);
     }
 
     public override bool AppendFormatted(Func<Event, Task> f)
     {
-        Writer.WriteStringLiteral("h(");
-        Writer.Write(Cursor);
-        Writer.WriteStringLiteral(",event)");
+        Writer.WriteRaw($"""h({Cursor},event)""");
 
         return CompleteDynamic(1);
     }
@@ -155,6 +182,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         // Set to false in case this composer instance is reused.
         isJsRegisterWritten = false;
+        suppressDynamicValues = false;
 
         base.Clear();
     }
@@ -163,7 +191,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         if (!isJsRegisterWritten)
         {
-            WriteSpan(JS_REGISTER.AsSpan());
+            Writer.WriteRaw($"{JS_REGISTER}");
             isJsRegisterWritten = true;
             return false;
         }

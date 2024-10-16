@@ -95,10 +95,9 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
     public override bool AppendFormatted(Func<string, Html> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        WriteSpan(name);
-        WriteSpan("=\"");
-        // attribute(string.Empty);
-        WriteSpan("\"");
+        Writer.WriteRaw($"{name}=\"");
+        attribute(string.Empty);
+        Writer.WriteRaw($"\"");
 
         return base.AppendFormatted(attribute, expression);
     }
@@ -106,11 +105,8 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
     public override bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        WriteSpan(name);
-        WriteSpan("=\"");
         var value = attribute(string.Empty);
-        AppendUtf8SpanFormattable(value, format);
-        WriteSpan("\"");
+        Writer.WriteRaw($"{name}=\"{value}\"");
 
         return base.AppendFormatted(attribute, expression);
     }
@@ -122,7 +118,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         if (value)
         {
             var name = GetAttributeName(expression);
-            WriteSpan(name);
+            Writer.WriteRaw($"{name}");
         }
 
         return base.AppendFormatted(attribute, expression);
@@ -167,21 +163,12 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         return base.AppendFormatted(f);
     }
 
-    protected void WriteSpan(ReadOnlySpan<char> span)
-    {
-        Writer.Advance(
-            Encoding.UTF8.GetBytes(
-                span, 
-                Writer.GetSpan(span.Length)
-            )
-        );
-    }
-
     protected static ReadOnlySpan<char> GetAttributeName(string? expression)
     {
         if (expression is not null && expression.Length >= 2)
         {
-            var end = expression.IndexOf('=');
+            // TODO: Make sure this doesn't allocate.
+            var end = expression.IndexOfAny([' ', '=']);
             if (end > 0)
             {
                 var start = expression[0] == '@' ? 1 : 0;
