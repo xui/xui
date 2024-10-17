@@ -6,8 +6,6 @@ using Xui.Web.Composers;
 
 namespace Xui.Web;
 
-public delegate Html Slot();
-
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
 public readonly ref struct Html
