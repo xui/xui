@@ -34,16 +34,16 @@ public class Tests
     [Benchmark]
     public async Task Small()
     {
-        var eventHandlers = pipe.Writer.Write(composer, $"""
-        <html>
-            <body>
-                Hello {name}
-                <button>
-                    Clicks: {c}
-                </button>
-            </body>
-        </html>
-        """);
+        pipe.Writer.Write(composer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
 
         await pipe.Writer.FlushAsync();
         if (pipe.Reader.TryRead(out ReadResult result))

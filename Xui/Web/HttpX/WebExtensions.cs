@@ -56,7 +56,7 @@ public static class WebExtensions
             pattern,
             async httpContext => {
                 var pipeWriter = httpContext.Response.BodyWriter;
-                var eventHandlers = pipeWriter.Write($"{requestDelegate()}");
+                pipeWriter.Write($"{requestDelegate()}");
                 await pipeWriter.FlushAsync();
             }
         );
@@ -71,7 +71,7 @@ public static class WebExtensions
             pattern,
             async httpContext => {
                 var pipeWriter = httpContext.Response.BodyWriter;
-                var eventHandlers = pipeWriter.Write($"{requestDelegate(httpContext)}");
+                pipeWriter.Write($"{requestDelegate(httpContext)}");
                 await pipeWriter.FlushAsync();
             }
         );
@@ -133,7 +133,7 @@ public static class WebExtensions
 
                     var pipeWriter = httpContext.Response.BodyWriter;
                     var composer = new HttpXComposer(pipeWriter);
-                    var eventHandlers = pipeWriter.Write(composer, $"{html()}");
+                    pipeWriter.Write(composer, $"{html()}");
                     await pipeWriter.FlushAsync();
                 }
             }
