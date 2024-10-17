@@ -6,9 +6,9 @@ static class EventPump
 {
     private static readonly ConcurrentQueue<Action> queue = [];
 
-    public static void Enqueue(Func<Event, Task> eventHandler, Event domEvent)
+    public static void Enqueue(Func<Event, Task> eventHandler, Event? domEvent)
     {
         // TODO: Do the work.
-        eventHandler(domEvent);
+        eventHandler(domEvent!);
     }
 }
