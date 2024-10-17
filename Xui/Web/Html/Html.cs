@@ -60,8 +60,4 @@ public readonly ref struct Html
     public readonly bool AppendFormatted<TView>(TView partial) where TView : IView => AppendFormatted(partial.Render());
     public readonly bool AppendFormatted(Html partial) => composer.AppendFormatted(partial);
     public readonly bool AppendFormatted(Slot slot) => AppendFormatted(slot());
-    public readonly bool AppendFormatted(Action eventHandler) => composer.AppendFormatted(eventHandler);
-    public readonly bool AppendFormatted(Action<Event> eventHandler) => composer.AppendFormatted(eventHandler);
-    public readonly bool AppendFormatted(Func<Task> eventHandler) => composer.AppendFormatted(eventHandler);
-    public readonly bool AppendFormatted(Func<Event, Task> eventHandler) => composer.AppendFormatted(eventHandler);
 }
