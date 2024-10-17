@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Xui.Web.Composers;
 
-namespace Xui.Web;
+namespace Xui.Web.HttpX;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
