@@ -16,6 +16,8 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
+    protected bool IsFinalAppend(string s) => literalLengthRemaining == s.Length;
+
     public void Grow(int literalLength, int formattedCount)
     {
         literalLengthRemaining += literalLength;
@@ -49,10 +51,6 @@ public abstract class BaseComposer
         Cursor = 0;
         current = null;
     }
-
-    // Note: formattedValuesRemaining is 1, not 0 because we kick it off with a wrapper, e.g. $"{ html() }".
-    protected bool IsFinalAppend(string s) => formattedValuesRemaining == 1 && literalLengthRemaining == s.Length;
-    protected bool IsFinalAppend() => formattedValuesRemaining == 1 && literalLengthRemaining == 0;
 
     public virtual bool AppendLiteral(string s) => CompleteStatic(s.Length);
     public virtual bool AppendFormatted(string s) => CompleteDynamic(1);
