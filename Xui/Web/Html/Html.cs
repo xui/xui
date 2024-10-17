@@ -50,9 +50,13 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(bool value) => composer.AppendFormatted(value);
     public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendFormatted(value, format);
-    public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
-    public readonly bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, format, expression);
-    public readonly bool AppendFormatted(Func<string, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted(Func<Event, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted<T>(Func<Event, T> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
+    public readonly bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
+    public readonly bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
+    public readonly bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
     public readonly bool AppendFormatted<TView>(TView partial) where TView : IView => AppendFormatted(partial.Render());
     public readonly bool AppendFormatted(Html partial) => composer.AppendFormatted(partial);
     public readonly bool AppendFormatted(Slot slot) => AppendFormatted(slot());

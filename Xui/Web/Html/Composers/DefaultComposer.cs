@@ -92,28 +92,28 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         return base.AppendFormatted(b);
     }
 
-    public override bool AppendFormatted(Func<string, Html> attribute, string? expression = null)
+    public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
         Writer.WriteRaw($"{name}=\"");
-        attribute(string.Empty);
+        attribute(Event.Empty);
         Writer.WriteRaw($"\"");
 
         return base.AppendFormatted(attribute, expression);
     }
 
-    public override bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null)
+    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        var value = attribute(string.Empty);
+        var value = attribute(Event.Empty);
         Writer.WriteRaw($"{name}=\"{value}\"");
 
         return base.AppendFormatted(attribute, expression);
     }
 
-    public override bool AppendFormatted(Func<string, bool> attribute, string? expression = null)
+    public override bool AppendFormatted(Func<Event, bool> attribute, string? expression = null)
     {
-        var value = attribute(string.Empty);
+        var value = attribute(Event.Empty);
 
         if (value)
         {
@@ -135,32 +135,32 @@ public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(
         return base.AppendFormatted(h);
     }
 
-    public override bool AppendFormatted(Action a)
+    public override bool AppendFormatted(Action eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(a);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Action<Event> a)
+    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(a);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Func<Task> f)
+    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(f);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Func<Event, Task> f)
+    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(f);
+        return base.AppendFormatted(eventHandler);
     }
 
     protected static ReadOnlySpan<char> GetAttributeName(string? expression)

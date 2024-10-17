@@ -64,16 +64,16 @@ public abstract class BaseComposer
     public virtual bool AppendFormatted(DateTime d, string? format = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(TimeSpan t, string? format = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(bool b) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<string, Html> attribute, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<string, bool> attribute, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Func<Event, Html> attribute, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted<T>(Func<Event, T> attribute, string? expression = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Func<Event, bool> attribute, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Action eventHandler, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Action<Event> eventHandler, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Func<Task> eventHandler, string? expression = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted<TView>(TView v) where TView : IView => CompleteDynamic(1);
     public virtual bool AppendFormatted(Html h) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Slot s) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Action a) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Action<Event> a) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Task> f) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Event, Task> f) => CompleteDynamic(1);
 }
 
 public static class ComposerExtensions

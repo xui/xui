@@ -19,12 +19,12 @@ public class IndexerComposer(int slotId) : BaseComposer
         return composer.EventHandler;
     }
 
-    public override bool AppendFormatted(Action a)
+    public override bool AppendFormatted(Action eventHandler, string? expression = null)
     {
         if (Cursor == SlotId)
         {
             EventHandler = @event => {
-                a();
+                eventHandler();
                 return Task.CompletedTask;
             };
             
@@ -33,15 +33,15 @@ public class IndexerComposer(int slotId) : BaseComposer
             return false;
         }
 
-        return base.AppendFormatted(a);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Action<Event> a)
+    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
     {
         if (Cursor == SlotId)
         {
             EventHandler = @event => {
-                a(@event);
+                eventHandler(@event);
                 return Task.CompletedTask;
             };
             
@@ -50,15 +50,15 @@ public class IndexerComposer(int slotId) : BaseComposer
             return false;
         }
 
-        return base.AppendFormatted(a);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Func<Task> f)
+    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
     {
         if (Cursor == SlotId)
         {
             EventHandler = @event => {
-                return f();
+                return eventHandler();
             };
             
             base.Clear();
@@ -66,20 +66,35 @@ public class IndexerComposer(int slotId) : BaseComposer
             return false;
         }
 
-        return base.AppendFormatted(f);
+        return base.AppendFormatted(eventHandler);
     }
 
-    public override bool AppendFormatted(Func<Event, Task> f)
+    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
     {
         if (Cursor == SlotId)
         {
-            EventHandler = f;
+            EventHandler = eventHandler;
             
             base.Clear();
             // Save time. Short circuits any following appends.
             return false;
         }
 
-        return base.AppendFormatted(f);
+        return base.AppendFormatted(eventHandler);
     }
+
+    // We have an unfortunate edge case to handle here.  
+    // The notation used for some attributes:
+    //   $"<input type="text" { maxlength => c } />"
+    // technically also matches the signature used for events:
+    //   $"<button { onclick => c++ }>click me</button>"
+    // Fortunately there's a simple workaround.  Since attributes
+    // only use the input param for its name, never its value 
+    // we can just key off its name and send it down a different path
+    // as if it were an event handler.
+    //
+    // AppendFormatted(@event => f(@event)) ...returns T
+    // AppendFormatted(@event => { f(@event); }) ...returns void
+    public override bool AppendFormatted<T>(Func<Event, T> f, string? expression = null) => AppendFormatted(e => { f(e); });
+    public override bool AppendFormatted(Func<Event, bool> f, string? expression = null) => AppendFormatted(e => { f(e); });
 }

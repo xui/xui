@@ -100,40 +100,150 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted(Func<string, Html> attribute, string? expression = null)
+    public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
     {
         suppressDynamicValues = true;
 
         var name = GetAttributeName(expression);
         Writer.WriteRaw($"{name}=\"");
-        attribute(string.Empty);
-        Writer.WriteRaw($"\" slot{Cursor}={name}\"");
+        attribute(Event.Empty);
+        Writer.WriteRaw($"\" slot{Cursor}=\"{name}\"");
 
         suppressDynamicValues = false;
 
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted<T>(Func<string, T> attribute, string? format = null, string? expression = null)
+    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        var value = attribute(string.Empty);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
+        
+        var value = attribute(Event.Empty);
         Writer.WriteRaw($"{name}=\"{value}\" slot{Cursor}=\"{name}\"");
 
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted(Func<string, bool> attribute, string? expression = null)
+    public override bool AppendFormatted(Func<Event, bool> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        var value = attribute(string.Empty);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
 
+        var value = attribute(Event.Empty);
         if (value)
         {
             Writer.WriteRaw($"{name}");
         }
 
         Writer.WriteRaw($" slot{Cursor}=\"{name}\"");
+
+        return CompleteDynamic(1);
+    }
+
+    private bool TryAppendAsEventHandler(ReadOnlySpan<char> name)
+    {
+        // We have an unfortunate edge case to handle here.  
+        // The notation used for some attributes:
+        //   $"<input type="text" { maxlength => c } />"
+        // technically also matches the signature used for events:
+        //   $"<button { onclick => c++ }>click me</button>"
+        // Fortunately there's a simple workaround.  Since attributes
+        // only use the input param for its name, never its value 
+        // we can just key off its name and send it down a different path
+        // as if it were an event handler.
+        switch (name)
+        {
+            case "e":
+            case "ev":
+            case "evnt":
+            case "@event":
+            case "(e)":
+            case "(ev)":
+            case "(evnt)":
+            case "(@event)":
+                Writer.WriteRaw($"""
+                    "h({Cursor},event)"
+                    """);
+
+                return true;
+        }
+
+        // All events start with on*.
+        if (name.Length >= 2 && name[0] == 'o' && name[1] == 'n')
+        {
+            Writer.WriteRaw($"""
+                {name}="h({Cursor})"
+                """);         
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    public override bool AppendFormatted(Action eventHandler, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
+
+        Writer.WriteRaw($"""
+            "h({Cursor})"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
+
+        Writer.WriteRaw($"""
+            "h({Cursor},event)"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
+
+        Writer.WriteRaw($"""
+            "h({Cursor})"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
+    {
+        var name = GetAttributeName(expression);
+        if (TryAppendAsEventHandler(name))
+        {
+            return CompleteDynamic(1);
+        }
+
+        Writer.WriteRaw($"""
+            "h({Cursor},event)"
+            """);
 
         return CompleteDynamic(1);
     }
@@ -148,42 +258,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 <script>r("slot{Cursor}")</script>
                 """);
         }
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Action a)
-    {
-        Writer.WriteRaw($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Action<Event> a)
-    {
-        Writer.WriteRaw($"""
-            "h({Cursor},event)"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Func<Task> f)
-    {
-        Writer.WriteRaw($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Func<Event, Task> f)
-    {
-        Writer.WriteRaw($"""
-            "h({Cursor},event)"
-            """);
 
         return CompleteDynamic(1);
     }
@@ -229,6 +303,11 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                     n.parentNode.insertBefore(t, n.nextSibling);
                     app[k]=t;
                 }
+            }
+            var attrs = document.evaluate('//*/attribute::*[starts-with(name(), "slot")]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            for (i=0;i<attrs.snapshotLength;i++) {
+                let a=attrs.snapshotItem(i);
+                app[a.name]=a;
             }
 
             function h(id,ev) {
