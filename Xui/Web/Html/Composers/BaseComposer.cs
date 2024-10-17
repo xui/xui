@@ -74,7 +74,6 @@ public abstract class BaseComposer
     public virtual bool AppendFormatted<TView>(TView view) where TView : IView => CompleteDynamic(1);
     public virtual bool AppendFormatted(Slot slot) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Html partial) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(RawText text) => CompleteDynamic(1);
 }
 
 public static class ComposerExtensions

@@ -177,12 +177,4 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         
         return base.AppendFormatted(partial);
     }
-
-    public override bool AppendFormatted(RawText text)
-    {
-        // Nothing to write.
-        // It was already written as "text" (above) was being created.
-        
-        return base.AppendFormatted(text);
-    }
 }
