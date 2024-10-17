@@ -16,7 +16,7 @@ public static class IBufferWriterExtensions
 
     public static int Write(
         this IBufferWriter<byte> writer, 
-        BufferWriterComposer composer,
+        StreamingComposer composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
     {
         return 4;

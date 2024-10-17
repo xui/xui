@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Xui.Web.Composers;
 
-public class DefaultComposer(IBufferWriter<byte> writer) : BufferWriterComposer(writer)
+public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
     public override bool AppendLiteral(string s)
     {

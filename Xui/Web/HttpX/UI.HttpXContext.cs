@@ -18,7 +18,7 @@ public abstract partial class UI<T> where T : IViewModel
         public T ViewModel { get; init; }
         private WebSocketPipe? pipe;
         internal WebSocketPipe? Pipe { get => pipe; }
-        private BufferWriterComposer composer;
+        private StreamingComposer composer;
         // private Composer composerCompare = new();
         public bool IsWebSocketOpen => pipe?.State == WebSocketState.Open;
 
