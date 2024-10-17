@@ -95,6 +95,6 @@ public class IndexerComposer(int slotId) : BaseComposer
     //
     // AppendFormatted(@event => f(@event)) ...returns T
     // AppendFormatted(@event => { f(@event); }) ...returns void
-    public override bool AppendFormatted<T>(Func<Event, T> f, string? expression = null) => AppendFormatted(e => { f(e); });
+    public override bool AppendFormatted<T>(Func<Event, T> f, string? format = null, string? expression = null) => AppendFormatted(e => { f(e); });
     public override bool AppendFormatted(Func<Event, bool> f, string? expression = null) => AppendFormatted(e => { f(e); });
 }

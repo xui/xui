@@ -49,7 +49,7 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(Func<Event, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
-    public readonly bool AppendFormatted<T>(Func<Event, T> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, expression);
+    public readonly bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, format, expression);
     public readonly bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
     public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
     public readonly bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);

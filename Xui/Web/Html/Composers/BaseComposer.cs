@@ -65,7 +65,7 @@ public abstract class BaseComposer
     public virtual bool AppendFormatted(TimeSpan t, string? format = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(bool b) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, Html> attribute, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<T>(Func<Event, T> attribute, string? expression = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
+    public virtual bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, bool> attribute, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Action eventHandler, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Action<Event> eventHandler, string? expression = null) => CompleteDynamic(1);

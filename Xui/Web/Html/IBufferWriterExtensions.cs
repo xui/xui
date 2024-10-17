@@ -21,10 +21,4 @@ public static class IBufferWriterExtensions
     {
         return 4;
     }
-
-    public static void WriteRaw(
-        this IBufferWriter<byte> writer, 
-        [InterpolatedStringHandlerArgument("writer")] ref RawText text)
-    {
-    }
 }

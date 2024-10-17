@@ -95,18 +95,33 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
     {
         var name = GetAttributeName(expression);
-        Writer.WriteRaw($"{name}=\"");
+
+        Encoding.UTF8.GetBytes(name, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
+
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler)
         attribute(Event.Empty);
-        Writer.WriteRaw($"\"");
+
+        Encoding.UTF8.GetBytes("\"", Writer);
 
         return base.AppendFormatted(attribute, expression);
     }
 
-    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? expression = null)
+    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null)
     {
         var name = GetAttributeName(expression);
         var value = attribute(Event.Empty);
-        Writer.WriteRaw($"{name}=\"{value}\"");
+
+        Encoding.UTF8.GetBytes(name, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
+
+        Span<byte> destination = Writer.GetSpan();
+        value.TryFormat(destination, out int length, format, null);
+        Writer.Advance(length);
+
+        Encoding.UTF8.GetBytes("\"", Writer);
 
         return base.AppendFormatted(attribute, expression);
     }
@@ -118,7 +133,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         if (value)
         {
             var name = GetAttributeName(expression);
-            Writer.WriteRaw($"{name}");
+            Encoding.UTF8.GetBytes(name, Writer);
         }
 
         return base.AppendFormatted(attribute, expression);
@@ -172,8 +187,9 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
     public override bool AppendFormatted(Html partial)
     {
-        // Nothing to write.
-        // It was already written as "partial" (above) was being created.
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler)
         
         return base.AppendFormatted(partial);
     }

@@ -28,7 +28,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
         if (Pipe is not null && Pipe.State == WebSocketState.Open)
         {
             var writer = Pipe.Output;
-            writer.WriteRaw($"window.history.pushState({{}},'', '{ path.ToUriComponent() }')");
+            writer.Inject($"window.history.pushState({{}},'', '{ path.ToUriComponent() }')");
             await writer.FlushAsync();
         }
     }
