@@ -5,7 +5,7 @@ using Xui.Web.Composers;
 
 namespace Xui.Web;
 
-public static class IBufferWriterExtensions
+public static class Extensions
 {
     public static void Write(
         this IBufferWriter<byte> writer, 
