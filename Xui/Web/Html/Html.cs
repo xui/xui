@@ -56,6 +56,6 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
     public readonly bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
     public readonly bool AppendFormatted<TView>(TView partial) where TView : IView => AppendFormatted(partial.Render());
-    public readonly bool AppendFormatted(Html partial) => composer.AppendFormatted(partial);
     public readonly bool AppendFormatted(Slot slot) => AppendFormatted(slot());
+    public readonly bool AppendFormatted(Html partial) => composer.AppendFormatted(partial);
 }

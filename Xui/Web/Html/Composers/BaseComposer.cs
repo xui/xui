@@ -71,9 +71,10 @@ public abstract class BaseComposer
     public virtual bool AppendFormatted(Action<Event> eventHandler, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Task> eventHandler, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<TView>(TView v) where TView : IView => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Html h) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Slot s) => CompleteDynamic(1);
+    public virtual bool AppendFormatted<TView>(TView view) where TView : IView => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Slot slot) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(Html partial) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(RawText text) => CompleteDynamic(1);
 }
 
 public static class ComposerExtensions

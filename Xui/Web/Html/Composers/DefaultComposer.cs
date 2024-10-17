@@ -124,17 +124,6 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.AppendFormatted(attribute, expression);
     }
 
-    public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
-    public override bool AppendFormatted(Slot s) => AppendFormatted(s());
-
-    public override bool AppendFormatted(Html h)
-    {
-        // Nothing to write.
-        // It was already written as "h" (above) was being created.
-        
-        return base.AppendFormatted(h);
-    }
-
     public override bool AppendFormatted(Action eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
@@ -176,5 +165,24 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
             }
         }
         return "attribute-name-unspecified";
+    }
+
+    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
+    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
+
+    public override bool AppendFormatted(Html partial)
+    {
+        // Nothing to write.
+        // It was already written as "partial" (above) was being created.
+        
+        return base.AppendFormatted(partial);
+    }
+
+    public override bool AppendFormatted(RawText text)
+    {
+        // Nothing to write.
+        // It was already written as "text" (above) was being created.
+        
+        return base.AppendFormatted(text);
     }
 }

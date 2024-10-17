@@ -248,9 +248,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted<TView>(TView v) => AppendFormatted(v.Render());
-    public override bool AppendFormatted(Slot s) => AppendFormatted(s());
-    public override bool AppendFormatted(Html h)
+    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
+    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
+    public override bool AppendFormatted(Html partial)
     {
         if (!suppressDynamicValues)
         {
