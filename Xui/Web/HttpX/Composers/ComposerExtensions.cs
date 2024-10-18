@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Xui.Web.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Xui.Web.HttpX.Composers;
 
 public static class ComposerExtensions
 {
