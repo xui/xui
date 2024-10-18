@@ -6,72 +6,72 @@ namespace Xui.Web.Composers;
 
 public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    public override bool AppendLiteral(string s)
+    public override bool AppendLiteral(string literal)
     {
-        Span<byte> destination = Writer.GetSpan(s.Length);
-        int length = Encoding.UTF8.GetBytes(s, destination);
+        Span<byte> destination = Writer.GetSpan(literal.Length);
+        int length = Encoding.UTF8.GetBytes(literal, destination);
         Writer.Advance(length);
 
-        return base.AppendLiteral(s);
+        return base.AppendLiteral(literal);
     }
 
-    public override bool AppendFormatted(string s)
+    public override bool AppendFormatted(string value)
     {
         // string has no formatters (and alignment isn't helpful in HTML)
-        Span<byte> destination = Writer.GetSpan(s.Length);
-        int length = Encoding.UTF8.GetBytes(s, destination);
+        Span<byte> destination = Writer.GetSpan(value.Length);
+        int length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.AppendFormatted(s);
+        return base.AppendFormatted(value);
     }
 
-    public override bool AppendFormatted(int i, string? format = null)
+    public override bool AppendFormatted(int value, string? format = null)
     {
-        AppendUtf8SpanFormattable(i, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(i, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(long l, string? format = null)
+    public override bool AppendFormatted(long value, string? format = null)
     {
-        AppendUtf8SpanFormattable(l, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(l, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(float f, string? format = null)
+    public override bool AppendFormatted(float value, string? format = null)
     {
-        AppendUtf8SpanFormattable(f, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(f, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(double d, string? format = null)
+    public override bool AppendFormatted(double value, string? format = null)
     {
-        AppendUtf8SpanFormattable(d, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(d, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(decimal d, string? format = null)
+    public override bool AppendFormatted(decimal value, string? format = null)
     {
-        AppendUtf8SpanFormattable(d, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(d, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(DateTime d, string? format = null)
+    public override bool AppendFormatted(DateTime value, string? format = null)
     {
-        AppendUtf8SpanFormattable(d, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(d, format);
+        return base.AppendFormatted(value, format);
     }
 
-    public override bool AppendFormatted(TimeSpan t, string? format = null)
+    public override bool AppendFormatted(TimeSpan value, string? format = null)
     {
-        AppendUtf8SpanFormattable(t, format);
+        AppendUtf8SpanFormattable(value, format);
 
-        return base.AppendFormatted(t, format);
+        return base.AppendFormatted(value, format);
     }
 
     private void AppendUtf8SpanFormattable<T>(T value, ReadOnlySpan<char> format = default) where T : IUtf8SpanFormattable
@@ -81,15 +81,15 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         Writer.Advance(length);
     }
 
-    public override bool AppendFormatted(bool b)
+    public override bool AppendFormatted(bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
-        var value = b ? Boolean.TrueString : Boolean.FalseString;
-        Span<byte> destination = Writer.GetSpan(value.Length);
-        int length = Encoding.UTF8.GetBytes(value, destination);
+        var output = value ? Boolean.TrueString : Boolean.FalseString;
+        Span<byte> destination = Writer.GetSpan(output.Length);
+        int length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.AppendFormatted(b);
+        return base.AppendFormatted(value);
     }
 
     public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
@@ -112,6 +112,11 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     public override bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null)
     {
         var name = GetAttributeName(expression);
+        if (IsReservedForEvent(name) || IsReservedForEventHandler(name))
+        {
+            return base.AppendFormatted(attribute, expression);
+        }
+
         var value = attribute(Event.Empty);
 
         Encoding.UTF8.GetBytes(name, Writer);
@@ -128,11 +133,16 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
     public override bool AppendFormatted(Func<Event, bool> attribute, string? expression = null)
     {
+        var name = GetAttributeName(expression);
+        if (IsReservedForEvent(name) || IsReservedForEventHandler(name))
+        {
+            return base.AppendFormatted(attribute, expression);
+        }
+
         var value = attribute(Event.Empty);
 
         if (value)
         {
-            var name = GetAttributeName(expression);
             Encoding.UTF8.GetBytes(name, Writer);
         }
 
@@ -143,28 +153,40 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(eventHandler);
+        return base.AppendFormatted(eventHandler, expression);
     }
 
     public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(eventHandler);
+        return base.AppendFormatted(eventHandler, expression);
     }
 
     public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(eventHandler);
+        return base.AppendFormatted(eventHandler, expression);
     }
 
     public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
     {
         // Nothing to write.  Possibly throw if SSG?
         
-        return base.AppendFormatted(eventHandler);
+        return base.AppendFormatted(eventHandler, expression);
+    }
+
+    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
+    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
+
+    public override bool AppendFormatted(Html partial)
+    {
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler)
+        
+        return base.AppendFormatted(partial);
     }
 
     protected static ReadOnlySpan<char> GetAttributeName(string? expression)
@@ -182,15 +204,30 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return "attribute-name-unspecified";
     }
 
-    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
-    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
+    // We have an unfortunate edge case to handle here.  
+    // The notation used for some attributes:
+    //   $"<input type="text" { maxlength => c } />"
+    // technically also matches the signature used for events:
+    //   $"<button { onclick => c++ }>click me</button>"
+    // Fortunately there's a simple workaround.  Since attributes
+    // only use the input param for its name, never its value 
+    // we can just key off its name and send it down a different path
+    // as if it were an event handler.
+    protected static bool IsReservedForEvent(ReadOnlySpan<char> name) => 
+        name switch
+        {
+            "e" or
+            "ev" or
+            "evnt" or
+            "@event" or
+            "(e)" or
+            "(ev)" or
+            "(evnt)" or
+            "(@event)" => true,
+            _ => false
+        };
 
-    public override bool AppendFormatted(Html partial)
-    {
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler)
-        
-        return base.AppendFormatted(partial);
-    }
+    protected static bool IsReservedForEventHandler(ReadOnlySpan<char> name) => 
+        // All events start with on*.
+        name.Length >= 2 && name[0] == 'o' && name[1] == 'n';
 }

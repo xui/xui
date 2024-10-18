@@ -52,16 +52,16 @@ public abstract class BaseComposer
         current = null;
     }
 
-    public virtual bool AppendLiteral(string s) => CompleteStatic(s.Length);
-    public virtual bool AppendFormatted(string s) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(int i, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(long l, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(float f, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(double d, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(decimal d, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(DateTime d, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(TimeSpan t, string? format = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(bool b) => CompleteDynamic(1);
+    public virtual bool AppendLiteral(string literal) => CompleteStatic(literal.Length);
+    public virtual bool AppendFormatted(string value) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(int value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(long value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(float value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(double value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(decimal value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(DateTime value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(TimeSpan value, string? format = null) => CompleteDynamic(1);
+    public virtual bool AppendFormatted(bool value) => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, Html> attribute, string? expression = null) => CompleteDynamic(1);
     public virtual bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
     public virtual bool AppendFormatted(Func<Event, bool> attribute, string? expression = null) => CompleteDynamic(1);
