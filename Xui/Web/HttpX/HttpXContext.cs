@@ -56,8 +56,6 @@ public struct HttpXContext(WebSocketPipe? pipe)
             var (slotId, domEvent) = Event.ParseEvent(buffer.Span);
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
-            Console.WriteLine($"Hi there. I'm about to execute slot: {slotId}");
-
             var eventHandler = GetEventHandlerById(slotId, html);
             if (eventHandler != null)
             {
@@ -68,7 +66,6 @@ public struct HttpXContext(WebSocketPipe? pipe)
                 // TODO: Interesting consideration.  What if it's gone?  
                 // This is possible by race condition as messages pass 
                 // each other across the network.
-                Console.WriteLine("Event handler not found!");
             }
         }
     }
