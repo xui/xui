@@ -124,7 +124,7 @@ public abstract partial class UI<T> where T : IViewModel
             {
                 // TODO: Buffer might be multiple segments one day.
                 var buffer = result.Buffer.First;
-                var (slotId, domEvent) = Event.ParseEvent(buffer.Span);
+                var (slotId, domEvent) = Xui.Web.HttpX.HttpXContext.ParseEvent(buffer.Span);
                 using (this.ViewModel.Batch())
                 {
                     //composer.HandleEvent(slotId, domEvent);
