@@ -7,52 +7,28 @@ namespace Xui.Web.HttpX.Composers;
 
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
-    // Fear not, this Dictionary will not grow unbounded.  
-    // Since it's only ever called from AppendLiteral, that means the universe of
-    // possible keys is finite - only what is already compiled into the executable.
-    private static readonly Dictionary<string, int> jsInjectionIndexes = [];
-
     private bool isJsRegisterWritten = false;
     private bool suppressDynamicValues = false;
 
-    public override bool AppendLiteral(string s)
+    public override bool AppendLiteral(string literal)
     {
-        // Inject the necessary JavaScript before the end of the </body> tag.
-        if (IsFinalAppend(s))
+        if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
         {
-            if (!jsInjectionIndexes.TryGetValue(s, out int index))
-            {
-                // Avoid expensive operation?
-                index = s.IndexOf("</body>");
-                jsInjectionIndexes[s] = index;
-            }
-            if (index >= 0)
-            {
-                var beforeBody = s.AsSpan(0, index);
-                var afterBody = s.AsSpan(index, s.Length - index);
-                Writer.Inject($"{beforeBody}{JS}{afterBody}");
-
-                suppressDynamicValues = true;
-
-                CompleteStatic(s.Length);
-                return true;
-            }
-
-            return base.AppendLiteral(s);
+            return true;
         }
 
-        return base.AppendLiteral(s);
+        return base.AppendLiteral(literal);
     }
 
-    public override bool AppendFormatted(string s) => WriteDynamicValue(s);
-    public override bool AppendFormatted(int i, string? format = null) => WriteDynamicValue(i, format);
-    public override bool AppendFormatted(long l, string? format = null) => WriteDynamicValue(l, format);
-    public override bool AppendFormatted(float f, string? format = null) => WriteDynamicValue(f, format);
-    public override bool AppendFormatted(double d, string? format = null) => WriteDynamicValue(d, format);
-    public override bool AppendFormatted(decimal d, string? format = null) => WriteDynamicValue(d, format);
-    public override bool AppendFormatted(DateTime d, string? format = null) => WriteDynamicValue(d, format);
-    public override bool AppendFormatted(TimeSpan t, string? format = null) => WriteDynamicValue(t, format);
-    public override bool AppendFormatted(bool b) => WriteDynamicValue(b ? Boolean.TrueString : Boolean.FalseString);
+    public override bool AppendFormatted(string value) => WriteDynamicValue(value);
+    public override bool AppendFormatted(int value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(long value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(float value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(double value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(decimal value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(DateTime value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(TimeSpan value, string? format = null) => WriteDynamicValue(value, format);
+    public override bool AppendFormatted(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
 
     private bool WriteDynamicValue<T>(T value, ReadOnlySpan<char> format = default)
         where T : IUtf8SpanFormattable
@@ -147,47 +123,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    private bool TryAppendAsEventHandler(ReadOnlySpan<char> name)
-    {
-        // We have an unfortunate edge case to handle here.  
-        // The notation used for some attributes:
-        //   $"<input type="text" { maxlength => c } />"
-        // technically also matches the signature used for events:
-        //   $"<button { onclick => c++ }>click me</button>"
-        // Fortunately there's a simple workaround.  Since attributes
-        // only use the input param for its name, never its value 
-        // we can just key off its name and send it down a different path
-        // as if it were an event handler.
-        switch (name)
-        {
-            case "e":
-            case "ev":
-            case "evnt":
-            case "@event":
-            case "(e)":
-            case "(ev)":
-            case "(evnt)":
-            case "(@event)":
-                Writer.Inject($"""
-                    "h({Cursor},event)"
-                    """);
-
-                return true;
-        }
-
-        // All events start with on*.
-        if (name.Length >= 2 && name[0] == 'o' && name[1] == 'n')
-        {
-            Writer.Inject($"""
-                {name}="h({Cursor})"
-                """);         
-            
-            return true;
-        }
-
-        return false;
-    }
-
     public override bool AppendFormatted(Action eventHandler, string? expression = null)
     {
         var name = GetAttributeName(expression);
@@ -248,6 +183,37 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
+    private bool TryAppendAsEventHandler(ReadOnlySpan<char> name)
+    {
+        // We have an unfortunate edge case to handle here.  
+        // The notation used for some attributes:
+        //   $"<input type="text" { maxlength => c } />"
+        // technically also matches the signature used for events:
+        //   $"<button { onclick => c++ }>click me</button>"
+        // Fortunately there's a simple workaround.  Since attributes
+        // only use the input param for its name, never its value 
+        // we can just key off its name and send it down a different path
+        // as if it were an event handler.
+
+        if (IsReservedForEvent(name))
+        {
+            Writer.Inject($"""
+                "h({Cursor},event)"
+                """);
+            return true;
+        }
+
+        if (IsReservedForEventHandler(name))
+        {
+            Writer.Inject($"""
+                {name}="h({Cursor})"
+                """);         
+            return true;
+        }
+
+        return false;
+    }
+
     public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
     public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
     public override bool AppendFormatted(Html partial)
@@ -293,6 +259,35 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         """
         .Replace("\n", "")
         .Replace("  ", "");
+
+    // Fear not, this Dictionary will not grow unbounded.  
+    // Since it's only ever called from AppendLiteral, that means the universe of
+    // possible keys is finite - only what is already compiled into the executable.
+    private static readonly Dictionary<string, int> jsInjectionPoint = [];
+
+    private bool TryInjectHttpXKernel(string literal)
+    {
+        // Inject the necessary JavaScript before the end of the </body> tag.
+
+        if (!jsInjectionPoint.TryGetValue(literal, out int index))
+        {
+            // Avoid expensive operation?
+            index = literal.IndexOf("</body>");
+            jsInjectionPoint[literal] = index;
+        }
+        if (index >= 0)
+        {
+            var beforeBody = literal.AsSpan(0, index);
+            var afterBody = literal.AsSpan(index, literal.Length - index);
+            Writer.Inject($"{beforeBody}{JS}{afterBody}");
+
+            suppressDynamicValues = true;
+            CompleteStatic(literal.Length);
+            return true;
+        }
+
+        return false;
+    }
 
     private static readonly string JS = """
         <script>
