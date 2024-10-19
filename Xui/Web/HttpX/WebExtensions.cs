@@ -11,6 +11,7 @@ using System.Text;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Components.Web;
 using Xui.Web.HttpX.Composers;
+using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX;
 
@@ -69,7 +70,7 @@ public static class WebExtensions
         );
     }
 
-    public static RouteGroupBuilder MapHttpX(
+    public static RouteGroupBuilder AddEventListeners(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
         HtmlDelegate html)
@@ -88,7 +89,7 @@ public static class WebExtensions
                     using (var pipe = await WebSocketPipe.Upgrade(httpContext))
                     {
                         var httpxContext = new HttpXContext(pipe);
-                        await httpxContext.AwaitEventListeners(html, httpContext.RequestAborted);
+                        await httpxContext.ListenForEvents(html, httpContext.RequestAborted);
                     }
 
                     var logger = endpoints.ServiceProvider.GetService<ILogger>();

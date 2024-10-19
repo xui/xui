@@ -33,10 +33,9 @@ public struct HttpXContext(WebSocketPipe? pipe)
         }
     }
 
-    public async Task AwaitEventListeners(HtmlDelegate html, CancellationToken cancellationToken)
+    public async Task ListenForEvents(HtmlDelegate html, CancellationToken cancellationToken)
     {
-        if (Pipe is null)
-            return;
+        ArgumentNullException.ThrowIfNull(Pipe);
 
         await Task.WhenAll(
             Receive(html), 
