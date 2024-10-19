@@ -5,8 +5,24 @@ using Xui.Web;
 
 namespace Xui.Web.HttpX;
 
-internal static class PipeWriterExtensions
+public static class PipeWriterExtensions
 {
+    public static ValueTask<FlushResult> WriteAsync(
+        this PipeWriter writer, 
+        [InterpolatedStringHandlerArgument("writer")] ref Html html,
+        CancellationToken cancellationToken = default)
+    {
+        // When instantiating an Html object, the compiler generates 
+        // lowered code (i.e. AppendLiteral and AppendFormatted) which
+        // is where the bytes get written to the PipeWriter.
+
+        return writer.FlushAsync(cancellationToken);
+    }
+
+
+
+
+
     public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
     {
         // chunk.Write(writer);

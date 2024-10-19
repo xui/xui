@@ -55,9 +55,18 @@ public static class WebExtensions
         return endpoints.Map(
             pattern,
             async httpContext => {
-                var pipeWriter = httpContext.Response.BodyWriter;
-                pipeWriter.Write($"{requestDelegate()}");
-                await pipeWriter.FlushAsync();
+                var response = httpContext.Response;
+                if (!response.HasStarted)
+                {
+                    var startAsyncTask = response.StartAsync();
+                    if (!startAsyncTask.IsCompletedSuccessfully)
+                    {
+                        await startAsyncTask;
+                    }
+                }
+
+                var pipeWriter = response.BodyWriter;
+                await pipeWriter.WriteAsync($"{requestDelegate()}");
             }
         );
     }
@@ -70,9 +79,18 @@ public static class WebExtensions
         return endpoints.Map(
             pattern,
             async httpContext => {
-                var pipeWriter = httpContext.Response.BodyWriter;
-                pipeWriter.Write($"{requestDelegate(httpContext)}");
-                await pipeWriter.FlushAsync();
+                var response = httpContext.Response;
+                if (!response.HasStarted)
+                {
+                    var startAsyncTask = response.StartAsync();
+                    if (!startAsyncTask.IsCompletedSuccessfully)
+                    {
+                        await startAsyncTask;
+                    }
+                }
+
+                var pipeWriter = response.BodyWriter;
+                await pipeWriter.WriteAsync($"{requestDelegate(httpContext)}");
             }
         );
     }
