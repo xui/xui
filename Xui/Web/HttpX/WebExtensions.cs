@@ -19,32 +19,6 @@ public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
 
 public static class WebExtensions
 {
-    public static void AddXui(this IServiceCollection services)
-    {
-        services.AddWebSockets(options =>
-        {
-        });
-    }
-
-    // TODO: Figure out later, the clearest way to configure all the things.
-    // This will include things like static site generation too, I believe.
-    public static void AddXuiTags(this IServiceCollection services) => services.AddXui();
-    public static void AddZeroScript(this IServiceCollection services) => services.AddXui();
-
-    public static WebApplication MapUI<T>(
-        this WebApplication app,
-        [StringSyntax("Route")] string pattern,
-        UI<T> ui) where T : IViewModel
-    {
-        app.UseStaticFiles();
-        app.UseWebSockets();
-
-        var group = app.MapGroup(pattern);
-        ui.MapPages(group);
-
-        return app;
-    }
-
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
     [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
     public static IEndpointConventionBuilder MapGet(
@@ -157,6 +131,35 @@ public static class WebExtensions
             }
         );
         return group;
+    }
+
+
+
+    // Deprecated below...
+    public static void AddXui(this IServiceCollection services)
+    {
+        services.AddWebSockets(options =>
+        {
+        });
+    }
+
+    // TODO: Figure out later, the clearest way to configure all the things.
+    // This will include things like static site generation too, I believe.
+    public static void AddXuiTags(this IServiceCollection services) => services.AddXui();
+    public static void AddZeroScript(this IServiceCollection services) => services.AddXui();
+
+    public static WebApplication MapUI<T>(
+        this WebApplication app,
+        [StringSyntax("Route")] string pattern,
+        UI<T> ui) where T : IViewModel
+    {
+        app.UseStaticFiles();
+        app.UseWebSockets();
+
+        var group = app.MapGroup(pattern);
+        ui.MapPages(group);
+
+        return app;
     }
 
     public static void MapPage<T>(
