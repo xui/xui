@@ -126,8 +126,7 @@ public static class WebExtensions
 
                     var pipeWriter = httpContext.Response.BodyWriter;
                     var composer = new HttpXComposer(pipeWriter);
-                    pipeWriter.Write(composer, $"{html()}");
-                    await pipeWriter.FlushAsync();
+                    await pipeWriter.WriteAsync(composer, $"{html()}");
                 }
             }
         );
