@@ -12,6 +12,7 @@ using System.Net.WebSockets;
 using Microsoft.AspNetCore.Components.Web;
 using Xui.Web.HttpX.Composers;
 using Xui.Web.Composers;
+using System.IO.Pipelines;
 
 namespace Xui.Web.HttpX;
 
@@ -27,24 +28,7 @@ public static class WebExtensions
         [StringSyntax("Route")] string pattern, 
         HtmlDelegate requestDelegate)
     {
-        return endpoints.Map(
-            pattern,
-            async context => {
-                var response = context.Response;
-
-                if (!response.HasStarted)
-                {
-                    var startAsyncTask = response.StartAsync();
-                    if (!startAsyncTask.IsCompletedSuccessfully)
-                    {
-                        await startAsyncTask;
-                    }
-                }
-
-                var pipeWriter = response.BodyWriter;
-                await pipeWriter.WriteAsync($"{requestDelegate()}");
-            }
-        );
+        return MapGet(endpoints, pattern, ctx => requestDelegate());
     }
     
     public static IEndpointConventionBuilder MapGet(
