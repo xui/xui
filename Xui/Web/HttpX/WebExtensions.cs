@@ -108,7 +108,6 @@ public static class WebExtensions
 
                     httpContext.Response.StatusCode = 204; // No Content
                     await httpContext.Response.CompleteAsync();
-
                     await httpxContext.UpdatePath(httpContext.Request.Path);
                 }
                 else
