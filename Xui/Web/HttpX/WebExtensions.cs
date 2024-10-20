@@ -28,7 +28,7 @@ public static class WebExtensions
         [StringSyntax("Route")] string pattern, 
         HtmlDelegate requestDelegate)
     {
-        return MapGet(endpoints, pattern, ctx => requestDelegate());
+        return MapGet(endpoints, pattern, context => requestDelegate());
     }
     
     public static IEndpointConventionBuilder MapGet(
