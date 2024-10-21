@@ -8,30 +8,7 @@ namespace Xui.Web.HttpX;
 
 public static class PipeWriterExtensions
 {
-    public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
-        [InterpolatedStringHandlerArgument("writer")] ref Html html,
-        CancellationToken cancellationToken = default)
-    {
-        // When instantiating an Html object, the compiler generates 
-        // lowered code (i.e. AppendLiteral and AppendFormatted) which
-        // is where the bytes get written to the PipeWriter.
 
-        return writer.FlushAsync(cancellationToken);
-    }
-
-    public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
-        StreamingComposer composer,
-        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
-        CancellationToken cancellationToken = default)
-    {
-        // When instantiating an Html object, the compiler generates 
-        // lowered code (i.e. AppendLiteral and AppendFormatted) which
-        // is where the bytes get written to the PipeWriter.
-
-        return writer.FlushAsync(cancellationToken);
-    }
 
 
 

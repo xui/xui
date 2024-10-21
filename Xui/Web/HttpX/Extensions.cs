@@ -1,0 +1,156 @@
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Xui.Web.Composers;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.WebSockets;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http;
+using Xui.Web;
+using Microsoft.AspNetCore.Routing.Patterns;
+using Microsoft.Extensions.Logging;
+using System.Net.WebSockets;
+using Microsoft.AspNetCore.Components.Web;
+using Xui.Web.HttpX.Composers;
+
+namespace Xui.Web.HttpX;
+
+public delegate Html HtmlDelegate();
+public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
+
+public static class Extensions
+{
+    public static void Inject(
+        this IBufferWriter<byte> writer, 
+        [InterpolatedStringHandlerArgument("writer")] ref RawText text)
+    {
+    }
+
+    public static ValueTask<FlushResult> WriteAsync(
+        this PipeWriter writer, 
+        [InterpolatedStringHandlerArgument("writer")] ref Html html,
+        CancellationToken cancellationToken = default)
+    {
+        // When instantiating an Html object, the compiler generates 
+        // lowered code (i.e. AppendLiteral and AppendFormatted) which
+        // is where the bytes get written to the PipeWriter.
+
+        return writer.FlushAsync(cancellationToken);
+    }
+
+    public static ValueTask<FlushResult> WriteAsync(
+        this PipeWriter writer, 
+        StreamingComposer composer,
+        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
+        CancellationToken cancellationToken = default)
+    {
+        // When instantiating an Html object, the compiler generates 
+        // lowered code (i.e. AppendLiteral and AppendFormatted) which
+        // is where the bytes get written to the PipeWriter.
+
+        return writer.FlushAsync(cancellationToken);
+    }
+
+    [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
+    [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
+    public static IEndpointConventionBuilder MapGet(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlDelegate requestDelegate)
+    {
+        return MapGet(endpoints, pattern, context => requestDelegate());
+    }
+    
+    public static IEndpointConventionBuilder MapGet(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlHttpContextDelegate requestDelegate)
+    {
+        return endpoints.Map(
+            pattern,
+            async context => {
+                var response = context.Response;
+                if (!response.HasStarted)
+                {
+                    response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
+                    var startAsyncTask = response.StartAsync();
+                    if (!startAsyncTask.IsCompletedSuccessfully)
+                    {
+                        await startAsyncTask;
+                    }
+                }
+
+                var pipeWriter = response.BodyWriter;
+                var composer = new DefaultComposer(pipeWriter);
+                await pipeWriter.WriteAsync(composer, $"{requestDelegate(context)}");
+
+                HotSpot.Track(pattern, composer);
+            }
+        );
+    }
+
+    public static RouteGroupBuilder AddEventListeners(
+        this IEndpointRouteBuilder endpoints, 
+        [StringSyntax("Route")] string pattern, 
+        HtmlDelegate html)
+    {
+        var group = endpoints.MapGroup(pattern);
+        group.Map(
+            "/",
+            async httpContext => {
+                if (httpContext.WebSockets.IsWebSocketRequest)
+                {
+                    // --- ws:// ---
+                    // Here is the request for upgrading to a websocket connection.  
+                    // Switch protocols and await the pipe reader which receives
+                    // DOM events that have been bubbled up beyond the browser.
+
+                    using (var pipe = await WebSocketPipe.Upgrade(httpContext))
+                    {
+                        var httpxContext = new HttpXContext(pipe);
+                        await httpxContext.ListenForEvents(html, httpContext.RequestAborted);
+                    }
+
+                    var logger = endpoints.ServiceProvider.GetService<ILogger>();
+                    logger?.LogInformation("WebSocket has disconnected.");
+                }
+                else if (
+                    HttpXContext.Get(httpContext) is var httpxContext && 
+                    httpxContext.IsWebSocketOpen)
+                {
+                    // --- 204 ---
+                    // Looks like the browser already has the page AND a websocket.
+                    // Respond with a 204 - No Content which will not alter the page.
+                    // Then update the browser's route using window.history.pushState. After that, 
+                    // execute this route's code (which contains no output, only state changes)
+                    // This may or may not trigger mutations to be pushed to the browser.
+
+                    httpContext.Response.StatusCode = 204; // No Content
+                    await httpContext.Response.CompleteAsync();
+                    await httpxContext.UpdatePath(httpContext.Request.Path);
+                }
+                else
+                {
+                    // --- 200 ---
+                    // If in here, this is a "normal" GET request.
+                    // There is no websocket yet so we cannot push mutations.
+                    // Respond with an old fashioned 200 response with HTML.
+                    // Note! 200/GETs never await for external data (e.g. from a DB).
+                    // Instead, they render immediately with whatever state they have in RAM.  
+                    // Once the browser receives this HTML it will upgrade to 
+                    // bidirectional communication via websocket.  Then it will be
+                    // ready to fetch external data, mutate its UI state, and react to it
+                    // by pushing DOM mutation instructions to the browser.
+
+                    var pipeWriter = httpContext.Response.BodyWriter;
+                    var composer = new HttpXComposer(pipeWriter);
+                    await pipeWriter.WriteAsync(composer, $"{html()}");
+                }
+            }
+        );
+        return group;
+    }
+}
