@@ -267,8 +267,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private bool TryInjectHttpXKernel(string literal)
     {
-        // Inject the necessary JavaScript before the end of the </body> tag.
+        // If there are zero dynamic slots, then we can skip this.
+        if (FormattedCount <= 1)
+        {
+            suppressDynamicValues = true;
+            return false;
+        }
 
+        // Inject the necessary JavaScript before the end of the </body> tag.
         if (!jsInjectionPoint.TryGetValue(literal, out int index))
         {
             // Avoid expensive operation?

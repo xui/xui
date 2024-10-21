@@ -42,6 +42,7 @@ public static class WebExtensions
                 var response = context.Response;
                 if (!response.HasStarted)
                 {
+                    response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
                     var startAsyncTask = response.StartAsync();
                     if (!startAsyncTask.IsCompletedSuccessfully)
                     {
@@ -50,7 +51,10 @@ public static class WebExtensions
                 }
 
                 var pipeWriter = response.BodyWriter;
-                await pipeWriter.WriteAsync($"{requestDelegate(context)}");
+                var composer = new DefaultComposer(pipeWriter);
+                await pipeWriter.WriteAsync(composer, $"{requestDelegate(context)}");
+
+                HotSpot.Track(pattern, composer);
             }
         );
     }

@@ -12,6 +12,8 @@ public abstract class BaseComposer
     public static BaseComposer? Current { get => current; set => current = value; }
 
     public int Cursor { get; set; } = 0;
+    public int LiteralLength { get; set; } = 0;
+    public int FormattedCount { get; set; } = 0;
 
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
@@ -20,6 +22,9 @@ public abstract class BaseComposer
 
     public void Grow(int literalLength, int formattedCount)
     {
+        LiteralLength += literalLength;
+        FormattedCount += formattedCount;
+        
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
     }
