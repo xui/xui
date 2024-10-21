@@ -16,7 +16,7 @@ using System.IO.Pipelines;
 
 namespace Xui.Web.HttpX;
 
-public static class WebExtensions
+public static class WebExtensions2
 {
     public static void AddXui(this IServiceCollection services)
     {

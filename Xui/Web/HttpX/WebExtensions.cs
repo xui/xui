@@ -1,19 +1,11 @@
-using System.Buffers;
-using System.IO.Pipelines;
-using System.Runtime.CompilerServices;
-using System.Text;
+
 using Xui.Web.Composers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.WebSockets;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
-using Xui.Web;
-using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Logging;
-using System.Net.WebSockets;
-using Microsoft.AspNetCore.Components.Web;
 using Xui.Web.HttpX.Composers;
 
 namespace Xui.Web.HttpX;
@@ -21,39 +13,8 @@ namespace Xui.Web.HttpX;
 public delegate Html HtmlDelegate();
 public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
 
-public static class Extensions
+public static class WebExtensions
 {
-    public static void Inject(
-        this IBufferWriter<byte> writer, 
-        [InterpolatedStringHandlerArgument("writer")] ref RawText text)
-    {
-    }
-
-    public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
-        [InterpolatedStringHandlerArgument("writer")] ref Html html,
-        CancellationToken cancellationToken = default)
-    {
-        // When instantiating an Html object, the compiler generates 
-        // lowered code (i.e. AppendLiteral and AppendFormatted) which
-        // is where the bytes get written to the PipeWriter.
-
-        return writer.FlushAsync(cancellationToken);
-    }
-
-    public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
-        StreamingComposer composer,
-        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
-        CancellationToken cancellationToken = default)
-    {
-        // When instantiating an Html object, the compiler generates 
-        // lowered code (i.e. AppendLiteral and AppendFormatted) which
-        // is where the bytes get written to the PipeWriter.
-
-        return writer.FlushAsync(cancellationToken);
-    }
-
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
     [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
     public static IEndpointConventionBuilder MapGet(
