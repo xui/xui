@@ -6,7 +6,7 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public class SearchComposer(int slotId) : BaseComposer
+public class GetByIdComposer(int slotId) : BaseComposer
 {
     public int SlotId { get; init; } = slotId;
 
@@ -14,7 +14,7 @@ public class SearchComposer(int slotId) : BaseComposer
 
     public static Func<Event, Task>? GetSlot(int slotId, HtmlDelegate html)
     {
-        var composer = new SearchComposer(slotId);
+        var composer = new GetByIdComposer(slotId);
         composer.Compose($"{html()}");
         return composer.EventHandler;
     }
