@@ -12,10 +12,8 @@ public enum FormatType
     Boolean,
     DateTime,
     TimeSpan,
+    Attribute,
+    EventHandler,
     View,
     HtmlString,
-    Action,
-    ActionEvent,
-    ActionAsync,
-    ActionEventAsync,
 }
