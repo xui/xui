@@ -97,6 +97,6 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
     private readonly Func<Event, Task>? GetEventHandlerById(int slotId, HtmlDelegate html)
     {
-        return SearchComposer.GetSlot(slotId, html);
+        return GetByIdComposer.GetSlot(slotId, html);
     }
 }
