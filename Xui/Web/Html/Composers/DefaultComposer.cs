@@ -170,14 +170,8 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     protected static bool IsReservedForEvent(ReadOnlySpan<char> name) => 
         name switch
         {
-            "e" or
-            "ev" or
-            "evnt" or
-            "@event" or
-            "(e)" or
-            "(ev)" or
-            "(evnt)" or
-            "(@event)" => true,
+            "e" or "ev" or "evnt" or "@event" or 
+            "(e)" or "(ev)" or "(evnt)" or "(@event)" => true,
             _ => false
         };
 
