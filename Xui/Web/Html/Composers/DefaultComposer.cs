@@ -164,7 +164,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     // technically also matches the signature used for events:
     //   $"<button { onclick => c++ }>click me</button>"
     // Fortunately there's a simple workaround.  Since attributes
-    // only use the input param for its name, never its value 
+    // only use the input param for its name, never its value, 
     // we can just key off its name and send it down a different path
     // as if it were an event handler.
     protected static bool IsReservedForEvent(ReadOnlySpan<char> name) => 
