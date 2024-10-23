@@ -177,5 +177,5 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
     protected static bool IsReservedForEventHandler(ReadOnlySpan<char> name) => 
         // All events start with on*.
-        name.Length >= 2 && name[0] == 'o' && name[1] == 'n';
+        name.Length >= 2 && name.StartsWith("on");
 }
