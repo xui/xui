@@ -8,7 +8,7 @@ namespace Xui.Web.HttpX.Composers;
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
     private bool isJsRegisterWritten = false;
-    private bool suppressDynamicValues = false;
+    private bool suppressSentinels = false;
 
     public override bool AppendLiteral(string literal)
     {
@@ -40,7 +40,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // It should end up looking like this:
         // $"<!-- -->{value:format}<script>r('slot{id}')</script>"
 
-        if (!suppressDynamicValues)
+        if (!suppressSentinels)
         {
             Writer.Inject($"<!-- -->");
         }
@@ -49,7 +49,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        if (!suppressDynamicValues && EnsureJsRegisterIsWritten())
+        if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
             Writer.Inject($"""<script>r("slot{Cursor}")</script>""");
         }
@@ -59,7 +59,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private bool WriteDynamicValue(string value)
     {
-        if (!suppressDynamicValues)
+        if (!suppressSentinels)
         {
             Writer.Inject($"<!-- -->{value}");
         }
@@ -68,7 +68,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"{value}");
         }
 
-        if (!suppressDynamicValues && EnsureJsRegisterIsWritten())
+        if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
             Writer.Inject($"""<script>r("slot{Cursor}")</script>""");
         }
@@ -78,14 +78,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
     {
-        suppressDynamicValues = true;
+        suppressSentinels = true;
 
         var name = GetAttributeName(expression);
         Writer.Inject($"{name}=\"");
         attribute(Event.Empty);
         Writer.Inject($"\" slot{Cursor}=\"{name}\"");
 
-        suppressDynamicValues = false;
+        suppressSentinels = false;
 
         return CompleteDynamic(1);
     }
@@ -218,7 +218,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
     public override bool AppendFormatted(Html partial)
     {
-        if (!suppressDynamicValues)
+        if (!suppressSentinels)
         {
             Writer.Inject($"""
                 <script>r("slot{Cursor}")</script>
@@ -232,7 +232,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         // Set to false in case this composer instance is reused.
         isJsRegisterWritten = false;
-        suppressDynamicValues = false;
+        suppressSentinels = false;
 
         base.Clear();
     }
@@ -270,7 +270,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // If there are zero dynamic slots, then we can skip this.
         if (FormattedCount <= 1)
         {
-            suppressDynamicValues = true;
+            suppressSentinels = true;
             return false;
         }
 
@@ -287,7 +287,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             var afterBody = literal.AsSpan(index, literal.Length - index);
             Writer.Inject($"{beforeBody}{JS}{afterBody}");
 
-            suppressDynamicValues = true;
+            suppressSentinels = true;
             CompleteStatic(literal.Length);
             return true;
         }
