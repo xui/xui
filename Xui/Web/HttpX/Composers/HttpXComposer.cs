@@ -21,17 +21,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     }
 
     public override bool AppendFormatted(string value) => WriteDynamicValue(value);
-    public override bool AppendFormatted(int value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(long value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(float value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(double value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(decimal value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(DateTime value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(TimeSpan value, string? format = null) => WriteDynamicValue(value, format);
-    public override bool AppendFormatted(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
 
-    private bool WriteDynamicValue<T>(T value, ReadOnlySpan<char> format = default)
-        where T : IUtf8SpanFormattable
+    public override bool AppendFormatted<T>(T value, string? format = default)
+    // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the dynamic value with a comment tag on one side 
         // to separate it from any preceding text and a script tag 
@@ -56,6 +48,8 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         return CompleteDynamic(1);
     }
+
+    public override bool AppendFormatted(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
 
     private bool WriteDynamicValue(string value)
     {

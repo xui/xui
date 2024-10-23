@@ -42,6 +42,12 @@ public readonly ref struct Html
         composer.PrependHtml();
     }
 
+    // AppendStaticMarkup
+    // AppendDynamicValue
+    // AppendDynamicPartial
+    // AppendDynamicAttribute
+    // AppendEventHandler
+
     public readonly bool AppendLiteral(string markup) => composer.AppendLiteral(markup);
     public readonly bool AppendFormatted(string value) => composer.AppendFormatted(value);
     public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendFormatted(value, format);
@@ -53,7 +59,7 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendFormatted(value, format);
     public readonly bool AppendFormatted(Func<Event, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
-    public readonly bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : IUtf8SpanFormattable => composer.AppendFormatted(attribute, format, expression);
+    public readonly bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : struct, IUtf8SpanFormattable => composer.AppendFormatted(attribute, format, expression);
     public readonly bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) => composer.AppendFormatted(attribute, expression);
     public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);
     public readonly bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => composer.AppendFormatted(eventHandler, expression);

@@ -25,60 +25,14 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.AppendFormatted(value);
     }
 
-    public override bool AppendFormatted(int value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(long value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(float value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(double value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(decimal value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(DateTime value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(TimeSpan value, string? format = null)
-    {
-        AppendUtf8SpanFormattable(value, format);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    private void AppendUtf8SpanFormattable<T>(T value, ReadOnlySpan<char> format = default) where T : IUtf8SpanFormattable
+    public override bool AppendFormatted<T>(T value, string? format = default)
+    // where T : struct, IUtf8SpanFormattable // (from base)
     {
         Span<byte> destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
+
+        return base.AppendFormatted(value, format);
     }
 
     public override bool AppendFormatted(bool value)

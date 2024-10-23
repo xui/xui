@@ -27,7 +27,7 @@ public readonly ref struct RawText
         Encoding.UTF8.GetBytes(value, writer);
     }
 
-    public readonly void AppendFormatted<T>(T value, string? format = null) where T : IUtf8SpanFormattable
+    public readonly void AppendFormatted<T>(T value, string? format = null) where T : struct, IUtf8SpanFormattable
     {
         Span<byte> destination = writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
