@@ -42,12 +42,6 @@ public readonly ref struct Html
         composer.PrependHtml();
     }
 
-    // AppendStaticMarkup
-    // AppendDynamicValue
-    // AppendDynamicPartial
-    // AppendDynamicAttribute
-    // AppendEventHandler
-
     public readonly bool AppendLiteral(string markup) => composer.AppendLiteral(markup);
     public readonly bool AppendFormatted(string value) => composer.AppendFormatted(value);
     public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendFormatted(value, format);
