@@ -43,7 +43,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
-            Writer.Inject($"""<script>r("slot{Cursor}")</script>""");
+            Writer.Inject($"""
+                <script>r("slot{Cursor}")</script>
+                """);
         }
 
         return CompleteDynamic(1);
