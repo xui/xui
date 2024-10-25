@@ -19,82 +19,75 @@ public class GetByIdComposer(int slotId) : BaseComposer
         return composer.EventHandler;
     }
 
-    public override bool AppendFormatted(Action eventHandler, string? expression = null)
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+
+    private bool ToCommonSignatureIfMatch<T>(T eventHandler)
     {
-        if (Cursor == SlotId)
+        if (Cursor != SlotId)
         {
-            EventHandler = @event => {
-                eventHandler();
-                return Task.CompletedTask;
-            };
-            
-            base.Clear();
-            // Save time. Short circuits any following appends.
-            return false;
+            return base.CompleteDynamic(1);
         }
 
-        return base.AppendFormatted(eventHandler);
-    }
-
-    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
-    {
-        if (Cursor == SlotId)
+        EventHandler = eventHandler switch
         {
-            EventHandler = @event => {
-                eventHandler(@event);
-                return Task.CompletedTask;
-            };
-            
-            base.Clear();
-            // Save time. Short circuits any following appends.
-            return false;
-        }
+            // Example:
+            //   void OnClick()
+            //   {
+            //       Console.WriteLine($"Button was clicked");
+            //   }
+            _ when eventHandler is Action action => Map(action),
 
-        return base.AppendFormatted(eventHandler);
+            // Example:
+            //   void OnClick(Event e)
+            //   {
+            //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
+            //   }
+            _ when eventHandler is Action<Event> action => Map(action),
+
+            // Example:
+            //   async Task OnClick()
+            //   {
+            //       await Task.Delay(1000);
+            //       Console.WriteLine($"Button was clicked");
+            //   }
+            _ when eventHandler is Func<Task> func => Map(func),
+
+            // Example:
+            //   async Task OnClick(Event e)
+            //   {
+            //       await Task.Delay(1000);
+            //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
+            //   }
+            _ when eventHandler is Func<Event, Task> func => func,
+            _ => null
+        };
+
+        base.Clear();
+
+        // Found it so save some time.  Return false to
+        // short circuit any following calls to html.Append*().
+        return false;
     }
 
-    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
+    private static Func<Event, Task> Map(Action action) => e =>
     {
-        if (Cursor == SlotId)
-        {
-            EventHandler = @event => {
-                return eventHandler();
-            };
-            
-            base.Clear();
-            // Save time. Short circuits any following appends.
-            return false;
-        }
+        action();
+        return Task.CompletedTask;
+    };
 
-        return base.AppendFormatted(eventHandler);
-    }
-
-    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
+    private static Func<Event, Task> Map(Action<Event> action) => e =>
     {
-        if (Cursor == SlotId)
-        {
-            EventHandler = eventHandler;
-            
-            base.Clear();
-            // Save time. Short circuits any following appends.
-            return false;
-        }
+        action(e);
+        return Task.CompletedTask;
+    };
 
-        return base.AppendFormatted(eventHandler);
-    }
+    private static Func<Event, Task> Map(Func<Task> func) => e =>
+    {
+        return func();
+    };
 
-    // We have an unfortunate edge case to handle here.  
-    // The notation used for some attributes:
-    //   $"<input type="text" { maxlength => c } />"
-    // technically also matches the signature used for events:
-    //   $"<button { onclick => c++ }>click me</button>"
-    // Fortunately there's a simple workaround.  Since attributes
-    // only use the input param for its name, never its value 
-    // we can just key off its name and send it down a different path
-    // as if it were an event handler.
-    //
-    // AppendFormatted(@event => f(@event)) ...returns T
-    // AppendFormatted(@event => { f(@event); }) ...returns void
-    public override bool AppendFormatted<T>(Func<Event, T> f, string? format = null, string? expression = null) => AppendFormatted(e => { f(e); });
-    public override bool AppendFormatted(Func<Event, bool> f, string? expression = null) => AppendFormatted(e => { f(e); });
+    // Note: NO need to map Func<Event, Task> since it's already the proper signature.
 }

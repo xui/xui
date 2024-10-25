@@ -10,20 +10,20 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
 
-    public override bool AppendLiteral(string literal)
+    public override bool AppendStaticPartialMarkup(string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
         {
             return true;
         }
 
-        return base.AppendLiteral(literal);
+        return base.AppendStaticPartialMarkup(literal);
     }
 
-    public override bool AppendFormatted(string value) => WriteDynamicValue(value);
-
-    public override bool AppendFormatted<T>(T value, string? format = default)
-    // where T : struct, IUtf8SpanFormattable // (from base)
+    public override bool AppendDynamicValue(string value) => WriteDynamicValue(value);
+    public override bool AppendDynamicValue(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool AppendDynamicValue<T>(T value, string? format = default)
+        // where T : IUtf8SpanFormattable // (from base)
     {
         // Wraps the dynamic value with a comment tag on one side 
         // to separate it from any preceding text and a script tag 
@@ -37,7 +37,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"<!-- -->");
         }
 
-        Span<byte> destination = Writer.GetSpan();
+        var destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
@@ -51,8 +51,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
-
     private bool WriteDynamicValue(string value)
     {
         if (!suppressSentinels)
@@ -61,7 +59,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         }
         else
         {
-            Writer.Inject($"{value}");
+            Encoding.UTF8.GetBytes(value, Writer);
         }
 
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
@@ -72,148 +70,107 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue)
     {
+        base.AppendDynamicAttribute(attrName, attrValue);
+        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
+        // where T : IUtf8SpanFormattable
+    {
+        base.AppendDynamicAttribute(attrName, attrValue, format);
+        Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue)
+    {
+        // Attributes can't be wrapped like dynamic values.  So instead,
+        // they include a sentinel by its slot ID which indicates the
+        // attribute name to references.  At the end of the body, a script
+        // picks them all up and registers them in a single pass.
+        // It should end up looking like this:
+        //   <input type={ myType } slot123="type" />
+
         suppressSentinels = true;
 
-        var name = GetAttributeName(expression);
-        Writer.Inject($"{name}=\"");
-        attribute(Event.Empty);
-        Writer.Inject($"\" slot{Cursor}=\"{name}\"");
+        base.AppendDynamicAttribute(attrName, attrValue);
+        Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
 
         return CompleteDynamic(1);
     }
 
-    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null)
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler)
     {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
+        if (!argName.IsEmpty)
         {
-            return CompleteDynamic(1);
+            Writer.Inject($"{argName}=");
         }
+
+        Writer.Inject($"""
+            "h({Cursor})"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler)
+    {
+        if (!argName.IsEmpty)
+        {
+            Writer.Inject($"{argName}=");
+        }
+
+        Writer.Inject($"""
+            "h({Cursor},event)"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler)
+    {
+        if (!argName.IsEmpty)
+        {
+            Writer.Inject($"{argName}=");
+        }
+
+        Writer.Inject($"""
+            "h({Cursor})"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler)
+    {
+        if (!argName.IsEmpty)
+        {
+            Writer.Inject($"{argName}=");
+        }
+
+        Writer.Inject($"""
+            "h({Cursor},event)"
+            """);
+
+        return CompleteDynamic(1);
+    }
+
+    public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
+    public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
+    public override bool AppendDynamicElement(Html partial)
+    {
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler 
+        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         
-        var value = attribute(Event.Empty);
-        Writer.Inject($"{name}=\"{value}\" slot{Cursor}=\"{name}\"");
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Func<Event, bool> attribute, string? expression = null)
-    {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
-        {
-            return CompleteDynamic(1);
-        }
-
-        var value = attribute(Event.Empty);
-        if (value)
-        {
-            Writer.Inject($"{name}");
-        }
-
-        Writer.Inject($" slot{Cursor}=\"{name}\"");
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Action eventHandler, string? expression = null)
-    {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
-        {
-            return CompleteDynamic(1);
-        }
-
-        Writer.Inject($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
-    {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
-        {
-            return CompleteDynamic(1);
-        }
-
-        Writer.Inject($"""
-            "h({Cursor},event)"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
-    {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
-        {
-            return CompleteDynamic(1);
-        }
-
-        Writer.Inject($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
-    {
-        var name = GetAttributeName(expression);
-        if (TryAppendAsEventHandler(name))
-        {
-            return CompleteDynamic(1);
-        }
-
-        Writer.Inject($"""
-            "h({Cursor},event)"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    private bool TryAppendAsEventHandler(ReadOnlySpan<char> name)
-    {
-        // We have an unfortunate edge case to handle here.  
-        // The notation used for some attributes:
-        //   $"<input type="text" { maxlength => c } />"
-        // technically also matches the signature used for events:
-        //   $"<button { onclick => c++ }>click me</button>"
-        // Fortunately there's a simple workaround.  Since attributes
-        // only use the input param for its name, never its value, 
-        // we can just key off its name and send it down a different path
-        // as if it were an event handler.
-
-        if (IsReservedForEvent(name))
-        {
-            Writer.Inject($"""
-                "h({Cursor},event)"
-                """);
-            return true;
-        }
-
-        if (IsReservedForEventHandler(name))
-        {
-            Writer.Inject($"""
-                {name}="h({Cursor})"
-                """);         
-            return true;
-        }
-
-        return false;
-    }
-
-    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
-    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
-    public override bool AppendFormatted(Html partial)
-    {
         if (!suppressSentinels)
         {
             Writer.Inject($"""

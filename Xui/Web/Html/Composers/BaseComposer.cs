@@ -57,19 +57,23 @@ public abstract class BaseComposer
         current = null;
     }
 
-    public virtual bool AppendLiteral(string literal) => CompleteStatic(literal.Length);
-    public virtual bool AppendFormatted(string value) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<T>(T value, string? format = default) where T : struct, IUtf8SpanFormattable => CompleteDynamic(1);
-    public virtual bool AppendFormatted(bool value) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Event, Html> attribute, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null) where T : struct, IUtf8SpanFormattable => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Event, bool> attribute, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Action eventHandler, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Action<Event> eventHandler, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Task> eventHandler, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null) => CompleteDynamic(1);
-    public virtual bool AppendFormatted<TView>(TView view) where TView : IView => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Slot slot) => CompleteDynamic(1);
-    public virtual bool AppendFormatted(Html partial) => CompleteDynamic(1);
-    public virtual void PrependHtml() { }
+    public virtual bool AppendStaticPartialMarkup(string literal) => CompleteStatic(literal.Length);
+
+    public virtual bool AppendDynamicValue(string value) => CompleteDynamic(1);
+    public virtual bool AppendDynamicValue(bool value) => CompleteDynamic(1);
+    public virtual bool AppendDynamicValue<T>(T value, string? format = default) where T : struct, IUtf8SpanFormattable => CompleteDynamic(1);
+    
+    public virtual bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue) => CompleteDynamic(1);
+    public virtual bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
+    public virtual bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue) => CompleteDynamic(1);
+    
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => CompleteDynamic(1);
+    
+    public virtual bool AppendDynamicElement<TView>(TView view) where TView : IView => CompleteDynamic(1);
+    public virtual bool AppendDynamicElement(Slot slot) => CompleteDynamic(1);
+    public virtual bool AppendDynamicElement(Html partial) => CompleteDynamic(1);
+    public virtual void PrependDynamicElement() { }
 }

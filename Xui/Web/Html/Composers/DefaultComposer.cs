@@ -6,176 +6,114 @@ namespace Xui.Web.Composers;
 
 public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    public override bool AppendLiteral(string literal)
+    public override bool AppendStaticPartialMarkup(string literal)
     {
-        Span<byte> destination = Writer.GetSpan(literal.Length);
-        int length = Encoding.UTF8.GetBytes(literal, destination);
+        var destination = Writer.GetSpan(literal.Length);
+        var length = Encoding.UTF8.GetBytes(literal, destination);
         Writer.Advance(length);
 
-        return base.AppendLiteral(literal);
+        return base.AppendStaticPartialMarkup(literal);
     }
 
-    public override bool AppendFormatted(string value)
+    public override bool AppendDynamicValue(string value)
     {
         // string has no formatters (and alignment isn't helpful in HTML)
-        Span<byte> destination = Writer.GetSpan(value.Length);
-        int length = Encoding.UTF8.GetBytes(value, destination);
+        var destination = Writer.GetSpan(value.Length);
+        var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.AppendFormatted(value);
+        return base.AppendDynamicValue(value);
     }
 
-    public override bool AppendFormatted<T>(T value, string? format = default)
-    // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        Span<byte> destination = Writer.GetSpan();
-        value.TryFormat(destination, out int length, format, null);
-        Writer.Advance(length);
-
-        return base.AppendFormatted(value, format);
-    }
-
-    public override bool AppendFormatted(bool value)
+    public override bool AppendDynamicValue(bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? Boolean.TrueString : Boolean.FalseString;
-        Span<byte> destination = Writer.GetSpan(output.Length);
-        int length = Encoding.UTF8.GetBytes(output, destination);
+        var destination = Writer.GetSpan(output.Length);
+        var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.AppendFormatted(value);
+        return base.AppendDynamicValue(value);
     }
 
-    public override bool AppendFormatted(Func<Event, Html> attribute, string? expression = null)
+    public override bool AppendDynamicValue<T>(T value, string? format = default)
+        // where T : IUtf8SpanFormattable // (from base)
     {
-        var name = GetAttributeName(expression);
+        var destination = Writer.GetSpan();
+        value.TryFormat(destination, out int length, format, null);
+        Writer.Advance(length);
 
-        Encoding.UTF8.GetBytes(name, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler)
-        attribute(Event.Empty);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.AppendFormatted(attribute, expression);
+        return base.AppendDynamicValue(value, format);
     }
 
-    public override bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, string? expression = null)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue)
     {
-        var name = GetAttributeName(expression);
-        if (IsReservedForEvent(name) || IsReservedForEventHandler(name))
+        // Boolean attributes are interesting in that the DOM treats them
+        // as true regardless of what value you supply.  The only way to 
+        // evaluate a boolean attribute to false is to exclude it.
+
+        var isTrue = attrValue(Event.Empty);
+        if (isTrue)
         {
-            return base.AppendFormatted(attribute, expression);
+            Encoding.UTF8.GetBytes(attrName, Writer);
+            // Boolean attributes don't need any value.
         }
 
-        var value = attribute(Event.Empty);
+        return base.AppendDynamicAttribute(attrName, attrValue);
+    }
 
-        Encoding.UTF8.GetBytes(name, Writer);
+    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
+        // where T : IUtf8SpanFormattable
+    {
+        Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
 
-        Span<byte> destination = Writer.GetSpan();
+        var value = attrValue(Event.Empty);
+        var destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
-        return base.AppendFormatted(attribute, expression);
+        return base.AppendDynamicAttribute(attrName, attrValue, format);
     }
 
-    public override bool AppendFormatted(Func<Event, bool> attribute, string? expression = null)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue)
     {
-        var name = GetAttributeName(expression);
-        if (IsReservedForEvent(name) || IsReservedForEventHandler(name))
-        {
-            return base.AppendFormatted(attribute, expression);
-        }
+        Encoding.UTF8.GetBytes(attrName, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
 
-        var value = attribute(Event.Empty);
-
-        if (value)
-        {
-            Encoding.UTF8.GetBytes(name, Writer);
-        }
-
-        return base.AppendFormatted(attribute, expression);
-    }
-
-    public override bool AppendFormatted(Action eventHandler, string? expression = null)
-    {
-        // Nothing to write.  Possibly throw if SSG?
-        
-        return base.AppendFormatted(eventHandler, expression);
-    }
-
-    public override bool AppendFormatted(Action<Event> eventHandler, string? expression = null)
-    {
-        // Nothing to write.  Possibly throw if SSG?
-        
-        return base.AppendFormatted(eventHandler, expression);
-    }
-
-    public override bool AppendFormatted(Func<Task> eventHandler, string? expression = null)
-    {
-        // Nothing to write.  Possibly throw if SSG?
-        
-        return base.AppendFormatted(eventHandler, expression);
-    }
-
-    public override bool AppendFormatted(Func<Event, Task> eventHandler, string? expression = null)
-    {
-        // Nothing to write.  Possibly throw if SSG?
-        
-        return base.AppendFormatted(eventHandler, expression);
-    }
-
-    public override bool AppendFormatted<TView>(TView view) => AppendFormatted(view.Render());
-    public override bool AppendFormatted(Slot slot) => AppendFormatted(slot());
-
-    public override bool AppendFormatted(Html partial)
-    {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler)
-        
-        return base.AppendFormatted(partial);
+        attrValue(string.Empty);
+
+        Encoding.UTF8.GetBytes("\"", Writer);
+
+        return base.AppendDynamicAttribute(attrName, attrValue);
     }
 
-    protected static ReadOnlySpan<char> GetAttributeName(string? expression)
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => Warn();
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => Warn();
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => Warn();
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => Warn();
+    
+    private bool Warn()
     {
-        if (expression is not null && expression.Length >= 2)
-        {
-            // TODO: Make sure this doesn't allocate.
-            var end = expression.IndexOfAny([' ', '=']);
-            if (end > 0)
-            {
-                var start = expression[0] == '@' ? 1 : 0;
-                return expression.AsSpan(start, end - start);
-            }
-        }
-        return "attribute-name-unspecified";
+        Encoding.UTF8.GetBytes("console.error('Event handlers not supported for MapGet().  Use AddEventListeners() for server-side or Use MapWASM() (coming soon) for client-side.')");
+        return CompleteDynamic(1);
     }
 
-    // We have an unfortunate edge case to handle here.  
-    // The notation used for some attributes:
-    //   $"<input type="text" { maxlength => c } />"
-    // technically also matches the signature used for events:
-    //   $"<button { onclick => c++ }>click me</button>"
-    // Fortunately there's a simple workaround.  Since attributes
-    // only use the input param for its name, never its value, 
-    // we can just key off its name and send it down a different path
-    // as if it were an event handler.
-    protected static bool IsReservedForEvent(ReadOnlySpan<char> name) => 
-        name switch
-        {
-            "e" or "ev" or "evnt" or "@event" or 
-            "(e)" or "(ev)" or "(evnt)" or "(@event)" => true,
-            _ => false
-        };
+    public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
+    public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
 
-    protected static bool IsReservedForEventHandler(ReadOnlySpan<char> name) => 
-        // All events start with on*.
-        name.Length >= 2 && name.StartsWith("on");
+    public override bool AppendDynamicElement(Html partial)
+    {
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler 
+        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
+        
+        return base.AppendDynamicElement(partial);
+    }
 }
