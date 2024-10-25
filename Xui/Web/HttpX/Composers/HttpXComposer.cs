@@ -72,19 +72,19 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue)
     {
-        base.AppendDynamicAttribute(attrName, attrValue);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
-        return CompleteDynamic(1);
+        return @continue;
     }
 
     public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
         // where T : IUtf8SpanFormattable
     {
-        base.AppendDynamicAttribute(attrName, attrValue, format);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue, format);
         Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
 
-        return CompleteDynamic(1);
+        return @continue;
     }
 
     public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue)
@@ -98,12 +98,12 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
-        base.AppendDynamicAttribute(attrName, attrValue);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue);
         Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
 
-        return CompleteDynamic(1);
+        return @continue;
     }
 
     public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler)
