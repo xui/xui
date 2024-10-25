@@ -125,11 +125,16 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!argName.IsEmpty)
         {
             Writer.Inject($"{argName}=");
+            Writer.Inject($"""
+                "h({Cursor})"
+                """);
         }
-
-        Writer.Inject($"""
-            "h({Cursor},event)"
-            """);
+        else
+        {
+            Writer.Inject($"""
+                "h({Cursor},event)"
+                """);
+        }
 
         return CompleteDynamic(1);
     }
@@ -153,11 +158,16 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!argName.IsEmpty)
         {
             Writer.Inject($"{argName}=");
+            Writer.Inject($"""
+                "h({Cursor})"
+                """);
         }
-
-        Writer.Inject($"""
-            "h({Cursor},event)"
-            """);
+        else
+        {
+            Writer.Inject($"""
+                "h({Cursor},event)"
+                """);
+        }
 
         return CompleteDynamic(1);
     }
