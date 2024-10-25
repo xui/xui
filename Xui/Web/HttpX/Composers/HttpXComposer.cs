@@ -82,7 +82,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // where T : IUtf8SpanFormattable
     {
         var @continue = base.AppendDynamicAttribute(attrName, attrValue, format);
-        Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
+        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
@@ -99,7 +99,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         suppressSentinels = true;
 
         var @continue = base.AppendDynamicAttribute(attrName, attrValue);
-        Writer.Inject($"\" slot{Cursor}=\"{attrName}\"");
+        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
 
