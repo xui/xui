@@ -19,6 +19,10 @@ public class GetByIdComposer(int slotId) : BaseComposer
         return composer.EventHandler;
     }
 
+    public override bool AppendEventHandler(Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Func<Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
     public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
     public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
     public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);

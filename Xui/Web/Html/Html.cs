@@ -83,21 +83,28 @@ public readonly ref struct Html
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(string.Empty, eventHandler);
+        => composer.AppendEventHandler(eventHandler);
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(GetArgName(expression), eventHandler);
+        => AppendEventHandler(GetArgName(expression), eventHandler);
     
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(string.Empty, eventHandler);
+        => composer.AppendEventHandler(eventHandler);
     
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(string.Empty, eventHandler);
+        => composer.AppendEventHandler(eventHandler);
     
+    private readonly bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler)
+        => argName switch
+        {
+            "" => composer.AppendEventHandler(eventHandler),
+            _ => composer.AppendEventHandler(argName, eventHandler),
+        };
+
     
     // DYNAMIC ELEMENTS
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
@@ -119,24 +126,24 @@ public readonly ref struct Html
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
                 => composer.AppendEventHandler(
-                        string.Empty, 
+                        // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
                         e => { func(e); } // make it return void
                     ),
             _ when argName.StartsWith("on")
                 => composer.AppendEventHandler(
-                        argName, 
+                        argName, // Writer is responsible for writing the attribute name (e.g. onclick)
                         () => { func(Event.Empty); } // make it return void
                     ),
             _ when func is Func<Event, bool> funcBool
                 => composer.AppendDynamicAttribute(
-                        attrName: argName, 
+                        attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcBool // returns bool
                     ),
             _ when funcUtf8 is not null 
                 => composer.AppendDynamicAttribute(
-                        attrName: argName, 
+                        attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
-                        format: format
+                        format: format // All primitives except string and bool are utf8-formattable
                     ),
             _ => throw new InvalidOperationException("Html does not support this type."),
         };

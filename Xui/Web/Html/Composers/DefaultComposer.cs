@@ -93,27 +93,26 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.AppendDynamicAttribute(attrName, attrValue);
     }
 
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => HandleNotSupported(argName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => HandleNotSupported(argName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => HandleNotSupported(argName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => HandleNotSupported(argName);
+    public override bool AppendEventHandler(Action eventHandler) => HandleNotSupported();
+    public override bool AppendEventHandler(Action<Event> eventHandler) => HandleNotSupported();
+    public override bool AppendEventHandler(Func<Task> eventHandler) => HandleNotSupported();
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => HandleNotSupported();
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler) => HandleNotSupported(attributeName);
     
-    private bool HandleNotSupported(ReadOnlySpan<char> argName)
+    private bool HandleNotSupported()
     {
-        if (!argName.IsEmpty)
-        {
-            Encoding.UTF8.GetBytes(argName, Writer);
-            Encoding.UTF8.GetBytes("""
-                =""
-                """, Writer);
-        }
-        else
-        {
-            Encoding.UTF8.GetBytes("""
-                ""
-                """, Writer);
-        }
+        // attributeName is already written at the end of the prior string literal (e.g. <button onclick=)
+        Encoding.UTF8.GetBytes("\"\"", Writer);
+        return CompleteDynamic(1);
+    }
 
+    private bool HandleNotSupported(ReadOnlySpan<char> attributeName)
+    {
+        Encoding.UTF8.GetBytes(attributeName, Writer);
+        Encoding.UTF8.GetBytes("=\"\"", Writer);
         return CompleteDynamic(1);
     }
 

@@ -106,69 +106,40 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler)
+    public override bool AppendEventHandler(Action eventHandler) => AppendEventHandler(includeEventArg: false);
+    public override bool AppendEventHandler(Action<Event> eventHandler) => AppendEventHandler(includeEventArg: true);
+    public override bool AppendEventHandler(Func<Task> eventHandler) => AppendEventHandler(includeEventArg: false);
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => AppendEventHandler(includeEventArg: true);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler) => AppendEventHandler(attributeName);
+    private bool AppendEventHandler(bool includeEventArg)
     {
-        if (!argName.IsEmpty)
-        {
-            Writer.Inject($"{argName}=");
-        }
-
-        Writer.Inject($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler)
-    {
-        if (!argName.IsEmpty)
-        {
-            Writer.Inject($"{argName}=");
-            Writer.Inject($"""
-                "h({Cursor})"
-                """);
-        }
-        else
+        if (includeEventArg)
         {
             Writer.Inject($"""
                 "h({Cursor},event)"
                 """);
         }
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler)
-    {
-        if (!argName.IsEmpty)
+        else
         {
-            Writer.Inject($"{argName}=");
-        }
-
-        Writer.Inject($"""
-            "h({Cursor})"
-            """);
-
-        return CompleteDynamic(1);
-    }
-
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler)
-    {
-        if (!argName.IsEmpty)
-        {
-            Writer.Inject($"{argName}=");
             Writer.Inject($"""
                 "h({Cursor})"
                 """);
         }
-        else
-        {
-            Writer.Inject($"""
-                "h({Cursor},event)"
-                """);
-        }
-
+        return CompleteDynamic(1);
+    }
+    private bool AppendEventHandler(ReadOnlySpan<char> includedAttributeName)
+    {
+        Writer.Inject($"{includedAttributeName}=");
+        Writer.Inject($"""
+            "h({Cursor})"
+            """);
+        // Note: When the attribute name is included as a part of the expression 
+        // (e.g. $"<button { onclick => c++ }>Click me</button>")
+        // then there's never a way to ALSO pass the event arg into the method signature.
+        // For that, you'd need $"<button onclick={ e => c++ }Click me</button>">
         return CompleteDynamic(1);
     }
 
