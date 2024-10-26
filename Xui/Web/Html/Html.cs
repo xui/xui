@@ -1,7 +1,6 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using Xui.Web.Composers;
 
 namespace Xui.Web;
@@ -67,13 +66,13 @@ public readonly ref struct Html
     // or (ambiguous): <button { onclick => isDisabled = !isDisabled }>Click me</button>
     // or (ambiguous): <button onclick={ e => isDisabled = !isDisabled }>Click me</button>
     public readonly bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => AppendAmbiguous(GetArgName(expression), attribute);
+        => AppendAmbiguous<bool, int>(GetArgName(expression), attribute);
     
     // Ex (primary):   <input type="text" { maxlength => c } />
     // or (ambiguous): <button { onclick => c++ }>Click me</button>
     // or (ambiguous): <button onclick={ e => c++ }>Click me</button>
     public readonly bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : struct, IUtf8SpanFormattable 
-        => AppendAmbiguous<T>(GetArgName(expression), attribute, format);
+        => AppendAmbiguous(GetArgName(expression), attribute, attribute, format);
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
@@ -109,45 +108,37 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(Html html) => composer.AppendDynamicElement(html);
 
 
-    private bool AppendAmbiguous<T>(ReadOnlySpan<char> argName, Func<Event, T> func, string? format = null) where T : IUtf8SpanFormattable
+    private bool AppendAmbiguous<T, Utf8>(
+        ReadOnlySpan<char> argName, 
+        Func<Event, T> func, 
+        Func<Event, Utf8>? funcUtf8 = null, 
+        string? format = null)
+            where Utf8 : IUtf8SpanFormattable
         => argName switch
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-                =>  composer.AppendEventHandler(
+                => composer.AppendEventHandler(
                         string.Empty, 
                         e => { func(e); } // make it return void
                     ),
             _ when argName.StartsWith("on")
-                =>  composer.AppendEventHandler(
+                => composer.AppendEventHandler(
                         argName, 
                         () => { func(Event.Empty); } // make it return void
                     ),
-            _   =>  composer.AppendDynamicAttribute(
+            _ when func is Func<Event, bool> funcBool
+                => composer.AppendDynamicAttribute(
                         attrName: argName, 
-                        attrValue: func, // returns int, long, float, double, etc
+                        attrValue: funcBool // returns bool
+                    ),
+            _ when funcUtf8 is not null 
+                => composer.AppendDynamicAttribute(
+                        attrName: argName, 
+                        attrValue: funcUtf8, // returns int, long, float, double, etc
                         format: format
                     ),
-        };
-
-    private bool AppendAmbiguous(ReadOnlySpan<char> argName, Func<Event, bool> func, string? format = null)
-        => argName switch
-        {
-            "e" or "ev" or "evnt" or "@event" or 
-            "(e)" or "(ev)" or "(evnt)" or "(@event)"
-                =>  composer.AppendEventHandler(
-                        string.Empty, 
-                        e => { func(e); } // make it return void
-                    ),
-            _ when argName.StartsWith("on")
-                =>  composer.AppendEventHandler(
-                        argName, 
-                        () => { func(Event.Empty); } // make it return void
-                    ),
-            _   =>  composer.AppendDynamicAttribute(
-                        attrName: argName, 
-                        attrValue: func // returns bool
-                    ),
+            _ => throw new InvalidOperationException("Html does not support this type."),
         };
 
     private static ReadOnlySpan<char> GetArgName(ReadOnlySpan<char> expression)
