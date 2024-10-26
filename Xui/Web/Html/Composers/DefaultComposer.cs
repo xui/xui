@@ -93,14 +93,27 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.AppendDynamicAttribute(attrName, attrValue);
     }
 
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => Warn();
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => Warn();
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => Warn();
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => Warn();
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => HandleNotSupported(argName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => HandleNotSupported(argName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => HandleNotSupported(argName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => HandleNotSupported(argName);
     
-    private bool Warn()
+    private bool HandleNotSupported(ReadOnlySpan<char> argName)
     {
-        Encoding.UTF8.GetBytes("console.error('Event handlers not supported for MapGet().  Use AddEventListeners() for server-side or Use MapWASM() (coming soon) for client-side.')");
+        if (!argName.IsEmpty)
+        {
+            Encoding.UTF8.GetBytes(argName, Writer);
+            Encoding.UTF8.GetBytes("""
+                =""
+                """, Writer);
+        }
+        else
+        {
+            Encoding.UTF8.GetBytes("""
+                ""
+                """, Writer);
+        }
+
         return CompleteDynamic(1);
     }
 
