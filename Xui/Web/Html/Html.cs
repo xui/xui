@@ -120,7 +120,7 @@ public readonly ref struct Html
         Func<Event, T> func, 
         Func<Event, Utf8>? funcUtf8 = null, 
         string? format = null)
-            where Utf8 : IUtf8SpanFormattable
+            where Utf8 : struct, IUtf8SpanFormattable
         => argName switch
         {
             "e" or "ev" or "evnt" or "@event" or 

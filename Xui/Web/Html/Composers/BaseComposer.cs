@@ -64,7 +64,7 @@ public abstract class BaseComposer
     public virtual bool AppendDynamicValue<T>(T value, string? format = default) where T : struct, IUtf8SpanFormattable => CompleteDynamic(1);
     
     public virtual bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue) => CompleteDynamic(1);
-    public virtual bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
+    public virtual bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteDynamic(1);
     public virtual bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue) => CompleteDynamic(1);
     
     public virtual bool AppendEventHandler(Action eventHandler) => CompleteDynamic(1);
