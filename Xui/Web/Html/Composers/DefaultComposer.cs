@@ -37,7 +37,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     }
 
     public override bool AppendDynamicValue<T>(T value, string? format = default)
-        // where T : IUtf8SpanFormattable // (from base)
+        // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
@@ -63,7 +63,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     }
 
     public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
-        // where T : IUtf8SpanFormattable
+        // where T : struct, IUtf8SpanFormattable
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);

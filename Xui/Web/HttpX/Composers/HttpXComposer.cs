@@ -23,7 +23,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool AppendDynamicValue(string value) => WriteDynamicValue(value);
     public override bool AppendDynamicValue(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
     public override bool AppendDynamicValue<T>(T value, string? format = default)
-        // where T : IUtf8SpanFormattable // (from base)
+        // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the dynamic value with a comment tag on one side 
         // to separate it from any preceding text and a script tag 
@@ -79,7 +79,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     }
 
     public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
-        // where T : IUtf8SpanFormattable
+        // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.AppendDynamicAttribute(attrName, attrValue, format);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
