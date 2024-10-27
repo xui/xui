@@ -67,10 +67,14 @@ public abstract class BaseComposer
     public virtual bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null) where T : IUtf8SpanFormattable => CompleteDynamic(1);
     public virtual bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue) => CompleteDynamic(1);
     
-    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => CompleteDynamic(1);
-    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => CompleteDynamic(1);
-    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => CompleteDynamic(1);
-    public virtual bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(Action eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(Action<Event> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(Func<Task> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(Func<Event, Task> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler) => CompleteDynamic(1);
+    public virtual bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler) => CompleteDynamic(1);
     
     public virtual bool AppendDynamicElement<TView>(TView view) where TView : IView => CompleteDynamic(1);
     public virtual bool AppendDynamicElement(Slot slot) => CompleteDynamic(1);
