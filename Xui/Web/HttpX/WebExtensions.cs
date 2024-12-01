@@ -10,9 +10,6 @@ using Xui.Web.HttpX.Composers;
 
 namespace Xui.Web.HttpX;
 
-public delegate Html HtmlDelegate();
-public delegate Html HtmlHttpContextDelegate(HttpContext httpContext);
-
 public static class WebExtensions
 {
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
@@ -20,7 +17,7 @@ public static class WebExtensions
     public static IEndpointConventionBuilder MapGet(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
-        HtmlDelegate requestDelegate)
+        Func<Html> requestDelegate)
     {
         return MapGet(endpoints, pattern, context => requestDelegate());
     }
@@ -28,7 +25,7 @@ public static class WebExtensions
     public static IEndpointConventionBuilder MapGet(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
-        HtmlHttpContextDelegate requestDelegate)
+        Func<HttpContext, Html> requestDelegate)
     {
         return endpoints.Map(
             pattern,
@@ -56,7 +53,7 @@ public static class WebExtensions
     public static RouteGroupBuilder AddEventListeners(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
-        HtmlDelegate html)
+        Func<Html> html)
     {
         var group = endpoints.MapGroup(pattern);
         group.Map(

@@ -33,7 +33,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
         }
     }
 
-    public async Task ListenForEvents(HtmlDelegate html, CancellationToken cancellationToken)
+    public async Task ListenForEvents(Func<Html> html, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(Pipe);
 
@@ -43,7 +43,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
         );
     }
 
-    private async Task Receive(HtmlDelegate html)
+    private async Task Receive(Func<Html> html)
     {
         if (Pipe is null)
             return;
@@ -95,7 +95,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
     }
 
 
-    private readonly Func<Event, Task>? GetEventHandlerById(int slotId, HtmlDelegate html)
+    private readonly Func<Event, Task>? GetEventHandlerById(int slotId, Func<Html> html)
     {
         return GetByIdComposer.GetSlot(slotId, html);
     }

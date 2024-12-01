@@ -12,7 +12,7 @@ public class GetByIdComposer(int slotId) : BaseComposer
 
     public Func<Event, Task>? EventHandler { get; set; } = null;
 
-    public static Func<Event, Task>? GetSlot(int slotId, HtmlDelegate html)
+    public static Func<Event, Task>? GetSlot(int slotId, Func<Html> html)
     {
         var composer = new GetByIdComposer(slotId);
         composer.Compose($"{html()}");
