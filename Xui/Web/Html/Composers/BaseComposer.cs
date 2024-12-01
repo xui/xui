@@ -79,5 +79,5 @@ public abstract class BaseComposer
     public virtual bool AppendDynamicElement<TView>(TView view) where TView : IView => CompleteDynamic(1);
     public virtual bool AppendDynamicElement(Slot slot) => CompleteDynamic(1);
     public virtual bool AppendDynamicElement(Html partial) => CompleteDynamic(1);
-    public virtual void PrependDynamicElement() { }
+    public virtual void PrepareHtml(int literalLength, int formattedCount) { }
 }
