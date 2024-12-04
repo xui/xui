@@ -8,7 +8,7 @@ namespace Xui.Web.HttpX.Composers;
 
 public static class GetByIdComposerExtensions
 {
-    public static Func<Event, Task>? GetElementById(this Func<Html> html, int slotId)
+    public static Func<Event, Task>? GetSlotById(this Func<Html> html, int slotId)
     {
         var composer = new GetByIdComposer(slotId);
         composer.Compose($"{html()}");

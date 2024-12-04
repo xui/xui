@@ -56,6 +56,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
             if (html.GetElementById(slotId) is Func<Event, Task> eventHandler)
+            if (html.GetSlotById(slotId) is Func<Event, Task> eventHandler)
             {
                 EventPump.Enqueue(eventHandler, domEvent);
             }
