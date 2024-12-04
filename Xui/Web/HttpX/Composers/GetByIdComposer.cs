@@ -6,18 +6,21 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public class GetByIdComposer(int slotId) : BaseComposer
+public static class GetByIdComposerExtensions
 {
-    public int SlotId { get; init; } = slotId;
-
-    public Func<Event, Task>? EventHandler { get; set; } = null;
-
-    public static Func<Event, Task>? GetSlot(int slotId, Func<Html> html)
+    public static Func<Event, Task>? GetElementById(this Func<Html> html, int slotId)
     {
         var composer = new GetByIdComposer(slotId);
         composer.Compose($"{html()}");
         return composer.EventHandler;
     }
+}
+
+public class GetByIdComposer(int slotId) : BaseComposer
+{
+    public int SlotId { get; init; } = slotId;
+
+    public Func<Event, Task>? EventHandler { get; set; } = null;
 
     public override bool AppendEventHandler(Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
     public override bool AppendEventHandler(Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);

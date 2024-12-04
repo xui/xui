@@ -55,8 +55,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
             var (slotId, domEvent) = ParseEvent(buffer.Span);
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
-            var eventHandler = GetEventHandlerById(slotId, html);
-            if (eventHandler != null)
+            if (html.GetElementById(slotId) is Func<Event, Task> eventHandler)
             {
                 EventPump.Enqueue(eventHandler, domEvent);
             }
@@ -92,11 +91,5 @@ public struct HttpXContext(WebSocketPipe? pipe)
             var @event = JsonSerializer.Deserialize<Event>(message);
             return (slot, @event);
         }
-    }
-
-
-    private readonly Func<Event, Task>? GetEventHandlerById(int slotId, Func<Html> html)
-    {
-        return GetByIdComposer.GetSlot(slotId, html);
     }
 }
