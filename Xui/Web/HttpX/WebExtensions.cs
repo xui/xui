@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Xui.Web.HttpX.Composers;
+using System.IO.Pipelines;
 
 namespace Xui.Web.HttpX;
 
@@ -104,8 +105,7 @@ public static class WebExtensions
                     // by pushing DOM mutation instructions to the browser.
 
                     var pipeWriter = httpContext.Response.BodyWriter;
-                    var composer = new HttpXComposer(pipeWriter);
-                    await pipeWriter.WriteAsync(composer, $"{html()}");
+                    await html.WriteAsync(pipeWriter, sentinels: true);
                 }
             }
         );
