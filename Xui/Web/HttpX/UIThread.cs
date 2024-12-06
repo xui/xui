@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace Xui.Web.HttpX;
 
-static class EventPump
+static class UIThread
 {
     private static readonly ConcurrentQueue<Action> queue = [];
 
