@@ -249,6 +249,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private static readonly string JS = """
         <script>
+            var app=app??{};
             for (let k in app) {
                 let n = app[k];
                 if (n.nodeType == 8) {
