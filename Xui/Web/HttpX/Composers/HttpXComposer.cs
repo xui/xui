@@ -202,9 +202,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private static readonly string JS_REGISTER = """
         <script>
-            app={};
+            ui={};
             function r(k) {
-                app[k]=document.currentScript.previousSibling;
+                ui[k]=document.currentScript.previousSibling;
             }
             r('slot0');
         </script>
