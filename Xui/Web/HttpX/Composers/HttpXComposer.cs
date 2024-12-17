@@ -249,19 +249,19 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private static readonly string JS = """
         <script>
-            var app=app??{};
-            for (let k in app) {
-                let n = app[k];
+            var ui=ui??{};
+            for (let k in ui) {
+                let n = ui[k];
                 if (n.nodeType == 8) {
                     let t = document.createTextNode("");
                     n.parentNode.insertBefore(t, n.nextSibling);
-                    app[k]=t;
+                    ui[k]=t;
                 }
             }
             var attrs = document.evaluate('//*/attribute::*[starts-with(name(), "slot")]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
             for (i=0;i<attrs.snapshotLength;i++) {
                 let a=attrs.snapshotItem(i);
-                app[a.name]=a;
+                ui[a.name]=a;
             }
 
             function h(id,ev) {
