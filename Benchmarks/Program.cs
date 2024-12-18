@@ -13,8 +13,10 @@ public class Tests
 {
     Pipe pipe = new();
     DefaultComposer composer = new(null);
+    NoOpComposer noOpComposer = new(null);
     string name = "Rylan";
     int c = 3;
+    State<int> cState = 3.AsState();
 
     [Benchmark]
     public void Baseline()
@@ -32,7 +34,45 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task Small()
+    public async Task PlaceboComposer()
+    {
+        pipe.Writer.Write(noOpComposer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public async Task PlaceboComposerWithState()
+    {
+        pipe.Writer.Write(noOpComposer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {cState}
+                    </button>
+                </body>
+            </html>
+            """);
+
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public async Task DefaultComposer()
     {
         pipe.Writer.Write(composer, $"""
             <html>
@@ -40,6 +80,25 @@ public class Tests
                     Hello {name}
                     <button>
                         Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public async Task DefaultComposerWithState()
+    {
+        pipe.Writer.Write(composer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {cState}
                     </button>
                 </body>
             </html>
