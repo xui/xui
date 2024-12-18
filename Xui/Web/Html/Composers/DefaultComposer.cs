@@ -46,7 +46,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.AppendDynamicValue(value, format);
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         // Boolean attributes are interesting in that the DOM treats them
         // as true regardless of what value you supply.  The only way to 
@@ -59,10 +59,10 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
             // Boolean attributes don't need any value.
         }
 
-        return base.AppendDynamicAttribute(attrName, attrValue);
+        return base.AppendDynamicAttribute(attrName, attrValue, expression);
     }
 
-    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
+    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
@@ -75,10 +75,10 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
-        return base.AppendDynamicAttribute(attrName, attrValue, format);
+        return base.AppendDynamicAttribute(attrName, attrValue, format, expression);
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
@@ -90,17 +90,17 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
-        return base.AppendDynamicAttribute(attrName, attrValue);
+        return base.AppendDynamicAttribute(attrName, attrValue, expression);
     }
 
-    public override bool AppendEventHandler(Action eventHandler) => HandleNotSupported();
-    public override bool AppendEventHandler(Action<Event> eventHandler) => HandleNotSupported();
-    public override bool AppendEventHandler(Func<Task> eventHandler) => HandleNotSupported();
-    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => HandleNotSupported();
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler) => HandleNotSupported(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler) => HandleNotSupported(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler) => HandleNotSupported(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(Action eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool AppendEventHandler(Action<Event> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool AppendEventHandler(Func<Task> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
     
     private bool HandleNotSupported()
     {
@@ -119,13 +119,13 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
     public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
 
-    public override bool AppendDynamicElement(Html partial)
+    public override bool AppendDynamicElement(Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler 
         // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         
-        return base.AppendDynamicElement(partial);
+        return base.AppendDynamicElement(partial, expression);
     }
 }

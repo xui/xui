@@ -88,24 +88,24 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteDynamic(1);
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null)
+    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue, format);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue, format, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue)
+    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // Attributes can't be wrapped like dynamic values.  So instead,
         // they include a sentinel by its slot ID which indicates the
@@ -116,7 +116,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue);
+        var @continue = base.AppendDynamicAttribute(attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
@@ -124,14 +124,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool AppendEventHandler(Action eventHandler) => AppendEventHandler(includeEventArg: false);
-    public override bool AppendEventHandler(Action<Event> eventHandler) => AppendEventHandler(includeEventArg: true);
-    public override bool AppendEventHandler(Func<Task> eventHandler) => AppendEventHandler(includeEventArg: false);
-    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => AppendEventHandler(includeEventArg: true);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler) => AppendEventHandler(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler) => AppendEventHandler(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler) => AppendEventHandler(attributeName);
-    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(Action eventHandler, string? expression = null) => AppendEventHandler(includeEventArg: false);
+    public override bool AppendEventHandler(Action<Event> eventHandler, string? expression = null) => AppendEventHandler(includeEventArg: true);
+    public override bool AppendEventHandler(Func<Task> eventHandler, string? expression = null) => AppendEventHandler(includeEventArg: false);
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler, string? expression = null) => AppendEventHandler(includeEventArg: true);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => AppendEventHandler(attributeName);
+    public override bool AppendEventHandler(ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => AppendEventHandler(attributeName);
     private bool AppendEventHandler(bool includeEventArg)
     {
         if (includeEventArg)
@@ -163,7 +163,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
     public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
-    public override bool AppendDynamicElement(Html partial)
+    public override bool AppendDynamicElement(Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.

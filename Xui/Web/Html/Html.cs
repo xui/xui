@@ -47,7 +47,7 @@ public readonly ref struct Html
     public readonly bool AppendLiteral(string literal) => composer.AppendStaticPartialMarkup(literal);
 
 
-    // DYNAMIC VALUES
+    // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
     public readonly bool AppendFormatted(string value) => composer.AppendDynamicValue(value);
     public readonly bool AppendFormatted(bool value) => composer.AppendDynamicValue(value);
@@ -60,66 +60,73 @@ public readonly ref struct Html
     public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendDynamicValue(value, format);
 
 
-    // DYNAMIC ATTRIBUTES
+    // MUTABLE ATTRIBUTES
 
     // Ex (primary):   <input type="text" { disabled => isDisabled } />
     // or (ambiguous): <button { onclick => isDisabled = !isDisabled }>Click me</button>
     // or (ambiguous): <button onclick={ e => isDisabled = !isDisabled }>Click me</button>
     public readonly bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => AppendAmbiguous<bool, int>(GetArgName(expression), attribute);
+        => AppendAmbiguous<bool, int>(GetArgName(expression), attribute, format: null, expression: expression);
     
     // Ex (primary):   <input type="text" { maxlength => c } />
     // or (ambiguous): <button { onclick => c++ }>Click me</button>
     // or (ambiguous): <button onclick={ e => c++ }>Click me</button>
     public readonly bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : struct, IUtf8SpanFormattable 
-        => AppendAmbiguous(GetArgName(expression), attribute, attribute, format);
+        => AppendAmbiguous(GetArgName(expression), attribute, attribute, format: format, expression: expression);
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => composer.AppendDynamicAttribute(GetArgName(expression), attribute);
+        => composer.AppendDynamicAttribute(GetArgName(expression), attribute, expression);
     
 
     // EVENT HANDLERS
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler);
+        => composer.AppendEventHandler(eventHandler, expression);
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => AppendEventHandler(GetArgName(expression), eventHandler);
+        => AppendEventHandler(GetArgName(expression), eventHandler, expression);
     
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler);
+        => composer.AppendEventHandler(eventHandler, expression);
     
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler);
+        => composer.AppendEventHandler(eventHandler, expression);
     
-    private readonly bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler)
+    private readonly bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null)
         => argName switch
         {
-            "" => composer.AppendEventHandler(eventHandler),
-            _ => composer.AppendEventHandler(argName, eventHandler),
+            "e" or "ev" or "evnt" or "@event" or 
+            "(e)" or "(ev)" or "(evnt)" or "(@event)"
+               => composer.AppendEventHandler(eventHandler, expression),
+            "" => composer.AppendEventHandler(eventHandler, expression),
+            _  => composer.AppendEventHandler(argName, eventHandler, expression),
         };
 
     
-    // DYNAMIC ELEMENTS
+    // MUTABLE ELEMENTS
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public readonly bool AppendFormatted<TView>(TView view) where TView : IView => composer.AppendDynamicElement(view.Render());
+    public readonly bool AppendFormatted<TView>(TView view) where TView : IView 
+        => composer.AppendDynamicElement(view.Render());
     // EX: <div>{ MyComponent(content: () => $"<h1>Hello world</h1>")) }</div>
-    public readonly bool AppendFormatted(Slot slot) => composer.AppendDynamicElement(slot());
+    public readonly bool AppendFormatted(Slot slot) 
+        => composer.AppendDynamicElement(slot());
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public readonly bool AppendFormatted(Html html) => composer.AppendDynamicElement(html);
+    public readonly bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null) 
+        => composer.AppendDynamicElement(html, expression);
 
 
     private bool AppendAmbiguous<T, Utf8>(
         ReadOnlySpan<char> argName, 
         Func<Event, T> func, 
         Func<Event, Utf8>? funcUtf8 = null, 
-        string? format = null)
+        string? format = null,
+        string? expression = null)
             where Utf8 : struct, IUtf8SpanFormattable
         => argName switch
         {
@@ -127,23 +134,27 @@ public readonly ref struct Html
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
                 => composer.AppendEventHandler(
                         // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
-                        e => { func(e); } // make it return void
+                        e => { func(e); }, // make it return void
+                        expression: expression
                     ),
             _ when argName.StartsWith("on")
                 => composer.AppendEventHandler(
                         argName, // Writer is responsible for writing the attribute name (e.g. onclick)
-                        () => { func(Event.Empty); } // make it return void
+                        () => { func(Event.Empty); }, // make it return void
+                        expression: expression
                     ),
             _ when func is Func<Event, bool> funcBool
                 => composer.AppendDynamicAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
-                        attrValue: funcBool // returns bool
+                        attrValue: funcBool, // returns bool
+                        expression: expression
                     ),
             _ when funcUtf8 is not null 
                 => composer.AppendDynamicAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
-                        format: format // All primitives except string and bool are utf8-formattable
+                        format: format, // All primitives except string and bool are utf8-formattable
+                        expression: expression
                     ),
             _ => throw new InvalidOperationException("Html does not support this type."),
         };

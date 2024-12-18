@@ -8,7 +8,7 @@ namespace Xui.Web.HttpX.Composers;
 
 public static class GetByIdComposerExtensions
 {
-    public static Func<Event, Task>? GetSlotById(this Func<Html> html, int slotId)
+    public static Func<Event?, Task>? GetSlotById(this Func<Html> html, int slotId)
     {
         var composer = new GetByIdComposer(slotId);
         composer.Compose($"{html()}");
@@ -20,16 +20,16 @@ public class GetByIdComposer(int slotId) : BaseComposer
 {
     public int SlotId { get; init; } = slotId;
 
-    public Func<Event, Task>? EventHandler { get; set; } = null;
+    public Func<Event?, Task>? EventHandler { get; set; } = null;
 
-    public override bool AppendEventHandler(Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Func<Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Func<Event, Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
 
     private bool ToCommonSignatureIfMatch<T>(T eventHandler)
     {
@@ -68,7 +68,7 @@ public class GetByIdComposer(int slotId) : BaseComposer
             //       await Task.Delay(1000);
             //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
             //   }
-            _ when eventHandler is Func<Event, Task> func => func,
+            _ when eventHandler is Func<Event, Task> func => Map(func),
             _ => null
         };
 
@@ -79,22 +79,25 @@ public class GetByIdComposer(int slotId) : BaseComposer
         return false;
     }
 
-    private static Func<Event, Task> Map(Action action) => e =>
+    private static Func<Event?, Task> Map(Action action) => e =>
     {
         action();
         return Task.CompletedTask;
     };
 
-    private static Func<Event, Task> Map(Action<Event> action) => e =>
+    private static Func<Event?, Task> Map(Action<Event> action) => e =>
     {
-        action(e);
+        action(e!);
         return Task.CompletedTask;
     };
 
-    private static Func<Event, Task> Map(Func<Task> func) => e =>
+    private static Func<Event?, Task> Map(Func<Task> func) => e =>
     {
         return func();
     };
 
-    // Note: NO need to map Func<Event, Task> since it's already the proper signature.
+    private static Func<Event?, Task> Map(Func<Event, Task> func) => e =>
+    {
+        return func(e!);
+    };
 }
