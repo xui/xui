@@ -16,21 +16,18 @@ public readonly ref struct Html
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = BaseComposer.Current ?? throw new ArgumentNullException("BaseComposer.Current");
         composer.Grow(literalLength, formattedCount);
-        composer.PrepareHtml(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, BaseComposer composer)
     {
         this.composer = BaseComposer.Current ??= composer;
         composer.Grow(literalLength, formattedCount);
-        composer.PrepareHtml(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
         this.composer = BaseComposer.Current ??= new DefaultComposer(writer);
         composer.Grow(literalLength, formattedCount);
-        composer.PrepareHtml(literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
@@ -38,7 +35,6 @@ public readonly ref struct Html
         this.composer = BaseComposer.Current ??= composer;
         composer.Writer = writer;
         composer.Grow(literalLength, formattedCount);
-        composer.PrepareHtml(literalLength, formattedCount);
     }
 
     // PARTIAL MARKUP

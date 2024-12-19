@@ -27,6 +27,8 @@ public abstract class BaseComposer
         
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
+
+        PrepareHtml(literalLength, formattedCount);
     }
 
     protected bool CompleteStringLiteral(int literalLength)
