@@ -44,20 +44,20 @@ public readonly ref struct Html
     // PARTIAL MARKUP
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
-    public readonly bool AppendLiteral(string literal) => composer.AppendStaticPartialMarkup(literal);
+    public readonly bool AppendLiteral(string literal) => composer.AppendImmutableMarkup(literal);
 
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public readonly bool AppendFormatted(string value) => composer.AppendDynamicValue(value);
-    public readonly bool AppendFormatted(bool value) => composer.AppendDynamicValue(value);
-    public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(long value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(float value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(double value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(decimal value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendDynamicValue(value, format);
-    public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendDynamicValue(value, format);
+    public readonly bool AppendFormatted(string value) => composer.AppendMutableValue(value);
+    public readonly bool AppendFormatted(bool value) => composer.AppendMutableValue(value);
+    public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(long value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(float value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(double value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(decimal value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendMutableValue(value, format);
 
 
     // MUTABLE ATTRIBUTES
@@ -76,7 +76,7 @@ public readonly ref struct Html
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => composer.AppendDynamicAttribute(GetArgName(expression), attribute, expression);
+        => composer.AppendMutableAttribute(GetArgName(expression), attribute, expression);
     
 
     // EVENT HANDLERS
@@ -112,13 +112,13 @@ public readonly ref struct Html
     // MUTABLE ELEMENTS
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
     public readonly bool AppendFormatted<TView>(TView view) where TView : IView 
-        => composer.AppendDynamicElement(view.Render());
+        => composer.AppendMutableElement(view.Render());
     // EX: <div>{ MyComponent(content: () => $"<h1>Hello world</h1>")) }</div>
     public readonly bool AppendFormatted(Slot slot) 
-        => composer.AppendDynamicElement(slot());
+        => composer.AppendMutableElement(slot());
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public readonly bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null) 
-        => composer.AppendDynamicElement(html, expression);
+        => composer.AppendMutableElement(html, expression);
 
 
     private bool AppendAmbiguous<T, Utf8>(
@@ -144,13 +144,13 @@ public readonly ref struct Html
                         expression: expression
                     ),
             _ when func is Func<Event, bool> funcBool
-                => composer.AppendDynamicAttribute(
+                => composer.AppendMutableAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcBool, // returns bool
                         expression: expression
                     ),
             _ when funcUtf8 is not null 
-                => composer.AppendDynamicAttribute(
+                => composer.AppendMutableAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
                         format: format, // All primitives except string and bool are utf8-formattable

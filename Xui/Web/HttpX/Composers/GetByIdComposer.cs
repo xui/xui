@@ -35,7 +35,7 @@ public class GetByIdComposer(int slotId) : BaseComposer
     {
         if (Cursor != SlotId)
         {
-            return base.CompleteDynamic(1);
+            return base.CompleteFormattedValue();
         }
 
         EventHandler = eventHandler switch

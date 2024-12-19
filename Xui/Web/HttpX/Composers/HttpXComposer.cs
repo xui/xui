@@ -28,19 +28,19 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
 
-    public override bool AppendStaticPartialMarkup(string literal)
+    public override bool AppendImmutableMarkup(string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
         {
             return true;
         }
 
-        return base.AppendStaticPartialMarkup(literal);
+        return base.AppendImmutableMarkup(literal);
     }
 
-    public override bool AppendDynamicValue(string value) => WriteDynamicValue(value);
-    public override bool AppendDynamicValue(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
-    public override bool AppendDynamicValue<T>(T value, string? format = default)
+    public override bool AppendMutableValue(string value) => WriteDynamicValue(value);
+    public override bool AppendMutableValue(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool AppendMutableValue<T>(T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the dynamic value with a comment tag on one side 
@@ -66,7 +66,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 """);
         }
 
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
     private bool WriteDynamicValue(string value)
@@ -85,27 +85,27 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"""<script>r("slot{Cursor}")</script>""");
         }
 
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue, expression);
+        var @continue = base.AppendMutableAttribute(attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool AppendMutableAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue, format, expression);
+        var @continue = base.AppendMutableAttribute(attrName, attrValue, format, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // Attributes can't be wrapped like dynamic values.  So instead,
         // they include a sentinel by its slot ID which indicates the
@@ -116,7 +116,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
-        var @continue = base.AppendDynamicAttribute(attrName, attrValue, expression);
+        var @continue = base.AppendMutableAttribute(attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
@@ -146,7 +146,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 "h({Cursor})"
                 """);
         }
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
     private bool AppendEventHandler(ReadOnlySpan<char> includedAttributeName)
     {
@@ -158,12 +158,12 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // (e.g. $"<button { onclick => c++ }>Click me</button>")
         // then there's never a way to ALSO pass the event arg into the method signature.
         // For that, you'd need $"<button onclick={ e => c++ }Click me</button>">
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
-    public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
-    public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
-    public override bool AppendDynamicElement(Html partial, string? expression = null)
+    public override bool AppendMutableElement<TView>(TView view) => AppendMutableElement(view.Render());
+    public override bool AppendMutableElement(Slot slot) => AppendMutableElement(slot());
+    public override bool AppendMutableElement(Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
@@ -177,7 +177,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 """);
         }
 
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
     protected override void Clear()
@@ -240,7 +240,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"{beforeBody}{JS}{afterBody}");
 
             suppressSentinels = true;
-            CompleteStatic(literal.Length);
+            CompleteStringLiteral(literal.Length);
             return true;
         }
 

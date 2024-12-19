@@ -6,39 +6,39 @@ namespace Xui.Web.Composers;
 
 public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    public override bool AppendStaticPartialMarkup(string literal)
+    public override bool AppendImmutableMarkup(string literal)
     {
         return true;
     }
 
-    public override bool AppendDynamicValue(string value)
+    public override bool AppendMutableValue(string value)
     {
         return true;
     }
 
-    public override bool AppendDynamicValue(bool value)
+    public override bool AppendMutableValue(bool value)
     {
         return true;
     }
 
-    public override bool AppendDynamicValue<T>(T value, string? format = default)
+    public override bool AppendMutableValue<T>(T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         return true;
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         return true;
     }
 
-    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool AppendMutableAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable
     {
         return true;
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         return true;
     }
@@ -62,10 +62,10 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return true;
     }
 
-    public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
-    public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
+    public override bool AppendMutableElement<TView>(TView view) => AppendMutableElement(view.Render());
+    public override bool AppendMutableElement(Slot slot) => AppendMutableElement(slot());
 
-    public override bool AppendDynamicElement(Html partial, string? expression = null)
+    public override bool AppendMutableElement(Html partial, string? expression = null)
     {
         return true;
     }

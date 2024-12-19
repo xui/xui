@@ -6,26 +6,26 @@ namespace Xui.Web.Composers;
 
 public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    public override bool AppendStaticPartialMarkup(string literal)
+    public override bool AppendImmutableMarkup(string literal)
     {
         var destination = Writer.GetSpan(literal.Length);
         var length = Encoding.UTF8.GetBytes(literal, destination);
         Writer.Advance(length);
 
-        return base.AppendStaticPartialMarkup(literal);
+        return base.AppendImmutableMarkup(literal);
     }
 
-    public override bool AppendDynamicValue(string value)
+    public override bool AppendMutableValue(string value)
     {
         // string has no formatters (and alignment isn't helpful in HTML)
         var destination = Writer.GetSpan(value.Length);
         var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.AppendDynamicValue(value);
+        return base.AppendMutableValue(value);
     }
 
-    public override bool AppendDynamicValue(bool value)
+    public override bool AppendMutableValue(bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? Boolean.TrueString : Boolean.FalseString;
@@ -33,20 +33,20 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.AppendDynamicValue(value);
+        return base.AppendMutableValue(value);
     }
 
-    public override bool AppendDynamicValue<T>(T value, string? format = default)
+    public override bool AppendMutableValue<T>(T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        return base.AppendDynamicValue(value, format);
+        return base.AppendMutableValue(value, format);
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         // Boolean attributes are interesting in that the DOM treats them
         // as true regardless of what value you supply.  The only way to 
@@ -59,10 +59,10 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
             // Boolean attributes don't need any value.
         }
 
-        return base.AppendDynamicAttribute(attrName, attrValue, expression);
+        return base.AppendMutableAttribute(attrName, attrValue, expression);
     }
 
-    public override bool AppendDynamicAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool AppendMutableAttribute<T>(ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
@@ -75,10 +75,10 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
-        return base.AppendDynamicAttribute(attrName, attrValue, format, expression);
+        return base.AppendMutableAttribute(attrName, attrValue, format, expression);
     }
 
-    public override bool AppendDynamicAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
@@ -90,7 +90,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
-        return base.AppendDynamicAttribute(attrName, attrValue, expression);
+        return base.AppendMutableAttribute(attrName, attrValue, expression);
     }
 
     public override bool AppendEventHandler(Action eventHandler, string? expression = null) => HandleNotSupported();
@@ -106,26 +106,26 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     {
         // attributeName is already written at the end of the prior string literal (e.g. <button onclick=)
         Encoding.UTF8.GetBytes("\"\"", Writer);
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
     private bool HandleNotSupported(ReadOnlySpan<char> attributeName)
     {
         Encoding.UTF8.GetBytes(attributeName, Writer);
         Encoding.UTF8.GetBytes("=\"\"", Writer);
-        return CompleteDynamic(1);
+        return CompleteFormattedValue();
     }
 
-    public override bool AppendDynamicElement<TView>(TView view) => AppendDynamicElement(view.Render());
-    public override bool AppendDynamicElement(Slot slot) => AppendDynamicElement(slot());
+    public override bool AppendMutableElement<TView>(TView view) => AppendMutableElement(view.Render());
+    public override bool AppendMutableElement(Slot slot) => AppendMutableElement(slot());
 
-    public override bool AppendDynamicElement(Html partial, string? expression = null)
+    public override bool AppendMutableElement(Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler 
         // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         
-        return base.AppendDynamicElement(partial, expression);
+        return base.AppendMutableElement(partial, expression);
     }
 }
