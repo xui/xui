@@ -40,20 +40,20 @@ public readonly ref struct Html
     // PARTIAL MARKUP
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
-    public readonly bool AppendLiteral(string literal) => composer.AppendImmutableMarkup(literal);
+    public readonly bool AppendLiteral(string literal) => composer.WriteImmutableMarkup(literal);
 
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public readonly bool AppendFormatted(string value) => composer.AppendMutableValue(value);
-    public readonly bool AppendFormatted(bool value) => composer.AppendMutableValue(value);
-    public readonly bool AppendFormatted(int value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(long value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(float value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(double value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(decimal value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.AppendMutableValue(value, format);
-    public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.AppendMutableValue(value, format);
+    public readonly bool AppendFormatted(string value) => composer.WriteMutableValue(value);
+    public readonly bool AppendFormatted(bool value) => composer.WriteMutableValue(value);
+    public readonly bool AppendFormatted(int value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(long value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(float value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(double value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(decimal value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(DateTime value, string? format = null) => composer.WriteMutableValue(value, format);
+    public readonly bool AppendFormatted(TimeSpan value, string? format = null) => composer.WriteMutableValue(value, format);
 
 
     // MUTABLE ATTRIBUTES
@@ -72,14 +72,14 @@ public readonly ref struct Html
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public readonly bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => composer.AppendMutableAttribute(GetArgName(expression), attribute, expression);
+        => composer.WriteMutableAttribute(GetArgName(expression), attribute, expression);
     
 
     // EVENT HANDLERS
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler, expression);
+        => composer.WriteEventHandler(eventHandler, expression);
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
@@ -88,36 +88,36 @@ public readonly ref struct Html
     
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler, expression);
+        => composer.WriteEventHandler(eventHandler, expression);
     
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
     public readonly bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.AppendEventHandler(eventHandler, expression);
+        => composer.WriteEventHandler(eventHandler, expression);
     
     private readonly bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null)
         => argName switch
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-               => composer.AppendEventHandler(eventHandler, expression),
-            "" => composer.AppendEventHandler(eventHandler, expression),
-            _  => composer.AppendEventHandler(argName, eventHandler, expression),
+               => composer.WriteEventHandler(eventHandler, expression),
+            "" => composer.WriteEventHandler(eventHandler, expression),
+            _  => composer.WriteEventHandler(argName, eventHandler, expression),
         };
 
     
     // MUTABLE ELEMENTS
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
     public readonly bool AppendFormatted<TView>(TView view) where TView : IView 
-        => composer.AppendMutableElement(view.Render());
+        => composer.WriteMutableElement(view.Render());
     // EX: <div>{ MyComponent(content: () => $"<h1>Hello world</h1>")) }</div>
     public readonly bool AppendFormatted(Slot slot) 
-        => composer.AppendMutableElement(slot());
+        => composer.WriteMutableElement(slot());
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public readonly bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null) 
-        => composer.AppendMutableElement(html, expression);
+        => composer.WriteMutableElement(html, expression);
 
 
-    private bool AppendAmbiguous<T, Utf8>(
+    private readonly bool AppendAmbiguous<T, Utf8>(
         ReadOnlySpan<char> argName, 
         Func<Event, T> func, 
         Func<Event, Utf8>? funcUtf8 = null, 
@@ -128,25 +128,25 @@ public readonly ref struct Html
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-                => composer.AppendEventHandler(
+                => composer.WriteEventHandler(
                         // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
                         e => { func(e); }, // make it return void
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
-                => composer.AppendEventHandler(
+                => composer.WriteEventHandler(
                         argName, // Writer is responsible for writing the attribute name (e.g. onclick)
                         () => { func(Event.Empty); }, // make it return void
                         expression: expression
                     ),
             _ when func is Func<Event, bool> funcBool
-                => composer.AppendMutableAttribute(
+                => composer.WriteMutableAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcBool, // returns bool
                         expression: expression
                     ),
             _ when funcUtf8 is not null 
-                => composer.AppendMutableAttribute(
+                => composer.WriteMutableAttribute(
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
                         format: format, // All primitives except string and bool are utf8-formattable

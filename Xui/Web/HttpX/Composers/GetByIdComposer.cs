@@ -22,14 +22,14 @@ public class GetByIdComposer(int slotId) : BaseComposer
 
     public Func<Event?, Task>? EventHandler { get; set; } = null;
 
-    public override bool AppendEventHandler(Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
-    public override bool AppendEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
+    public override bool WriteEventHandler(ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(eventHandler);
 
     private bool ToCommonSignatureIfMatch<T>(T eventHandler)
     {
