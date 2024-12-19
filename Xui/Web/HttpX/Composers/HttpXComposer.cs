@@ -38,12 +38,12 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return base.AppendImmutableMarkup(literal);
     }
 
-    public override bool AppendMutableValue(string value) => WriteDynamicValue(value);
-    public override bool AppendMutableValue(bool value) => WriteDynamicValue(value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool AppendMutableValue(string value) => WriteMutableValue(value);
+    public override bool AppendMutableValue(bool value) => WriteMutableValue(value ? Boolean.TrueString : Boolean.FalseString);
     public override bool AppendMutableValue<T>(T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        // Wraps the dynamic value with a comment tag on one side 
+        // Wraps the mutable value with a comment tag on one side 
         // to separate it from any preceding text and a script tag 
         // on the other side which registers it without the need 
         // for id= or document.getElementById().
@@ -69,7 +69,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    private bool WriteDynamicValue(string value)
+    private bool WriteMutableValue(string value)
     {
         if (!suppressSentinels)
         {
@@ -107,7 +107,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool AppendMutableAttribute(ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
-        // Attributes can't be wrapped like dynamic values.  So instead,
+        // Mutable attributes can't be simply wrapped like mutable values.  So instead,
         // they include a sentinel by its slot ID which indicates the
         // attribute name to references.  At the end of the body, a script
         // picks them all up and registers them in a single pass.
@@ -219,7 +219,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private bool TryInjectHttpXKernel(string literal)
     {
-        // If there are zero dynamic slots, then we can skip this.
+        // If there are zero mutable slots, then we can skip this.
         if (FormattedCount <= 1)
         {
             suppressSentinels = true;
