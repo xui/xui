@@ -79,44 +79,44 @@ public static class DiffComposerExtensions
             {
                 case FormatType.StringLiteral:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyC  {"",-15} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}  {"",-15} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
                             console.log(`{keyhole.String}`);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.String:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🟢 %c'{keyhole.String}'`, cssVariable, cssOperator, cssType, cssString);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🟢 %c'{keyhole.String}'`, cssVariable, cssOperator, cssType, cssString);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.Integer:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.EventHandler:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.Attribute:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.HtmlString:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 default:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckey{keyhole.Key}%c: %c{keyhole.Type,-15} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
                         console.groupEnd();
                         """);
                     break;
