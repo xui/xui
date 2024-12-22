@@ -200,6 +200,9 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, string value)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
@@ -212,6 +215,9 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, bool value)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
@@ -225,6 +231,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
@@ -273,6 +282,9 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         // end = h.end;
 
         ref var chunk = ref slotTable[html.Index + html.Length++];
@@ -291,6 +303,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         // end = h.end;
 
         ref var chunk = ref slotTable[html.Index + html.Length++];
@@ -308,6 +323,9 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         // end = h.end;
 
         ref var chunk = ref slotTable[html.Index + html.Length++];
@@ -333,6 +351,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
     private bool WriteEventHandler(ref Html html, string? expression = null)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         chunk.Type = FormatType.EventHandler;
@@ -345,6 +366,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
     public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
+        if (IsEvenSlot(html.Length))
+            WriteImmutableMarkup(ref html, string.Empty);
+
         ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
@@ -356,5 +380,11 @@ public class DiffComposer : BaseComposer
         // start.Integer = Cursor;
 
         return base.WriteMutableElement(ref html, partial);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsEvenSlot(int number)
+    {
+        return number % 2 == 0;
     }
 }
