@@ -52,11 +52,10 @@ public struct HttpXContext(WebSocketPipe? pipe)
         {
             // TODO: Buffer might be multiple segments one day.
             var buffer = result.Buffer.First;
-            var (slotId, domEvent) = ParseEvent(buffer.Span);
+            var (key, domEvent) = ParseEvent(buffer.Span);
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
-            if (html.GetElementById(slotId) is Func<Event, Task> eventHandler)
-            if (html.GetSlotById(slotId) is Func<Event, Task> eventHandler)
+            if (html.GetKeyhole(key) is Func<Event?, Task> eventHandler)
             {
                 EventPump.Enqueue(eventHandler, domEvent);
             }

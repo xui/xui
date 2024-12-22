@@ -6,19 +6,19 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public static class GetByIdComposerExtensions
+public static class GetKeyholeComposerExtensions
 {
-    public static Func<Event?, Task>? GetSlotById(this Func<Html> html, int slotId)
+    public static Func<Event?, Task>? GetKeyhole(this Func<Html> html, int key)
     {
-        var composer = new GetByIdComposer(slotId);
+        var composer = new GetKeyholeComposer(key);
         composer.Compose($"{html()}");
         return composer.EventHandler;
     }
 }
 
-public class GetByIdComposer(int slotId) : BaseComposer
+public class GetKeyholeComposer(int key) : BaseComposer
 {
-    public int SlotId { get; init; } = slotId;
+    public int Key { get; init; } = key;
 
     public Func<Event?, Task>? EventHandler { get; set; } = null;
 
@@ -33,7 +33,7 @@ public class GetByIdComposer(int slotId) : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html html, T eventHandler)
     {
-        if (Cursor != SlotId)
+        if (Cursor != Key)
         {
             return base.CompleteFormattedValue();
         }

@@ -6,7 +6,7 @@ namespace Xui.Web.HttpX;
 
 public struct Chunk
 {
-    public int SlotId;
+    public int Key;
     public int RefId;
     public FormatType Type;
     public string? String;

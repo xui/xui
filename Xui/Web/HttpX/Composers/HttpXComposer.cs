@@ -48,7 +48,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // on the other side which registers it without the need 
         // for id= or document.getElementById().
         // It should end up looking like this:
-        // $"<!-- -->{value:format}<script>r('slot{id}')</script>"
+        // $"<!-- -->{value:format}<script>r('key{id}')</script>"
 
         if (!suppressSentinels)
         {
@@ -62,7 +62,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
             Writer.Inject($"""
-                <script>r("slot{Cursor}")</script>
+                <script>r("key{Cursor}")</script>
                 """);
         }
 
@@ -82,7 +82,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
-            Writer.Inject($"""<script>r("slot{Cursor}")</script>""");
+            Writer.Inject($"""<script>r("key{Cursor}")</script>""");
         }
 
         return CompleteFormattedValue();
@@ -91,7 +91,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
-        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
+        Writer.Inject($" key{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
@@ -100,7 +100,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, format, expression);
-        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
+        Writer.Inject($" key{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
@@ -108,16 +108,16 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // Mutable attributes can't be simply wrapped like mutable values.  So instead,
-        // they include a sentinel by its slot ID which indicates the
+        // they include a sentinel by its key ID which indicates the
         // attribute name to references.  At the end of the body, a script
         // picks them all up and registers them in a single pass.
         // It should end up looking like this:
-        //   <input type={ myType } slot123="type" />
+        //   <input type={ myType } keyAB="type" />
 
         suppressSentinels = true;
 
         var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
-        Writer.Inject($" slot{Cursor}=\"{attrName}\"");
+        Writer.Inject($" key{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
 
@@ -173,7 +173,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels)
         {
             Writer.Inject($"""
-                <script>r("slot{Cursor}")</script>
+                <script>r("key{Cursor}")</script>
                 """);
         }
 
@@ -206,7 +206,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             function r(k) {
                 ui[k]=document.currentScript.previousSibling;
             }
-            r('slot0');
+            r('key0');
         </script>
         """
         .Replace("\n", "")
@@ -219,7 +219,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     private bool TryInjectHttpXKernel(string literal)
     {
-        // If there are zero mutable slots, then we can skip this.
+        // If there are zero mutable keys, then we can skip this.
         if (FormattedCount <= 1)
         {
             suppressSentinels = true;
@@ -258,14 +258,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                     ui[k]=t;
                 }
             }
-            var attrs = document.evaluate('//*/attribute::*[starts-with(name(), "slot")]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            var attrs = document.evaluate('//*/attribute::*[starts-with(name(), "key")]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
             for (i=0;i<attrs.snapshotLength;i++) {
                 let a=attrs.snapshotItem(i);
                 ui[a.name]=a;
             }
 
             function h(id,ev) {
-                console.debug("executing slot " + id);
+                console.debug("executing key " + id);
                 if (ev) {
                     ws.send(`${id}${encodeEvent(ev)}`);
                 } else {

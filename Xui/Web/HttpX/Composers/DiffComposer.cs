@@ -54,7 +54,7 @@ public static class DiffComposerExtensions
         // double ns = 1_000_000_000.0 * (double)ticks / Stopwatch.Frequency;
         // double us = 1_000_000.0 * (double)ticks / Stopwatch.Frequency;
 
-        Chunk[] slotTable = composer.SlotTable;
+        Chunk[] keyholes = composer.Keyholes;
         var output = new StringBuilder();
 
         output.Append($"""
@@ -74,49 +74,49 @@ public static class DiffComposerExtensions
 
         for (int i = 0; i < composer.Length; i++)
         {
-            ref Chunk slot = ref slotTable[i];
-            switch (slot.Type)
+            ref Chunk keyhole = ref keyholes[i];
+            switch (keyhole.Type)
             {
                 case FormatType.StringLiteral:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotC  {"",-15} 🟢 %c"{InlineString(slot.String)}"`, cssVariable, cssLiteral);
-                            console.log(`{slot.String}`);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyC  {"",-15} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
+                            console.log(`{keyhole.String}`);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.String:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotF%c: %c{slot.Type,-15} 🟢 %c'{slot.String}'`, cssVariable, cssOperator, cssType, cssString);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🟢 %c'{keyhole.String}'`, cssVariable, cssOperator, cssType, cssString);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.Integer:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotF%c: %c{slot.Type,-15} 🟢 %c{slot.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.EventHandler:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotD%c: %c{slot.Type,-15} 🟢 %c{ $"{{ {slot.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.Attribute:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotD%c: %c{slot.Type,-15} 🟢 %c{ $"{{ {slot.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 case FormatType.HtmlString:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotD%c: %c{slot.Type,-15} 🟢 %c{ $"{{ {slot.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyD%c: %c{keyhole.Type,-15} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
                         """);
                     break;
                 default:
                     output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  %cslotF%c: %c{slot.Type,-15} 🔴 %c{slot.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                        console.groupCollapsed(`{$"[{i}]",-4}  %ckeyF%c: %c{keyhole.Type,-15} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
                         console.groupEnd();
                         """);
                     break;
@@ -147,22 +147,29 @@ public static class DiffComposerExtensions
 public class DiffComposer : BaseComposer
 {
     private static int highWaterMark = 2048;
-    // private Chunk[] slotTable;
-    private static Chunk[] slotTable = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
-    public Chunk[] SlotTable { get => slotTable; }
+    // private Chunk[] keyholes;
+    private static Chunk[] keyholes = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
+    public Chunk[] Keyholes { get => keyholes; }
     // private int segmentPosition = 0;
     public int Length { get; private set; } = 0;
     public int WriteHead { get; private set; } = 0;
 
     public DiffComposer()
     {
-        // slotTable = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
+        // keyholes = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
+    }
+
+    private void Enumerate()
+    {
+        ref var keyhole = ref keyholes[1];
     }
 
     protected override void Clear()
     {
+        Enumerate();
+
         WriteHead = 0;
-        Length = Cursor; // TODO: Fix this (+2) once the empty slot problem is solved.
+        Length = Cursor; // TODO: Fix this (+2) once the empty keyhole problem is solved.
         // currentIndex = 0;
         // parentStartIndex = 0;
 
@@ -174,14 +181,14 @@ public class DiffComposer : BaseComposer
         html.Index = WriteHead;
         WriteHead += (2 * formattedCount + 1);
 
-        // ref var chunk = ref slotTable[index];
-        // chunk.SlotId = Cursor;
+        // ref var chunk = ref keyholes[index];
+        // chunk.Key = Cursor;
         // // chunk.RefId = parentStartIndex;
         // chunk.Type = FormatType.HtmlString;
         // chunk.String = $" --------start-----------: literalLength: {literalLength}, formattedCount: {formattedCount}";
 
         // // Update the "starting end cap" to point its end.
-        // ref var start = ref slotTable[parentStartIndex];
+        // ref var start = ref keyholes[parentStartIndex];
         // start.Integer = Cursor;
 
         base.PrepareHtml(ref html, literalLength, formattedCount);
@@ -189,8 +196,8 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = literal;
         chunk.Type = FormatType.StringLiteral;
@@ -200,11 +207,11 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, string value)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = value;
         chunk.Type = FormatType.String;
@@ -215,11 +222,11 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, bool value)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Boolean = value;
         chunk.Type = FormatType.Boolean;
@@ -231,11 +238,11 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Format = format;
 
@@ -282,13 +289,13 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
         chunk.Type = FormatType.Attribute;
@@ -303,13 +310,13 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
         chunk.Type = FormatType.Attribute;
@@ -323,13 +330,13 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
         chunk.Type = FormatType.Attribute;
@@ -351,11 +358,11 @@ public class DiffComposer : BaseComposer
     public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
     private bool WriteEventHandler(ref Html html, string? expression = null)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         chunk.Type = FormatType.EventHandler;
         chunk.String = expression;
 
@@ -366,24 +373,24 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
     public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
-        if (IsEvenSlot(html.Length))
+        if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref slotTable[html.Index + html.Length++];
-        chunk.SlotId = Cursor;
+        ref var chunk = ref keyholes[html.Index + html.Length++];
+        chunk.Key = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Type = FormatType.HtmlString;
         chunk.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
 
         // // Update the "starting end cap" to point its end.
-        // ref var start = ref slotTable[parentStartIndex];
+        // ref var start = ref keyholes[parentStartIndex];
         // start.Integer = Cursor;
 
         return base.WriteMutableElement(ref html, partial);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEvenSlot(int number)
+    public static bool IsEven(int number)
     {
         return number % 2 == 0;
     }
