@@ -6,51 +6,51 @@ namespace Xui.Web.Composers;
 
 public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    public override bool WriteImmutableMarkup(int index, string literal)
+    public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
         return true;
     }
 
-    public override bool WriteMutableValue(int index, string value)
+    public override bool WriteMutableValue(ref Html html, string value)
     {
         return true;
     }
 
-    public override bool WriteMutableValue(int index, bool value)
+    public override bool WriteMutableValue(ref Html html, bool value)
     {
         return true;
     }
 
-    public override bool WriteMutableValue<T>(int index, T value, string? format = default)
+    public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         return true;
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         return true;
     }
 
-    public override bool WriteMutableAttribute<T>(int index, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable
     {
         return true;
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         return true;
     }
 
-    public override bool WriteEventHandler(int index, Action eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(int index, Action<Event> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(int index, Func<Task> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(int index, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
     
     private bool HandleNotSupported()
     {
@@ -62,10 +62,10 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return true;
     }
 
-    public override bool WriteMutableElement<TView>(int index, TView view) => WriteMutableElement(index, view.Render());
-    public override bool WriteMutableElement(int index, Slot slot) => WriteMutableElement(index, slot());
+    public override bool WriteMutableElement<TView>(ref Html html, TView view) => WriteMutableElement(ref html, view.Render());
+    public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
 
-    public override bool WriteMutableElement(int index, Html partial, string? expression = null)
+    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
         return true;
     }

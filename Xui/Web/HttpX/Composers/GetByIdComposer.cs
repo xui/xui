@@ -22,16 +22,16 @@ public class GetByIdComposer(int slotId) : BaseComposer
 
     public Func<Event?, Task>? EventHandler { get; set; } = null;
 
-    public override bool WriteEventHandler(int index, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(index, eventHandler);
+    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
 
-    private bool ToCommonSignatureIfMatch<T>(int index, T eventHandler)
+    private bool ToCommonSignatureIfMatch<T>(ref Html html, T eventHandler)
     {
         if (Cursor != SlotId)
         {

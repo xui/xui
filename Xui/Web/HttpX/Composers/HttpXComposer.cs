@@ -28,19 +28,19 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
 
-    public override bool WriteImmutableMarkup(int index, string literal)
+    public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
         {
             return true;
         }
 
-        return base.WriteImmutableMarkup(index, literal);
+        return base.WriteImmutableMarkup(ref html, literal);
     }
 
-    public override bool WriteMutableValue(int index, string value) => WriteMutableString(index, value);
-    public override bool WriteMutableValue(int index, bool value) => WriteMutableString(index, value ? Boolean.TrueString : Boolean.FalseString);
-    public override bool WriteMutableValue<T>(int index, T value, string? format = default)
+    public override bool WriteMutableValue(ref Html html, string value) => WriteMutableString(ref html, value);
+    public override bool WriteMutableValue(ref Html html, bool value) => WriteMutableString(ref html, value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the mutable value with a comment tag on one side 
@@ -69,7 +69,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    private bool WriteMutableString(int index, string value)
+    private bool WriteMutableString(ref Html html, string value)
     {
         if (!suppressSentinels)
         {
@@ -88,24 +88,24 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        var @continue = base.WriteMutableAttribute(index, attrName, attrValue, expression);
+        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool WriteMutableAttribute<T>(int index, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        var @continue = base.WriteMutableAttribute(index, attrName, attrValue, format, expression);
+        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, format, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // Mutable attributes can't be simply wrapped like mutable values.  So instead,
         // they include a sentinel by its slot ID which indicates the
@@ -116,7 +116,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
-        var @continue = base.WriteMutableAttribute(index, attrName, attrValue, expression);
+        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
         Writer.Inject($" slot{Cursor}=\"{attrName}\"");
 
         suppressSentinels = false;
@@ -124,15 +124,15 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool WriteEventHandler(int index, Action eventHandler, string? expression = null) => WriteEventHandler(index, includeEventArg: false);
-    public override bool WriteEventHandler(int index, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(index, includeEventArg: true);
-    public override bool WriteEventHandler(int index, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(index, includeEventArg: false);
-    public override bool WriteEventHandler(int index, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(index, includeEventArg: true);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(index, attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(index, attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(index, attributeName);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(index, attributeName);
-    private bool WriteEventHandler(int index, bool includeEventArg)
+    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: false);
+    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: true);
+    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: false);
+    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: true);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
+    private bool WriteEventHandler(ref Html html, bool includeEventArg)
     {
         if (includeEventArg)
         {
@@ -148,7 +148,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         }
         return CompleteFormattedValue();
     }
-    private bool WriteEventHandler(int index, ReadOnlySpan<char> includedAttributeName)
+    private bool WriteEventHandler(ref Html html, ReadOnlySpan<char> includedAttributeName)
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""
@@ -161,9 +161,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(int index, TView view) => WriteMutableElement(index, view.Render());
-    public override bool WriteMutableElement(int index, Slot slot) => WriteMutableElement(index, slot());
-    public override bool WriteMutableElement(int index, Html partial, string? expression = null)
+    public override bool WriteMutableElement<TView>(ref Html html, TView view) => WriteMutableElement(ref html, view.Render());
+    public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
+    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.

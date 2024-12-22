@@ -29,14 +29,14 @@ public static class DiffComposerExtensions
         // if (!warmedUp)
         // {
             // for (int i = 0; i < 250_000; i++)
-                composer.Compose($"{html()}");
+                // composer.Compose($"{html()}");
         //     warmedUp = true;
         // }
         // long gc1 = GC.GetTotalAllocatedBytes();
         long gc1 = GC.GetAllocatedBytesForCurrentThread();
         var sw1 = Stopwatch.GetTimestamp();
         // for (int i = 0; i < 250_000; i++)
-            // composer.Compose($"{html()}");
+            composer.Compose($"{html()}");
         var elapsed = Stopwatch.GetElapsedTime(sw1);
         long gc2 = GC.GetAllocatedBytesForCurrentThread();
         // long gc2 = GC.GetTotalAllocatedBytes();
@@ -186,45 +186,45 @@ public class DiffComposer : BaseComposer
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
-    public override bool WriteImmutableMarkup(int index, string literal)
+    public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = literal;
         chunk.Type = FormatType.StringLiteral;
 
-        return base.WriteImmutableMarkup(index, literal);
+        return base.WriteImmutableMarkup(ref html, literal);
     }
 
-    public override bool WriteMutableValue(int index, string value)
+    public override bool WriteMutableValue(ref Html html, string value)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = value;
         chunk.Type = FormatType.String;
         chunk.Format = null;
 
-        return base.WriteMutableValue(index, value);
+        return base.WriteMutableValue(ref html, value);
     }
 
-    public override bool WriteMutableValue(int index, bool value)
+    public override bool WriteMutableValue(ref Html html, bool value)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Boolean = value;
         chunk.Type = FormatType.Boolean;
         chunk.Format = null;
 
-        return base.WriteMutableValue(index, value);
+        return base.WriteMutableValue(ref html, value);
     }
 
-    public override bool WriteMutableValue<T>(int index, T value, string? format = default)
+    public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Format = format;
@@ -267,14 +267,14 @@ public class DiffComposer : BaseComposer
                 throw new NotSupportedException($"Type {typeof(T)} not supported");            
         }
 
-        return base.WriteMutableValue(index, value, format);
+        return base.WriteMutableValue(ref html, value, format);
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -284,15 +284,15 @@ public class DiffComposer : BaseComposer
         // ref var start = ref chunks[h.start];
         // start.Integer = Cursor;
 
-        return base.WriteMutableAttribute(index, attrName, attrValue, expression);
+        return base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
     }
 
-    public override bool WriteMutableAttribute<T>(int index, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -302,14 +302,14 @@ public class DiffComposer : BaseComposer
         // ref var start = ref chunks[h.start];
         // start.Integer = Cursor;
 
-        return base.WriteMutableAttribute(index, attrName, attrValue, format, expression);
+        return base.WriteMutableAttribute(ref html, attrName, attrValue, format, expression);
     }
 
-    public override bool WriteMutableAttribute(int index, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -319,20 +319,20 @@ public class DiffComposer : BaseComposer
         // ref var start = ref chunks[h.start];
         // start.Integer = Cursor;
 
-        return base.WriteMutableAttribute(index, attrName, attrValue, expression);
+        return base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
     }
 
-    public override bool WriteEventHandler(int index, Action eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    public override bool WriteEventHandler(int index, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(index, expression);
-    private bool WriteEventHandler(int index, string? expression = null)
+    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
+    private bool WriteEventHandler(ref Html html, string? expression = null)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         chunk.Type = FormatType.EventHandler;
         chunk.String = expression;
@@ -340,11 +340,11 @@ public class DiffComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(int index, TView view) => WriteMutableElement(index, view.Render());
-    public override bool WriteMutableElement(int index, Slot slot) => WriteMutableElement(index, slot());
-    public override bool WriteMutableElement(int index, Html partial, string? expression = null)
+    public override bool WriteMutableElement<TView>(ref Html html, TView view) => WriteMutableElement(ref html, view.Render());
+    public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
+    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
-        ref var chunk = ref slotTable[index];
+        ref var chunk = ref slotTable[html.Offset + html.Index++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Type = FormatType.HtmlString;
@@ -354,6 +354,6 @@ public class DiffComposer : BaseComposer
         // ref var start = ref slotTable[parentStartIndex];
         // start.Integer = Cursor;
 
-        return base.WriteMutableElement(index, partial);
+        return base.WriteMutableElement(ref html, partial);
     }
 }

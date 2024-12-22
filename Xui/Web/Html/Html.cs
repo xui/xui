@@ -11,7 +11,7 @@ public ref struct Html
 {
     readonly BaseComposer composer;
     public int Offset { get; set; }
-    public int Index { get; private set; } = 0;
+    public int Index { get; set; } = 0;
 
     public Html(int literalLength, int formattedCount)
     {
@@ -42,20 +42,20 @@ public ref struct Html
     // PARTIAL MARKUP
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
-    public bool AppendLiteral(string literal) => composer.WriteImmutableMarkup(Offset + Index++, literal);
+    public bool AppendLiteral(string literal) => composer.WriteImmutableMarkup(ref this, literal);
 
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public bool AppendFormatted(string value) => composer.WriteMutableValue(Offset + Index++, value);
-    public bool AppendFormatted(bool value) => composer.WriteMutableValue(Offset + Index++, value);
-    public bool AppendFormatted(int value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(long value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(float value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(double value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(decimal value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(DateTime value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
-    public bool AppendFormatted(TimeSpan value, string? format = null) => composer.WriteMutableValue(Offset + Index++, value, format);
+    public bool AppendFormatted(string value) => composer.WriteMutableValue(ref this, value);
+    public bool AppendFormatted(bool value) => composer.WriteMutableValue(ref this, value);
+    public bool AppendFormatted(int value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(long value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(float value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(double value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(decimal value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(DateTime value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
+    public bool AppendFormatted(TimeSpan value, string? format = null) => composer.WriteMutableValue(ref this, value, format);
 
 
     // MUTABLE ATTRIBUTES
@@ -74,14 +74,14 @@ public ref struct Html
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => composer.WriteMutableAttribute(Offset + Index++, GetArgName(expression), attribute, expression);
+        => composer.WriteMutableAttribute(ref this, GetArgName(expression), attribute, expression);
     
 
     // EVENT HANDLERS
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
     public bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.WriteEventHandler(Offset + Index++, eventHandler, expression);
+        => composer.WriteEventHandler(ref this, eventHandler, expression);
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
@@ -90,33 +90,33 @@ public ref struct Html
     
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
     public bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.WriteEventHandler(Offset + Index++, eventHandler, expression);
+        => composer.WriteEventHandler(ref this, eventHandler, expression);
     
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
     public bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-        => composer.WriteEventHandler(Offset + Index++, eventHandler, expression);
+        => composer.WriteEventHandler(ref this, eventHandler, expression);
     
     private bool AppendEventHandler(ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null)
         => argName switch
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-               => composer.WriteEventHandler(Offset + Index++, eventHandler, expression),
-            "" => composer.WriteEventHandler(Offset + Index++, eventHandler, expression),
-            _  => composer.WriteEventHandler(Offset + Index++, argName, eventHandler, expression),
+               => composer.WriteEventHandler(ref this, eventHandler, expression),
+            "" => composer.WriteEventHandler(ref this, eventHandler, expression),
+            _  => composer.WriteEventHandler(ref this, argName, eventHandler, expression),
         };
 
     
     // MUTABLE ELEMENTS
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
     public bool AppendFormatted<TView>(TView view) where TView : IView 
-        => composer.WriteMutableElement(Offset + Index++, view.Render());
+        => composer.WriteMutableElement(ref this, view.Render());
     // EX: <div>{ MyComponent(content: () => $"<h1>Hello world</h1>")) }</div>
     public bool AppendFormatted(Slot slot) 
-        => composer.WriteMutableElement(Offset + Index++, slot());
+        => composer.WriteMutableElement(ref this, slot());
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null) 
-        => composer.WriteMutableElement(Offset + Index++, html, expression);
+        => composer.WriteMutableElement(ref this, html, expression);
 
 
     private bool AppendAmbiguous<T, Utf8>(
@@ -131,28 +131,28 @@ public ref struct Html
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
                 => composer.WriteEventHandler(
-                        Offset + Index++, 
+                        ref this, 
                         // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
                         e => { func(e); }, // make it return void
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
                 => composer.WriteEventHandler(
-                        Offset + Index++, 
+                        ref this, 
                         argName, // Writer is responsible for writing the attribute name (e.g. onclick)
                         () => { func(Event.Empty); }, // make it return void
                         expression: expression
                     ),
             _ when func is Func<Event, bool> funcBool
                 => composer.WriteMutableAttribute(
-                        Offset + Index++,
+                        ref this,
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcBool, // returns bool
                         expression: expression
                     ),
             _ when funcUtf8 is not null 
                 => composer.WriteMutableAttribute(
-                        Offset + Index++,
+                        ref this,
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
                         format: format, // All primitives except string and bool are utf8-formattable
