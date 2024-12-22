@@ -10,8 +10,8 @@ namespace Xui.Web;
 public ref struct Html
 {
     readonly BaseComposer composer;
-    public int Offset { get; set; }
-    public int Index { get; set; } = 0;
+    public int Index { get; set; }
+    public int Length { get; set; } = 0;
 
     public Html(int literalLength, int formattedCount)
     {

@@ -170,7 +170,7 @@ public class DiffComposer : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Offset = WriteHead;
+        html.Index = WriteHead;
         WriteHead += (2 * formattedCount + 1);
 
         // ref var chunk = ref slotTable[index];
@@ -188,7 +188,7 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = literal;
@@ -199,7 +199,7 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, string value)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.String = value;
@@ -211,7 +211,7 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html html, bool value)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Boolean = value;
@@ -224,7 +224,7 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Format = format;
@@ -274,7 +274,7 @@ public class DiffComposer : BaseComposer
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -292,7 +292,7 @@ public class DiffComposer : BaseComposer
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -309,7 +309,7 @@ public class DiffComposer : BaseComposer
     {
         // end = h.end;
 
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // chunk.Integer = h.start;
@@ -332,7 +332,7 @@ public class DiffComposer : BaseComposer
     public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, expression);
     private bool WriteEventHandler(ref Html html, string? expression = null)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         chunk.Type = FormatType.EventHandler;
         chunk.String = expression;
@@ -344,11 +344,11 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
     public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
-        ref var chunk = ref slotTable[html.Offset + html.Index++];
+        ref var chunk = ref slotTable[html.Index + html.Length++];
         chunk.SlotId = Cursor;
         // chunk.RefId = parentStartIndex;
         chunk.Type = FormatType.HtmlString;
-        chunk.String = expression + $" start:{partial.Offset} end:{partial.Offset + partial.Index - 1}";
+        chunk.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
 
         // // Update the "starting end cap" to point its end.
         // ref var start = ref slotTable[parentStartIndex];
