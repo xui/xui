@@ -20,10 +20,6 @@ public struct Chunk
     public bool? Boolean;
     public IView? View;
     public string? Format;
-    public Action Action;
-    public Action<Event> ActionEvent;
-    public Func<Task> ActionAsync;
-    public Func<Event, Task> ActionEventAsync;
 
     public static bool operator ==(Chunk c1, Chunk c2)
     {
