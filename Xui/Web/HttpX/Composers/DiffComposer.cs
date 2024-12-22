@@ -161,6 +161,7 @@ public class DiffComposer : BaseComposer
 
     protected override void Clear()
     {
+        WriteHead = 0;
         Length = Cursor; // TODO: Fix this (+2) once the empty slot problem is solved.
         // currentIndex = 0;
         // parentStartIndex = 0;
