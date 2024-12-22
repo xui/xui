@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Xui.Web.HttpX;
 
-public struct Chunk
+public struct Keyhole
 {
     public int Key;
     public int RefId;
@@ -21,7 +21,7 @@ public struct Chunk
     public IView? View;
     public string? Format;
 
-    public static bool operator ==(Chunk c1, Chunk c2)
+    public static bool operator ==(Keyhole c1, Keyhole c2)
     {
         if (c1.Type != c2.Type)
             return false;
@@ -42,7 +42,7 @@ public struct Chunk
         };
     }
 
-    public static bool operator !=(Chunk c1, Chunk c2)
+    public static bool operator !=(Keyhole c1, Keyhole c2)
     {
         return !(c1 == c2);
     }

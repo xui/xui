@@ -44,7 +44,7 @@ public static class DiffComposerExtensions
         Console.WriteLine($"elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
 
         var output = GetOutput(composer, elapsed, gc2 - gc1);
-        // var output = GetOutput(Memory<Chunk>.Empty, elapsed, gc2 - gc1);
+        // var output = GetOutput(Memory<Keyhole>.Empty, elapsed, gc2 - gc1);
         writer.Inject($"{output.ToString()}");
         await writer.FlushAsync();
     }
@@ -54,7 +54,7 @@ public static class DiffComposerExtensions
         // double ns = 1_000_000_000.0 * (double)ticks / Stopwatch.Frequency;
         // double us = 1_000_000.0 * (double)ticks / Stopwatch.Frequency;
 
-        Chunk[] keyholes = composer.Keyholes;
+        Keyhole[] keyholes = composer.Keyholes;
         var output = new StringBuilder();
 
         output.Append($"""
@@ -74,7 +74,7 @@ public static class DiffComposerExtensions
 
         for (int i = 0; i < composer.Length; i++)
         {
-            ref Chunk keyhole = ref keyholes[i];
+            ref Keyhole keyhole = ref keyholes[i];
             switch (keyhole.Type)
             {
                 case FormatType.StringLiteral:
@@ -147,16 +147,16 @@ public static class DiffComposerExtensions
 public class DiffComposer : BaseComposer
 {
     private static int highWaterMark = 2048;
-    // private Chunk[] keyholes;
-    private static Chunk[] keyholes = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
-    public Chunk[] Keyholes { get => keyholes; }
+    // private Keyhole[] keyholes;
+    private static Keyhole[] keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
+    public Keyhole[] Keyholes { get => keyholes; }
     // private int segmentPosition = 0;
     public int Length { get; private set; } = 0;
     public int WriteHead { get; private set; } = 0;
 
     public DiffComposer()
     {
-        // keyholes = ArrayPool<Chunk>.Shared.Rent(highWaterMark);
+        // keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
     }
 
     private void Enumerate()
@@ -181,11 +181,11 @@ public class DiffComposer : BaseComposer
         html.Index = WriteHead;
         WriteHead += (2 * formattedCount + 1);
 
-        // ref var chunk = ref keyholes[index];
-        // chunk.Key = Cursor;
-        // // chunk.RefId = parentStartIndex;
-        // chunk.Type = FormatType.HtmlString;
-        // chunk.String = $" --------start-----------: literalLength: {literalLength}, formattedCount: {formattedCount}";
+        // ref var keyhole = ref keyholes[index];
+        // keyhole.Key = Cursor;
+        // // keyhole.RefId = parentStartIndex;
+        // keyhole.Type = FormatType.HtmlString;
+        // keyhole.String = $" --------start-----------: literalLength: {literalLength}, formattedCount: {formattedCount}";
 
         // // Update the "starting end cap" to point its end.
         // ref var start = ref keyholes[parentStartIndex];
@@ -196,11 +196,11 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = parentStartIndex;
-        chunk.String = literal;
-        chunk.Type = FormatType.StringLiteral;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = parentStartIndex;
+        keyhole.String = literal;
+        keyhole.Type = FormatType.StringLiteral;
 
         return base.WriteImmutableMarkup(ref html, literal);
     }
@@ -210,12 +210,12 @@ public class DiffComposer : BaseComposer
         if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = parentStartIndex;
-        chunk.String = value;
-        chunk.Type = FormatType.String;
-        chunk.Format = null;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = parentStartIndex;
+        keyhole.String = value;
+        keyhole.Type = FormatType.String;
+        keyhole.Format = null;
 
         return base.WriteMutableValue(ref html, value);
     }
@@ -225,12 +225,12 @@ public class DiffComposer : BaseComposer
         if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = parentStartIndex;
-        chunk.Boolean = value;
-        chunk.Type = FormatType.Boolean;
-        chunk.Format = null;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = parentStartIndex;
+        keyhole.Boolean = value;
+        keyhole.Type = FormatType.Boolean;
+        keyhole.Format = null;
 
         return base.WriteMutableValue(ref html, value);
     }
@@ -241,40 +241,40 @@ public class DiffComposer : BaseComposer
         if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = parentStartIndex;
-        chunk.Format = format;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = parentStartIndex;
+        keyhole.Format = format;
 
         switch (value)
         {
             case int i:
-                chunk.Integer = i;
-                chunk.Type = FormatType.Integer;
+                keyhole.Integer = i;
+                keyhole.Type = FormatType.Integer;
                 break;
             case long l:
-                chunk.Long = l;
-                chunk.Type = FormatType.Long;
+                keyhole.Long = l;
+                keyhole.Type = FormatType.Long;
                 break;
             case float f:
-                chunk.Float = f;
-                chunk.Type = FormatType.Float;
+                keyhole.Float = f;
+                keyhole.Type = FormatType.Float;
                 break;
             case double d:
-                chunk.Double = d;
-                chunk.Type = FormatType.Double;
+                keyhole.Double = d;
+                keyhole.Type = FormatType.Double;
                 break;
             case decimal m:
-                chunk.Decimal = m;
-                chunk.Type = FormatType.Decimal;
+                keyhole.Decimal = m;
+                keyhole.Type = FormatType.Decimal;
                 break;
             case DateTime dt:
-                chunk.DateTime = dt;
-                chunk.Type = FormatType.DateTime;
+                keyhole.DateTime = dt;
+                keyhole.Type = FormatType.DateTime;
                 break;
             case TimeSpan ts:
-                chunk.TimeSpan = ts;
-                chunk.Type = FormatType.TimeSpan;
+                keyhole.TimeSpan = ts;
+                keyhole.Type = FormatType.TimeSpan;
                 break;
             default:
                 // In the future, possibly support other/custom IUtf8SpanFormattable types?
@@ -294,14 +294,14 @@ public class DiffComposer : BaseComposer
 
         // end = h.end;
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // chunk.Integer = h.start;
-        chunk.Type = FormatType.Attribute;
-        chunk.String = expression;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
+        // keyhole.Integer = h.start;
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
 
-        // ref var start = ref chunks[h.start];
+        // ref var start = ref keyholes[h.start];
         // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
@@ -315,14 +315,14 @@ public class DiffComposer : BaseComposer
 
         // end = h.end;
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // chunk.Integer = h.start;
-        chunk.Type = FormatType.Attribute;
-        chunk.String = expression;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
+        // keyhole.Integer = h.start;
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
 
-        // ref var start = ref chunks[h.start];
+        // ref var start = ref keyholes[h.start];
         // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref html, attrName, attrValue, format, expression);
@@ -335,14 +335,14 @@ public class DiffComposer : BaseComposer
 
         // end = h.end;
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // chunk.Integer = h.start;
-        chunk.Type = FormatType.Attribute;
-        chunk.String = expression;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
+        // keyhole.Integer = h.start;
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
 
-        // ref var start = ref chunks[h.start];
+        // ref var start = ref keyholes[h.start];
         // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
@@ -361,10 +361,10 @@ public class DiffComposer : BaseComposer
         if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        chunk.Type = FormatType.EventHandler;
-        chunk.String = expression;
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        keyhole.Type = FormatType.EventHandler;
+        keyhole.String = expression;
 
         return CompleteFormattedValue();
     }
@@ -376,11 +376,11 @@ public class DiffComposer : BaseComposer
         if (IsEven(html.Length))
             WriteImmutableMarkup(ref html, string.Empty);
 
-        ref var chunk = ref keyholes[html.Index + html.Length++];
-        chunk.Key = Cursor;
-        // chunk.RefId = parentStartIndex;
-        chunk.Type = FormatType.HtmlString;
-        chunk.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
+        ref var keyhole = ref keyholes[html.Index + html.Length++];
+        keyhole.Key = Cursor;
+        // keyhole.RefId = parentStartIndex;
+        keyhole.Type = FormatType.HtmlString;
+        keyhole.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
 
         // // Update the "starting end cap" to point its end.
         // ref var start = ref keyholes[parentStartIndex];

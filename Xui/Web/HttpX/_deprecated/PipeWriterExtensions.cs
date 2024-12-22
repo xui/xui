@@ -13,29 +13,29 @@ public static class PipeWriterExtensions
 
 
 
-    public static void Write(this IBufferWriter<byte> writer, ref Chunk chunk)
+    public static void Write(this IBufferWriter<byte> writer, ref Keyhole keyhole)
     {
-        // chunk.Write(writer);
+        // keyhole.Write(writer);
     }
 
-    public static void Write(this PipeWriter writer, IEnumerable<Memory<Chunk>> deltas)
+    public static void Write(this PipeWriter writer, IEnumerable<Memory<Keyhole>> deltas)
     {
         foreach (var delta in deltas)
         {
-        //     ref var chunk = ref delta.Span[0];
+        //     ref var keyhole = ref delta.Span[0];
 
         //     if (delta.Length == 1)
         //     {
         //         writer.WriteStringLiteral("slot");
-        //         writer.Write(chunk.Id);
+        //         writer.Write(keyhole.Id);
         //         writer.WriteStringLiteral(".nodeValue='");
-        //         writer.Write(ref chunk);
+        //         writer.Write(ref keyhole);
         //         writer.WriteStringLiteral("';");
         //     }
         //     else
         //     {
         //         writer.WriteStringLiteral("replaceNode(slot");
-        //         writer.Write(chunk.Id);
+        //         writer.Write(keyhole.Id);
         //         writer.WriteStringLiteral(",`");
         //         var span = delta.Span;
         //         for (int i = 0; i <= delta.Length; i++)
@@ -55,16 +55,16 @@ public static class PipeWriterExtensions
             // {
             //     case DeltaType.Text:
             //         writer.WriteStringLiteral("slot");
-            //         writer.Write(chunk.Id);
+            //         writer.Write(keyhole.Id);
             //         writer.WriteStringLiteral(".nodeValue=`");
-            //         writer.Write(ref chunk);
+            //         writer.Write(ref keyhole);
             //         writer.WriteStringLiteral("`;");
             //         break;
             //     case DeltaType.Attribute:
             //         writer.WriteStringLiteral("slot");
-            //         writer.Write(chunk.Id);
+            //         writer.Write(keyhole.Id);
             //         writer.WriteStringLiteral(".setAttribute(`");
-            //         writer.Write(chunk.Attribute);
+            //         writer.Write(keyhole.Attribute);
             //         writer.WriteStringLiteral("`,`");
             //         var spanAttr = delta.Span;
             //         for (int i = 0; i <= delta.Length; i++)
@@ -79,7 +79,7 @@ public static class PipeWriterExtensions
             //         // should include the sentinels like below.
             //         // Will it be escaped properly?
             //         writer.WriteStringLiteral("replaceNode(slot");
-            //         writer.Write(chunk.Id);
+            //         writer.Write(keyhole.Id);
             //         writer.WriteStringLiteral(",`");
             //         var spanElem = delta.Span;
             //         for (int i = 0; i <= delta.Length; i++)
@@ -93,15 +93,15 @@ public static class PipeWriterExtensions
         }
     }
 
-    public static void Write(this PipeWriter writer, Span<Chunk> span)
+    public static void Write(this PipeWriter writer, Span<Keyhole> span)
     {
         // bool hackProbablyAnAttributeNext = false;
 
         // for (int i = 0; i < span.Length; i++)
         // {
-        //     ref var chunk = ref span[i];
+        //     ref var keyhole = ref span[i];
 
-        //     switch (chunk.Type)
+        //     switch (keyhole.Type)
         //     {
         //         case FormatType.Boolean:
         //         case FormatType.DateTime:
@@ -114,45 +114,45 @@ public static class PipeWriterExtensions
         //         case FormatType.String:
         //             if (hackProbablyAnAttributeNext)
         //             {
-        //                 writer.Write(ref chunk);
+        //                 writer.Write(ref keyhole);
         //             }
         //             else
         //             {
         //                 writer.WriteStringLiteral("<!-- -->");
-        //                 writer.Write(ref chunk);
+        //                 writer.Write(ref keyhole);
         //                 writer.WriteStringLiteral("<script>r(\"slot");
-        //                 writer.Write(chunk.Id);
+        //                 writer.Write(keyhole.Id);
         //                 writer.WriteStringLiteral("\")</script>");
         //             }
         //             break;
         //         case FormatType.View:
         //         case FormatType.HtmlString:
         //             // Only render extras for HtmlString's trailing sentinel, ignore for the leading sentinel.
-        //             if (chunk.Id > chunk.Integer)
+        //             if (keyhole.Id > keyhole.Integer)
         //             {
         //                 writer.WriteStringLiteral("<script>r(\"slot");
-        //                 writer.Write(chunk.Id);
+        //                 writer.Write(keyhole.Id);
         //                 writer.WriteStringLiteral("\")</script>");
         //             }
         //             break;
         //         case FormatType.Action:
         //         case FormatType.ActionAsync:
         //             writer.WriteStringLiteral("h(");
-        //             writer.Write(chunk.Id);
+        //             writer.Write(keyhole.Id);
         //             writer.WriteStringLiteral(")");
         //             break;
         //         case FormatType.ActionEvent:
         //         case FormatType.ActionEventAsync:
         //             writer.WriteStringLiteral("h(");
-        //             writer.Write(chunk.Id);
+        //             writer.Write(keyhole.Id);
         //             writer.WriteStringLiteral(",event)");
         //             break;
         //         default:
-        //             writer.Write(ref chunk);
+        //             writer.Write(ref keyhole);
         //             break;
         //     }
 
-        //     if (chunk.Type == FormatType.StringLiteral && chunk.String?[^1] == '"')
+        //     if (keyhole.Type == FormatType.StringLiteral && keyhole.String?[^1] == '"')
         //     {
         //         hackProbablyAnAttributeNext = true;
         //     }
