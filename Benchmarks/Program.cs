@@ -4,6 +4,7 @@ using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Xui.Web.Composers;
+using Xui.Web.HttpX.Composers;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
@@ -12,8 +13,9 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 public class Tests
 {
     Pipe pipe = new();
-    DefaultComposer composer = new(null);
     NoOpComposer noOpComposer = new(null);
+    DefaultComposer defaultComposer = new(null);
+    DiffComposer diffComposer = new();
     string name = "Rylan";
     int c = 3;
     State<int> cState = 3.AsState();
@@ -34,7 +36,7 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task PlaceboComposer()
+    public async Task NoOpComposer()
     {
         pipe.Writer.Write(noOpComposer, $"""
             <html>
@@ -53,7 +55,7 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task PlaceboComposerWithState()
+    public async Task NoOpComposerWithState()
     {
         pipe.Writer.Write(noOpComposer, $"""
             <html>
@@ -74,7 +76,7 @@ public class Tests
     [Benchmark]
     public async Task DefaultComposer()
     {
-        pipe.Writer.Write(composer, $"""
+        pipe.Writer.Write(defaultComposer, $"""
             <html>
                 <body>
                     Hello {name}
@@ -93,7 +95,7 @@ public class Tests
     [Benchmark]
     public async Task DefaultComposerWithState()
     {
-        pipe.Writer.Write(composer, $"""
+        pipe.Writer.Write(defaultComposer, $"""
             <html>
                 <body>
                     Hello {name}
@@ -107,6 +109,36 @@ public class Tests
         await pipe.Writer.FlushAsync();
         if (pipe.Reader.TryRead(out ReadResult result))
             pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public void DiffComposer()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerWithState()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {cState}
+                    </button>
+                </body>
+            </html>
+            """);
     }
 }
 
