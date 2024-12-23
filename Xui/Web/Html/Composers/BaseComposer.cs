@@ -29,7 +29,6 @@ public abstract class BaseComposer
         formattedValuesRemaining += formattedCount;
 
         PrepareHtml(ref html, literalLength, formattedCount);
-        Cursor++;
     }
 
     protected bool CompleteStringLiteral(int literalLength)

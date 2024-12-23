@@ -149,7 +149,7 @@ public class DiffComposer : BaseComposer
     private static int highWaterMark = 2048;
     // private Keyhole[] keyholes;
     private static Keyhole[] keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-    public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length); }
+    public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length + 9); } // TODO: Fix this (+2) once the empty keyhole problem is solved.
     // private int segmentPosition = 0;
     public int Length { get; private set; } = 0;
     public int WriteHead { get; private set; } = 0;
