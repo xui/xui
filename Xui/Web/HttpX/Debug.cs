@@ -26,7 +26,7 @@ public static class Debug
             var cssOperator = "font-weight:normal;font-family:monospace,monospace;";
             var cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
             var cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
-            var cssLink = "color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
+            var cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
             var cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
             console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
@@ -51,7 +51,7 @@ public static class Debug
         {
             case FormatType.StringLiteral:
                 output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}",-24} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
+                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
                         console.log(`{keyhole.String}`);
                     console.groupEnd();
                     """);
@@ -84,7 +84,7 @@ public static class Debug
                 int start = keyhole.Integer!.Value;
                 int length = (int)keyhole.Long!.Value;
                 output.AppendLine($"""
-                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %c[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
                     """);
                 for (int i = start; i < start + length; i++)
                 {
