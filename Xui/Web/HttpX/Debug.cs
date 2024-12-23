@@ -27,6 +27,7 @@ public static class Debug
             var cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
             var cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
             var cssLink = "color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
+            var cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
             console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
             """);
@@ -69,13 +70,13 @@ public static class Debug
                 break;
             case FormatType.EventHandler:
                 output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
                     console.groupEnd();
                     """);
                 break;
             case FormatType.Attribute:
                 output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
+                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
                     console.groupEnd();
                     """);
                 break;
@@ -83,7 +84,7 @@ public static class Debug
                 int start = keyhole.Integer!.Value;
                 int length = (int)keyhole.Long!.Value;
                 output.AppendLine($"""
-                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" } %c[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssDefault, cssLink);
+                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %c[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
                     """);
                 for (int i = start; i < start + length; i++)
                 {
