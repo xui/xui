@@ -5,8 +5,9 @@ using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Xui.Web.Composers;
+using Xui.Web.HttpX.Composers;
 
-namespace Xui.Web.HttpX.Composers;
+namespace Xui.Web.HttpX;
 
 public static class Debug
 {
