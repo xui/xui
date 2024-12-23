@@ -159,15 +159,8 @@ public class DiffComposer : BaseComposer
         // keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
     }
 
-    private void Enumerate()
-    {
-        ref var keyhole = ref keyholes[1];
-    }
-
     protected override void Clear()
     {
-        Enumerate();
-
         WriteHead = 0;
         Length = Cursor; // TODO: Fix this (+2) once the empty keyhole problem is solved.
         // currentIndex = 0;
