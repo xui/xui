@@ -108,7 +108,7 @@ public static class DiffComposerExtensions
                         console.groupEnd();
                         """);
                     break;
-                case FormatType.HtmlString:
+                case FormatType.Html:
                     output.AppendLine($"""
                         console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
@@ -372,7 +372,7 @@ public class DiffComposer : BaseComposer
         ref var keyhole = ref keyholes[html.Index + html.Length++];
         keyhole.Key = Cursor;
         // keyhole.RefId = parentStartIndex;
-        keyhole.Type = FormatType.HtmlString;
+        keyhole.Type = FormatType.Html;
         keyhole.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
 
         // // Update the "starting end cap" to point its end.
