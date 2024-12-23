@@ -287,10 +287,7 @@ public class DiffComposer : BaseComposer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEven(int number)
-    {
-        return number % 2 == 0;
-    }
+    public static bool IsEven(int number) => number % 2 == 0;
 
     public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole html)
     {
