@@ -15,5 +15,5 @@ public enum FormatType
     Attribute,
     EventHandler,
     View,
-    Html,
+    HtmlString,
 }

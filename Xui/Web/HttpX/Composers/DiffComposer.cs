@@ -108,7 +108,7 @@ public static class DiffComposerExtensions
                         console.groupEnd();
                         """);
                     break;
-                case FormatType.Html:
+                case FormatType.HtmlString:
                     output.AppendLine($"""
                         console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
                         console.groupEnd();
@@ -159,15 +159,8 @@ public class DiffComposer : BaseComposer
         // keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
     }
 
-    private void Enumerate()
-    {
-        ref var keyhole = ref keyholes[1];
-    }
-
     protected override void Clear()
     {
-        Enumerate();
-
         WriteHead = 0;
         Length = Cursor; // TODO: Fix this (+2) once the empty keyhole problem is solved.
         // currentIndex = 0;
@@ -379,7 +372,7 @@ public class DiffComposer : BaseComposer
         ref var keyhole = ref keyholes[html.Index + html.Length++];
         keyhole.Key = Cursor;
         // keyhole.RefId = parentStartIndex;
-        keyhole.Type = FormatType.Html;
+        keyhole.Type = FormatType.HtmlString;
         keyhole.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
 
         // // Update the "starting end cap" to point its end.
