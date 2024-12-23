@@ -8,10 +8,6 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-
 public static class DiffComposerExtensions
 {
     private static bool warmedUp = false;
@@ -43,104 +39,9 @@ public static class DiffComposerExtensions
 
         Console.WriteLine($"elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
 
-        var output = GetOutput(composer, elapsed, gc2 - gc1);
-        // var output = GetOutput(Memory<Keyhole>.Empty, elapsed, gc2 - gc1);
+        var output = Debug.GetOutput(composer);
         writer.Inject($"{output.ToString()}");
         await writer.FlushAsync();
-    }
-
-    private static StringBuilder GetOutput(DiffComposer composer, TimeSpan elapsed, long bytesAllocated)
-    {
-        // double ns = 1_000_000_000.0 * (double)ticks / Stopwatch.Frequency;
-        // double us = 1_000_000.0 * (double)ticks / Stopwatch.Frequency;
-
-        var keyholes = composer.Keyholes;
-        var output = new StringBuilder();
-
-        output.Append($"""
-            var cssDefault = "font-weight:normal;font-family:monospace,monospace;";
-            var cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
-            var cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
-            var cssHtml = "font-weight:normal;font-family:monospace,monospace;";
-            var cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
-            var cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
-            var cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
-            var cssOperator = "font-weight:normal;font-family:monospace,monospace;";
-            var cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
-            var cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
-
-            console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
-            """);
-
-        for (int i = 0; i < keyholes.Length; i++)
-        {
-            ref Keyhole keyhole = ref keyholes[i];
-            switch (keyhole.Type)
-            {
-                case FormatType.StringLiteral:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}",-24} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
-                            console.log(`{keyhole.String}`);
-                        console.groupEnd();
-                        """);
-                    break;
-                case FormatType.String:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'`, cssVariable, cssOperator, cssType, cssString);
-                        console.groupEnd();
-                        """);
-                    break;
-                case FormatType.Integer:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
-                        console.groupEnd();
-                        """);
-                    break;
-                case FormatType.EventHandler:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
-                        console.groupEnd();
-                        """);
-                    break;
-                case FormatType.Attribute:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
-                        console.groupEnd();
-                        """);
-                    break;
-                case FormatType.Html:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{ $"{{ {keyhole.String} }}" }`, cssVariable, cssOperator, cssType, cssDefault);
-                        console.groupEnd();
-                        """);
-                    break;
-                default:
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{i}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
-                        console.groupEnd();
-                        """);
-                    break;
-            }
-        }
-
-        output.Append($"""
-            console.log("\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
-            console.groupEnd();
-            """);
-        return output;
-    }
-
-    private static string? InlineString(string? value)
-    {
-        int maxLength = 100;
-        var inlined = value
-            ?.Replace("\n", "")
-            ?.Replace("\r", "") 
-            ?.Replace("  ", "")
-            ?? "";
-        return (inlined.Length > maxLength)
-            ? inlined[..(maxLength-3)] + "..."
-            : inlined;
     }
 }
 
@@ -149,6 +50,7 @@ public class DiffComposer : BaseComposer
     private static int highWaterMark = 2048;
     // private Keyhole[] keyholes;
     private static Keyhole[] keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
+    private Keyhole Root { get => keyholes[1]; }
     public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length + 9); } // TODO: Fix this (+2) once the empty keyhole problem is solved.
     // private int segmentPosition = 0;
     public int Length { get; private set; } = 0;
@@ -373,7 +275,9 @@ public class DiffComposer : BaseComposer
         keyhole.Key = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.Type = FormatType.Html;
-        keyhole.String = expression + $" Index:{partial.Index} Length:{partial.Length}";
+        keyhole.String = expression;
+        keyhole.Integer = partial.Index;
+        keyhole.Long = partial.Length;
 
         // // Update the "starting end cap" to point its end.
         // ref var start = ref keyholes[parentStartIndex];
@@ -386,5 +290,24 @@ public class DiffComposer : BaseComposer
     public static bool IsEven(int number)
     {
         return number % 2 == 0;
+    }
+
+    public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole html)
+    {
+        var start = html.Integer!.Value;
+        var end = start + html.Long!.Value - 1;
+        for (int i = start; i <= end; i++)
+        {
+            var keyhole = keyholes[i];
+            yield return keyhole;
+            
+            if (keyhole.Type == FormatType.Html)
+            {
+                foreach (var k in EnumerateDepthFirst(keyhole))
+                {
+                    yield return k;
+                }
+            }
+        }
     }
 }
