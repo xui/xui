@@ -54,7 +54,7 @@ public static class DiffComposerExtensions
         // double ns = 1_000_000_000.0 * (double)ticks / Stopwatch.Frequency;
         // double us = 1_000_000.0 * (double)ticks / Stopwatch.Frequency;
 
-        Keyhole[] keyholes = composer.Keyholes;
+        var keyholes = composer.Keyholes;
         var output = new StringBuilder();
 
         output.Append($"""
@@ -72,7 +72,7 @@ public static class DiffComposerExtensions
             console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
             """);
 
-        for (int i = 0; i < composer.Length; i++)
+        for (int i = 0; i < keyholes.Length; i++)
         {
             ref Keyhole keyhole = ref keyholes[i];
             switch (keyhole.Type)
@@ -149,7 +149,7 @@ public class DiffComposer : BaseComposer
     private static int highWaterMark = 2048;
     // private Keyhole[] keyholes;
     private static Keyhole[] keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-    public Keyhole[] Keyholes { get => keyholes; }
+    public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length); }
     // private int segmentPosition = 0;
     public int Length { get; private set; } = 0;
     public int WriteHead { get; private set; } = 0;
