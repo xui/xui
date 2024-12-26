@@ -35,14 +35,14 @@ public class FindKeyholeComposer(int key) : BaseComposer
             //   {
             //       Console.WriteLine($"Button was clicked");
             //   }
-            _ when eventHandler is Action action => Map(action),
+            Action action => Map(action),
 
             // Example:
             //   void OnClick(Event e)
             //   {
             //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
             //   }
-            _ when eventHandler is Action<Event> action => Map(action),
+            Action<Event> action => Map(action),
 
             // Example:
             //   async Task OnClick()
@@ -50,7 +50,7 @@ public class FindKeyholeComposer(int key) : BaseComposer
             //       await Task.Delay(1000);
             //       Console.WriteLine($"Button was clicked");
             //   }
-            _ when eventHandler is Func<Task> func => Map(func),
+            Func<Task> func => Map(func),
 
             // Example:
             //   async Task OnClick(Event e)
@@ -58,7 +58,7 @@ public class FindKeyholeComposer(int key) : BaseComposer
             //       await Task.Delay(1000);
             //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
             //   }
-            _ when eventHandler is Func<Event, Task> func => Map(func),
+            Func<Event, Task> func => Map(func),
             _ => null
         };
 
