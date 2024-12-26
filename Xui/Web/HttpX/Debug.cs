@@ -13,8 +13,8 @@ public static class Debug
 {
     public static StringBuilder GetOutput(DiffComposer composer)
     {
-        var keyholes = composer.Keyholes;
         var output = new StringBuilder();
+        var keyholes = composer.Keyholes;
 
         output.Append($"""
             var cssDefault = "font-weight:normal;font-family:monospace,monospace;";
@@ -43,6 +43,7 @@ public static class Debug
             console.log("\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
             console.groupEnd();
             """);
+
         return output;
     }
 
