@@ -6,7 +6,7 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public class GetKeyholeComposer(int key) : BaseComposer
+public class FindKeyholeComposer(int key) : BaseComposer
 {
     public int Key { get; init; } = key;
 

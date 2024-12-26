@@ -27,7 +27,7 @@ public static class Extensions
     
     public static Func<Event?, Task>? GetKeyhole(this Func<Html> html, int key)
     {
-        var composer = new GetKeyholeComposer(key);
+        var composer = new FindKeyholeComposer(key);
         composer.Compose($"{html()}");
         return composer.EventHandler;
     }
