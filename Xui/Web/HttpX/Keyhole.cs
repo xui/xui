@@ -6,7 +6,8 @@ namespace Xui.Web.HttpX;
 
 public struct Keyhole
 {
-    public int Key;
+    public string Key;
+    public int OldId;
     public int RefId;
     public FormatType Type;
     public string? String;
