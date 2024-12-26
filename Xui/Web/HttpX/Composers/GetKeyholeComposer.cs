@@ -6,16 +6,6 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public static class GetKeyholeComposerExtensions
-{
-    public static Func<Event?, Task>? GetKeyhole(this Func<Html> html, int key)
-    {
-        var composer = new GetKeyholeComposer(key);
-        composer.Compose($"{html()}");
-        return composer.EventHandler;
-    }
-}
-
 public class GetKeyholeComposer(int key) : BaseComposer
 {
     public int Key { get; init; } = key;

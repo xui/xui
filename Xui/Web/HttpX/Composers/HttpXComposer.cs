@@ -6,23 +6,6 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public static class HttpXComposerExtensions
-{
-    public static ValueTask<FlushResult> WriteAsync(this Func<Html> html, PipeWriter pipeWriter, bool sentinels = false)
-    {
-        if (sentinels)
-        {
-            var composer = new HttpXComposer(pipeWriter);
-            return pipeWriter.WriteAsync(composer, $"{html()}");
-        }
-        else
-        {
-            var composer = new DefaultComposer(pipeWriter);
-            return pipeWriter.WriteAsync(composer, $"{html()}");
-        }
-    }
-}
-
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
     private bool isJsRegisterWritten = false;
