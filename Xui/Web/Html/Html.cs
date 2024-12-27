@@ -10,6 +10,7 @@ namespace Xui.Web;
 public ref struct Html
 {
     readonly BaseComposer composer;
+    public string Key { get; set; }
     public int Index { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; }

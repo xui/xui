@@ -1,28 +1,20 @@
+
 namespace Xui.Web.HttpX;
 
-public struct Keymaker
+internal struct Keymaker
 {
     private static readonly char[] ALPHANUMERICS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
-    private static int depth = 0;
+    private static string parentKey = string.Empty;
     private static int cursor = 0;
 
-    private static char[] key = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".ToCharArray();
-
-    public static void MoveDown(int depth)
+    public static void Reset(string parentKey, int cursor)
     {
-        cursor = 0;
-        Keymaker.depth += depth;
-    }
-
-    public static void MoveUp(int depth)
-    {
-        cursor = 0;
-        Keymaker.depth -= depth;
+        Keymaker.parentKey = parentKey;
+        Keymaker.cursor = cursor;
     }
 
     public static string GetNext()
     {
-        key[depth-1] = ALPHANUMERICS[cursor++];
-        return new string(key[..depth]);
+        return parentKey + ALPHANUMERICS[cursor++];
     }
 }

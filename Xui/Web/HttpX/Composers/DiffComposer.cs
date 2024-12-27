@@ -24,26 +24,26 @@ public class DiffComposer : BaseComposer
 
     protected override void Clear()
     {
+        Keymaker.Reset(parentKey: string.Empty, cursor: 0);
         Length = WriteHead;
         WriteHead = 0;
 
         // currentIndex = 0;
         // parentStartIndex = 0;
 
-        Keymaker.MoveUp(1);
-
         base.Clear();
     }
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        Keymaker.MoveDown(1);
+        html.Key = Keymaker.GetNext();
+        Keymaker.Reset(parentKey: html.Key, cursor: 0);
 
         html.Index = WriteHead;
         WriteHead += html.Length;
 
         // ref var keyhole = ref keyholes[index];
-        // keyhole.Key = Keymaker.GetNext();
+        // keyhole.Key = Keymaker.GetOrCreate(ref html);
         // keyhole.OldId = Cursor;
         // // keyhole.RefId = parentStartIndex;
         // keyhole.Type = FormatType.HtmlString;
@@ -59,7 +59,7 @@ public class DiffComposer : BaseComposer
     public override bool WriteImmutableMarkup(ref Html html, string literal)
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
-        // keyhole.Key = Keymaker.GetNext();
+        // keyhole.Key = Keymaker.GetOrCreate(ref html);
         keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.String = literal;
@@ -222,10 +222,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
     public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
     {
-        Keymaker.MoveUp(1);
-
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
-        keyhole.Key = Keymaker.GetNext();
+        keyhole.Key = partial.Key;
+        Keymaker.Reset(parentKey: html.Key, cursor: html.Cursor / 2 + 1);
         keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.Type = FormatType.Html;
