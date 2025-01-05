@@ -18,25 +18,25 @@ public class FindKeyholeComposer(string key) : BaseComposer
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetNext();
-        Keymaker.Reset(parentKey: html.Key, cursor: 0);
-        base.PrepareHtml(ref html, literalLength, formattedCount);
+        parent.Key = Keymaker.GetNext();
+        Keymaker.Reset(parentKey: parent.Key, cursor: 0);
+        base.PrepareHtml(ref parent, literalLength, formattedCount);
     }
 
-    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
 
-    private bool ToCommonSignatureIfMatch<T>(ref Html html, T eventHandler)
+    private bool ToCommonSignatureIfMatch<T>(ref Html parent, T eventHandler)
     {
-        if (Keymaker.GetKey(ref html) != Key)
+        if (Keymaker.GetKey(ref parent) != Key)
         {
             return base.CompleteFormattedValue();
         }
@@ -104,9 +104,9 @@ public class FindKeyholeComposer(string key) : BaseComposer
         return func(e!);
     };
 
-    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
-        Keymaker.Reset(parentKey: html.Key, cursor: html.Cursor / 2 + 1);
+        Keymaker.Reset(parentKey: parent.Key, cursor: parent.Cursor / 2 + 1);
         return CompleteFormattedValue();
     }
 }

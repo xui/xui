@@ -18,8 +18,8 @@ internal struct Keymaker
         return parentKey + ALPHANUMERICS[cursor++];
     }
 
-    public static string GetKey(ref Html html)
+    public static string GetKey(ref Html parent)
     {
-        return html.Key + ALPHANUMERICS[html.Cursor / 2];
+        return parent.Key + ALPHANUMERICS[parent.Cursor / 2];
     }
 }

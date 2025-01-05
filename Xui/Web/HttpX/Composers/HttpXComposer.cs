@@ -20,27 +20,27 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetNext();
-        Keymaker.Reset(parentKey: html.Key, cursor: 0);
+        parent.Key = Keymaker.GetNext();
+        Keymaker.Reset(parentKey: parent.Key, cursor: 0);
         
-        base.PrepareHtml(ref html, literalLength, formattedCount);
+        base.PrepareHtml(ref parent, literalLength, formattedCount);
     }
 
-    public override bool WriteImmutableMarkup(ref Html html, string literal)
+    public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
         {
             return true;
         }
 
-        return base.WriteImmutableMarkup(ref html, literal);
+        return base.WriteImmutableMarkup(ref parent, literal);
     }
 
-    public override bool WriteMutableValue(ref Html html, string value) => WriteMutableString(ref html, value);
-    public override bool WriteMutableValue(ref Html html, bool value) => WriteMutableString(ref html, value ? Boolean.TrueString : Boolean.FalseString);
-    public override bool WriteMutableValue<T>(ref Html html, T value, string? format = default)
+    public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
+    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the mutable value with a comment tag on one side 
@@ -62,14 +62,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
             Writer.Inject($"""
-                <script>r("key{Keymaker.GetKey(ref html)}")</script>
+                <script>r("key{Keymaker.GetKey(ref parent)}")</script>
                 """);
         }
 
         return CompleteFormattedValue();
     }
 
-    private bool WriteMutableString(ref Html html, string value)
+    private bool WriteMutableString(ref Html parent, string value)
     {
         if (!suppressSentinels)
         {
@@ -82,30 +82,30 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
-            Writer.Inject($"""<script>r("key{Keymaker.GetKey(ref html)}")</script>""");
+            Writer.Inject($"""<script>r("key{Keymaker.GetKey(ref parent)}")</script>""");
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref html)}=\"{attrName}\"");
+        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool WriteMutableAttribute<T>(ref Html html, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
+    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, format, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref html)}=\"{attrName}\"");
+        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
+        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
 
         return @continue;
     }
 
-    public override bool WriteMutableAttribute(ref Html html, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
         // Mutable attributes can't be simply wrapped like mutable values.  So instead,
         // they include a sentinel by its key ID which indicates the
@@ -116,43 +116,43 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
-        var @continue = base.WriteMutableAttribute(ref html, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref html)}=\"{attrName}\"");
+        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
 
         suppressSentinels = false;
 
         return @continue;
     }
 
-    public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: false);
-    public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: true);
-    public override bool WriteEventHandler(ref Html html, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: false);
-    public override bool WriteEventHandler(ref Html html, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, includeEventArg: true);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
-    public override bool WriteEventHandler(ref Html html, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref html, attributeName);
-    private bool WriteEventHandler(ref Html html, bool includeEventArg)
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
+    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
+    private bool WriteEventHandler(ref Html parent, bool includeEventArg)
     {
         if (includeEventArg)
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(ref html)}',event)"
+                "h('{Keymaker.GetKey(ref parent)}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(ref html)}')"
+                "h('{Keymaker.GetKey(ref parent)}')"
                 """);
         }
         return CompleteFormattedValue();
     }
-    private bool WriteEventHandler(ref Html html, ReadOnlySpan<char> includedAttributeName)
+    private bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> includedAttributeName)
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""
-            "h('{Keymaker.GetKey(ref html)}')"
+            "h('{Keymaker.GetKey(ref parent)}')"
             """);
         // Note: When the attribute name is included as a part of the expression 
         // (e.g. $"<button { onclick => c++ }>Click me</button>")
@@ -161,9 +161,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html html, TView view) => WriteMutableElement(ref html, view.Render());
-    public override bool WriteMutableElement(ref Html html, Slot slot) => WriteMutableElement(ref html, slot());
-    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => WriteMutableElement(ref parent, view.Render());
+    public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
@@ -175,7 +175,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"""
                 <script>r("key{partial.Key}")</script>
                 """);
-            Keymaker.Reset(parentKey: html.Key, cursor: html.Cursor / 2 + 1);
+            Keymaker.Reset(parentKey: parent.Key, cursor: parent.Cursor / 2 + 1);
         }
 
         return CompleteFormattedValue();
