@@ -6,11 +6,24 @@ using Xui.Web.Composers;
 
 namespace Xui.Web.HttpX.Composers;
 
-public class FindKeyholeComposer(int key) : BaseComposer
+public class FindKeyholeComposer(string key) : BaseComposer
 {
-    public int Key { get; init; } = key;
+    public string Key { get; init; } = key;
 
     public Func<Event?, Task>? EventHandler { get; set; } = null;
+
+    protected override void Clear()
+    {
+        Keymaker.Reset(parentKey: string.Empty, cursor: 0);
+        base.Clear();
+    }
+
+    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    {
+        html.Key = Keymaker.GetNext();
+        Keymaker.Reset(parentKey: html.Key, cursor: 0);
+        base.PrepareHtml(ref html, literalLength, formattedCount);
+    }
 
     public override bool WriteEventHandler(ref Html html, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
     public override bool WriteEventHandler(ref Html html, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref html, eventHandler);
@@ -23,7 +36,7 @@ public class FindKeyholeComposer(int key) : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html html, T eventHandler)
     {
-        if (Cursor != Key)
+        if (Keymaker.GetKey(ref html) != Key)
         {
             return base.CompleteFormattedValue();
         }
@@ -90,4 +103,10 @@ public class FindKeyholeComposer(int key) : BaseComposer
     {
         return func(e!);
     };
+
+    public override bool WriteMutableElement(ref Html html, Html partial, string? expression = null)
+    {
+        Keymaker.Reset(parentKey: html.Key, cursor: html.Cursor / 2 + 1);
+        return CompleteFormattedValue();
+    }
 }

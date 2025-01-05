@@ -60,7 +60,7 @@ public class DiffComposer : BaseComposer
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         // keyhole.Key = Keymaker.GetOrCreate(ref html);
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.String = literal;
         keyhole.Type = FormatType.StringLiteral;
@@ -72,7 +72,7 @@ public class DiffComposer : BaseComposer
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.String = value;
         keyhole.Type = FormatType.String;
@@ -85,7 +85,7 @@ public class DiffComposer : BaseComposer
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
@@ -99,7 +99,7 @@ public class DiffComposer : BaseComposer
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.Format = format;
 
@@ -150,7 +150,7 @@ public class DiffComposer : BaseComposer
 
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
@@ -169,7 +169,7 @@ public class DiffComposer : BaseComposer
 
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
@@ -187,7 +187,7 @@ public class DiffComposer : BaseComposer
 
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
         // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
@@ -211,7 +211,7 @@ public class DiffComposer : BaseComposer
     {
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = Keymaker.GetNext();
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         keyhole.Type = FormatType.EventHandler;
         keyhole.String = expression;
 
@@ -225,7 +225,7 @@ public class DiffComposer : BaseComposer
         ref var keyhole = ref keyholes[html.Index + html.Cursor];
         keyhole.Key = partial.Key;
         Keymaker.Reset(parentKey: html.Key, cursor: html.Cursor / 2 + 1);
-        keyhole.OldId = Cursor;
+        // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;
         keyhole.Type = FormatType.Html;
         keyhole.String = expression;

@@ -11,7 +11,6 @@ public abstract class BaseComposer
     static BaseComposer? current;
     public static BaseComposer? Current { get => current; set => current = value; }
 
-    public int Cursor { get; private set; } = 0;
     public int LiteralLength { get; private set; } = 0;
     public int FormattedCount { get; private set; } = 0;
 
@@ -45,7 +44,6 @@ public abstract class BaseComposer
 
     protected bool MoveNext()
     {
-        Cursor++;
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
         {
             Clear();
@@ -55,7 +53,6 @@ public abstract class BaseComposer
 
     protected virtual void Clear()
     {
-        Cursor = 0;
         current = null;
     }
 
