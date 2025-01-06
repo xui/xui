@@ -75,7 +75,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
             _ => null
         };
 
-        base.Clear();
+        Clear();
 
         // Found it so save some time.  Return false to
         // short circuit any following calls to html.Append*().
