@@ -236,7 +236,7 @@ public class DiffComposer : BaseComposer
         // ref var start = ref keyholes[parentStartIndex];
         // start.Integer = Cursor;
 
-        return base.WriteMutableElement(ref parent, partial);
+        return base.WriteMutableElement(ref parent, partial, expression);
     }
 
     public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)
