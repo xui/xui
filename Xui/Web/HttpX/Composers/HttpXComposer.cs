@@ -8,24 +8,29 @@ namespace Xui.Web.HttpX.Composers;
 
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
+    private string parentKey = string.Empty;
+    private int cursor = 0;
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
 
     protected override void Clear()
     {
-        Keymaker.Reset(parentKey: string.Empty, cursor: 0);
+        parentKey = string.Empty;
+        cursor = 0;
+        
         isJsRegisterWritten = false;
         suppressSentinels = false;
 
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        parent.Key = Keymaker.GetNext();
-        Keymaker.Reset(parentKey: parent.Key, cursor: 0);
+        html.Key = Keymaker.GetKey(parentKey, cursor++);
+        parentKey = html.Key;
+        cursor = 0;
         
-        base.PrepareHtml(ref parent, literalLength, formattedCount);
+        base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
@@ -62,9 +67,10 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
             Writer.Inject($"""
-                <script>r("key{Keymaker.GetKey(ref parent)}")</script>
+                <script>r("key{Keymaker.GetKey(parentKey, cursor)}")</script>
                 """);
         }
+        cursor++;
 
         return CompleteFormattedValue();
     }
@@ -82,8 +88,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         if (!suppressSentinels && EnsureJsRegisterIsWritten())
         {
-            Writer.Inject($"""<script>r("key{Keymaker.GetKey(ref parent)}")</script>""");
+            Writer.Inject($"""<script>r("key{Keymaker.GetKey(parentKey, cursor)}")</script>""");
         }
+        cursor++;
 
         return CompleteFormattedValue();
     }
@@ -91,7 +98,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
+        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -100,7 +107,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
+        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -117,7 +124,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         suppressSentinels = true;
 
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(ref parent)}=\"{attrName}\"");
+        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++)}=\"{attrName}\"");
 
         suppressSentinels = false;
 
@@ -137,13 +144,13 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (includeEventArg)
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(ref parent)}',event)"
+                "h('{Keymaker.GetKey(parentKey, cursor++)}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(ref parent)}')"
+                "h('{Keymaker.GetKey(parentKey, cursor++)}')"
                 """);
         }
         return CompleteFormattedValue();
@@ -152,7 +159,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""
-            "h('{Keymaker.GetKey(ref parent)}')"
+            "h('{Keymaker.GetKey(parentKey, cursor++)}')"
             """);
         // Note: When the attribute name is included as a part of the expression 
         // (e.g. $"<button { onclick => c++ }>Click me</button>")
@@ -175,8 +182,10 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Writer.Inject($"""
                 <script>r("key{partial.Key}")</script>
                 """);
-            Keymaker.Reset(parentKey: parent.Key, cursor: parent.Cursor / 2 + 1);
         }
+
+        parentKey = parent.Key;
+        cursor = parent.Cursor / 2 + 1;
 
         return CompleteFormattedValue();
     }

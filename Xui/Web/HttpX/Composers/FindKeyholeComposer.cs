@@ -8,21 +8,28 @@ namespace Xui.Web.HttpX.Composers;
 
 public class FindKeyholeComposer(string key) : BaseComposer
 {
+    private string parentKey = string.Empty;
+    private int cursor = 0;
+
     public string Key { get; init; } = key;
 
     public Func<Event?, Task>? EventHandler { get; set; } = null;
 
     protected override void Clear()
     {
-        Keymaker.Reset(parentKey: string.Empty, cursor: 0);
+        parentKey = string.Empty;
+        cursor = 0;
+
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        parent.Key = Keymaker.GetNext();
-        Keymaker.Reset(parentKey: parent.Key, cursor: 0);
-        base.PrepareHtml(ref parent, literalLength, formattedCount);
+        html.Key = Keymaker.GetKey(parentKey, cursor++);
+        parentKey = html.Key;
+        cursor = 0;
+
+        base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
     public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
@@ -36,7 +43,8 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T eventHandler)
     {
-        if (Keymaker.GetKey(ref parent) != Key)
+        var key = Keymaker.GetKey(parentKey, cursor++);
+        if (key != Key)
         {
             return base.CompleteFormattedValue();
         }
@@ -106,7 +114,29 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
-        Keymaker.Reset(parentKey: parent.Key, cursor: parent.Cursor / 2 + 1);
+        parentKey = parent.Key;
+        cursor = parent.Cursor / 2 + 1;
         return CompleteFormattedValue();
     }
+
+
+
+    // TEMPORARY!!!!!!!  Perhaps the cursor should always move itself at the base level?
+
+    private FindKeyholeComposer IncrementCursor()
+    {
+        cursor++;
+        return this;
+    }
+
+    public override bool WriteMutableValue(ref Html parent, string value) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableValue(ref Html parent, bool value) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default) => IncrementCursor().CompleteFormattedValue();
+    
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
+
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableElement(ref Html parent, Slot slot) => IncrementCursor().CompleteFormattedValue();
 }
