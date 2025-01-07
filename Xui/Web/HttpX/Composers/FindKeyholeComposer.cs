@@ -25,7 +25,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++);
+        html.Key = Keymaker.GetKey(parentKey, cursor++, 1);
         parentKey = html.Key;
         cursor = 0;
 
@@ -43,7 +43,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T eventHandler)
     {
-        var key = Keymaker.GetKey(parentKey, cursor++);
+        var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         if (key != Key)
         {
             return base.CompleteFormattedValue();
