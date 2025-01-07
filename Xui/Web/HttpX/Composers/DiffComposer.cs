@@ -14,6 +14,7 @@ public class DiffComposer : BaseComposer
     // private Keyhole[] keyholes;
     private static Keyhole[] keyholes = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
     private string parentKey = string.Empty;
+    private int parentLength = 0;
     private int cursor = 0;
     public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length); }
     public int WriteHead { get; private set; } = 0;
@@ -27,6 +28,7 @@ public class DiffComposer : BaseComposer
     protected override void Clear()
     {
         parentKey = string.Empty;
+        parentLength = 0;
         cursor = 0;
 
         Length = WriteHead;
@@ -40,8 +42,9 @@ public class DiffComposer : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++, 1);
+        html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
         parentKey = html.Key;
+        parentLength = html.Length;
         cursor = 0;
 
         html.Index = WriteHead;
@@ -230,6 +233,7 @@ public class DiffComposer : BaseComposer
         ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
         keyhole.Key = partial.Key;
         parentKey = parent.Key;
+        parentLength = parent.Length;
         cursor = parent.Cursor / 2 + 1;
         // keyhole.OldId = Cursor;
         // keyhole.RefId = parentStartIndex;

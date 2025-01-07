@@ -9,6 +9,7 @@ namespace Xui.Web.HttpX.Composers;
 public class FindKeyholeComposer(string key) : BaseComposer
 {
     private string parentKey = string.Empty;
+    private int parentLength = 0;
     private int cursor = 0;
 
     public string Key { get; init; } = key;
@@ -18,6 +19,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
     protected override void Clear()
     {
         parentKey = string.Empty;
+        parentLength = 0;
         cursor = 0;
 
         base.Clear();
@@ -25,8 +27,9 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++, 1);
+        html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
         parentKey = html.Key;
+        parentLength = html.Length;
         cursor = 0;
 
         base.PrepareHtml(ref html, literalLength, formattedCount);
@@ -115,6 +118,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
     public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
         parentKey = parent.Key;
+        parentLength = parent.Length;
         cursor = parent.Cursor / 2 + 1;
         return CompleteFormattedValue();
     }

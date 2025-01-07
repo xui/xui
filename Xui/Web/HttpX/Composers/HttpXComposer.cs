@@ -9,6 +9,7 @@ namespace Xui.Web.HttpX.Composers;
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {
     private string parentKey = string.Empty;
+    private int parentLength = 0;
     private int cursor = 0;
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
@@ -16,6 +17,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     protected override void Clear()
     {
         parentKey = string.Empty;
+        parentLength = 0;
         cursor = 0;
         
         isJsRegisterWritten = false;
@@ -26,8 +28,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++, 1);
+        html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
         parentKey = html.Key;
+        parentLength = html.Length;
         cursor = 0;
         
         base.PrepareHtml(ref html, literalLength, formattedCount);
@@ -185,6 +188,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         }
 
         parentKey = parent.Key;
+        parentLength = parent.Length;
         cursor = parent.Cursor / 2 + 1;
 
         return CompleteFormattedValue();
