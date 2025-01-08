@@ -27,8 +27,10 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
-        parentKey = html.Key;
+        // Skip the root.  It doesn't need a key.
+        parentKey = html.Key = IsInitialAppend()
+            ? string.Empty
+            : Keymaker.GetKey(parentKey, cursor++, parentLength);
         parentLength = html.Length;
         cursor = 0;
 

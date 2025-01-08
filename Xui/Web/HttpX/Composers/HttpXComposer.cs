@@ -28,8 +28,10 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
-        parentKey = html.Key;
+        // Skip the root.  It doesn't need a key.
+        parentKey = html.Key = IsInitialAppend()
+            ? string.Empty
+            : Keymaker.GetKey(parentKey, cursor++, parentLength);
         parentLength = html.Length;
         cursor = 0;
         
@@ -67,10 +69,11 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        if (!suppressSentinels && EnsureJsRegisterIsWritten())
+        var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
+        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>r("key{Keymaker.GetKey(parentKey, cursor, parent.Length)}")</script>
+                <script>reg('key{key}')</script>
                 """);
         }
         cursor++;
@@ -89,9 +92,10 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             Encoding.UTF8.GetBytes(value, Writer);
         }
 
-        if (!suppressSentinels && EnsureJsRegisterIsWritten())
+        var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
+        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
-            Writer.Inject($"""<script>r("key{Keymaker.GetKey(parentKey, cursor, parent.Length)}")</script>""");
+            Writer.Inject($"""<script>reg('key{key}')</script>""");
         }
         cursor++;
 
@@ -147,13 +151,13 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (includeEventArg)
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event)"
+                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "h('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
+                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
                 """);
         }
         return CompleteFormattedValue();
@@ -162,7 +166,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""
-            "h('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
+            "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
             """);
         // Note: When the attribute name is included as a part of the expression 
         // (e.g. $"<button { onclick => c++ }>Click me</button>")
@@ -183,7 +187,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels)
         {
             Writer.Inject($"""
-                <script>r("key{partial.Key}")</script>
+                <script>reg('key{partial.Key}')</script>
                 """);
         }
 
@@ -194,28 +198,16 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
-    private bool EnsureJsRegisterIsWritten()
+    private bool EnsureJsRegisterIsWritten(string key)
     {
         if (!isJsRegisterWritten)
         {
-            Writer.Inject($"{JS_REGISTER}");
+            Writer.Inject($$"""<script>ui={};function reg(k){ui[k]=document.currentScript.previousSibling;}reg('key{{key}}');</script>""");
             isJsRegisterWritten = true;
             return false;
         }
         return true;
     }
-
-    private static readonly string JS_REGISTER = """
-        <script>
-            ui={};
-            function r(k) {
-                ui[k]=document.currentScript.previousSibling;
-            }
-            r('key0');
-        </script>
-        """
-        .Replace("\n", "")
-        .Replace("  ", "");
 
     // Fear not, this Dictionary will not grow unbounded.  
     // Since it's only ever called from AppendLiteral, that means the universe of
@@ -269,7 +261,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 ui[a.name]=a;
             }
 
-            function h(id,ev) {
+            function rpc(id,ev) {
                 console.debug("executing keyhole: " + id);
                 if (ev) {
                     ws.send(`${id}${encodeEvent(ev)}`);

@@ -33,11 +33,20 @@ public static class Debug
             console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
             """);
 
-        for (int i = 0; i < 3; i++)
+        var root = keyholes[1];
+        int start = root.Integer!.Value;
+        int length = (int)root.Long!.Value;
+        for (int i = start; i < length + start; i++)
         {
             ref Keyhole keyhole = ref keyholes[i];
             Append(output, i, ref keyhole, keyholes);
         }
+
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     ref Keyhole keyhole = ref keyholes[i];
+        //     Append(output, i, ref keyhole, keyholes);
+        // }
 
         output.Append($"""
             console.log("\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
@@ -85,9 +94,19 @@ public static class Debug
             case FormatType.Html:
                 int start = keyhole.Integer!.Value;
                 int length = (int)keyhole.Long!.Value;
-                output.AppendLine($"""
-                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
-                    """);
+                if (keyhole.Key != string.Empty)
+                {
+                    output.AppendLine($"""
+                        console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        """);
+                }
+                else
+                {
+                    output.AppendLine($"""
+                        console.group(`{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        """);
+                }
+
                 for (int i = start; i < start + length; i++)
                 {
                     ref var k = ref keyholes[i];
