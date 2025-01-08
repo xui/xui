@@ -17,6 +17,7 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
+    protected bool IsInitialAppend() => FormattedCount - formattedValuesRemaining == 0;
     protected bool IsFinalAppend(string s) => literalLengthRemaining == s.Length;
 
     public void Grow(ref Html parent, int literalLength, int formattedCount)
