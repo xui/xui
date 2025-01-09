@@ -16,9 +16,11 @@ public class DiffComposer : BaseComposer
     private string parentKey = string.Empty;
     private int parentLength = 0;
     private int cursor = 0;
-    public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, Length); }
-    public int WriteHead { get; private set; } = 0;
-    public int Length { get; private set; } = 0;
+    private int writeHead = -3; // Offset by -3 to skip the initial $"{html()}
+    private int bufferLength = 0;
+    
+    public int RootLength { get; private set; } = 0;
+    public Span<Keyhole> Keyholes { get => keyholes.AsSpan(0, bufferLength); }
 
     public DiffComposer()
     {
@@ -31,59 +33,54 @@ public class DiffComposer : BaseComposer
         parentLength = 0;
         cursor = 0;
 
-        Length = WriteHead;
-        WriteHead = 0;
-
-        // currentIndex = 0;
-        // parentStartIndex = 0;
+        bufferLength = writeHead;
+        writeHead = 0;
 
         base.Clear();
     }
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        // Skip the root.  It doesn't need a key.
-        parentKey = html.Key = IsInitialAppend()
-            ? string.Empty
-            : Keymaker.GetKey(parentKey, cursor++, parentLength);
+        Console.WriteLine($"initial:{IsInitialAppend()}, html.Length:{html.Length}");
+
+        if (IsInitialAppend())
+        {
+            html.Key = string.Empty;
+            RootLength = html.Length;
+        }
+        else
+        {
+            html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
+        }
+
+        parentKey = html.Key;
         parentLength = html.Length;
         cursor = 0;
 
-        html.Index = WriteHead;
-        WriteHead += html.Length;
-
-        // ref var keyhole = ref keyholes[index];
-        // keyhole.Key = Keymaker.GetOrCreate(ref html);
-        // keyhole.OldId = Cursor;
-        // // keyhole.RefId = parentStartIndex;
-        // keyhole.Type = FormatType.HtmlString;
-        // keyhole.String = $" --------start-----------: literalLength: {literalLength}, formattedCount: {formattedCount}";
-
-        // // Update the "starting end cap" to point its end.
-        // ref var start = ref keyholes[parentStartIndex];
-        // start.Integer = Cursor;
+        html.Index = writeHead;
+        writeHead += html.Length;
 
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
-        // keyhole.Key = Keymaker.GetOrCreate(ref html);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = parentStartIndex;
-        keyhole.String = literal;
-        keyhole.Type = FormatType.StringLiteral;
+        var index = parent.Index + parent.Cursor;
+        if (index >= 0)
+        {
+            ref var keyhole = ref keyholes[index];
+            keyhole.String = literal;
+            keyhole.Type = FormatType.StringLiteral;
+        }
 
         return base.WriteImmutableMarkup(ref parent, literal);
     }
 
     public override bool WriteMutableValue(ref Html parent, string value)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = parentStartIndex;
         keyhole.String = value;
         keyhole.Type = FormatType.String;
         keyhole.Format = null;
@@ -93,10 +90,9 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableValue(ref Html parent, bool value)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = parentStartIndex;
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
         keyhole.Format = null;
@@ -107,10 +103,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = parentStartIndex;
         keyhole.Format = format;
 
         switch (value)
@@ -156,18 +151,11 @@ public class DiffComposer : BaseComposer
 
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
-        // end = h.end;
-
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
-
-        // ref var start = ref keyholes[h.start];
-        // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
@@ -175,36 +163,22 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        // end = h.end;
-
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
-
-        // ref var start = ref keyholes[h.start];
-        // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
     }
 
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
     {
-        // end = h.end;
-
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = ...TBD.. // actually I DO know it since this is executing AFTER the HTML instantiates
-        // keyhole.Integer = h.start;
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
-
-        // ref var start = ref keyholes[h.start];
-        // start.Integer = Cursor;
 
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
@@ -219,9 +193,9 @@ public class DiffComposer : BaseComposer
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, expression);
     private bool WriteEventHandler(ref Html parent, string? expression = null)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref keyholes[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        // keyhole.OldId = Cursor;
         keyhole.Type = FormatType.EventHandler;
         keyhole.String = expression;
 
@@ -232,21 +206,19 @@ public class DiffComposer : BaseComposer
     public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
     public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
-        ref var keyhole = ref keyholes[parent.Index + parent.Cursor];
-        keyhole.Key = partial.Key;
-        parentKey = parent.Key;
-        parentLength = parent.Length;
-        cursor = parent.Cursor / 2 + 1;
-        // keyhole.OldId = Cursor;
-        // keyhole.RefId = parentStartIndex;
-        keyhole.Type = FormatType.Html;
-        keyhole.String = expression;
-        keyhole.Integer = partial.Index;
-        keyhole.Long = partial.Cursor;
-
-        // // Update the "starting end cap" to point its end.
-        // ref var start = ref keyholes[parentStartIndex];
-        // start.Integer = Cursor;
+        var index = parent.Index + parent.Cursor;
+        if (index >= 0)
+        {
+            ref var keyhole = ref keyholes[index];
+            keyhole.Key = partial.Key;
+            parentKey = parent.Key;
+            parentLength = parent.Length;
+            cursor = parent.Cursor / 2 + 1;
+            keyhole.Type = FormatType.Html;
+            keyhole.String = expression;
+            keyhole.Integer = partial.Index;
+            keyhole.Long = partial.Cursor;
+        }
 
         return base.WriteMutableElement(ref parent, partial, expression);
     }

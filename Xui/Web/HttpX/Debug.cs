@@ -33,20 +33,11 @@ public static class Debug
             console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
             """);
 
-        var root = keyholes[1];
-        int start = root.Integer!.Value;
-        int length = (int)root.Long!.Value;
-        for (int i = start; i < length + start; i++)
+        for (int i = 0; i < composer.RootLength; i++)
         {
             ref Keyhole keyhole = ref keyholes[i];
             Append(output, i, ref keyhole, keyholes);
         }
-
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     ref Keyhole keyhole = ref keyholes[i];
-        //     Append(output, i, ref keyhole, keyholes);
-        // }
 
         output.Append($"""
             console.log("\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
