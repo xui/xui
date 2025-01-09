@@ -7,8 +7,6 @@ namespace Xui.Web.HttpX;
 public struct Keyhole
 {
     public string Key;
-    public int OldId;
-    public int RefId;
     public FormatType Type;
     public string? String;
     public int? Integer;
@@ -19,7 +17,6 @@ public struct Keyhole
     public DateTime? DateTime;
     public TimeSpan? TimeSpan;
     public bool? Boolean;
-    public IView? View;
     public string? Format;
 
     public static bool operator ==(Keyhole c1, Keyhole c2)
