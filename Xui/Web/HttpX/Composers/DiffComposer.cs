@@ -34,7 +34,7 @@ public class DiffComposer : BaseComposer
         cursor = 0;
 
         bufferLength = writeHead;
-        writeHead = 0;
+        writeHead = -3;
 
         base.Clear();
     }

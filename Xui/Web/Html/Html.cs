@@ -26,14 +26,14 @@ public ref struct Html
     public Html(int literalLength, int formattedCount, BaseComposer composer)
     {
         Length = 2 * formattedCount + 1;
-        this.composer = BaseComposer.Current ??= composer;
+        this.composer = BaseComposer.Current ??= composer.Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
         Length = 2 * formattedCount + 1;
-        this.composer = BaseComposer.Current ??= new DefaultComposer(writer);
+        this.composer = BaseComposer.Current ??= new DefaultComposer(writer).Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
     }
 
@@ -41,7 +41,7 @@ public ref struct Html
     {
         Length = 2 * formattedCount + 1;
         composer.Writer = writer;
-        this.composer = BaseComposer.Current ??= composer;
+        this.composer = BaseComposer.Current ??= composer.Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
     }
 
