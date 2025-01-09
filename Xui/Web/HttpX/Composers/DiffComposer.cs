@@ -41,8 +41,6 @@ public class DiffComposer : BaseComposer
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        Console.WriteLine($"initial:{IsInitialAppend()}, html.Length:{html.Length}");
-
         if (IsInitialAppend())
         {
             html.Key = string.Empty;
