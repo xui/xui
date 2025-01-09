@@ -62,7 +62,7 @@ public static class Debug
         {
             case FormatType.StringLiteral:
                 output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c"{InlineString(keyhole.String)}"`, cssVariable, cssLiteral);
+                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c\`{InlineString(keyhole.String)}\``, cssVariable, cssLiteral);
                         console.log(`\n{keyhole.String}\n\n`);
                     console.groupEnd();
                     """);
