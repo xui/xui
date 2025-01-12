@@ -262,26 +262,26 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 ui[a.name]=a;
             }
 
-            function rpc(id,ev) {
-                console.debug("executing keyhole: " + id);
-                if (ev) {
-                    ws.send(`${id}${encodeEvent(ev)}`);
-                } else {
-                    ws.send(id);
-                }
+            function rpc(key,ev) {
+                let body = (ev) ? encodeEvent(ev) : '';
+                let command = 
+        `CALL /app#key${key} XTTP/0.1
+        Content-Type: application/json
+        Content-Length: ${body.length}
+
+        ${body}`;
+                ws.send(command);
             }
 
             function debugSocket(name, ws) {
-                ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
-                ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
-                ws.onerror = (event) => { console.error(`${name} onerror`, event); };
             }
 
             var l = location;
             const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
-            debugSocket("xui", ws);
+            ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
+            ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
+            ws.onerror = (event) => { console.error(`${name} onerror`, event); };
             ws.onmessage = (event) => {
-                console.debug("onmessage: ", event);
                 eval(event.data);
             };
 
@@ -314,7 +314,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 }
             }
         </script>
-        """
-        .Replace("\n", "")
-        .Replace("  ", "");
+        """;
+        // .Replace("\n", "")
+        // .Replace("  ", "");
 }

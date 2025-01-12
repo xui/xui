@@ -25,8 +25,11 @@ public static class Extensions
         }
     }
     
-    public static Func<Event?, Task>? GetKeyhole(this Func<Html> html, string key)
+    public static Func<Event?, Task>? GetKeyhole(this Func<Html> html, string? key)
     {
+        if (key is null)
+            return null;
+
         var composer = new FindKeyholeComposer(key);
         composer.Compose($"{html()}");
         return composer.EventHandler;
@@ -35,34 +38,39 @@ public static class Extensions
     private static bool warmedUp = false;
     public static async Task DebugSnapshot(this Func<Html> html, PipeWriter writer)
     {
-        var composer = new DiffComposer();
-        // // Warmup...
-        // var warmup = Stopwatch.StartNew();
-        // long c = 0;
-        // while (warmup.ElapsedMilliseconds < 1000)
-        // {
-        //     c++;
-        // }
-        // Console.WriteLine(c);
-        // if (!warmedUp)
-        // {
+        try
+        {
+            var composer = new DiffComposer();
+            // // Warmup...
+            // var warmup = Stopwatch.StartNew();
+            // long c = 0;
+            // while (warmup.ElapsedMilliseconds < 1000)
+            // {
+            //     c++;
+            // }
+            // Console.WriteLine(c);
+            // if (!warmedUp)
+            // {
+                // for (int i = 0; i < 250_000; i++)
+                    // composer.Compose($"{html()}");
+            //     warmedUp = true;
+            // }
+
+            // long gc1 = GC.GetAllocatedBytesForCurrentThread();
+            // var sw1 = Stopwatch.GetTimestamp();
             // for (int i = 0; i < 250_000; i++)
-                // composer.Compose($"{html()}");
-        //     warmedUp = true;
-        // }
-        // long gc1 = GC.GetTotalAllocatedBytes();
-        long gc1 = GC.GetAllocatedBytesForCurrentThread();
-        var sw1 = Stopwatch.GetTimestamp();
-        // for (int i = 0; i < 250_000; i++)
-            composer.Compose($"{html()}");
-        var elapsed = Stopwatch.GetElapsedTime(sw1);
-        long gc2 = GC.GetAllocatedBytesForCurrentThread();
-        // long gc2 = GC.GetTotalAllocatedBytes();
+                composer.Compose($"{html()}");
+            // var elapsed = Stopwatch.GetElapsedTime(sw1);
+            // long gc2 = GC.GetAllocatedBytesForCurrentThread();
+            // Console.WriteLine($"elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
 
-        Console.WriteLine($"elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
-
-        var output = Debug.GetOutput(composer);
-        writer.Inject($"{output.ToString()}");
-        await writer.FlushAsync();
+            var output = Debug.GetOutput(composer);
+            writer.Inject($"{output.ToString()}");
+            await writer.FlushAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

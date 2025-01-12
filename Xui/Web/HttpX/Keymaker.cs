@@ -40,6 +40,30 @@ internal struct Keymaker
         return value;
     }
 
+    /// <summary>
+    /// Converts ReadOnlySpan<byte> to string from a pool of keys
+    /// to prevent rampant memory allocations.
+    /// Prevents OutOfMemory issues by only returning a key 
+    /// if its already in the pool due to hackers filling the pool 
+    /// with nonsensical keys from custom-constructed GET/SET/CALL requests.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    internal static string? GetKeyIfCached(ReadOnlySpan<byte> key)
+    {
+        if (key.Length > 1024)
+            return null;
+        
+        Span<char> chars = stackalloc char[key.Length];
+        for (int i = 0; i < key.Length; i++)
+            chars[i] = (char)key[i];
+
+        if (cache.TryGetValue(chars, out var value))
+            return value;
+        
+        return null;
+    }
+
     private static int GetNumberWidth(int digit)
     {
         var width = 0;

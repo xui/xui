@@ -2,8 +2,11 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipelines;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Web;
 using Xui.Web.Composers;
 using Xui.Web.HttpX.Composers;
 
@@ -17,6 +20,13 @@ public static class Debug
         var keyholes = composer.Keyholes;
 
         output.Append($"""
+            /* DEBUG /app XTTP/0.1
+            Host: myapp.ui.cloud
+            User-Agent: neato
+            Content-Type: application/javascript
+            Content-Length: 5000
+            */
+
             var cssDefault = "font-weight:normal;font-family:monospace,monospace;";
             var cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
             var cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
@@ -30,7 +40,8 @@ public static class Debug
             var cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
             var cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
-            console.groupCollapsed("Server Diff\n%c(expand for details)", cssNotes);
+            console.groupCollapsed("Server Diff (2)");
+            console.log("%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", cssNotes);
             """);
 
         for (int i = 0; i < composer.RootLength; i++)
@@ -109,7 +120,17 @@ public static class Debug
                 break;
             default:
                 output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                    console.group(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                    console.log(`
+                    SET /app XTTP/0.1
+                    Host: myapp.ui.cloud
+                    User-Agent: neato
+                    Content-Type: application/x-www-form-urlencoded
+                    Content-Length: 50
+
+                    keyAFBC={keyhole.DateTime}&keyAbBC={keyhole.DateTime}
+
+                    `);
                     console.groupEnd();
                     """);
                 break;
