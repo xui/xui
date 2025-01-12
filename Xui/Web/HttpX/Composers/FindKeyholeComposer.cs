@@ -128,7 +128,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
 
 
-    // TEMPORARY!!!!!!!  Perhaps the cursor should always move itself at the base level?
+    // TODO: TEMPORARY!!!!!!!  Perhaps the cursor should always move itself at the base level?
 
     private FindKeyholeComposer IncrementCursor()
     {
