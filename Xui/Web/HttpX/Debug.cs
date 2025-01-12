@@ -21,9 +21,7 @@ public static class Debug
 
         output.Append($"""
             /* DEBUG /app XTTP/0.1
-            Host: myapp.ui.cloud
-            User-Agent: neato
-            Content-Type: application/javascript
+            Content-Type: text/javascript; charset=UTF-8
             Content-Length: 5000
             */
 
