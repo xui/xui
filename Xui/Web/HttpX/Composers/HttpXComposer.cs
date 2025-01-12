@@ -131,8 +131,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
         suppressSentinels = true;
 
+        var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" key{key}=\"{attrName}\"");
+
+        parentKey = parent.Key;
+        parentLength = parent.Length;
+        cursor = parent.Cursor / 2 + 1;
 
         suppressSentinels = false;
 
