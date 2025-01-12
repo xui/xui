@@ -35,6 +35,13 @@ public static class Extensions
         return composer.EventHandler;
     }
 
+    public static Span<Keyhole> CaptureSnapshot(this Func<Html> html)
+    {
+        var composer = new DiffComposer();
+        composer.Compose($"{html()}");
+        return composer.Keyholes;
+    }
+
     private static bool warmedUp = false;
     public static async Task DebugSnapshot(this Func<Html> html, PipeWriter writer)
     {

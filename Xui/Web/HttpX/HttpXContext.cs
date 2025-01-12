@@ -81,7 +81,9 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
                 // TODO: Surround with "batch" concept.
                 {
+                    var before = html.CaptureSnapshot();
                     await eventHandler(domEvent);
+                    var after = html.CaptureSnapshot();
                 }
 
                 // TODO: State invalidations will not live here
