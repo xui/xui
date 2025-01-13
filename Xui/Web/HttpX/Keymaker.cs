@@ -1,4 +1,3 @@
-
 namespace Xui.Web.HttpX;
 
 internal struct Keymaker
