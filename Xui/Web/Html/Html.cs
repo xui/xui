@@ -115,7 +115,7 @@ public ref struct Html
         => AppendAmbiguous(GetArgName(expression), attribute, attribute, format: format, expression: expression);
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
-    public bool AppendFormatted(Func<string, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null)
+    public bool AppendFormatted(Func<Event, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);

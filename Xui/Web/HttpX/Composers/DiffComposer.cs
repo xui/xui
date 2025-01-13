@@ -170,7 +170,7 @@ public class DiffComposer : BaseComposer
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
     }
 
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref keyholes[index];
@@ -179,7 +179,7 @@ public class DiffComposer : BaseComposer
         keyhole.String = expression;
 
         // Must trigger Html to append its splits.  Then reset the parent.
-        _ = attrValue(string.Empty);
+        _ = attrValue(Event.Empty);
         parentKey = parent.Key;
         parentLength = parent.Length;
         cursor = parent.Cursor / 2 + 1;

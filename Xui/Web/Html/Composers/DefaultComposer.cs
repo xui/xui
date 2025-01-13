@@ -78,7 +78,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
     }
 
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
     {
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
@@ -86,7 +86,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler)
-        attrValue(string.Empty);
+        attrValue(Event.Empty);
 
         Encoding.UTF8.GetBytes("\"", Writer);
 
