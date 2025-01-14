@@ -17,7 +17,7 @@ public static class Debug
     public static StringBuilder GetOutput(DiffComposer composer)
     {
         var output = new StringBuilder();
-        var keyholes = composer.Keyholes;
+        var snapshot = composer.Snapshot;
 
         output.Append($"""
             /* DEBUG /app XTTP/0.1
@@ -42,10 +42,10 @@ public static class Debug
             console.log("%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", cssNotes);
             """);
 
-        for (int i = 0; i < composer.RootLength; i++)
+        for (int i = 0; i < snapshot.Root.Length; i++)
         {
-            ref Keyhole keyhole = ref keyholes[i];
-            Append(output, i, ref keyhole, keyholes);
+            ref Keyhole keyhole = ref snapshot.Buffer[i];
+            Append(output, i, ref keyhole, snapshot.Buffer);
         }
 
         output.Append($"""

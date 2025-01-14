@@ -35,11 +35,11 @@ public static class Extensions
         return composer.EventHandler;
     }
 
-    public static Span<Keyhole> CaptureSnapshot(this Func<Html> html)
+    public static Snapshot CaptureSnapshot(this Func<Html> html)
     {
         var composer = new DiffComposer();
         composer.Compose($"{html()}");
-        return composer.Keyholes;
+        return composer.Snapshot;
     }
 
     private static bool warmedUp = false;
