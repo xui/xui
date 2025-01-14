@@ -269,14 +269,23 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             }
 
             function rpc(key,ev) {
-                let body = (ev) ? encodeEvent(ev) : '';
-                let command = 
+                if (ev) {
+                    let body = (ev) ? encodeEvent(ev) : '';
+                    let command = 
         `CALL /app#key${key} XTTP/0.1
         Content-Type: application/json
         Content-Length: ${body.length}
 
         ${body}`;
-                ws.send(command);
+                    ws.send(command);
+                } else {
+                    let command = 
+        `CALL /app#key${key} XTTP/0.1
+        Content-Length: 0
+
+        `;
+                    ws.send(command);
+                }
             }
 
             function debugSocket(name, ws) {
