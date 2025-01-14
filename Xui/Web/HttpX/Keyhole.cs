@@ -19,31 +19,24 @@ public struct Keyhole
     public bool? Boolean;
     public string? Format;
 
-    public static bool operator ==(Keyhole c1, Keyhole c2)
-    {
-        if (c1.Type != c2.Type)
-            return false;
-
-        return c1.Type switch
+    public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
+    public static bool operator !=(Keyhole left, Keyhole right)
+        => !Equals(ref left, ref right);
+    public static bool Equals(ref Keyhole left, ref Keyhole right)
+        => left.Type == right.Type && left.Type switch
         {
-            FormatType.StringLiteral    => c1.String == c2.String,
-            FormatType.String           => c1.String == c2.String,
-            FormatType.Integer          => c1.Integer == c2.Integer     && c1.Format == c2.Format,
-            FormatType.Long             => c1.Long == c2.Long           && c1.Format == c2.Format,
-            FormatType.Float            => c1.Float == c2.Float         && c1.Format == c2.Format,
-            FormatType.Double           => c1.Double == c2.Double       && c1.Format == c2.Format,
-            FormatType.Decimal          => c1.Decimal == c2.Decimal     && c1.Format == c2.Format,
-            FormatType.DateTime         => c1.DateTime == c2.DateTime   && c1.Format == c2.Format,
-            FormatType.TimeSpan         => c1.TimeSpan == c2.TimeSpan   && c1.Format == c2.Format,
-            FormatType.Boolean          => c1.Boolean == c2.Boolean,
-            _ => true
+            FormatType.StringLiteral    => left.String == right.String,
+            FormatType.String           => left.String == right.String,
+            FormatType.Boolean          => left.Boolean == right.Boolean,
+            FormatType.Integer          => left.Integer == right.Integer     && left.Format == right.Format,
+            FormatType.Long             => left.Long == right.Long           && left.Format == right.Format,
+            FormatType.Float            => left.Float == right.Float         && left.Format == right.Format,
+            FormatType.Double           => left.Double == right.Double       && left.Format == right.Format,
+            FormatType.Decimal          => left.Decimal == right.Decimal     && left.Format == right.Format,
+            FormatType.DateTime         => left.DateTime == right.DateTime   && left.Format == right.Format,
+            FormatType.TimeSpan         => left.TimeSpan == right.TimeSpan   && left.Format == right.Format,
+            _ => false
         };
-    }
-
-    public static bool operator !=(Keyhole c1, Keyhole c2)
-    {
-        return !(c1 == c2);
-    }
 
     public override readonly bool Equals(object? obj)
     {
