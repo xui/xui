@@ -341,16 +341,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 inputType:"",
             };
 
-            const eventTypes = [
-                "click", "dblclick", "mouseover", "mouseout", "mousedown", "mouseup", "mousemove", 
-                "keydown", "keyup", "keypress",
-                "change", "input", "submit", "focus", "blur",
-                "scroll", "resize", "load", "unload",
-                "contextmenu",
-                "drag", "dragstart", "dragend", "dragenter", "dragleave", "dragover", "drop",
-                "touchstart", "touchend", "touchmove", "touchcancel"
-            ];
-
             function encodeEvent(e) {
                 console.log(e);
                 const obj = {};
