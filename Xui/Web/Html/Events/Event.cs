@@ -143,26 +143,34 @@ public record class HtmlElement(
 }
 
 public record class DataTransfer(
-    string? dropEffect = null,
-    string? effectAllowed = null,
-    string[]? files = null,
-    DataTransferItem[]? items = null,
-    string[]? types = null
-);
+    string dropEffect,
+    string effectAllowed,
+    string[] files,
+    DataTransferItem[] items,
+    string[] types
+) {
+    public DataTransfer() : this("", "", [], [], []) {}
+
+    public static readonly DataTransfer Empty = new();
+}
 
 public record class DataTransferItem(
-    string? kind = null,
-    string? type = null
-);
+    string kind = "",
+    string type = ""
+) {
+    public static readonly DataTransferItem Empty = new();
+}
 
 public record class TouchPoint(
-    long? identifier = null,
-    double? screenX = null,
-    double? screenY = null,
-    double? clientX = null,
-    double? clientY = null,
-    double? pageX = null,
-    double? pageY = null
-);
+    long identifier = 0,
+    double screenX = 0,
+    double screenY = 0,
+    double clientX = 0,
+    double clientY = 0,
+    double pageX = 0,
+    double pageY = 0
+) {
+    public static readonly TouchPoint Empty = new();
+}
 
 #pragma warning restore IDE1006 // Naming Styles
