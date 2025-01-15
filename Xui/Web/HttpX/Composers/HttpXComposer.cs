@@ -300,15 +300,75 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 eval(event.data);
             };
 
+            const defaults = {
+                bubbles:true,
+                cancelable:false,
+                composed:false,
+                defaultPrevented:false,
+                eventPhase:2,
+                isTrusted:true,
+                timeStamp:0,
+                type:"",
+                detail:0,
+                altKey:false,
+                button:0,
+                buttons:0,
+                clientX:0,
+                clientY:0,
+                ctrlKey:false,
+                metaKey:false,
+                movementX:0,
+                movementY:0,
+                offsetX:0,
+                offsetY:0,
+                pageX:0,
+                pageY:0,
+                screenX:0,
+                screenY:0,
+                shiftKey:false,
+                x:0,
+                y:0,
+                code:"",
+                isComposing:false,
+                key:"",
+                location:0,
+                repeat:false,
+                deltaX:0,
+                deltaY:0,
+                deltaZ:0,
+                deltaMode:0,
+                data:"",
+                inputType:"",
+            };
+
+            const eventTypes = [
+                "click", "dblclick", "mouseover", "mouseout", "mousedown", "mouseup", "mousemove", 
+                "keydown", "keyup", "keypress",
+                "change", "input", "submit", "focus", "blur",
+                "scroll", "resize", "load", "unload",
+                "contextmenu",
+                "drag", "dragstart", "dragend", "dragenter", "dragleave", "dragover", "drop",
+                "touchstart", "touchend", "touchmove", "touchcancel"
+            ];
+
             function encodeEvent(e) {
+                console.log(e);
                 const obj = {};
-                for (let k in e) { obj[k] = e[k]; }
-                return JSON.stringify(obj, (k, v) => {
-                    /* TODO: There are a few more properties that can be shaved off. */
-                    if (v instanceof Node) return {id: v.id,name: v.name,type: v.type,value: v.value};
-                    if (v instanceof Window) return null;
-                    return v;
-                }, '');
+                for (let k in e) {
+                    let v = e[k];
+                    if (v instanceof Node) {
+                        obj[k] = {};
+                        if (v.id != '') obj[k].id = v.id;
+                        if (v.name != '') obj[k].name = v.name;
+                        if (v.type != '') obj[k].type = v.type;
+                        if (v.value != '') obj[k].value = v.value;
+                    } else if (v instanceof TouchList || v instanceof DataTransfer) {
+                        obj[k] = v;
+                    } else if (k in defaults && v != defaults[k]) {
+                        obj[k] = v;
+                    }
+                }
+                return JSON.stringify(obj, null, '');
             }
 
             function replaceNode(node, content) {
