@@ -35,11 +35,11 @@ public partial record class Event
     bool UI.bubbles => this.bubbles;
     bool UI.cancelable => this.cancelable;
     bool UI.composed => this.composed;
-    HtmlElement UI.currentTarget => this.currentTarget ?? new();
+    HtmlElement UI.currentTarget => this.currentTarget ?? HtmlElement.Empty;
     bool UI.defaultPrevented => this.defaultPrevented;
     int UI.eventPhase => this.eventPhase;
     bool UI.isTrusted => this.isTrusted;
-    HtmlElement UI.target => this.target ?? new();
+    HtmlElement UI.target => this.target ?? HtmlElement.Empty;
     double UI.timeStamp => this.timeStamp;
     string UI.type => this.type;
 }

@@ -55,13 +55,13 @@ public partial record class Event (
     bool bubbles = true,
     bool cancelable = false,
     bool composed = false,
-    HtmlElement? currentTarget = null, // TODO: Fix nullability
+    HtmlElement? currentTarget = null,
     bool defaultPrevented = false,
-    int eventPhase = 0, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    int eventPhase = 2, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
     bool isTrusted = true,
-    HtmlElement? target = null, // TODO: Fix nullability
-    double timeStamp = 0, // TODO: Remove?  Not deprecated yet but will be soon
-    string type = "", // TODO: Can "" even represent a default?
+    HtmlElement? target = null,
+    double timeStamp = 0,
+    string type = "",
 
     // UIEvent
     long? detail = 0,
@@ -129,11 +129,13 @@ public partial record class Event (
 }
 
 public record class HtmlElement(
-    string? id = null,
-    string? name = null,
-    string? type = null,
-    string? value = null
-);
+    string id = "",
+    string name = "",
+    string type = "",
+    string value = ""
+) {
+    public static readonly HtmlElement Empty = new();
+}
 
 public record class DataTransfer(
     string? dropEffect = null,

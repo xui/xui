@@ -19,7 +19,7 @@ public partial record class Event
         HtmlElement relatedTarget { get; }
     }
 
-    HtmlElement Focus.relatedTarget => this.relatedTarget ?? new();
+    HtmlElement Focus.relatedTarget => this.relatedTarget ?? HtmlElement.Empty;
 }
 
 #pragma warning restore IDE1006

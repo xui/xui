@@ -50,7 +50,7 @@ public partial record class Event
     double Mouse.offsetY => this.offsetY ?? 0;
     double Mouse.pageX => this.pageX ?? 0;
     double Mouse.pageY => this.pageY ?? 0;
-    HtmlElement Mouse.relatedTarget => this.relatedTarget ?? new();
+    HtmlElement Mouse.relatedTarget => this.relatedTarget ?? HtmlElement.Empty;
     double Mouse.screenX => this.screenX ?? 0;
     double Mouse.screenY => this.screenY ?? 0;
     bool Mouse.shiftKey => this.shiftKey ?? false;
