@@ -88,26 +88,29 @@ public partial record class Event (
     double? y = null,
 
     // TouchEvent
-    // bool? altKey = null,
     TouchPoint[]? changedTouches = null,
+    TouchPoint[]? targetTouches = null,
+    TouchPoint[]? touches = null,
+    // Overlapping (redundant) properties:
+    // bool? altKey = null,
     // bool? ctrlKey = null,
     // bool? metaKey = null,
     // bool? shiftKey = null,
-    TouchPoint[]? targetTouches = null,
-    TouchPoint[]? touches = null,
 
     // FocusEvent
+    // Overlapping (redundant) properties:
     // HtmlElement? relatedTarget = null,
 
     // KeyboardEvent
-    // bool? altKey = null,
     string? code = null,
-    // bool? ctrlKey = null,
     bool? isComposing = null,
     string? key = null,
     long? location = null, // TODO: Enum?
-    // bool? metaKey = null,
     bool? repeat = null,
+    // Overlapping (redundant) properties:
+    // bool? altKey = null,
+    // bool? ctrlKey = null,
+    // bool? metaKey = null,
     // bool? shiftKey = null,
 
     // WheelEvent
@@ -120,9 +123,11 @@ public partial record class Event (
     string? data = null,
     DataTransfer? dataTransfer = null,
     string? inputType = null
+    // Overlapping (redundant) properties:
     // bool? isComposing = null,
 
     // CompositionEvent
+    // Overlapping (redundant) properties:
     // string? data = null,
 ) : Event.UI, Event.Mouse, Event.Touch, Event.Focus, Event.Keyboard, Event.Wheel, Event.Input, Event.Composition {
     public static readonly Event Empty = new();
