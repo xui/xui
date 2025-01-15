@@ -342,7 +342,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             };
 
             function encodeEvent(e) {
-                console.log(e);
                 const obj = {};
                 for (let k in e) {
                     let v = e[k];
