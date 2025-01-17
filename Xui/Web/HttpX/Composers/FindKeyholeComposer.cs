@@ -38,10 +38,10 @@ public class FindKeyholeComposer(string key) : BaseComposer
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);

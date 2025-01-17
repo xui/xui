@@ -74,10 +74,10 @@ public abstract class BaseComposer
     public virtual bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
     public virtual bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => CompleteFormattedValue();
     
-    public virtual bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => CompleteFormattedValue();

@@ -145,17 +145,23 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true);
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
-    private bool WriteEventHandler(ref Html parent, bool includeEventArg)
+    private bool WriteEventHandler(ref Html parent, bool includeEventArg, string? format = null)
     {
-        if (includeEventArg)
+        if (includeEventArg && format != null)
+        {
+            Writer.Inject($"""
+                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event,'{format ?? ""}')"
+                """);
+        }
+        else if (includeEventArg && format == null)
         {
             Writer.Inject($"""
                 "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event)"
@@ -268,9 +274,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 ui[a.name]=a;
             }
 
-            function rpc(key,ev) {
+            function rpc(key,ev,incl) {
                 if (ev) {
-                    let body = (ev) ? encodeEvent(ev) : '';
+                    let body = (ev) ? encodeEvent(ev,incl) : '';
                     let command = 
         `CALL /app#key${key} XTTP/0.1
         Content-Type: application/json
@@ -293,71 +299,34 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
             var l = location;
             const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
-            ws.onopen = (event) => { console.debug(`${name} onopen`, event); };
-            ws.onclose = (event) => { console.debug(`${name} onclose`, event); };
-            ws.onerror = (event) => { console.error(`${name} onerror`, event); };
+            ws.onopen = (event) => { console.debug(`onopen`, event); };
+            ws.onclose = (event) => { console.debug(`onclose`, event); };
+            ws.onerror = (event) => { console.error(`onerror`, event); };
             ws.onmessage = (event) => {
                 eval(event.data);
             };
 
-            const defaults = {
-                bubbles:true,
-                cancelable:false,
-                composed:false,
-                defaultPrevented:false,
-                eventPhase:2,
-                isTrusted:true,
-                timeStamp:0,
-                type:"",
-                detail:0,
-                altKey:false,
-                button:0,
-                buttons:0,
-                clientX:0,
-                clientY:0,
-                ctrlKey:false,
-                metaKey:false,
-                movementX:0,
-                movementY:0,
-                offsetX:0,
-                offsetY:0,
-                pageX:0,
-                pageY:0,
-                screenX:0,
-                screenY:0,
-                shiftKey:false,
-                x:0,
-                y:0,
-                code:"",
-                isComposing:false,
-                key:"",
-                location:0,
-                repeat:false,
-                deltaX:0,
-                deltaY:0,
-                deltaZ:0,
-                deltaMode:0,
-                data:"",
-                inputType:"",
-            };
-
-            function encodeEvent(e) {
-                const obj = {};
+            const rootKeys = ["altKey","bubbles","button","buttons","cancelable","changedTouches","clientX","clientY","code","composed","ctrlKey","currentTarget","data","dataTransfer","defaultPrevented","deltaMode","deltaX","deltaY","deltaZ","detail","eventPhase","inputType","isComposing","isTrusted","key","location","metaKey","movementX","movementY","offsetX","offsetY","pageX","pageY","relatedTarget","repeat","screenX","screenY","shiftKey","target","targetTouches","timeStamp","touches","type","x","y"];
+            const eventTargetKeys = ["id","name","type","value"];
+            function encodeEvent(e,incl) {
+                const allowList = incl?.split(",") ?? rootKeys;
+                const json = {};
                 for (let k in e) {
                     let v = e[k];
-                    if (v instanceof Node) {
-                        obj[k] = {};
-                        if (v.id != '') obj[k].id = v.id;
-                        if (v.name != '') obj[k].name = v.name;
-                        if (v.type != '') obj[k].type = v.type;
-                        if (v.value != '') obj[k].value = v.value;
-                    } else if (v instanceof TouchList || v instanceof DataTransfer) {
-                        obj[k] = v;
-                    } else if (k in defaults && v != defaults[k]) {
-                        obj[k] = v;
+                    if (v != null && allowList.includes(k)) {
+                        if (v instanceof EventTarget) {
+                            json[k] = {};
+                            for (let k2 in v) {
+                                let v2 = v[k2];
+                                if (eventTargetKeys.includes(k2) && v2 != '')
+                                    json[k][k2] = v2;
+                            }
+                        } else {    
+                            json[k] = v;
+                        }
                     }
                 }
-                return JSON.stringify(obj, null, '');
+                return JSON.stringify(json);
             }
 
             function replaceNode(node, content) {

@@ -93,10 +93,10 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
     public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);

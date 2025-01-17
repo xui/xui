@@ -130,19 +130,19 @@ public ref struct Html
 
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
-    public bool AppendFormatted(Action eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Action eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, expression);
+        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
         Cursor++;
         return @continue;
     }
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
-    public bool AppendFormatted(Action<Event> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Action<Event> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
@@ -152,8 +152,8 @@ public ref struct Html
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-               => composer.WriteEventHandler(ref this, eventHandler, expression),
-            "" => composer.WriteEventHandler(ref this, eventHandler, expression),
+               => composer.WriteEventHandler(ref this, eventHandler, format, expression),
+            "" => composer.WriteEventHandler(ref this, eventHandler, format, expression),
             _  => composer.WriteEventHandler(ref this, argName, eventHandler, expression),
         };
         Cursor++;
@@ -161,23 +161,23 @@ public ref struct Html
     }
     
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Func<Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, expression);
+        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
         Cursor++;
         return @continue;
     }
     
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Event, Task> eventHandler, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Func<Event, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, expression);
+        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
         Cursor++;
         return @continue;
     }
@@ -224,6 +224,7 @@ public ref struct Html
                         ref this, 
                         // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
                         e => { func(e); }, // make it return void
+                        format: format,
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
