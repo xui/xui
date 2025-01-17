@@ -37,25 +37,25 @@ public partial record class Event
         double y { get; }
     }
 
-    bool Mouse.altKey => this.altKey ?? false;
-    int Mouse.button => this.button ?? 0;
-    int Mouse.buttons => this.buttons ?? 0;
-    double Mouse.clientX => this.clientX ?? 0;
-    double Mouse.clientY => this.clientY ?? 0;
-    bool Mouse.ctrlKey => this.ctrlKey ?? false;
-    bool Mouse.metaKey => this.metaKey ?? false;
-    double Mouse.movementX => this.movementX ?? 0;
-    double Mouse.movementY => this.movementX ?? 0;
-    double Mouse.offsetX => this.offsetX ?? 0;
-    double Mouse.offsetY => this.offsetY ?? 0;
-    double Mouse.pageX => this.pageX ?? 0;
-    double Mouse.pageY => this.pageY ?? 0;
+    bool Mouse.altKey => this.altKey ?? default;
+    int Mouse.button => this.button ?? default;
+    int Mouse.buttons => this.buttons ?? default;
+    double Mouse.clientX => this.clientX ?? default;
+    double Mouse.clientY => this.clientY ?? default;
+    bool Mouse.ctrlKey => this.ctrlKey ?? default;
+    bool Mouse.metaKey => this.metaKey ?? default;
+    double Mouse.movementX => this.movementX ?? default;
+    double Mouse.movementY => this.movementX ?? default;
+    double Mouse.offsetX => this.offsetX ?? default;
+    double Mouse.offsetY => this.offsetY ?? default;
+    double Mouse.pageX => this.pageX ?? default;
+    double Mouse.pageY => this.pageY ?? default;
     HtmlElement Mouse.relatedTarget => this.relatedTarget ?? HtmlElement.Empty;
-    double Mouse.screenX => this.screenX ?? 0;
-    double Mouse.screenY => this.screenY ?? 0;
-    bool Mouse.shiftKey => this.shiftKey ?? false;
-    double Mouse.x => this.x ?? 0;
-    double Mouse.y => this.y ?? 0;
+    double Mouse.screenX => this.screenX ?? default;
+    double Mouse.screenY => this.screenY ?? default;
+    bool Mouse.shiftKey => this.shiftKey ?? default;
+    double Mouse.x => this.x ?? default;
+    double Mouse.y => this.y ?? default;
 }
 
 #pragma warning restore IDE1006

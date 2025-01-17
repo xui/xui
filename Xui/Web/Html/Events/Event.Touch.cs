@@ -26,11 +26,11 @@ public partial record class Event
 
     }
 
-    bool Touch.altKey => this.altKey ?? false;
+    bool Touch.altKey => this.altKey ?? default;
     TouchPoint[] Touch.changedTouches => this.changedTouches ?? [];
-    bool Touch.ctrlKey => this.ctrlKey ?? false;
-    bool Touch.metaKey => this.metaKey ?? false;
-    bool Touch.shiftKey => this.shiftKey ?? false;
+    bool Touch.ctrlKey => this.ctrlKey ?? default;
+    bool Touch.metaKey => this.metaKey ?? default;
+    bool Touch.shiftKey => this.shiftKey ?? default;
     TouchPoint[] Touch.targetTouches => this.targetTouches ?? [];
     TouchPoint[] Touch.touches => this.touches ?? [];
 }

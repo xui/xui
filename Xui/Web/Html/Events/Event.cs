@@ -52,19 +52,19 @@ namespace Xui.Web;
 /// <param name="inputType">Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.</param>
 public partial record class Event (
     // Event (base)
-    bool bubbles = true,
-    bool cancelable = false,
-    bool composed = false,
+    bool? bubbles = null,
+    bool? cancelable = null,
+    bool? composed = null,
     HtmlElement? currentTarget = null,
-    bool defaultPrevented = false,
-    int eventPhase = 2, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
-    bool isTrusted = true,
+    bool? defaultPrevented = null,
+    int? eventPhase = null, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    bool? isTrusted = null,
     HtmlElement? target = null,
-    double timeStamp = 0,
-    string type = "",
+    double? timeStamp = null,
+    string? type = null,
 
     // UIEvent
-    long? detail = 0,
+    long? detail = null,
 
     // MouseEvent
     bool? altKey = null,

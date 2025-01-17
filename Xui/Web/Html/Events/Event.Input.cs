@@ -23,9 +23,9 @@ public partial record class Event
     }
 
     string Input.data => this.data ?? string.Empty;
-    DataTransfer Input.dataTransfer => this.dataTransfer ?? new();
+    DataTransfer Input.dataTransfer => this.dataTransfer ?? DataTransfer.Empty;
     string Input.inputType => this.inputType ?? string.Empty;
-    bool Input.isComposing => this.isComposing ?? false;
+    bool Input.isComposing => this.isComposing ?? default;
 }
 
 #pragma warning restore IDE1006

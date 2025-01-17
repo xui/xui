@@ -27,15 +27,15 @@ public partial record class Event
         bool shiftKey { get; }
     }
 
-    bool Keyboard.altKey => this.altKey ?? false;
+    bool Keyboard.altKey => this.altKey ?? default;
     string Keyboard.code => this.code ?? string.Empty;
-    bool Keyboard.ctrlKey => this.ctrlKey ?? false;
-    bool Keyboard.isComposing => this.isComposing ?? false;
+    bool Keyboard.ctrlKey => this.ctrlKey ?? default;
+    bool Keyboard.isComposing => this.isComposing ?? default;
     string Keyboard.key => this.key ?? string.Empty;
-    long Keyboard.location => this.location ?? 0;
-    bool Keyboard.metaKey => this.metaKey ?? false;
-    bool Keyboard.repeat => this.repeat ?? false;
-    bool Keyboard.shiftKey => this.shiftKey ?? false;
+    long Keyboard.location => this.location ?? default;
+    bool Keyboard.metaKey => this.metaKey ?? default;
+    bool Keyboard.repeat => this.repeat ?? default;
+    bool Keyboard.shiftKey => this.shiftKey ?? default;
 }
 
 #pragma warning restore IDE1006

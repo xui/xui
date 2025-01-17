@@ -31,17 +31,17 @@ public partial record class Event
         string type { get; }
     }
 
-    long UI.detail => this.detail ?? 0;
-    bool UI.bubbles => this.bubbles;
-    bool UI.cancelable => this.cancelable;
-    bool UI.composed => this.composed;
+    long UI.detail => this.detail ?? default;
+    bool UI.bubbles => this.bubbles ?? default;
+    bool UI.cancelable => this.cancelable ?? default;
+    bool UI.composed => this.composed ?? default;
     HtmlElement UI.currentTarget => this.currentTarget ?? HtmlElement.Empty;
-    bool UI.defaultPrevented => this.defaultPrevented;
-    int UI.eventPhase => this.eventPhase;
-    bool UI.isTrusted => this.isTrusted;
+    bool UI.defaultPrevented => this.defaultPrevented ?? default;
+    int UI.eventPhase => this.eventPhase ?? default;
+    bool UI.isTrusted => this.isTrusted ?? default;
     HtmlElement UI.target => this.target ?? HtmlElement.Empty;
-    double UI.timeStamp => this.timeStamp;
-    string UI.type => this.type;
+    double UI.timeStamp => this.timeStamp ?? default;
+    string UI.type => this.type ?? string.Empty;
 }
 
 #pragma warning restore IDE1006
