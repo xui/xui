@@ -1,5 +1,7 @@
 partial class UI
 {
+    public Html Wat(ViewModel vm) => MainLayout(vm);
+
     protected override Html MainLayout(ViewModel vm) => $"""
         <html>
         <head>
@@ -8,7 +10,6 @@ partial class UI
             <link rel="stylesheet" href="/css/preflight.css" />
             <link rel="stylesheet" href="/css/site.css" />
             <meta name="viewport" content="width=device-width, user-scalable=no">
-            {Register()}
         </head>
         <body>
             <nav>
@@ -35,9 +36,6 @@ partial class UI
                 {new Sense()}
                 {new Roadmap()}
             </div>
-
-            {Connect()}
-            {Watch()}
         </body>
         </html>
         """;
