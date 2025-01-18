@@ -94,3 +94,101 @@ public static class StateExtensions
     public static State<DateTime> AsState(this DateTime value, string topic = State<DateTime>.GLOBAL_TOPIC) => new(value, topic);
     public static State<TimeSpan> AsState(this TimeSpan value, string topic = State<TimeSpan>.GLOBAL_TOPIC) => new(value, topic);
 }
+
+// public class State
+// {
+//     private static readonly Thread uiThread;
+//     private static readonly Channel<SendOrPostCallback> channel = Channel.CreateUnbounded<SendOrPostCallback>(new UnboundedChannelOptions {
+//         SingleWriter = false,
+//         SingleReader = true,
+//         AllowSynchronousContinuations = false,
+//     });
+
+//     public static void Invoke(Action action)
+//     {
+//         channel.Writer.TryWrite(_ => action());
+//     }
+
+//     public static void Invoke(Func<Task> asyncTask)
+//     {
+//         channel.Writer.TryWrite(_ => asyncTask());
+//     }
+
+//     static State()
+//     {
+//         uiThread = new(Loop) { Name = "UI Thread" };
+//         uiThread.Start();
+//     }
+
+//     private static async void Loop()
+//     {
+//         Console.WriteLine("--- Hello from the UI Thread! ---");
+
+//         var syncContext = new UISynchronizationContext();
+//         SynchronizationContext.SetSynchronizationContext(syncContext);
+
+//         long batch = 0;
+
+//         await foreach (SendOrPostCallback callback in channel.Reader.ReadAllAsync())
+//         {
+//             Console.WriteLine("Thanks for the action.  Executing now...");
+
+//             // Mutate state
+//             callback(null);
+
+//             // Parallel.ForEach(PubSub.GetInvalidatedShells(), shell =>
+//             // {
+//             //     // Capture previous state
+//             //     // var isDebounced = shell.CapturePreviousState();
+
+//             //     // // Capture current state
+//             //     // if (shell.LastTick > 16.ms)
+//             //     // {
+
+//             //     // }
+
+//             //     // Diff
+//             // });
+
+//             batch++;
+//         }
+
+//         Console.WriteLine("--- Goodbye from the UI Thread! ---");
+//     }
+
+//     private class UISynchronizationContext : SynchronizationContext
+//     {
+//         public override void Post(SendOrPostCallback d, object? state)
+//         {
+//             State.Invoke(() => d(state));
+//         }
+
+//         public override void Send(SendOrPostCallback d, object? state)
+//         {
+//             base.Send(d, state);
+//         }
+
+//         public override int Wait(nint[] waitHandles, bool waitAll, int millisecondsTimeout)
+//         {
+//             return base.Wait(waitHandles, waitAll, millisecondsTimeout);
+//         }
+
+//         public override void OperationCompleted()
+//         {
+//             Console.WriteLine("OperationCompleted()");
+//             base.OperationCompleted();
+//         }
+
+//         public override void OperationStarted()
+//         {
+//             Console.WriteLine("OperationStarted()");
+//             base.OperationStarted();
+//         }
+
+//         public override SynchronizationContext CreateCopy()
+//         {
+//             Console.WriteLine("CreateCopy()");
+//             return base.CreateCopy();
+//         }
+//     }
+// }
