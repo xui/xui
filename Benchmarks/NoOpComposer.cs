@@ -27,6 +27,11 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return true;
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
+    {
+        return true;
+    }
+
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         return true;
@@ -38,19 +43,15 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return true;
     }
 
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<string, Html> attrValue, string? expression = null)
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
     {
         return true;
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
+    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
     
     private bool HandleNotSupported()
     {

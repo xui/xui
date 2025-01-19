@@ -42,10 +42,6 @@ public class FindKeyholeComposer(string key) : BaseComposer
     public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
     public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
     public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T eventHandler)
     {
@@ -140,6 +136,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
     public override bool WriteMutableValue(ref Html parent, bool value) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default) => IncrementCursor().CompleteFormattedValue();
     
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();

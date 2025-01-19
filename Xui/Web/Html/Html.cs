@@ -102,15 +102,18 @@ public ref struct Html
 
     // MUTABLE ATTRIBUTES
 
+    // Ex (primary):   <p { style => GetStyle() }>Hello</p>
+    // or (ambiguous): <button onclick={ (Event e) => name = e.Target.Name }>Click me</button>
+    public bool AppendFormatted(Func<Event, string> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
+        => AppendAmbiguous<string, int>(GetArgName(expression), attribute, format: null, expression: expression);
+    
     // Ex (primary):   <input type="text" { disabled => isDisabled } />
-    // or (ambiguous): <button { onclick => isDisabled = !isDisabled }>Click me</button>
-    // or (ambiguous): <button onclick={ e => isDisabled = !isDisabled }>Click me</button>
+    // or (ambiguous): <button onclick={ (Event e) => isDisabled = !isDisabled }>Click me</button>
     public bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
         => AppendAmbiguous<bool, int>(GetArgName(expression), attribute, format: null, expression: expression);
     
     // Ex (primary):   <input type="text" { maxlength => c } />
-    // or (ambiguous): <button { onclick => c++ }>Click me</button>
-    // or (ambiguous): <button onclick={ e => c++ }>Click me</button>
+    // or (ambiguous): <button onclick={ (Event e) => c++ }>Click me</button>
     public bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : struct, IUtf8SpanFormattable 
         => AppendAmbiguous(GetArgName(expression), attribute, attribute, format: format, expression: expression);
 
@@ -141,21 +144,14 @@ public ref struct Html
     }
     
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
-    // Ex: <button onclick={ e => Increment(e) }>Clicks: { c }</button>
+    // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
     public bool AppendFormatted(Action<Event> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
         var argName = GetArgName(expression);
-        var @continue = argName switch
-        {
-            "e" or "ev" or "evnt" or "@event" or 
-            "(e)" or "(ev)" or "(evnt)" or "(@event)"
-               => composer.WriteEventHandler(ref this, eventHandler, format, expression),
-            "" => composer.WriteEventHandler(ref this, eventHandler, format, expression),
-            _  => composer.WriteEventHandler(ref this, argName, eventHandler, expression),
-        };
+        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
         Cursor++;
         return @continue;
     }
@@ -218,20 +214,22 @@ public ref struct Html
 
         var @continue = argName switch
         {
-            "e" or "ev" or "evnt" or "@event" or 
-            "(e)" or "(ev)" or "(evnt)" or "(@event)"
+            _ when argName.StartsWith("on")
+                => throw new ArgumentException($$"""
+                    Cannot use the notation <button {onclick => ...}> for event handlers; that's only valid for regular attributes.  Instead, try <button onclick={...}> or <button onclick={() => ...}> or <button onclick={(Event e) => ...}.
+                """, expression),
+            _ when argName.StartsWith("(Event")
                 => composer.WriteEventHandler(
                         ref this, 
-                        // No argName! It's already written from end of the prior string literal (e.g <button onclick=)
-                        e => { func(e); }, // make it return void
+                        e => { func(e); }, // Convert signature.  Event handlers always return void.
                         format: format,
                         expression: expression
                     ),
-            _ when argName.StartsWith("on")
-                => composer.WriteEventHandler(
-                        ref this, 
-                        argName, // Writer is responsible for writing the attribute name (e.g. onclick)
-                        () => { func(Event.Empty); }, // make it return void
+            _ when func is Func<Event, string> funcString
+                => composer.WriteMutableAttribute(
+                        ref this,
+                        attrName: argName, // argName is guaranteed to never be empty
+                        attrValue: funcString, // returns string
                         expression: expression
                     ),
             _ when func is Func<Event, bool> funcBool

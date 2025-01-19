@@ -46,6 +46,19 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.WriteMutableValue(ref parent, value, format);
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
+    {
+        Encoding.UTF8.GetBytes(attrName, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
+
+        var value = attrValue(Event.Empty);
+        Encoding.UTF8.GetBytes(value, Writer);
+
+        Encoding.UTF8.GetBytes("\"", Writer);
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         // Boolean attributes are interesting in that the DOM treats them
@@ -97,10 +110,6 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => HandleNotSupported(attributeName);
     
     private bool HandleNotSupported()
     {

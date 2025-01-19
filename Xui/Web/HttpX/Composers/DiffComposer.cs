@@ -137,6 +137,17 @@ public class DiffComposer : BaseComposer
         return base.WriteMutableValue(ref parent, value, format);
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot.Buffer[index];
+        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
@@ -181,10 +192,6 @@ public class DiffComposer : BaseComposer
     public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
     public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
     public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> argName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, expression);
     private bool WriteEventHandler(ref Html parent, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;

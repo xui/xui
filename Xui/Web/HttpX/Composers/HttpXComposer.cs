@@ -103,6 +103,14 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return CompleteFormattedValue();
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
+    {
+        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+
+        return @continue;
+    }
+
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
@@ -149,10 +157,6 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
     public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
     public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Action<Event> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
-    public override bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> attributeName, Func<Event, Task> eventHandler, string? expression = null) => WriteEventHandler(ref parent, attributeName);
     private bool WriteEventHandler(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (includeEventArg && format != null)
