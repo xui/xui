@@ -131,49 +131,51 @@ public ref struct Html
 
     // EVENT HANDLERS
 
-    // Ex: <button onclick={ Increment }>Clicks: { c }</button>
-    // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
-    public bool AppendFormatted(Action eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Action eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
+    public bool AppendFormatted(Action<Event> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
+    public bool AppendFormatted(Action<Events.Composition> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Composition.Format, expression);
+    public bool AppendFormatted(Action<Events.Focus> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Focus.Format, expression);
+    public bool AppendFormatted(Action<Events.Input> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Input.Format, expression);
+    public bool AppendFormatted(Action<Events.Keyboard> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Keyboard.Format, expression);
+    public bool AppendFormatted(Action<Events.Mouse> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Mouse.Format, expression);
+    public bool AppendFormatted(Action<Events.MouseXY> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.MouseXY.Format, expression);
+    public bool AppendFormatted(Action<Events.Touch> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Touch.Format, expression);
+    public bool AppendFormatted(Action<Events.Wheel> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Wheel.Format, expression);
+    public bool AppendFormatted(Action<Events.UI> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.UI.Format, expression);
+    public bool AppendFormatted(Func<Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
+    public bool AppendFormatted(Func<Event, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
+    public bool AppendFormatted(Func<Events.Composition, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Composition.Format, expression);
+    public bool AppendFormatted(Func<Events.Focus, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Focus.Format, expression);
+    public bool AppendFormatted(Func<Events.Input, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Input.Format, expression);
+    public bool AppendFormatted(Func<Events.Keyboard, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Keyboard.Format, expression);
+    public bool AppendFormatted(Func<Events.Mouse, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Mouse.Format, expression);
+    public bool AppendFormatted(Func<Events.Touch, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Touch.Format, expression);
+    public bool AppendFormatted(Func<Events.Wheel, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.Wheel.Format, expression);
+    public bool AppendFormatted(Func<Events.UI, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format ?? Events.UI.Format, expression);
+    private bool AppendEventHandler<T>(T eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
-        Cursor++;
-        return @continue;
-    }
-    
-    // Ex: <button onclick={ Increment }>Clicks: { c }</button>
-    // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
-    public bool AppendFormatted(Action<Event> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
+        // var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
+        var @continue = eventHandler switch
+        {
+            // Ex: <button onclick={ Increment }>Clicks: { c }</button>
+            // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
+            Action noArg => composer.WriteEventHandler(ref this, noArg, format, expression),
 
-        var argName = GetArgName(expression);
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
-        Cursor++;
-        return @continue;
-    }
-    
-    // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
+            // Ex: <button onclick={ Increment }>Clicks: { c }</button>
+            // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
+            Action<Event> eventArg => composer.WriteEventHandler(ref this, eventArg, format, expression),
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
-        Cursor++;
-        return @continue;
-    }
-    
-    // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Event, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
+            // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
+            Func<Task> noArgAsync => composer.WriteEventHandler(ref this, noArgAsync, format, expression),
 
-        var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
+            // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
+            Func<Event, Task> eventArgAsync => composer.WriteEventHandler(ref this, eventArgAsync, format, expression),
+            _ => true,
+        };
+        
         Cursor++;
         return @continue;
     }

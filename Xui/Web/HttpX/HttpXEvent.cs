@@ -1,4 +1,4 @@
-namespace Xui.Web;
+namespace Xui.Web.HttpX;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -50,139 +50,211 @@ namespace Xui.Web;
 /// <param name="data">Returns a string with the inserted characters. This may be an empty string if the change doesn't insert text (for example, when deleting characters).</param>
 /// <param name="dataTransfer">Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.</param>
 /// <param name="inputType">Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.</param>
-public partial interface Event : 
-    Events.Composition, 
-    Events.Focus, 
-    Events.Input, 
-    Events.Keyboard, 
-    Events.Mouse, 
-    Events.Touch, 
-    Events.Wheel,
-    Events.UI
-{
-    static Event Empty { get; }
-
+internal partial record class HttpXEvent (
     // Event (base)
-    new bool? bubbles { get; }
-    new bool? cancelable { get; }
-    new bool? composed { get; }
-    new HtmlElement? currentTarget { get; }
-    new bool? defaultPrevented { get; }
-    new int? eventPhase { get; } // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
-    new bool? isTrusted { get; }
-    new HtmlElement? target { get; }
-    new double? timeStamp { get; }
-    new string? type { get; }
+    bool? bubbles = null,
+    bool? cancelable = null,
+    bool? composed = null,
+    HtmlElement? currentTarget = null,
+    bool? defaultPrevented = null,
+    int? eventPhase = null, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    bool? isTrusted = null,
+    HtmlElement? target = null,
+    double? timeStamp = null,
+    string? type = null,
 
     // UIEvent
-    new long? detail { get; }
+    long? detail = null,
 
     // MouseEvent
-    new bool? altKey { get; }
-    new int? button { get; }
-    new int? buttons { get; }
-    new double? clientX { get; }
-    new double? clientY { get; }
-    new bool? ctrlKey { get; }
-    new bool? metaKey { get; }
-    new double? movementX { get; }
-    new double? movementY { get; }
-    new double? offsetX { get; }
-    new double? offsetY { get; }
-    new double? pageX { get; }
-    new double? pageY { get; }
-    new HtmlElement? relatedTarget { get; }
-    new double? screenX { get; }
-    new double? screenY { get; }
-    new bool? shiftKey { get; }
-    new double? x { get; }
-    new double? y { get; }
+    bool? altKey = null,
+    int? button = null,
+    int? buttons = null,
+    double? clientX = null,
+    double? clientY = null,
+    bool? ctrlKey = null,
+    bool? metaKey = null,
+    double? movementX = null,
+    double? movementY = null,
+    double? offsetX = null,
+    double? offsetY = null,
+    double? pageX = null,
+    double? pageY = null,
+    HtmlElement? relatedTarget = null,
+    double? screenX = null,
+    double? screenY = null,
+    bool? shiftKey = null,
+    double? x = null,
+    double? y = null,
 
     // TouchEvent
-    new TouchPoint[]? changedTouches { get; }
-    new TouchPoint[]? targetTouches { get; }
-    new TouchPoint[]? touches { get; }
+    TouchPoint[]? changedTouches = null,
+    TouchPoint[]? targetTouches = null,
+    TouchPoint[]? touches = null,
     // Overlapping (redundant) properties:
-    // bool? altKey { get; }
-    // bool? ctrlKey { get; }
-    // bool? metaKey { get; }
-    // bool? shiftKey { get; }
+    // bool? altKey = null,
+    // bool? ctrlKey = null,
+    // bool? metaKey = null,
+    // bool? shiftKey = null,
 
     // FocusEvent
     // Overlapping (redundant) properties:
-    // HtmlElement? relatedTarget { get; }
+    // HtmlElement? relatedTarget = null,
 
     // KeyboardEvent
-    new string? code { get; }
-    new bool? isComposing { get; }
-    new string? key { get; }
-    new long? location { get; } // TODO: Enum?
-    new bool? repeat { get; }
+    string? code = null,
+    bool? isComposing = null,
+    string? key = null,
+    long? location = null, // TODO: Enum?
+    bool? repeat = null,
     // Overlapping (redundant) properties:
-    // bool? altKey { get; }
-    // bool? ctrlKey { get; }
-    // bool? metaKey { get; }
-    // bool? shiftKey { get; }
+    // bool? altKey = null,
+    // bool? ctrlKey = null,
+    // bool? metaKey = null,
+    // bool? shiftKey = null,
 
     // WheelEvent
-    new double? deltaX { get; }
-    new double? deltaY { get; }
-    new double? deltaZ { get; }
-    new long? deltaMode { get; } // TODO: Enum?
+    double? deltaX = null,
+    double? deltaY = null,
+    double? deltaZ = null,
+    long? deltaMode = null, // TODO: Enum?
 
     // InputEvent
-    new string? data { get; }
-    new DataTransfer? dataTransfer { get; }
-    new string? inputType { get; }
+    string? data = null,
+    DataTransfer? dataTransfer = null,
+    string? inputType = null
     // Overlapping (redundant) properties:
-    // bool? isComposing { get; }
+    // bool? isComposing = null,
 
     // CompositionEvent
     // Overlapping (redundant) properties:
-    // string? data { get; }
+    // string? data = null,
+) : Event {
+    public static readonly HttpXEvent Empty = new();
 
-    // public static readonly Event Empty = new();
-    // static abstract Event Empty();
+    bool Events.Input.isComposing => throw new NotImplementedException();
+
+    bool Events.Keyboard.isComposing => throw new NotImplementedException();
+
+    bool Events.Keyboard.altKey => throw new NotImplementedException();
+
+    bool Events.Mouse.altKey => throw new NotImplementedException();
+
+    bool Events.Touch.altKey => throw new NotImplementedException();
+
+    bool Events.Keyboard.ctrlKey => throw new NotImplementedException();
+
+    bool Events.Mouse.ctrlKey => throw new NotImplementedException();
+
+    bool Events.Touch.ctrlKey => throw new NotImplementedException();
+
+    long Events.Keyboard.location => throw new NotImplementedException();
+
+    bool Events.Keyboard.metaKey => throw new NotImplementedException();
+
+    bool Events.Mouse.metaKey => throw new NotImplementedException();
+
+    bool Events.Touch.metaKey => throw new NotImplementedException();
+
+    bool Events.Keyboard.repeat => throw new NotImplementedException();
+
+    bool Events.Keyboard.shiftKey => throw new NotImplementedException();
+
+    bool Events.Mouse.shiftKey => throw new NotImplementedException();
+
+    bool Events.Touch.shiftKey => throw new NotImplementedException();
+
+    int Events.Mouse.button => throw new NotImplementedException();
+
+    int Events.Mouse.buttons => throw new NotImplementedException();
+
+    double Events.Mouse.clientX => throw new NotImplementedException();
+
+    double Events.Mouse.clientY => throw new NotImplementedException();
+
+    double Events.Mouse.movementX => throw new NotImplementedException();
+
+    double Events.Mouse.movementY => throw new NotImplementedException();
+
+    double Events.Mouse.offsetX => throw new NotImplementedException();
+
+    double Events.Mouse.offsetY => throw new NotImplementedException();
+
+    double Events.Mouse.pageX => throw new NotImplementedException();
+
+    double Events.Mouse.pageY => throw new NotImplementedException();
+
+    double Events.Mouse.screenX => throw new NotImplementedException();
+
+    double Events.Mouse.screenY => throw new NotImplementedException();
+
+    double Events.MouseXY.x => throw new NotImplementedException();
+
+    double Events.MouseXY.y => throw new NotImplementedException();
+
+    double Events.Wheel.deltaX => throw new NotImplementedException();
+
+    double Events.Wheel.deltaY => throw new NotImplementedException();
+
+    double Events.Wheel.deltaZ => throw new NotImplementedException();
+
+    long Events.Wheel.deltaMode => throw new NotImplementedException();
+
+    long Events.UI.detail => throw new NotImplementedException();
+
+    bool Events.UI.bubbles => throw new NotImplementedException();
+
+    bool Events.UI.cancelable => throw new NotImplementedException();
+
+    bool Events.UI.composed => throw new NotImplementedException();
+
+    bool Events.UI.defaultPrevented => throw new NotImplementedException();
+
+    int Events.UI.eventPhase => throw new NotImplementedException();
+
+    bool Events.UI.isTrusted => throw new NotImplementedException();
+
+    double Events.UI.timeStamp => throw new NotImplementedException();
 }
 
-public record class HtmlElement(
-    string id = "",
-    string name = "",
-    string type = "",
-    string value = ""
-) {
-    public static readonly HtmlElement Empty = new();
-}
+// public record class HtmlElement(
+//     string id = "",
+//     string name = "",
+//     string type = "",
+//     string value = ""
+// ) {
+//     public static readonly HtmlElement Empty = new();
+// }
 
-public record class DataTransfer(
-    string dropEffect,
-    string effectAllowed,
-    string[] files,
-    DataTransferItem[] items,
-    string[] types
-) {
-    public DataTransfer() : this("", "", [], [], []) {}
+// public record class DataTransfer(
+//     string dropEffect,
+//     string effectAllowed,
+//     string[] files,
+//     DataTransferItem[] items,
+//     string[] types
+// ) {
+//     public DataTransfer() : this("", "", [], [], []) {}
 
-    public static readonly DataTransfer Empty = new();
-}
+//     public static readonly DataTransfer Empty = new();
+// }
 
-public record class DataTransferItem(
-    string kind = "",
-    string type = ""
-) {
-    public static readonly DataTransferItem Empty = new();
-}
+// public record class DataTransferItem(
+//     string kind = "",
+//     string type = ""
+// ) {
+//     public static readonly DataTransferItem Empty = new();
+// }
 
-public record class TouchPoint(
-    long identifier = 0,
-    double screenX = 0,
-    double screenY = 0,
-    double clientX = 0,
-    double clientY = 0,
-    double pageX = 0,
-    double pageY = 0
-) {
-    public static readonly TouchPoint Empty = new();
-}
+// public record class TouchPoint(
+//     long identifier = 0,
+//     double screenX = 0,
+//     double screenY = 0,
+//     double clientX = 0,
+//     double clientY = 0,
+//     double pageX = 0,
+//     double pageY = 0
+// ) {
+//     public static readonly TouchPoint Empty = new();
+// }
 
 #pragma warning restore IDE1006 // Naming Styles
