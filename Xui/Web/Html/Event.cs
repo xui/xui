@@ -129,7 +129,8 @@ public partial record class Event (
     // CompositionEvent
     // Overlapping (redundant) properties:
     // string? data = null,
-) : Event.UI, Event.Mouse, Event.Touch, Event.Focus, Event.Keyboard, Event.Wheel, Event.Input, Event.Composition {
+//) : Event.UI, Event.Mouse, Event.Touch, Event.Focus, Event.Keyboard, Event.Wheel, Event.Input, Event.Composition {
+) {
     public static readonly Event Empty = new();
 }
 
