@@ -2,7 +2,7 @@ namespace Xui.Web;
 
 #pragma warning disable IDE1006 // Naming Styles
 
-public interface Events
+public partial interface Events
 {
     public interface Composition
     {
@@ -25,31 +25,24 @@ public interface Events
         bool isComposing { get; }
     }
 
-    public interface Keyboard
+    public interface Keyboard: Subsets.ModifierKeys, Subsets.ModifierAlt, Subsets.ModifierCtrl, Subsets.ModifierMeta, Subsets.ModifierShift
     {
-        const string Format = "altKey,code,ctrlKey,isComposing,key,location,metaKey,repeat,shiftKey";
-        bool altKey { get; }
+        new const string Format = "code,isComposing,location,repeat," + Subsets.ModifierKeys.Format;
         string code { get; }
-        bool ctrlKey { get; }
         bool isComposing { get; }
         string key { get; }
         long location { get; }
-        bool metaKey { get; }
         bool repeat { get; }
-        bool shiftKey { get; }
     }
 
-    public interface Mouse : UI, MouseXY
+    public interface Mouse : UI, Subsets.XY, Subsets.ModifierKeys, Subsets.ModifierAlt, Subsets.ModifierCtrl, Subsets.ModifierMeta, Subsets.ModifierShift
     {
-        new const string Format = "altKey,button,buttons,clientX,clientY,ctrlKey,metaKey,movementX,movementY,offsetX,offsetY,pageX,pageY,relatedTarget,screenX,screenY,shiftKey" + MouseXY.Format;
+        new const string Format = "button,buttons,clientX,clientY,movementX,movementY,offsetX,offsetY,pageX,pageY,relatedTarget,screenX,screenY," + Subsets.XY.Format + "," + Subsets.ModifierKeys.Format;
         
-        bool altKey { get; }
         int button { get; }
         int buttons { get; }
         double clientX { get; }
         double clientY { get; }
-        bool ctrlKey { get; }
-        bool metaKey { get; }
         double movementX { get; }
         double movementY { get; }
         double offsetX { get; }
@@ -59,30 +52,14 @@ public interface Events
         HtmlElement relatedTarget { get; }
         double screenX { get; }
         double screenY { get; }
-        bool shiftKey { get; }
-
-        public interface XY : MouseXY { }
     }
 
-    public interface MouseXY
+    public interface Touch: Subsets.ModifierKeys, Subsets.ModifierAlt, Subsets.ModifierCtrl, Subsets.ModifierMeta, Subsets.ModifierShift
     {
-        const string Format = "x,y";
-
-        double x { get; }
-        double y { get; }
-    }
-
-    public interface Touch
-    {
-        const string Format = "altKey,altKey,changedTouches,ctrlKey,metaKey,shiftKey,targetTouches,touches";
-        bool altKey { get; }
+        const string Format = "changedTouches,targetTouches,touches," + Subsets.ModifierKeys.Format;
         TouchPoint[] changedTouches { get; }
-        bool ctrlKey { get; }
-        bool metaKey { get; }
-        bool shiftKey { get; }
         TouchPoint[] targetTouches { get; }
         TouchPoint[] touches { get; }
-
     }
 
     public interface Wheel : Mouse

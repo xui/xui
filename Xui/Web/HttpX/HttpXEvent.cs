@@ -136,33 +136,17 @@ internal partial record class HttpXEvent (
 
     bool Events.Keyboard.isComposing => throw new NotImplementedException();
 
-    bool Events.Keyboard.altKey => throw new NotImplementedException();
-
-    bool Events.Mouse.altKey => throw new NotImplementedException();
-
-    bool Events.Touch.altKey => throw new NotImplementedException();
-
-    bool Events.Keyboard.ctrlKey => throw new NotImplementedException();
-
-    bool Events.Mouse.ctrlKey => throw new NotImplementedException();
-
-    bool Events.Touch.ctrlKey => throw new NotImplementedException();
-
     long Events.Keyboard.location => throw new NotImplementedException();
-
-    bool Events.Keyboard.metaKey => throw new NotImplementedException();
-
-    bool Events.Mouse.metaKey => throw new NotImplementedException();
-
-    bool Events.Touch.metaKey => throw new NotImplementedException();
 
     bool Events.Keyboard.repeat => throw new NotImplementedException();
 
-    bool Events.Keyboard.shiftKey => throw new NotImplementedException();
+    double Events.Wheel.deltaX => throw new NotImplementedException();
 
-    bool Events.Mouse.shiftKey => throw new NotImplementedException();
+    double Events.Wheel.deltaY => throw new NotImplementedException();
 
-    bool Events.Touch.shiftKey => throw new NotImplementedException();
+    double Events.Wheel.deltaZ => throw new NotImplementedException();
+
+    long Events.Wheel.deltaMode => throw new NotImplementedException();
 
     int Events.Mouse.button => throw new NotImplementedException();
 
@@ -188,17 +172,17 @@ internal partial record class HttpXEvent (
 
     double Events.Mouse.screenY => throw new NotImplementedException();
 
-    double Events.MouseXY.x => throw new NotImplementedException();
+    double Events.Subsets.XY.x => throw new NotImplementedException();
 
-    double Events.MouseXY.y => throw new NotImplementedException();
+    double Events.Subsets.XY.y => throw new NotImplementedException();
 
-    double Events.Wheel.deltaX => throw new NotImplementedException();
+    bool Events.Subsets.ModifierAlt.altKey => throw new NotImplementedException();
 
-    double Events.Wheel.deltaY => throw new NotImplementedException();
+    bool Events.Subsets.ModifierCtrl.ctrlKey => throw new NotImplementedException();
 
-    double Events.Wheel.deltaZ => throw new NotImplementedException();
+    bool Events.Subsets.ModifierMeta.metaKey => throw new NotImplementedException();
 
-    long Events.Wheel.deltaMode => throw new NotImplementedException();
+    bool Events.Subsets.ModifierShift.shiftKey => throw new NotImplementedException();
 
     long Events.UI.detail => throw new NotImplementedException();
 
