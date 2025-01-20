@@ -132,49 +132,47 @@ internal partial record class HttpXEvent (
 ) : Event {
     public static readonly HttpXEvent Empty = new();
 
-    bool Events.Input.isComposing => throw new NotImplementedException();
-
-    bool Events.Keyboard.isComposing => throw new NotImplementedException();
+    bool Events.Subsets.IsComposing.isComposing => throw new NotImplementedException();
 
     long Events.Keyboard.location => throw new NotImplementedException();
 
     bool Events.Keyboard.repeat => throw new NotImplementedException();
 
-    double Events.Wheel.deltaX => throw new NotImplementedException();
+    double Events.Subsets.Deltas.deltaX => throw new NotImplementedException();
 
-    double Events.Wheel.deltaY => throw new NotImplementedException();
+    double Events.Subsets.Deltas.deltaY => throw new NotImplementedException();
 
-    double Events.Wheel.deltaZ => throw new NotImplementedException();
+    double Events.Subsets.Deltas.deltaZ => throw new NotImplementedException();
 
-    long Events.Wheel.deltaMode => throw new NotImplementedException();
+    long Events.Subsets.Deltas.deltaMode => throw new NotImplementedException();
 
-    int Events.Mouse.button => throw new NotImplementedException();
+    int Events.Subsets.Buttons.button => throw new NotImplementedException();
 
-    int Events.Mouse.buttons => throw new NotImplementedException();
+    int Events.Subsets.Buttons.buttons => throw new NotImplementedException();
 
-    double Events.Mouse.clientX => throw new NotImplementedException();
+    double Events.Subsets.X.x => throw new NotImplementedException();
 
-    double Events.Mouse.clientY => throw new NotImplementedException();
+    double Events.Subsets.Y.y => throw new NotImplementedException();
 
-    double Events.Mouse.movementX => throw new NotImplementedException();
+    double Events.Subsets.ClientXY.clientX => throw new NotImplementedException();
 
-    double Events.Mouse.movementY => throw new NotImplementedException();
+    double Events.Subsets.ClientXY.clientY => throw new NotImplementedException();
 
-    double Events.Mouse.offsetX => throw new NotImplementedException();
+    double Events.Subsets.MovementXY.movementX => throw new NotImplementedException();
 
-    double Events.Mouse.offsetY => throw new NotImplementedException();
+    double Events.Subsets.MovementXY.movementY => throw new NotImplementedException();
 
-    double Events.Mouse.pageX => throw new NotImplementedException();
+    double Events.Subsets.OffsetXY.offsetX => throw new NotImplementedException();
 
-    double Events.Mouse.pageY => throw new NotImplementedException();
+    double Events.Subsets.OffsetXY.offsetY => throw new NotImplementedException();
 
-    double Events.Mouse.screenX => throw new NotImplementedException();
+    double Events.Subsets.PageXY.pageX => throw new NotImplementedException();
 
-    double Events.Mouse.screenY => throw new NotImplementedException();
+    double Events.Subsets.PageXY.pageY => throw new NotImplementedException();
 
-    double Events.Subsets.XY.x => throw new NotImplementedException();
+    double Events.Subsets.ScreenXY.screenX => throw new NotImplementedException();
 
-    double Events.Subsets.XY.y => throw new NotImplementedException();
+    double Events.Subsets.ScreenXY.screenY => throw new NotImplementedException();
 
     bool Events.Subsets.ModifierAlt.altKey => throw new NotImplementedException();
 
