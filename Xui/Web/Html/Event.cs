@@ -51,14 +51,14 @@ namespace Xui.Web;
 /// <param name="dataTransfer">Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.</param>
 /// <param name="inputType">Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.</param>
 public partial interface Event : 
+    Events.UI,
     Events.Composition, 
     Events.Focus, 
     Events.Input, 
     Events.Keyboard, 
     Events.Mouse, 
     Events.Touch, 
-    Events.Wheel,
-    Events.UI
+    Events.Wheel
 {
     static Event Empty { get; }
 
