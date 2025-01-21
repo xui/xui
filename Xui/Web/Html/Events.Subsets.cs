@@ -210,7 +210,7 @@ public partial interface Events
             const string Format = "altKey";
 
             /// <summary>
-            /// Returns true if the alt key was down when the mouse event was fired.
+            /// Returns true if the alt key was down when the event was fired.
             /// </summary>
             bool altKey { get; }
         }
@@ -220,7 +220,7 @@ public partial interface Events
             const string Format = "ctrlKey";
 
             /// <summary>
-            /// Returns true if the control key was down when the mouse event was fired.
+            /// Returns true if the control key was down when the event was fired.
             /// </summary>
             bool ctrlKey { get; }
         }
@@ -230,7 +230,7 @@ public partial interface Events
             const string Format = "metaKey";
 
             /// <summary>
-            /// Returns true if the meta key was down when the mouse event was fired.
+            /// Returns true if the meta key was down when the event was fired.
             /// </summary>
             bool metaKey { get; }
         }
@@ -240,7 +240,7 @@ public partial interface Events
             const string Format = "shiftKey";
 
             /// <summary>
-            /// Returns true if the shift key was down when the mouse event was fired.
+            /// Returns true if the shift key was down when the event was fired.
             /// </summary>
             bool shiftKey { get; }
         }
