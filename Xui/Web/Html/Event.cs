@@ -15,8 +15,6 @@ public partial interface Event :
     Events.Touch, 
     Events.Wheel
 {
-    static Event Empty { get; }
-
     // Event (base)
     /// <summary>
     /// A nullable boolean value indicating whether or not the event bubbles up through the DOM.  

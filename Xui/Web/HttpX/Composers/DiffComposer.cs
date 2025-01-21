@@ -180,7 +180,7 @@ public class DiffComposer : BaseComposer
         keyhole.String = expression;
 
         // Must trigger Html to append its splits.  Then reset the parent.
-        _ = attrValue(Event.Empty);
+        _ = attrValue(null!);
         parentKey = parent.Key;
         parentLength = parent.Length;
         cursor = parent.Cursor / 2 + 1;

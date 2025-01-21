@@ -51,7 +51,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
 
-        var value = attrValue(Event.Empty);
+        var value = attrValue(null!);
         Encoding.UTF8.GetBytes(value, Writer);
 
         Encoding.UTF8.GetBytes("\"", Writer);
@@ -65,7 +65,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         // as true regardless of what value you supply.  The only way to 
         // evaluate a boolean attribute to false is to exclude it.
 
-        var isTrue = attrValue(Event.Empty);
+        var isTrue = attrValue(null!);
         if (isTrue)
         {
             Encoding.UTF8.GetBytes(attrName, Writer);
@@ -81,7 +81,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
 
-        var value = attrValue(Event.Empty);
+        var value = attrValue(null!);
         var destination = Writer.GetSpan();
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
@@ -99,7 +99,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler)
-        attrValue(Event.Empty);
+        attrValue(null!);
 
         Encoding.UTF8.GetBytes("\"", Writer);
 

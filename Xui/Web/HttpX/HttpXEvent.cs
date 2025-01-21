@@ -2,7 +2,7 @@ namespace Xui.Web.HttpX;
 
 #pragma warning disable IDE1006 // Naming Styles
 
-internal partial record class HttpXEvent (
+internal partial record class HttpXEvent(
     // Event (base)
     bool? bubbles = null,
     bool? cancelable = null,
@@ -81,114 +81,53 @@ internal partial record class HttpXEvent (
     // CompositionEvent
     // Overlapping (redundant) properties:
     // string? data = null,
-) : Event {
-    public static readonly HttpXEvent Empty = new();
-
-    bool Events.Subsets.IsComposing.isComposing => throw new NotImplementedException();
-
-    long Events.Keyboard.location => throw new NotImplementedException();
-
-    bool Events.Keyboard.repeat => throw new NotImplementedException();
-
-    double Events.Subsets.Deltas.deltaX => throw new NotImplementedException();
-
-    double Events.Subsets.Deltas.deltaY => throw new NotImplementedException();
-
-    double Events.Subsets.Deltas.deltaZ => throw new NotImplementedException();
-
-    long Events.Subsets.Deltas.deltaMode => throw new NotImplementedException();
-
-    int Events.Subsets.Buttons.button => throw new NotImplementedException();
-
-    int Events.Subsets.Buttons.buttons => throw new NotImplementedException();
-
-    double Events.Subsets.X.x => throw new NotImplementedException();
-
-    double Events.Subsets.Y.y => throw new NotImplementedException();
-
-    double Events.Subsets.ClientXY.clientX => throw new NotImplementedException();
-
-    double Events.Subsets.ClientXY.clientY => throw new NotImplementedException();
-
-    double Events.Subsets.MovementXY.movementX => throw new NotImplementedException();
-
-    double Events.Subsets.MovementXY.movementY => throw new NotImplementedException();
-
-    double Events.Subsets.OffsetXY.offsetX => throw new NotImplementedException();
-
-    double Events.Subsets.OffsetXY.offsetY => throw new NotImplementedException();
-
-    double Events.Subsets.PageXY.pageX => throw new NotImplementedException();
-
-    double Events.Subsets.PageXY.pageY => throw new NotImplementedException();
-
-    double Events.Subsets.ScreenXY.screenX => throw new NotImplementedException();
-
-    double Events.Subsets.ScreenXY.screenY => throw new NotImplementedException();
-
-    bool Events.Subsets.ModifierAlt.altKey => throw new NotImplementedException();
-
-    bool Events.Subsets.ModifierCtrl.ctrlKey => throw new NotImplementedException();
-
-    bool Events.Subsets.ModifierMeta.metaKey => throw new NotImplementedException();
-
-    bool Events.Subsets.ModifierShift.shiftKey => throw new NotImplementedException();
-
-    long Events.UI.detail => throw new NotImplementedException();
-
-    bool Events.UI.bubbles => throw new NotImplementedException();
-
-    bool Events.UI.cancelable => throw new NotImplementedException();
-
-    bool Events.UI.composed => throw new NotImplementedException();
-
-    bool Events.UI.defaultPrevented => throw new NotImplementedException();
-
-    int Events.UI.eventPhase => throw new NotImplementedException();
-
-    bool Events.UI.isTrusted => throw new NotImplementedException();
-
-    double Events.UI.timeStamp => throw new NotImplementedException();
+) : Event
+{
+    long Events.Keyboard.location => location ?? default;
+    bool Events.Keyboard.repeat => repeat ?? default;
+    bool Events.Subsets.IsComposing.isComposing => isComposing ?? default;
+    long Events.UI.detail => detail ?? default;
+    bool Events.UI.bubbles => bubbles ?? default;
+    bool Events.UI.cancelable => cancelable ?? default;
+    bool Events.UI.composed => composed ?? default;
+    bool Events.UI.defaultPrevented => defaultPrevented ?? default;
+    int Events.UI.eventPhase => eventPhase ?? default;
+    bool Events.UI.isTrusted => isTrusted ?? default;
+    double Events.UI.timeStamp => timeStamp ?? default;
+    int Events.Subsets.Buttons.button => button ?? default;
+    int Events.Subsets.Buttons.buttons => buttons ?? default;
+    double Events.Subsets.X.x => x ?? default;
+    double Events.Subsets.Y.y => y ?? default;
+    double Events.Subsets.ClientXY.clientX => clientX ?? default;
+    double Events.Subsets.ClientXY.clientY => clientY ?? default;
+    double Events.Subsets.MovementXY.movementX => movementX ?? default;
+    double Events.Subsets.MovementXY.movementY => movementY ?? default;
+    double Events.Subsets.OffsetXY.offsetX => offsetX ?? default;
+    double Events.Subsets.OffsetXY.offsetY => offsetY ?? default;
+    double Events.Subsets.PageXY.pageX => pageX ?? default;
+    double Events.Subsets.PageXY.pageY => pageY ?? default;
+    double Events.Subsets.ScreenXY.screenX => screenX ?? default;
+    double Events.Subsets.ScreenXY.screenY => screenY ?? default;
+    bool Events.Subsets.ModifierAlt.altKey => altKey ?? default;
+    bool Events.Subsets.ModifierCtrl.ctrlKey => ctrlKey ?? default;
+    bool Events.Subsets.ModifierMeta.metaKey => metaKey ?? default;
+    bool Events.Subsets.ModifierShift.shiftKey => shiftKey ?? default;
+    double Events.Subsets.Deltas.deltaX => deltaX ?? default;
+    double Events.Subsets.Deltas.deltaY => deltaY ?? default;
+    double Events.Subsets.Deltas.deltaZ => deltaZ ?? default;
+    long Events.Subsets.Deltas.deltaMode => deltaMode ?? default;
+    HtmlElement Events.UI.target => target ?? HtmlElement.Empty;
+    string Events.UI.type => type ?? string.Empty;
+    HtmlElement Events.UI.currentTarget => currentTarget ?? HtmlElement.Empty;
+    HtmlElement Events.Subsets.RelatedTarget.relatedTarget => relatedTarget ?? HtmlElement.Empty;
+    TouchPoint[] Events.Subsets.Touches.changedTouches => changedTouches ?? [];
+    TouchPoint[] Events.Subsets.Touches.targetTouches => targetTouches ?? [];
+    TouchPoint[] Events.Subsets.Touches.touches => touches ?? [];
+    string Events.Keyboard.code => code ?? string.Empty;
+    string Events.Keyboard.key => key ?? string.Empty;
+    string Events.Subsets.Data.data => data ?? string.Empty;
+    DataTransfer Events.Input.dataTransfer => dataTransfer ?? DataTransfer.Empty;
+    string Events.Input.inputType => inputType ?? string.Empty;
 }
-
-// public record class HtmlElement(
-//     string id = "",
-//     string name = "",
-//     string type = "",
-//     string value = ""
-// ) {
-//     public static readonly HtmlElement Empty = new();
-// }
-
-// public record class DataTransfer(
-//     string dropEffect,
-//     string effectAllowed,
-//     string[] files,
-//     DataTransferItem[] items,
-//     string[] types
-// ) {
-//     public DataTransfer() : this("", "", [], [], []) {}
-
-//     public static readonly DataTransfer Empty = new();
-// }
-
-// public record class DataTransferItem(
-//     string kind = "",
-//     string type = ""
-// ) {
-//     public static readonly DataTransferItem Empty = new();
-// }
-
-// public record class TouchPoint(
-//     long identifier = 0,
-//     double screenX = 0,
-//     double screenY = 0,
-//     double clientX = 0,
-//     double clientY = 0,
-//     double pageX = 0,
-//     double pageY = 0
-// ) {
-//     public static readonly TouchPoint Empty = new();
-// }
 
 #pragma warning restore IDE1006 // Naming Styles
