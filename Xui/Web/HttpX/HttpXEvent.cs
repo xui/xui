@@ -33,12 +33,12 @@ internal partial record class HttpXEvent(
     double? deltaX = null,
     double? deltaY = null,
     double? deltaZ = null,
-    long? deltaMode = null, // TODO: Enum?
+    int? deltaMode = null,
 
     string? code = null,
     bool? isComposing = null,
     string? key = null,
-    long? location = null, // TODO: Enum?
+    int? location = null,
     bool? repeat = null,
 
     string? data = null,
@@ -51,14 +51,14 @@ internal partial record class HttpXEvent(
     HtmlElement? currentTarget = null,
     bool? defaultPrevented = null,
     long? detail = null,
-    int? eventPhase = null, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    int? eventPhase = null,
     bool? isTrusted = null,
     HtmlElement? target = null,
     double? timeStamp = null,
     string? type = null
 ) : Event
 {
-    long Events.Keyboard.location => location ?? default;
+    KeyLocation Events.Keyboard.location => (KeyLocation)(location ?? default);
     bool Events.Keyboard.repeat => repeat ?? default;
     bool Events.Subsets.IsComposing.isComposing => isComposing ?? default;
     long Events.UI.detail => detail ?? default;
@@ -66,11 +66,11 @@ internal partial record class HttpXEvent(
     bool Events.UI.cancelable => cancelable ?? default;
     bool Events.UI.composed => composed ?? default;
     bool Events.UI.defaultPrevented => defaultPrevented ?? default;
-    int Events.UI.eventPhase => eventPhase ?? default;
+    EventPhase Events.UI.eventPhase => (EventPhase)(eventPhase ?? default);
     bool Events.UI.isTrusted => isTrusted ?? default;
     double Events.UI.timeStamp => timeStamp ?? default;
-    int Events.Subsets.Buttons.button => button ?? default;
-    int Events.Subsets.Buttons.buttons => buttons ?? default;
+    Button Events.Subsets.Buttons.button => (Button)(button ?? default);
+    ButtonFlag Events.Subsets.Buttons.buttons => (ButtonFlag)(buttons ?? default);
     double Events.Subsets.X.x => x ?? default;
     double Events.Subsets.Y.y => y ?? default;
     double Events.Subsets.ClientXY.clientX => clientX ?? default;
@@ -90,7 +90,7 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.deltaX => deltaX ?? default;
     double Events.Subsets.Deltas.deltaY => deltaY ?? default;
     double Events.Subsets.Deltas.deltaZ => deltaZ ?? default;
-    long Events.Subsets.Deltas.deltaMode => deltaMode ?? default;
+    DeltaMode Events.Subsets.Deltas.deltaMode => (DeltaMode)(deltaMode ?? default);
     HtmlElement Events.UI.target => target ?? HtmlElement.Empty;
     string Events.UI.type => type ?? string.Empty;
     HtmlElement Events.UI.currentTarget => currentTarget ?? HtmlElement.Empty;

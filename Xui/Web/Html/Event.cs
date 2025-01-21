@@ -56,7 +56,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? eventPhase { get; } // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    new int? eventPhase { get; }
     
     /// <summary>
     /// A nullable boolean which indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, for example).
@@ -284,11 +284,11 @@ public partial interface Event :
     new string? key { get; }
 
     /// <summary>
-    /// Returns a number representing the location of the key on the keyboard or other input device. A list of the constants identifying the locations is shown above in Keyboard locations.
+    /// Returns a number representing the location of the key on the keyboard or other input device.
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new long? location { get; } // TODO: Enum?
+    new int? location { get; }
 
     /// <summary>
     /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
@@ -330,7 +330,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new long? deltaMode { get; } // TODO: Enum?
+    new int? deltaMode { get; }
 
     // InputEvent
 

@@ -23,12 +23,12 @@ public partial interface Events
             /// <summary>
             /// The button number that was pressed (if applicable) when the mouse event was fired.
             /// </summary>
-            int button { get; }
+            Button button { get; }
 
             /// <summary>
             /// The buttons being pressed (if any) when the mouse event was fired.
             /// </summary>
-            int buttons { get; }
+            ButtonFlag buttons { get; }
         }
 
         public interface Coordinates : XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY
@@ -163,7 +163,7 @@ public partial interface Events
             /// <summary>
             /// Returns an unsigned long representing the unit of the delta* values' scroll amount.
             /// </summary>
-            long deltaMode { get; }
+            DeltaMode deltaMode { get; }
         }
 
         public interface Touches
