@@ -56,7 +56,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? eventPhase { get; }
+    new EventPhase? eventPhase { get; }
     
     /// <summary>
     /// A nullable boolean which indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, for example).
@@ -107,14 +107,14 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? button { get; }
+    new Button? button { get; }
 
     /// <summary>
     /// The buttons being pressed (if any) when the mouse event was fired.
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? buttons { get; }
+    new ButtonFlag? buttons { get; }
 
     /// <summary>
     /// The X coordinate of the mouse pointer in viewport coordinates.
@@ -288,7 +288,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? location { get; }
+    new KeyLocation? location { get; }
 
     /// <summary>
     /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
@@ -330,7 +330,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new int? deltaMode { get; }
+    new DeltaMode? deltaMode { get; }
 
     // InputEvent
 
