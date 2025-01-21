@@ -1,7 +1,5 @@
 namespace Xui.Web;
 
-#pragma warning disable IDE1006 // Naming Styles
-
 public partial interface Events
 {
     public interface Composition : UI, Subsets.Data
@@ -28,12 +26,12 @@ public partial interface Events
         /// <summary>
         /// Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.
         /// </summary>
-        DataTransfer dataTransfer { get; }
+        DataTransfer DataTransfer { get; }
 
         /// <summary>
         /// Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.
         /// </summary>
-        string inputType { get; }
+        string InputType { get; }
     }
 
     public interface Keyboard: UI, Subsets.Modifiers, Subsets.IsComposing
@@ -46,22 +44,22 @@ public partial interface Events
         /// <summary>
         /// Returns a string with the code value of the physical key represented by the event.
         /// </summary>
-        string code { get; }
+        string Code { get; }
 
         /// <summary>
         /// Returns a string representing the key value of the key represented by the event.
         /// </summary>
-        string key { get; }
+        string Key { get; }
 
         /// <summary>
         /// Returns a number representing the location of the key on the keyboard or other input device.
         /// </summary>
-        KeyLocation location { get; }
+        KeyLocation Location { get; }
 
         /// <summary>
         /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
         /// </summary>
-        bool repeat { get; }
+        bool Repeat { get; }
     }
 
     public interface Mouse : UI, Subsets.Buttons, Subsets.Coordinates, Subsets.Modifiers, Subsets.RelatedTarget
@@ -97,57 +95,57 @@ public partial interface Events
         /// <summary>
         /// Returns a long with details about the event, depending on the event type.
         /// </summary>
-        long detail { get; }
+        long Detail { get; }
         
         /// <summary>
         /// A boolean value indicating whether or not the event bubbles up through the DOM.
         /// </summary>
-        bool bubbles { get; }
+        bool Bubbles { get; }
 
         /// <summary>
         /// A boolean value indicating whether the event is cancelable.
         /// </summary>
-        bool cancelable { get; }
+        bool Cancelable { get; }
         
         /// <summary>
         /// A boolean indicating whether or not the event can bubble across the boundary between the shadow DOM and the regular DOM.
         /// </summary>
-        bool composed { get; }
+        bool Composed { get; }
 
         /// <summary>
         /// A reference to the currently registered target for the event. This is the object to which the event is currently slated to be sent. It's possible this has been changed along the way through retargeting.
         /// </summary>
-        HtmlElement currentTarget { get; }
+        HtmlElement CurrentTarget { get; }
 
         /// <summary>
         /// Indicates whether or not the call to event.preventDefault() canceled the event.
         /// </summary>
-        bool defaultPrevented { get; }
+        bool DefaultPrevented { get; }
 
         /// <summary>
         /// Indicates which phase of the event flow is being processed. It is one of the following numbers: NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
         /// </summary>
-        EventPhase eventPhase { get; }
+        EventPhase EventPhase { get; }
         
         /// <summary>
         /// Indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, for example).
         /// </summary>
-        bool isTrusted { get; }
+        bool IsTrusted { get; }
         
         /// <summary>
         /// A reference to the object to which the event was originally dispatched.
         /// </summary>
-        HtmlElement target { get; }
+        HtmlElement Target { get; }
 
         /// <summary>
         /// The time at which the event was created (in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a DOMHighResTimeStamp instead.
         /// </summary>
-        double timeStamp { get; }
+        double TimeStamp { get; }
 
         /// <summary>
         /// The name identifying the type of the event.
         /// </summary>
-        string type { get; }
+        string Type { get; }
     }
 }
 
@@ -283,5 +281,3 @@ public enum ButtonFlag : int
     /// </summary>
     Fifth = 16
 }
-
-#pragma warning restore IDE1006 // Naming Styles

@@ -1,7 +1,5 @@
 namespace Xui.Web;
 
-#pragma warning disable IDE1006 // Naming Styles
-
 public partial interface Events
 {
     public partial interface Subsets
@@ -13,7 +11,7 @@ public partial interface Events
             /// <summary>
             /// Returns a string with the inserted characters. This may be an empty string if the change doesn't insert text (for example, when deleting characters).
             /// </summary>
-            string data { get; }
+            string Data { get; }
         }
 
         public interface Buttons
@@ -23,12 +21,12 @@ public partial interface Events
             /// <summary>
             /// The button number that was pressed (if applicable) when the mouse event was fired.
             /// </summary>
-            Button button { get; }
+            Button Button { get; }
 
             /// <summary>
             /// The buttons being pressed (if any) when the mouse event was fired.
             /// </summary>
-            ButtonFlag buttons { get; }
+            ButtonFlag Buttons { get; }
         }
 
         public interface Coordinates : XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY
@@ -43,7 +41,7 @@ public partial interface Events
         }
         public interface XY : X, Y
         {
-            new const string Format = X.Format + "," + Y.Format;
+            new const string Format = Subsets.X.Format + "," + Subsets.Y.Format;
         }
 
         public interface X
@@ -53,7 +51,7 @@ public partial interface Events
             /// <summary>
             /// Alias for MouseEvent.clientX.
             /// </summary>
-            double x { get; }
+            double X { get; }
         }
 
         public interface Y
@@ -63,7 +61,7 @@ public partial interface Events
             /// <summary>
             /// Alias for MouseEvent.clientY.
             /// </summary>
-            double y { get; }
+            double Y { get; }
         }
 
         public interface ClientXY
@@ -73,12 +71,12 @@ public partial interface Events
             /// <summary>
             /// The X coordinate of the mouse pointer in viewport coordinates.
             /// </summary>
-            double clientX { get; }
+            double ClientX { get; }
 
             /// <summary>
             /// The Y coordinate of the mouse pointer in viewport coordinates.
             /// </summary>
-            double clientY { get; }
+            double ClientY { get; }
         }
 
         public interface MovementXY
@@ -88,12 +86,12 @@ public partial interface Events
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the last mousemove event.
             /// </summary>
-            double movementX { get; }
+            double MovementX { get; }
 
             /// <summary>
             /// The Y coordinate of the mouse pointer relative to the position of the last mousemove event.
             /// </summary>
-            double movementY { get; }
+            double MovementY { get; }
         }
 
         public interface OffsetXY
@@ -103,12 +101,12 @@ public partial interface Events
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the padding edge of the target node.
             /// </summary>
-            double offsetX { get; }
+            double OffsetX { get; }
 
             /// <summary>
             /// The Y coordinate of the mouse pointer relative to the position of the padding edge of the target node.
             /// </summary>
-            double offsetY { get; }
+            double OffsetY { get; }
         }
 
         public interface PageXY
@@ -118,12 +116,12 @@ public partial interface Events
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the whole document.
             /// </summary>
-            double pageX { get; }
+            double PageX { get; }
 
             /// <summary>
             /// The Y coordinate of the mouse pointer relative to the whole document.
             /// </summary>
-            double pageY { get; }
+            double PageY { get; }
         }
 
         public interface ScreenXY
@@ -133,12 +131,12 @@ public partial interface Events
             /// <summary>
             /// The X coordinate of the mouse pointer in screen coordinates.
             /// </summary>
-            double screenX { get; }
+            double ScreenX { get; }
 
             /// <summary>
             /// The Y coordinate of the mouse pointer in screen coordinates.
             /// </summary>
-            double screenY { get; }
+            double ScreenY { get; }
         }
 
         public interface Deltas
@@ -148,22 +146,22 @@ public partial interface Events
             /// <summary>
             /// Returns a double representing the horizontal scroll amount.
             /// </summary>
-            double deltaX { get; }
+            double DeltaX { get; }
 
             /// <summary>
             /// Returns a double representing the vertical scroll amount.
             /// </summary>
-            double deltaY { get; }
+            double DeltaY { get; }
 
             /// <summary>
             /// Returns a double representing the scroll amount for the z-axis.
             /// </summary>
-            double deltaZ { get; }
+            double DeltaZ { get; }
 
             /// <summary>
             /// Returns an unsigned long representing the unit of the delta* values' scroll amount.
             /// </summary>
-            DeltaMode deltaMode { get; }
+            DeltaMode DeltaMode { get; }
         }
 
         public interface Touches
@@ -173,17 +171,17 @@ public partial interface Events
             /// <summary>
             /// A TouchList of all the Touch objects representing individual points of contact whose states changed between the previous touch event and this one.
             /// </summary>
-            TouchPoint[] changedTouches { get; }
+            TouchPoint[] ChangedTouches { get; }
 
             /// <summary>
             /// A TouchList of all the Touch objects that are both currently in contact with the touch surface and were also started on the same element that is the target of the event.
             /// </summary>
-            TouchPoint[] targetTouches { get; }
+            TouchPoint[] TargetTouches { get; }
 
             /// <summary>
             /// A TouchList of all the Touch objects representing all current points of contact with the surface, regardless of target or changed status.
             /// </summary>
-            TouchPoint[] touches { get; }
+            TouchPoint[] Touches { get; }
         }
 
         public interface RelatedTarget
@@ -193,7 +191,7 @@ public partial interface Events
             /// <summary>
             /// The secondary target for the event, if there is one.
             /// </summary>
-            HtmlElement relatedTarget { get; }
+            HtmlElement RelatedTarget { get; }
         }
 
         public interface Modifiers : ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift
@@ -212,7 +210,7 @@ public partial interface Events
             /// <summary>
             /// Returns true if the alt key was down when the event was fired.
             /// </summary>
-            bool altKey { get; }
+            bool AltKey { get; }
         }
 
         public interface ModifierCtrl
@@ -222,7 +220,7 @@ public partial interface Events
             /// <summary>
             /// Returns true if the control key was down when the event was fired.
             /// </summary>
-            bool ctrlKey { get; }
+            bool CtrlKey { get; }
         }
 
         public interface ModifierMeta
@@ -232,7 +230,7 @@ public partial interface Events
             /// <summary>
             /// Returns true if the meta key was down when the event was fired.
             /// </summary>
-            bool metaKey { get; }
+            bool MetaKey { get; }
         }
 
         public interface ModifierShift
@@ -242,7 +240,7 @@ public partial interface Events
             /// <summary>
             /// Returns true if the shift key was down when the event was fired.
             /// </summary>
-            bool shiftKey { get; }
+            bool ShiftKey { get; }
         }
 
         public interface IsComposing
@@ -252,9 +250,7 @@ public partial interface Events
             /// <summary>
             /// Returns a boolean value that is true if the event is fired between after compositionstart and before compositionend.
             /// </summary>
-            bool isComposing { get; }
+            bool IsComposing { get; }
         }
     }
 }
-
-#pragma warning disable IDE1006
