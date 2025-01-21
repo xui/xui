@@ -3,84 +3,59 @@ namespace Xui.Web.HttpX;
 #pragma warning disable IDE1006 // Naming Styles
 
 internal partial record class HttpXEvent(
-    // Event (base)
-    bool? bubbles = null,
-    bool? cancelable = null,
-    bool? composed = null,
-    HtmlElement? currentTarget = null,
-    bool? defaultPrevented = null,
-    int? eventPhase = null, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
-    bool? isTrusted = null,
-    HtmlElement? target = null,
-    double? timeStamp = null,
-    string? type = null,
-
-    // UIEvent
-    long? detail = null,
-
-    // MouseEvent
-    bool? altKey = null,
-    int? button = null,
-    int? buttons = null,
     double? clientX = null,
     double? clientY = null,
-    bool? ctrlKey = null,
-    bool? metaKey = null,
     double? movementX = null,
     double? movementY = null,
     double? offsetX = null,
     double? offsetY = null,
     double? pageX = null,
     double? pageY = null,
-    HtmlElement? relatedTarget = null,
     double? screenX = null,
     double? screenY = null,
-    bool? shiftKey = null,
     double? x = null,
     double? y = null,
 
-    // TouchEvent
+    bool? altKey = null,
+    bool? ctrlKey = null,
+    bool? metaKey = null,
+    bool? shiftKey = null,
+
+    int? button = null,
+    int? buttons = null,
+
+    HtmlElement? relatedTarget = null,
+
     TouchPoint[]? changedTouches = null,
     TouchPoint[]? targetTouches = null,
     TouchPoint[]? touches = null,
-    // Overlapping (redundant) properties:
-    // bool? altKey = null,
-    // bool? ctrlKey = null,
-    // bool? metaKey = null,
-    // bool? shiftKey = null,
 
-    // FocusEvent
-    // Overlapping (redundant) properties:
-    // HtmlElement? relatedTarget = null,
-
-    // KeyboardEvent
-    string? code = null,
-    bool? isComposing = null,
-    string? key = null,
-    long? location = null, // TODO: Enum?
-    bool? repeat = null,
-    // Overlapping (redundant) properties:
-    // bool? altKey = null,
-    // bool? ctrlKey = null,
-    // bool? metaKey = null,
-    // bool? shiftKey = null,
-
-    // WheelEvent
     double? deltaX = null,
     double? deltaY = null,
     double? deltaZ = null,
     long? deltaMode = null, // TODO: Enum?
 
-    // InputEvent
+    string? code = null,
+    bool? isComposing = null,
+    string? key = null,
+    long? location = null, // TODO: Enum?
+    bool? repeat = null,
+
     string? data = null,
     DataTransfer? dataTransfer = null,
-    string? inputType = null
-    // Overlapping (redundant) properties:
-    // bool? isComposing = null,
+    string? inputType = null,
 
-    // CompositionEvent
-    // Overlapping (redundant) properties:
-    // string? data = null,
+    bool? bubbles = null,
+    bool? cancelable = null,
+    bool? composed = null,
+    HtmlElement? currentTarget = null,
+    bool? defaultPrevented = null,
+    long? detail = null,
+    int? eventPhase = null, // TODO: Should this be an enum? NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
+    bool? isTrusted = null,
+    HtmlElement? target = null,
+    double? timeStamp = null,
+    string? type = null
 ) : Event
 {
     long Events.Keyboard.location => location ?? default;
