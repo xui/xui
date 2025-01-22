@@ -40,7 +40,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new HtmlElement? CurrentTarget { get; }
+    new EventTarget? CurrentTarget { get; }
 
     /// <summary>
     /// A nullable boolean that indicates whether or not the call to event.preventDefault() canceled the event.
@@ -68,7 +68,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new HtmlElement? Target { get; }
+    new EventTarget? Target { get; }
 
     /// <summary>
     /// The nullable time at which the event was created (in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a DOMHighResTimeStamp instead.
@@ -189,7 +189,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Events.Mouse, Events.Keyboard, Events.Focus, Events.Input, Events.Touch, Events.Wheel and Events.Composition.
     /// </summary>
-    new HtmlElement? RelatedTarget { get; }
+    new EventTarget? RelatedTarget { get; }
 
     /// <summary>
     /// The X coordinate of the mouse pointer in screen coordinates.
@@ -363,13 +363,13 @@ public partial interface Event :
     // static abstract Event Empty();
 }
 
-public record class HtmlElement(
+public record class EventTarget(
     string ID = "",
     string Name = "",
     string Type = "",
     string Value = ""
 ) {
-    public static readonly HtmlElement Empty = new();
+    public static readonly EventTarget Empty = new();
 }
 
 public record class DataTransfer(

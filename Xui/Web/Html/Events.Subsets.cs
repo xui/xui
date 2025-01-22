@@ -191,7 +191,7 @@ public partial interface Events
             /// <summary>
             /// The secondary target for the event, if there is one.
             /// </summary>
-            HtmlElement RelatedTarget { get; }
+            EventTarget RelatedTarget { get; }
         }
 
         public interface Modifiers : ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift

@@ -22,7 +22,7 @@ internal partial record class HttpXEvent(
     Button? Button = null,
     ButtonFlag? Buttons = null,
 
-    HtmlElement? RelatedTarget = null,
+    EventTarget? RelatedTarget = null,
 
     TouchPoint[]? ChangedTouches = null,
     TouchPoint[]? TargetTouches = null,
@@ -46,12 +46,12 @@ internal partial record class HttpXEvent(
     bool? Bubbles = null,
     bool? Cancelable = null,
     bool? Composed = null,
-    HtmlElement? CurrentTarget = null,
+    EventTarget? CurrentTarget = null,
     bool? DefaultPrevented = null,
     long? Detail = null,
     EventPhase? EventPhase = null,
     bool? IsTrusted = null,
-    HtmlElement? Target = null,
+    EventTarget? Target = null,
     double? TimeStamp = null,
     string? Type = null
 ) : Event
@@ -89,10 +89,10 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaY => DeltaY ?? default;
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web.DeltaMode.Pixel;
-    HtmlElement Events.UI.Target => Target ?? HtmlElement.Empty;
+    EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
     string Events.UI.Type => Type ?? string.Empty;
-    HtmlElement Events.UI.CurrentTarget => CurrentTarget ?? HtmlElement.Empty;
-    HtmlElement Events.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? HtmlElement.Empty;
+    EventTarget Events.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
+    EventTarget Events.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;
     TouchPoint[] Events.Subsets.Touches.ChangedTouches => ChangedTouches ?? [];
     TouchPoint[] Events.Subsets.Touches.TargetTouches => TargetTouches ?? [];
     TouchPoint[] Events.Subsets.Touches.Touches => Touches ?? [];

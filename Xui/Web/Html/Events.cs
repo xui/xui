@@ -115,7 +115,7 @@ public partial interface Events
         /// <summary>
         /// A reference to the currently registered target for the event. This is the object to which the event is currently slated to be sent. It's possible this has been changed along the way through retargeting.
         /// </summary>
-        HtmlElement CurrentTarget { get; }
+        EventTarget CurrentTarget { get; }
 
         /// <summary>
         /// Indicates whether or not the call to event.preventDefault() canceled the event.
@@ -135,7 +135,7 @@ public partial interface Events
         /// <summary>
         /// A reference to the object to which the event was originally dispatched.
         /// </summary>
-        HtmlElement Target { get; }
+        EventTarget Target { get; }
 
         /// <summary>
         /// The time at which the event was created (in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a DOMHighResTimeStamp instead.
