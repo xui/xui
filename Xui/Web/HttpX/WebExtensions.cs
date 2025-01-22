@@ -30,7 +30,8 @@ public static class WebExtensions
     {
         return endpoints.Map(
             pattern,
-            async context => {
+            async context =>
+            {
                 var response = context.Response;
                 if (!response.HasStarted)
                 {
@@ -51,7 +52,7 @@ public static class WebExtensions
         );
     }
 
-    public static RouteGroupBuilder AddEventListeners(
+    public static WindowBuilder MapWindow(
         this IEndpointRouteBuilder endpoints, 
         [StringSyntax("Route")] string pattern, 
         Func<Html> html)
@@ -59,7 +60,8 @@ public static class WebExtensions
         var group = endpoints.MapGroup(pattern);
         group.Map(
             "/",
-            async httpContext => {
+            async httpContext =>
+            {
                 if (httpContext.WebSockets.IsWebSocketRequest)
                 {
                     // --- ws:// ---
@@ -109,6 +111,6 @@ public static class WebExtensions
                 }
             }
         );
-        return group;
+        return new WindowBuilder(group);
     }
 }
