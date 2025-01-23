@@ -6,7 +6,7 @@ var app = builder.Build();
 
 var c = 4;
 
-var window = app.Map("/app", () => $"""
+var window = app.MapXttp("/app", () => $"""
     <html>
         <body>
             <button onclick={OnClick}>
