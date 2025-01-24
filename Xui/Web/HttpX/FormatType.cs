@@ -1,4 +1,4 @@
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public enum FormatType
 {

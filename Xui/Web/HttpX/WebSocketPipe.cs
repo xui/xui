@@ -5,7 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public class WebSocketPipe : IDuplexPipe, IDisposable
 {

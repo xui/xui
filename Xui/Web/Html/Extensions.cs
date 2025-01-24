@@ -1,9 +1,9 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Xui.Web.Composers;
+using Web4.Composers;
 
-namespace Xui.Web;
+namespace Web4;
 
 public static class Extensions
 {

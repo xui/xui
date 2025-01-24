@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
 {

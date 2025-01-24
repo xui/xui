@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Xui.Web.Composers;
+namespace Web4.Composers;
 
 public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {

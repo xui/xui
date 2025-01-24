@@ -4,10 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Xui.Web.Composers;
-using Xui.Web.HttpX.Composers;
+using Web4.Composers;
+using Web4.HttpX.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public static class Extensions
 {

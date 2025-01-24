@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Numerics;
 using System.Threading.Channels;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public class State<T>
 {

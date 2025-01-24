@@ -4,9 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Xui.Web.Composers;
+using Web4.Composers;
 
-namespace Xui.Web.HttpX.Composers;
+namespace Web4.HttpX.Composers;
 
 public class DiffComposer : BaseComposer
 {

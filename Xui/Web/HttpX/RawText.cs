@@ -2,9 +2,9 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Xui.Web.Composers;
+using Web4.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]

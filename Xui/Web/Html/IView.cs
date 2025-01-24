@@ -1,4 +1,4 @@
-namespace Xui.Web;
+namespace Web4;
 
 public interface IView
 {

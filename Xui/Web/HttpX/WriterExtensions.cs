@@ -1,9 +1,9 @@
 using System.Buffers;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
-using Xui.Web.Composers;
+using Web4.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public static class WriterExtensions
 {

@@ -1,4 +1,4 @@
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 internal partial record class HttpXEvent(
     double? ClientX = null,
@@ -64,10 +64,10 @@ internal partial record class HttpXEvent(
     bool Events.UI.Cancelable => Cancelable ?? default;
     bool Events.UI.Composed => Composed ?? default;
     bool Events.UI.DefaultPrevented => DefaultPrevented ?? default;
-    EventPhase Events.UI.EventPhase => EventPhase ?? Web.EventPhase.None;
+    EventPhase Events.UI.EventPhase => EventPhase ?? Web4.EventPhase.None;
     bool Events.UI.IsTrusted => IsTrusted ?? default;
     double Events.UI.TimeStamp => TimeStamp ?? default;
-    Button Events.Subsets.Buttons.Button => Button ?? Web.Button.Main;
+    Button Events.Subsets.Buttons.Button => Button ?? Web4.Button.Main;
     ButtonFlag Events.Subsets.Buttons.Buttons => Buttons ?? ButtonFlag.None;
     double Events.Subsets.X.X => X ?? default;
     double Events.Subsets.Y.Y => Y ?? default;
@@ -88,7 +88,7 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaX => DeltaX ?? default;
     double Events.Subsets.Deltas.DeltaY => DeltaY ?? default;
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
-    DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web.DeltaMode.Pixel;
+    DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
     string Events.UI.Type => Type ?? string.Empty;
     EventTarget Events.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;

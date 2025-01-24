@@ -1,6 +1,6 @@
 #if !DEBUG
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public static class HotReload
 {
@@ -16,9 +16,9 @@ public static class HotReload
 
 using System.Reflection.Metadata;
 
-[assembly: MetadataUpdateHandler(typeof(Xui.Web.HttpX.HotReload))]
+[assembly: MetadataUpdateHandler(typeof(Web4.HttpX.HotReload))]
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public static class HotReload
 {

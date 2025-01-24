@@ -5,10 +5,10 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
-using Xui.Web;
-using Xui.Web.Composers;
+using Web4;
+using Web4.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public abstract partial class UI<T> where T : IViewModel
 {
@@ -124,7 +124,7 @@ public abstract partial class UI<T> where T : IViewModel
             {
                 // TODO: Buffer might be multiple segments one day.
                 var buffer = result.Buffer.First;
-                var (slotId, domEvent) = Xui.Web.HttpX.HttpXContext.ParseEvent(buffer.Span);
+                var (slotId, domEvent) = Web4.HttpX.HttpXContext.ParseEvent(buffer.Span);
                 using (this.ViewModel.Batch())
                 {
                     //composer.HandleEvent(slotId, domEvent);

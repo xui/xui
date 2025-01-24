@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Routing;
 using System.Diagnostics.CodeAnalysis;
-using Xui.Web;
+using Web4;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public abstract partial class UI<T> where T : IViewModel
 {

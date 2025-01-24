@@ -7,10 +7,10 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
-using Xui.Web;
-using Xui.Web.HttpX.Composers;
+using Web4;
+using Web4.HttpX.Composers;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public struct HttpXContext(WebSocketPipe? pipe)
 {

@@ -1,16 +1,16 @@
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 
-using Xui.Web.Composers;
+using Web4.Composers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Xui.Web;
-using Xui.Web.HttpX;
+using Web4;
+using Web4.HttpX;
 using Microsoft.AspNetCore.WebSockets;
-using Html = Xui.Web.Html;
+using Html = Web4.Html;
 
 // TODO: Html namespace collision problem?
 //namespace Microsoft.AspNetCore.Builder;

@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace Xui.Web.Composers;
+namespace Web4.Composers;
 
 public abstract class StreamingComposer(IBufferWriter<byte> writer) : BaseComposer()
 {

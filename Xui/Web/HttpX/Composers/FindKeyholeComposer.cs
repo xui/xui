@@ -2,9 +2,9 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Xui.Web.Composers;
+using Web4.Composers;
 
-namespace Xui.Web.HttpX.Composers;
+namespace Web4.HttpX.Composers;
 
 public class FindKeyholeComposer(string key) : BaseComposer
 {

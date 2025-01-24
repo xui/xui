@@ -4,17 +4,17 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
-using Xui.Web;
+using Web4;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Components.Web;
-using Xui.Web.HttpX.Composers;
-using Xui.Web.Composers;
+using Web4.HttpX.Composers;
+using Web4.Composers;
 using System.IO.Pipelines;
 
-namespace Xui.Web.HttpX;
+namespace Web4.HttpX;
 
 public static class WebExtensions2
 {
