@@ -1,7 +1,6 @@
 using Xui.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddWeb4();
 var app = builder.Build();
 
 string name = "World";
