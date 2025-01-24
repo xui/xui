@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
 namespace Xui.Web.HttpX;
@@ -10,10 +13,29 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
         return this;
     }
 
+    public WindowBuilder AddEventListener(string type, Action<Events.Subsets.Modifiers> listener)
+    {
+        return this;
+    }
+
     // TODO: Support options param
     public WindowBuilder AddEventListener(string type, Action<Event> listener, object options)
         => AddEventListener(type, listener);
     
+    public WindowBuilder MapGet(
+        [StringSyntax("Route")] string pattern, 
+        Action<HttpContext> requestDelegate)
+    {
+        routeGroupBuilder.Map(
+            pattern,
+            async context => {
+                await Task.Delay(1);
+            }
+        );
+
+        return this;
+    }
+
     public Action<Event> OnAbort { get; set; }
     public Action<Event> OnAfterPrint { get; set; }
     public Action<Event> OnAnimationEnd { get; set; }
