@@ -255,10 +255,14 @@ public ref struct Html
 
         var @continue = argName switch
         {
-            _ when argName.StartsWith("on")
-                => throw new ArgumentException($$"""
-                    Cannot use the notation <button {onclick => ...}> for event handlers; that's only valid for regular attributes.  Instead, try <button onclick={...}> or <button onclick={() => ...}> or <button onclick={(Event e) => ...}.
-                """, expression),
+            "e" or "ev" or "evnt" or "@event" or 
+            "(e)" or "(ev)" or "(evnt)" or "(@event)"
+                => composer.WriteEventHandler(
+                        ref this, 
+                        e => { func(e); }, // Convert signature.  Event handlers always return void.
+                        format: format,
+                        expression: expression
+                    ),
             _ when argName.StartsWith("(Event")
                 => composer.WriteEventHandler(
                         ref this, 
@@ -266,6 +270,10 @@ public ref struct Html
                         format: format,
                         expression: expression
                     ),
+            _ when argName.StartsWith("on")
+                => throw new ArgumentException($$"""
+                    Cannot use the notation <button {onclick => ...}> for event handlers; that's only valid for regular attributes.  Instead, try <button onclick={...}> or <button onclick={() => ...}> or <button onclick={(Event e) => ...}.
+                """, expression),
             _ when func is Func<Event, string> funcString
                 => composer.WriteMutableAttribute(
                         ref this,

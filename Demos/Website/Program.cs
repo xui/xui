@@ -1,6 +1,7 @@
 global using Xui.Web;
 global using Xui.Web.ZeroScript;
 global using Xui.Web.HttpX;
+global using System.Buffers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddXui();
