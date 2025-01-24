@@ -1,3 +1,4 @@
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 
 using Xui.Web.Composers;
 using Microsoft.AspNetCore.Builder;
@@ -6,13 +7,20 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Xui.Web.HttpX.Composers;
-using System.IO.Pipelines;
+using Xui.Web;
+using Xui.Web.HttpX;
+using Microsoft.AspNetCore.WebSockets;
 
-namespace Xui.Web.HttpX;
+namespace Microsoft.Extensions.DependencyInjection;
 
-public static class WebExtensions
+public static class Web4ServiceCollectionExtensions
 {
+    public static IServiceCollection AddWeb4(this IServiceCollection services)
+    {
+        services.AddWebSockets(options => {});
+        return services;
+    }
+
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
     [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
     public static IEndpointConventionBuilder MapGet(
@@ -52,12 +60,14 @@ public static class WebExtensions
         );
     }
 
-    public static WindowBuilder MapWindow(
-        this IEndpointRouteBuilder endpoints, 
+    public static WindowBuilder MapXttp(
+        this WebApplication app, 
         [StringSyntax("Route")] string pattern, 
         Func<Html> html)
     {
-        var group = endpoints.MapGroup(pattern);
+        app.UseWebSockets();
+
+        var group = app.MapGroup(pattern);
         group.Map(
             "/",
             async httpContext =>
@@ -74,9 +84,6 @@ public static class WebExtensions
                         var httpxContext = new HttpXContext(pipe);
                         await httpxContext.ListenForEvents(html, httpContext.RequestAborted);
                     }
-
-                    var logger = endpoints.ServiceProvider.GetService<ILogger>();
-                    logger?.LogInformation("WebSocket has disconnected.");
                 }
                 else if (
                     HttpXContext.Get(httpContext) is var httpxContext && 
