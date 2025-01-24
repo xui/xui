@@ -62,7 +62,13 @@ public static class Web4EndpointRouteBuilderExtensions
         );
     }
 
-    public static WindowBuilder MapXttp(
+    public static WindowBuilder Map(
+        this WebApplication app, 
+        [StringSyntax("Route")] string pattern, 
+        Func<Html> html) 
+        => MapWeb4(app, pattern, html);
+
+    public static WindowBuilder MapWeb4(
         this WebApplication app, 
         [StringSyntax("Route")] string pattern, 
         Func<Html> html)
