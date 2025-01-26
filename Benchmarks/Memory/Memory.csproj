@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Web4.Core\Web4.Core.csproj" />
+    <ProjectReference Include="..\..\Web4\Web4.csproj" />
     <ProjectReference Include="..\Web4\Web4.csproj" />
   </ItemGroup>
 

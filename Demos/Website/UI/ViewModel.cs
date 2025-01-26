@@ -1,8 +1,8 @@
 partial class ViewModel
 {
-    [Live] string? name;
-    [Live] int? count;
-    [Live] string? color;
-    [Live] bool showAdditional;
-    [Live] List<int> colors = [1, 2, 3];
+    [Live] public string? Name;
+    [Live] public int? Count;
+    [Live] public string? Color;
+    [Live] public bool ShowAdditional;
+    [Live] public List<int> Colors = [1, 2, 3];
 }
