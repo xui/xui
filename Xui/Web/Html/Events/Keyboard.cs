@@ -37,19 +37,13 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Events.Keyboard> eventHandler, 
-        string? format = null, 
+        string? format = Events.Keyboard.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Keyboard.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Keyboard, Task> eventHandler, 
-        string? format = null, 
+        string? format = Events.Keyboard.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Keyboard.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
 }

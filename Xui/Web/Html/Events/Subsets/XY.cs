@@ -17,19 +17,13 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Events.Subsets.XY> eventHandler, 
-        string? format = null, 
+        string? format = Events.Subsets.XY.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Subsets.XY.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Subsets.XY, Task> eventHandler, 
-        string? format = null, 
+        string? format = Events.Subsets.XY.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Subsets.XY.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
 }

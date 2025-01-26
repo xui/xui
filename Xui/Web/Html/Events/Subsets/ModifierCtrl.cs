@@ -22,19 +22,13 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Events.Subsets.ModifierCtrl> eventHandler, 
-        string? format = null, 
+        string? format = Events.Subsets.ModifierCtrl.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Subsets.ModifierCtrl.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
                 
     public bool AppendFormatted(
         Func<Events.Subsets.ModifierCtrl, Task> eventHandler, 
-        string? format = null, 
+        string? format = Events.Subsets.ModifierCtrl.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(
-                eventHandler, 
-                format ?? Events.Subsets.ModifierCtrl.Format, 
-                expression);
+            => AppendEventHandler(eventHandler, format, expression);
 }
