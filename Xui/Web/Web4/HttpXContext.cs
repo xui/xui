@@ -8,9 +8,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Web4;
-using Web4.HttpX.Composers;
+using Web4.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public struct HttpXContext(WebSocketPipe? pipe)
 {

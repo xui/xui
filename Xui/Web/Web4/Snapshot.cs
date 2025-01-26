@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public class Snapshot : IDisposable
 {

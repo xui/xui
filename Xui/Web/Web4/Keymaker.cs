@@ -1,4 +1,4 @@
-namespace Web4.HttpX;
+namespace Web4;
 
 internal struct Keymaker
 {

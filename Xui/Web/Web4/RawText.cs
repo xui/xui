@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Web4.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]

@@ -1,10 +1,8 @@
 ﻿global using Web4;
-global using Web4.HttpX;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Web4.Composers;
-using Web4.HttpX.Composers;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Web4;
 using Web4.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public abstract partial class UI<T> where T : IViewModel
 {
@@ -124,11 +124,11 @@ public abstract partial class UI<T> where T : IViewModel
             {
                 // TODO: Buffer might be multiple segments one day.
                 var buffer = result.Buffer.First;
-                var (slotId, domEvent) = Web4.HttpX.HttpXContext.ParseEvent(buffer.Span);
-                using (this.ViewModel.Batch())
-                {
-                    //composer.HandleEvent(slotId, domEvent);
-                }
+                // var (slotId, domEvent) = UI<T>.HttpXContext.ParseEvent(buffer.Span);
+                // using (this.ViewModel.Batch())
+                // {
+                //     //composer.HandleEvent(slotId, domEvent);
+                // }
 
                 pipe.Input.AdvanceTo(result.Buffer.End);
             }

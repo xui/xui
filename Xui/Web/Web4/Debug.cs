@@ -8,9 +8,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Web;
 using Web4.Composers;
-using Web4.HttpX.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public static class Debug
 {

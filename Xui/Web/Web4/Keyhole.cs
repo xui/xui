@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public struct Keyhole
 {

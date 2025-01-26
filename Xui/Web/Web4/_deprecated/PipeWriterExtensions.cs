@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using Web4;
 using Web4.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public static class PipeWriterExtensions
 {

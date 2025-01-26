@@ -10,11 +10,10 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Components.Web;
-using Web4.HttpX.Composers;
 using Web4.Composers;
 using System.IO.Pipelines;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public static class WebExtensions2
 {

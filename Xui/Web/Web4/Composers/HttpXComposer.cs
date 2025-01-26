@@ -4,7 +4,7 @@ using System.IO.Pipelines;
 using System.Text;
 using Web4.Composers;
 
-namespace Web4.HttpX.Composers;
+namespace Web4.Composers;
 
 public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 {

@@ -5,9 +5,8 @@ using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Web4.Composers;
-using Web4.HttpX.Composers;
 
-namespace Web4.HttpX;
+namespace Web4;
 
 public static class Extensions
 {

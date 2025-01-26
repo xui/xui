@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Web4.Composers;
 
-namespace Web4.HttpX.Composers;
+namespace Web4.Composers;
 
 public class FindKeyholeComposer(string key) : BaseComposer
 {
