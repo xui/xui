@@ -76,6 +76,7 @@ public static class Web4EndpointRouteBuilderExtensions
         app.UseWebSockets();
 
         var group = app.MapGroup(pattern);
+        var window = new WindowBuilder(group);
         group.Map(
             "/",
             async httpContext =>
@@ -126,6 +127,6 @@ public static class Web4EndpointRouteBuilderExtensions
                 }
             }
         );
-        return new WindowBuilder(group);
+        return window;
     }
 }
