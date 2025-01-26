@@ -1,6 +1,6 @@
 partial class ViewModel
 {
-    public static IViewModel New() => new ViewModel()
+    public static ViewModel New() => new ViewModel()
     {
         Name = "Rylan Barnes",
         Count = 0,

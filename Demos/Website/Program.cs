@@ -10,7 +10,6 @@ builder.Services.AddLogging(c => c.ClearProviders());
 #endif
 
 var app = builder.Build();
-app.MapUI("/", new UI());
 
 
 

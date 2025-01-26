@@ -1,4 +1,4 @@
-partial class ViewModel : IViewModel
+partial class ViewModel
 {
     [Live] string? name;
     [Live] int? count;

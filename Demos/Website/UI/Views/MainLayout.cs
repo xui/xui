@@ -2,7 +2,7 @@ partial class UI
 {
     public Html Wat(ViewModel vm) => MainLayout(vm);
 
-    protected override Html MainLayout(ViewModel vm) => $"""
+    protected Html MainLayout(ViewModel vm) => $"""
         <html>
         <head>
             <!-- Zero script-refs.  Such fast. -->
