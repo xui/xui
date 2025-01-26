@@ -79,15 +79,49 @@ public struct HttpXContext(WebSocketPipe? pipe)
                 //     await eventHandler(domEvent!);
                 // });
 
+                var isChanged = false;
                 // TODO: Surround with "batch" concept.
                 {
                     var before = html.CaptureSnapshot();
-                    await eventHandler(domEvent);
+                    try
+                    {
+                        await eventHandler(domEvent);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
                     var after = html.CaptureSnapshot();
+
+                    for (int i = 0; i < after.RootLength; i++)
+                    {
+                        ref var keyholeBefore = ref before.Buffer[i];
+                        ref var keyholeAfter = ref after.Buffer[i];
+
+                        if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+                        {
+                            switch (keyholeAfter.Type)
+                            {
+                                case FormatType.Boolean:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
+                                    break;
+                                case FormatType.String:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
+                                    break;
+                                case FormatType.Integer:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
+                                    break;
+                            }
+                        }
+                    }
                 }
 
                 // TODO: State invalidations will not live here
-                await html.DebugSnapshot(Pipe.Output);
+                if (isChanged)
+                    await html.DebugSnapshot(Pipe.Output);
             }
             else
             {
@@ -181,7 +215,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
                             if (bodyEnd <= buffer.Length)
                             {
                                 var body = buffer[bodyStart..bodyEnd];
-                                @event = JsonSerializer.Deserialize<Event>(body);
+                                @event = JsonSerializer.Deserialize<HttpXEvent>(body, JsonSerializerOptions.Web);
                             }
                         }
                         state = STATE_COMPLETED;

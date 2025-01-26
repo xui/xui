@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Xui\Web\Web\Web.csproj" />
+    <ProjectReference Include="..\..\Xui\Web\Web4\Web4.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

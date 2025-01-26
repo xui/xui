@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.5.002.0
+VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{9D577A44-8CF8-4503-84F9-357AE3ED9DF4}"
 EndProject
@@ -11,15 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Demos\Website\We
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xui", "Xui", "{810B8863-9155-487D-8B5B-6B4DA65EB3B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpX", "Xui\Web\HttpX\HttpX.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4", "Xui\Web\Web4\Web4.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Html", "Xui\Web\Html\Html.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Core", "Xui\Web\Web4.Core\Web4.Core.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{A057E78A-294B-459F-8F1F-2BBFBF23D4C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroScript", "Xui\Web\ZeroScript\ZeroScript.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Xui\Web\Web\Web.csproj", "{F92424F6-33C1-4D76-9454-6299519AEC47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clean", "Demos\Clean\Clean.csproj", "{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}"
 EndProject
@@ -53,10 +51,6 @@ Global
 		{B54145FB-DC9E-435A-BB12-37FC51CEF18A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B54145FB-DC9E-435A-BB12-37FC51CEF18A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B54145FB-DC9E-435A-BB12-37FC51CEF18A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F92424F6-33C1-4D76-9454-6299519AEC47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F92424F6-33C1-4D76-9454-6299519AEC47}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F92424F6-33C1-4D76-9454-6299519AEC47}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F92424F6-33C1-4D76-9454-6299519AEC47}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU

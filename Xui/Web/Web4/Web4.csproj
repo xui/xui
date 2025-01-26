@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Html\Html.csproj" />
+    <ProjectReference Include="../Web4.Core/Web4.Core.csproj" />
   </ItemGroup>
   
   <PropertyGroup>
