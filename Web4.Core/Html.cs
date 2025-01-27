@@ -104,26 +104,56 @@ public ref partial struct Html
 
     // Ex (primary):   <p { style => GetStyle() }>Hello</p>
     // or (ambiguous): <button onclick={ (Event e) => name = e.Target.Name }>Click me</button>
-    public bool AppendFormatted(Func<Event, string> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => AppendAmbiguous<string, int>(GetArgName(expression), attribute, format: null, expression: expression);
+    public bool AppendFormatted(
+        Func<Event, string> attribute, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(attribute))] string? expression = null) => 
+            AppendAmbiguous<string, int>(
+                GetArgName(expression), 
+                attribute, 
+                format: format, 
+                expression: expression);
     
     // Ex (primary):   <input type="text" { disabled => isDisabled } />
     // or (ambiguous): <button onclick={ (Event e) => isDisabled = !isDisabled }>Click me</button>
-    public bool AppendFormatted(Func<Event, bool> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-        => AppendAmbiguous<bool, int>(GetArgName(expression), attribute, format: null, expression: expression);
+    public bool AppendFormatted(
+        Func<Event, bool> attribute, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(attribute))] string? expression = null) => 
+            AppendAmbiguous<bool, int>(
+                GetArgName(expression), 
+                attribute, 
+                format: format, 
+                expression: expression);
     
     // Ex (primary):   <input type="text" { maxlength => c } />
     // or (ambiguous): <button onclick={ (Event e) => c++ }>Click me</button>
-    public bool AppendFormatted<T>(Func<Event, T> attribute, string? format = null, [CallerArgumentExpression(nameof(attribute))] string? expression = null) where T : struct, IUtf8SpanFormattable 
-        => AppendAmbiguous(GetArgName(expression), attribute, attribute, format: format, expression: expression);
+    public bool AppendFormatted<T>(
+        Func<Event, T> attribute, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
+            where T : struct, IUtf8SpanFormattable => 
+            AppendAmbiguous(
+                GetArgName(expression), 
+                attribute, 
+                attribute, 
+                format: format, 
+                expression: expression);
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
-    public bool AppendFormatted(Func<Event, Html> attribute, [CallerArgumentExpression(nameof(attribute))] string? expression = null)
+    public bool AppendFormatted(
+        Func<Event, Html> attribute, 
+        [CallerArgumentExpression(nameof(attribute))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableAttribute(ref this, GetArgName(expression), attribute, expression);
+        var @continue = composer.WriteMutableAttribute(
+            ref this, 
+            GetArgName(expression), 
+            attribute, 
+            expression);
+
         Cursor++;
         return @continue;
     }
