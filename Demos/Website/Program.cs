@@ -362,8 +362,8 @@ app.Map("/signatures", () => $"""
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
             <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*c = e.Target.Value*/ } />
             <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*{ c = e.Target.Value; }*/ } />
-            <input type="number" { value => c } onchange={ e => name = e.Data } />
-            <input type="number" { value => c } onchange={ e => { name = e.Target.Value; } } />
+            <input type="text" { value => name } oninput={ e => name = e.Code ?? "" } />
+            <input type="number" { value => c } onchange={ e => name = e.Target.Value } />
             <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.Target.Value}") } />
         </body>
     </html>
