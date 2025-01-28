@@ -29,26 +29,26 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Input<int>> eventHandler, 
+        Action<Events.Input<int>> listener, 
         string? format = Events.Input<int>.Format, 
-        [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(eventHandler, format, expression);
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendEventHandler(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Input<int>, Task> eventHandler, 
+        Func<Events.Input<int>, Task> listener, 
         string? format = Events.Input<int>.Format, 
-        [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(eventHandler, format, expression);
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendEventHandler(listener, format, expression);
 
     public bool AppendFormatted(
-        Action<Events.Input<DateTime>> eventHandler, 
+        Action<Events.Input<DateTime>> listener, 
         string? format = Events.Input<int>.Format, 
-        [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(eventHandler, format, expression);
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendEventHandler(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Input<DateTime>, Task> eventHandler, 
+        Func<Events.Input<DateTime>, Task> listener, 
         string? format = Events.Input<int>.Format, 
-        [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
-            => AppendEventHandler(eventHandler, format, expression);
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendEventHandler(listener, format, expression);
 }

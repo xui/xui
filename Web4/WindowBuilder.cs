@@ -14,7 +14,9 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
 {
     private readonly Dictionary<string, List<EventHandler>> listeners = [];
 
-    public WindowBuilder AddEventListener(string type, Action<Event> listener, string? format = null)
+    public WindowBuilder AddEventListener(
+        string type, Action<Event> listener, 
+        string? format = null)
     {
         if (!listeners.ContainsKey(type))
             listeners.Add(type, []);
@@ -22,11 +24,17 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
         return this;
     }
 
-    public WindowBuilder AddEventListener(string type, Action<Events.Subsets.Modifiers> listener)
-        => AddEventListener(type, listener, Events.Subsets.Modifiers.Format);
+    public WindowBuilder AddEventListener(
+        string type, 
+        Action<Events.Subsets.Modifiers> listener, 
+        string? format = null) => 
+            AddEventListener(type, listener, Events.Subsets.Modifiers.Format);
 
-    public WindowBuilder AddEventListener(string type, Action<Events.Mouse> listener)
-        => AddEventListener(type, listener, Events.Mouse.Format);
+    public WindowBuilder AddEventListener(
+        string type, 
+        Action<Events.Mouse> listener, 
+        string? format = null) => 
+            AddEventListener(type, listener, Events.Mouse.Format);
     
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
