@@ -1,3 +1,4 @@
+
 namespace Web4;
 
 internal partial record class HttpXEvent(
@@ -90,11 +91,12 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
-    IntEventTarget Events.Input.InputInt.Target => new(Target);
-    FloatEventTarget Events.Input.InputFloat.Target => new(Target);
-    DoubleEventTarget Events.Input.InputDouble.Target => new(Target);
-    DecimalEventTarget Events.Input.InputDecimal.Target => new(Target);
-    DateTimeEventTarget Events.Input.InputDateTime.Target => new(Target);
+    EventTarget<int> Events.Input<int>.Target => new(Target);
+    EventTarget<long> Events.Input<long>.Target => new(Target);
+    EventTarget<float> Events.Input<float>.Target => new(Target);
+    EventTarget<double> Events.Input<double>.Target => new(Target);
+    EventTarget<decimal> Events.Input<decimal>.Target => new(Target);
+    EventTarget<DateTime> Events.Input<DateTime>.Target => new(Target);
     string Events.UI.Type => Type ?? string.Empty;
     EventTarget Events.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     EventTarget Events.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;

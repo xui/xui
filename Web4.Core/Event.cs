@@ -9,11 +9,12 @@ public partial interface Event :
     Events.Composition, 
     Events.Focus, 
     Events.Input, 
-    Events.Input.InputInt,
-    Events.Input.InputFloat,
-    Events.Input.InputDouble,
-    Events.Input.InputDecimal,
-    Events.Input.InputDateTime,
+    Events.Input<int>,
+    Events.Input<long>,
+    Events.Input<float>,
+    Events.Input<double>,
+    Events.Input<decimal>,
+    Events.Input<DateTime>,
     Events.Keyboard, 
     Events.Mouse, 
     Events.Touch, 
@@ -520,54 +521,12 @@ public record class EventTarget(
     public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out DateTime t) ? t : null;
 }
 
-public struct IntEventTarget(EventTarget? target)
+public struct EventTarget<T>(EventTarget? target) where T : unmanaged, IParsable<T>
 {
     public readonly string ID => target?.ID ?? "";
     public readonly string Name => target?.Name ?? "";
     public readonly string Type => target?.Type ?? "";
-    public readonly int Value => target?.ValueAsInt ?? default;
-}
-
-public struct FloatEventTarget(EventTarget? target)
-{
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    public readonly float Value => target?.ValueAsFloat ?? default;
-}
-
-public struct DoubleEventTarget(EventTarget? target)
-{
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    public readonly double Value => target?.ValueAsDouble ?? default;
-}
-
-public struct DecimalEventTarget(EventTarget? target)
-{
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    public readonly decimal Value => target?.ValueAsDecimal ?? default;
-}
-
-public struct DateTimeEventTarget(EventTarget? target)
-{
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    public readonly DateTime Value => target?.ValueAsDateTime ?? default;
-}
-
-public struct EventTarget2(EventTarget? target)
-{
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    // public readonly T Value => T.TryParse(target?.Value ?? "", null, out var value) ? value : default;
-    public T GetValue<T>() 
-        where T : unmanaged, IParsable<T>
+    public readonly T Value 
         => T.TryParse(target?.Value ?? "", null, out var value) ? value : default;
 }
 
