@@ -63,7 +63,8 @@ async void DoIt(string source)
 Action a = new(SomeInstanceMethod);
 void SomeInstanceMethod()
 {
-    Console.WriteLine("I am a static method");
+    c++;
+    Console.WriteLine("I am a method");
 }
 
 var window = app.Map("/x02", () => $"""
