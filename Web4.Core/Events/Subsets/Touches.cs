@@ -34,11 +34,11 @@ public ref partial struct Html
         Func<Events.Subsets.Touches, Task> listener, 
         string? format = Events.Subsets.Touches.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Events.Subsets.Touches> listener, 
         string? format = Events.Subsets.Touches.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

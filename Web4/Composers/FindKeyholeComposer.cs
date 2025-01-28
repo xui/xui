@@ -14,7 +14,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public string Key { get; init; } = key;
 
-    public Func<Event?, Task>? EventHandler { get; set; } = null;
+    public Func<Event?, Task>? EventListener { get; set; } = null;
 
     protected override void Clear()
     {
@@ -38,10 +38,10 @@ public class FindKeyholeComposer(string key) : BaseComposer
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
@@ -51,7 +51,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
             return base.CompleteFormattedValue();
         }
 
-        EventHandler = listener switch
+        EventListener = listener switch
         {
             // Example:
             //   void OnClick()

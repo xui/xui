@@ -161,11 +161,11 @@ public ref partial struct Html
 
     // EVENT HANDLERS
 
-    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
-    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
-    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
-    public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
-    private bool AppendEventHandler<T>(T listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    private bool AppendEventListener<T>(T listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
@@ -174,17 +174,17 @@ public ref partial struct Html
         {
             // Ex: <button onclick={ Increment }>Clicks: { c }</button>
             // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
-            Action noArg => composer.WriteEventHandler(ref this, noArg, format, expression),
+            Action noArg => composer.WriteEventListener(ref this, noArg, format, expression),
 
             // Ex: <button onclick={ Increment }>Clicks: { c }</button>
             // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
-            Action<Event> eventArg => composer.WriteEventHandler(ref this, eventArg, format, expression),
+            Action<Event> eventArg => composer.WriteEventListener(ref this, eventArg, format, expression),
 
             // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
-            Func<Task> noArgAsync => composer.WriteEventHandler(ref this, noArgAsync, format, expression),
+            Func<Task> noArgAsync => composer.WriteEventListener(ref this, noArgAsync, format, expression),
 
             // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
-            Func<Event, Task> eventArgAsync => composer.WriteEventHandler(ref this, eventArgAsync, format, expression),
+            Func<Event, Task> eventArgAsync => composer.WriteEventListener(ref this, eventArgAsync, format, expression),
             _ => true,
         };
         
@@ -230,14 +230,14 @@ public ref partial struct Html
         {
             "e" or "ev" or "evnt" or "@event" or 
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
-                => composer.WriteEventHandler(
+                => composer.WriteEventListener(
                         ref this, 
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
                         format: format,
                         expression: expression
                     ),
             _ when argName.StartsWith("(Event")
-                => composer.WriteEventHandler(
+                => composer.WriteEventListener(
                         ref this, 
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
                         format: format,

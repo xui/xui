@@ -153,11 +153,11 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
-    private bool WriteEventHandler(ref Html parent, bool includeEventArg, string? format = null)
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
+    private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (includeEventArg && format != null)
         {
@@ -179,7 +179,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         }
         return CompleteFormattedValue();
     }
-    private bool WriteEventHandler(ref Html parent, ReadOnlySpan<char> includedAttributeName)
+    private bool WriteEventListener(ref Html parent, ReadOnlySpan<char> includedAttributeName)
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""

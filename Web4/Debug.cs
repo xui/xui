@@ -78,7 +78,7 @@ public static class Debug
                     console.groupEnd();
                     """);
                 break;
-            case FormatType.EventHandler:
+            case FormatType.EventListener:
                 output.AppendLine($"""
                     console.groupCollapsed(`{$"[{index}]",-4}  {$"%ckey{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
                     console.groupEnd();

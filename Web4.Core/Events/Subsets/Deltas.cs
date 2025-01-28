@@ -39,11 +39,11 @@ public ref partial struct Html
         Action<Events.Subsets.Deltas> listener, 
         string? format = Events.Subsets.Deltas.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Subsets.Deltas, Task> listener, 
         string? format = Events.Subsets.Deltas.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

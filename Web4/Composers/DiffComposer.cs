@@ -188,16 +188,16 @@ public class DiffComposer : BaseComposer
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, expression);
-    private bool WriteEventHandler(ref Html parent, string? expression = null)
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
+    private bool WriteEventListener(ref Html parent, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot.Buffer[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        keyhole.Type = FormatType.EventHandler;
+        keyhole.Type = FormatType.EventListener;
         keyhole.String = expression;
 
         return CompleteFormattedValue();

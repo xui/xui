@@ -13,7 +13,7 @@ public enum FormatType
     DateTime,
     TimeSpan,
     Attribute,
-    EventHandler,
+    EventListener,
     View,
     Html,
 }

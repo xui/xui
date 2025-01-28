@@ -31,7 +31,7 @@ public static class Extensions
 
         var composer = new FindKeyholeComposer(key);
         composer.Compose($"{html()}");
-        return composer.EventHandler;
+        return composer.EventListener;
     }
 
     public static Snapshot CaptureSnapshot(this Func<Html> html)

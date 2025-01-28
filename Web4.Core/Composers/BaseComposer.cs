@@ -75,10 +75,10 @@ public abstract class BaseComposer
     public virtual bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
     public virtual bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => CompleteFormattedValue();
     
-    public virtual bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     
     public virtual bool WriteMutableElement<TView>(ref Html parent, TView view) where TView : IView => CompleteFormattedValue();
     public virtual bool WriteMutableElement(ref Html parent, Slot slot) => CompleteFormattedValue();

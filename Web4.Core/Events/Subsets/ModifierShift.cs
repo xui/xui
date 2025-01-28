@@ -24,11 +24,11 @@ public ref partial struct Html
         Action<Events.Subsets.ModifierShift> listener, 
         string? format = Events.Subsets.ModifierShift.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Subsets.ModifierShift, Task> listener, 
         string? format = Events.Subsets.ModifierShift.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

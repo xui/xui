@@ -19,11 +19,11 @@ public ref partial struct Html
         string? format = Events.Focus.Format, 
         [CallerArgumentExpression(nameof(listener))] 
         string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Focus, Task> listener, 
         string? format = Events.Focus.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

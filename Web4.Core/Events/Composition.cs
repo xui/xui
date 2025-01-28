@@ -18,10 +18,10 @@ public ref partial struct Html
         Action<Events.Composition> listener, 
         string? format = Events.Composition.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Events.Composition, Task> listener, 
         string? format = Events.Composition.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

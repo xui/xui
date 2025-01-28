@@ -48,10 +48,10 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return true;
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     
     private bool HandleNotSupported()
     {

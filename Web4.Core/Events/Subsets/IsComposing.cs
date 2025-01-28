@@ -24,11 +24,11 @@ public ref partial struct Html
         Action<Events.Subsets.IsComposing> listener, 
         string? format = Events.Subsets.IsComposing.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Subsets.IsComposing, Task> listener, 
         string? format = Events.Subsets.IsComposing.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

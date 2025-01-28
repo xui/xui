@@ -24,11 +24,11 @@ public ref partial struct Html
         Action<Events.Subsets.Data> listener, 
         string? format = Events.Subsets.Data.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Subsets.Data, Task> listener, 
         string? format = Events.Subsets.Data.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventHandler(listener, format, expression);
+            => AppendEventListener(listener, format, expression);
 }

@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Routing;
 
 namespace Web4;
 
-public record class EventHandler(
+public record class EventListener(
     Action<Event> Listener,
     string? Format = null
 );
 
 public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
 {
-    private readonly Dictionary<string, List<EventHandler>> listeners = [];
+    private readonly Dictionary<string, List<EventListener>> listeners = [];
 
     public WindowBuilder AddEventListener(
         string type, Action<Event> listener, 
