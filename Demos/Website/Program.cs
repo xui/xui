@@ -300,6 +300,7 @@ string s = "Rylan";
 bool b = true;
 int i = 3;
 double d = 3.14;
+decimal m = 3.1415m;
 DateTime t = DateTime.Now;
 app.Map("/signatures", () => $"""
     <!doctype html>
@@ -362,9 +363,10 @@ app.Map("/signatures", () => $"""
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
             <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*c = e.Target.Value*/ } />
             <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*{ c = e.Target.Value; }*/ } />
-            <input type="text" { value => name } oninput={ e => name = e.Code ?? "" } />
-            <input type="number" { value => c } onchange={ e => name = e.Target.Value } />
-            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.Target.Value}") } />
+            <input type="text" { value => name } oninput={ e => name = e.Target?.Value ?? "wat" } />
+            <input type="date" { value => t } oninput={ e => t = e.Target.Value } />
+            <input type="number" { value => c } onchange={ e => c = e.Target.Value } />
+            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.Target.ValueAsInt}") } />
         </body>
     </html>
     """);
@@ -378,10 +380,11 @@ async Task WithEventAsync(Event e)              { Console.WriteLine($"WithEventA
 async Task WithMouseEventAsync(Events.Mouse e)  { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
 async Task WithTouchEventAsync(Events.Touch e)  { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
 
-void DoIt2(Event e)
+void DoIt2(Events.Input.DateTime e)
 {
+    var a = e.Target.Value;
     Console.WriteLine($"d:{d}");
-    Console.WriteLine($"{e.Target?.ID} {e.Target?.Name} {e.EventPhase} {e.DeltaMode}\n\n{e}");
+    Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
 }
 
 

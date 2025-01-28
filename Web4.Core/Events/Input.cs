@@ -4,7 +4,7 @@ namespace Web4;
 
 public partial interface Events
 {
-    public interface Input : UI, Subsets.Data, Subsets.IsComposing
+    public partial interface Input : UI, Subsets.Data, Subsets.IsComposing
     {
         new const string Format = "dataTransfer,inputType," + 
             UI.Format + "," + 

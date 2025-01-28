@@ -90,6 +90,11 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
+    IntEventTarget Events.Input.Int.Target => new(Target);
+    FloatEventTarget Events.Input.Float.Target => new(Target);
+    DoubleEventTarget Events.Input.Double.Target => new(Target);
+    DecimalEventTarget Events.Input.Decimal.Target => new(Target);
+    DateTimeEventTarget Events.Input.DateTime.Target => new(Target);
     string Events.UI.Type => Type ?? string.Empty;
     EventTarget Events.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     EventTarget Events.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;

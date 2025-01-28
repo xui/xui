@@ -8,6 +8,11 @@ public partial interface Event :
     Events.Composition, 
     Events.Focus, 
     Events.Input, 
+    Events.Input.Int,
+    Events.Input.Float,
+    Events.Input.Double,
+    Events.Input.Decimal,
+    Events.Input.DateTime,
     Events.Keyboard, 
     Events.Mouse, 
     Events.Touch, 
@@ -500,9 +505,55 @@ public record class EventTarget(
     string ID = "",
     string Name = "",
     string Type = "",
-    string Value = ""
-) {
+    string Value = "")
+{
     public static readonly EventTarget Empty = new();
+
+    public int? ValueAsInt => int.TryParse(Value, out int i) ? i : null;
+    public float? ValueAsFloat => float.TryParse(Value, out float f) ? f : null;
+    public double? ValueAsDouble => double.TryParse(Value, out double d) ? d : null;
+    public decimal? ValueAsDecimal => decimal.TryParse(Value, out decimal m) ? m : null;
+    public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out DateTime t) ? t : null;
+}
+
+public struct IntEventTarget(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    public readonly int Value => target?.ValueAsInt ?? default;
+}
+
+public struct FloatEventTarget(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    public readonly float Value => target?.ValueAsFloat ?? default;
+}
+
+public struct DoubleEventTarget(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    public readonly double Value => target?.ValueAsDouble ?? default;
+}
+
+public struct DecimalEventTarget(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    public readonly decimal Value => target?.ValueAsDecimal ?? default;
+}
+
+public struct DateTimeEventTarget(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    public readonly DateTime Value => target?.ValueAsDateTime ?? default;
 }
 
 public record class DataTransfer(
