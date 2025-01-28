@@ -41,7 +41,7 @@ public static class Extensions
         return composer.Snapshot;
     }
 
-    private static bool warmedUp = false;
+    // private static bool warmedUp = false;
     public static async Task DebugSnapshot(this Func<Html> html, PipeWriter writer)
     {
         try

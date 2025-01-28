@@ -91,6 +91,20 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
+    DataTransfer Events.Input.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<int>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<long>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<float>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<double>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<decimal>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    DataTransfer Events.Input<DateTime>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
+    string Events.Input.InputType => InputType ?? string.Empty;
+    string Events.Input<int>.InputType => InputType ?? string.Empty;
+    string Events.Input<long>.InputType => InputType ?? string.Empty;
+    string Events.Input<float>.InputType => InputType ?? string.Empty;
+    string Events.Input<double>.InputType => InputType ?? string.Empty;
+    string Events.Input<decimal>.InputType => InputType ?? string.Empty;
+    string Events.Input<DateTime>.InputType => InputType ?? string.Empty;
     EventTarget<int> Events.Input<int>.Target => new(Target);
     EventTarget<long> Events.Input<long>.Target => new(Target);
     EventTarget<float> Events.Input<float>.Target => new(Target);
@@ -106,6 +120,4 @@ internal partial record class HttpXEvent(
     string Events.Keyboard.Code => Code ?? string.Empty;
     string Events.Keyboard.Key => Key ?? string.Empty;
     string Events.Subsets.Data.Data => Data ?? string.Empty;
-    DataTransfer Events.Input.DataTransfer => DataTransfer ?? DataTransfer.Empty;
-    string Events.Input.InputType => InputType ?? string.Empty;
 }

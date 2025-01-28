@@ -11,6 +11,7 @@ public class State<T>
 
     [ThreadStatic]
     static bool returnInvalidated;
+    public static bool ReturnInvalidated { get => returnInvalidated; set => returnInvalidated = value; }
 
     private readonly static Dictionary<State<T>, T> invalidatedValues = [];
 
