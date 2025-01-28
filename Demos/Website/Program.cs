@@ -361,26 +361,24 @@ app.Map("/signatures", () => $"""
             <button onclick={e => Console.WriteLine($"{e.X}")}>lambda</button>
             <button onclick={e => d = e.X}>lambda</button>
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
-            <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*c = e.Target.Value*/ } />
-            <input type="number" { value => c } onchange={ e => Console.WriteLine(e.X) /*{ c = e.Target.Value; }*/ } />
             <input type="text" { value => name } oninput={ e => name = e.Target?.Value ?? "wat" } />
-            <input type="date" { value => t } oninput={ e => t = e.Target.Value } />
             <input type="number" { value => c } onchange={ e => c = e.Target.Value } />
-            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.Target.ValueAsInt}") } />
+            <input type="date" { value => t } oninput={ e => t = e.Target.Value } />
+            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
         </body>
     </html>
     """);
 
 void WithoutEvent()                             { Console.WriteLine($"WithoutEvent()"); }
 void WithEvent(Event e)                         { Console.WriteLine($"WithEvent(Event e): {e}"); }
-void WithMouseEvent(Events.Mouse e)             { Console.WriteLine($"WithMouseEvent(Event.Mouse e): {e}"); }
-void WithTouchEvent(Events.Touch e)             { Console.WriteLine($"WithTouchEvent(Event.Touch e): {e}"); }
+void WithMouseEvent(Event.Mouse e)              { Console.WriteLine($"WithMouseEvent(Event.Mouse e): {e}"); }
+void WithTouchEvent(Event.Touch e)              { Console.WriteLine($"WithTouchEvent(Event.Touch e): {e}"); }
 async Task WithoutEventAsync()                  { Console.WriteLine($"WithoutEventAsync()"); await Task.Delay(1); }
 async Task WithEventAsync(Event e)              { Console.WriteLine($"WithEventAsync(Event e): {e}"); await Task.Delay(1); }
-async Task WithMouseEventAsync(Events.Mouse e)  { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
-async Task WithTouchEventAsync(Events.Touch e)  { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
+async Task WithMouseEventAsync(Event.Mouse e)   { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
+async Task WithTouchEventAsync(Event.Touch e)   { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
 
-void DoIt2(Events.Input.DateTime e)
+void DoIt2(Event.Input e)
 {
     var a = e.Target.Value;
     Console.WriteLine($"d:{d}");

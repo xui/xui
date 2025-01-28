@@ -4,6 +4,7 @@ namespace Web4;
 /// A DOM event
 /// </summary>
 public partial interface Event : 
+    Events,
     Events.UI,
     Events.Composition, 
     Events.Focus, 
