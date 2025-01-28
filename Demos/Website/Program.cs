@@ -93,18 +93,6 @@ window.AddEventListener("click", e => {
 
 window.OnAbort = e => Console.WriteLine(e.AltKey);
 
-// √ Here's where I left off.  I'm about to have a LOT more events.
-// √ First, finish deciding on the signatures for app.MapWindow???... I think I like Map?
-// √    - This includes .Format inference from the interface.
-// √ Then re-org the events namespace so that they use partial Html within their own files.
-//   Support Func<Events.*, string/bool/T> onchange={ e => name = e.Target.Value }
-//   Then implement the rest of the window-level events (well all of them).  There are many.
-//   Then see if you can finagle EventTarget.Value to cast implicitly.
-//   What about IBlockingEvent?  This might need a duplicate tree hierarchy?
-//      - initEvent(), preventDefault(), stopImmediatePropagation(), stopPropagation()
-//      - alt idea: instead of blocking the browser, can I stop*Propagation and re-dispatch if necessary?
-
-
 
 
 
