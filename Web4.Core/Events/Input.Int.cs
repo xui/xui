@@ -6,7 +6,7 @@ public partial interface Events
 {
     public partial interface Input
     {
-        public interface Int : UI, Subsets.Data, Subsets.IsComposing
+        public interface InputInt : UI, Subsets.Data, Subsets.IsComposing
         {
             new const string Format = "dataTransfer,inputType," + 
                 UI.Format + "," + 
@@ -31,14 +31,14 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Input.Int> eventHandler, 
-        string? format = Events.Input.Int.Format, 
+        Action<Events.Input.InputInt> eventHandler, 
+        string? format = Events.Input.InputInt.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
             => AppendEventHandler(eventHandler, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Input.Int, Task> eventHandler, 
-        string? format = Events.Input.Int.Format, 
+        Func<Events.Input.InputInt, Task> eventHandler, 
+        string? format = Events.Input.InputInt.Format, 
         [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) 
             => AppendEventHandler(eventHandler, format, expression);
 }

@@ -9,11 +9,11 @@ public partial interface Event :
     Events.Composition, 
     Events.Focus, 
     Events.Input, 
-    Events.Input.Int,
-    Events.Input.Float,
-    Events.Input.Double,
-    Events.Input.Decimal,
-    Events.Input.DateTime,
+    Events.Input.InputInt,
+    Events.Input.InputFloat,
+    Events.Input.InputDouble,
+    Events.Input.InputDecimal,
+    Events.Input.InputDateTime,
     Events.Keyboard, 
     Events.Mouse, 
     Events.Touch, 
@@ -510,6 +510,9 @@ public record class EventTarget(
 {
     public static readonly EventTarget Empty = new();
 
+    public T GetValue<T>() where T : unmanaged, IParsable<T>
+        => T.TryParse(Value, null, out var value) ? value : default;
+
     public int? ValueAsInt => int.TryParse(Value, out int i) ? i : null;
     public float? ValueAsFloat => float.TryParse(Value, out float f) ? f : null;
     public double? ValueAsDouble => double.TryParse(Value, out double d) ? d : null;
@@ -555,6 +558,17 @@ public struct DateTimeEventTarget(EventTarget? target)
     public readonly string Name => target?.Name ?? "";
     public readonly string Type => target?.Type ?? "";
     public readonly DateTime Value => target?.ValueAsDateTime ?? default;
+}
+
+public struct EventTarget2(EventTarget? target)
+{
+    public readonly string ID => target?.ID ?? "";
+    public readonly string Name => target?.Name ?? "";
+    public readonly string Type => target?.Type ?? "";
+    // public readonly T Value => T.TryParse(target?.Value ?? "", null, out var value) ? value : default;
+    public T GetValue<T>() 
+        where T : unmanaged, IParsable<T>
+        => T.TryParse(target?.Value ?? "", null, out var value) ? value : default;
 }
 
 public record class DataTransfer(

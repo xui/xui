@@ -6,7 +6,7 @@ public partial interface Events
 {
     public partial interface Input
     {
-        public interface Decimal : UI, Subsets.Data, Subsets.IsComposing
+        public interface InputDecimal : UI, Subsets.Data, Subsets.IsComposing
         {
             new const string Format = "dataTransfer,inputType," + 
                 UI.Format + "," + 

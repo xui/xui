@@ -6,7 +6,7 @@ public partial interface Events
 {
     public partial interface Input
     {
-        public interface Float : UI, Subsets.Data, Subsets.IsComposing
+        public interface InputFloat : UI, Subsets.Data, Subsets.IsComposing
         {
             new const string Format = "dataTransfer,inputType," + 
                 UI.Format + "," + 
