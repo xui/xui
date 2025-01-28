@@ -153,10 +153,10 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         return @continue;
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
+    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: false, format);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventHandler(ref parent, includeEventArg: true, format);
     private bool WriteEventHandler(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (includeEventArg && format != null)

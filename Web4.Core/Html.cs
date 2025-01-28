@@ -161,17 +161,16 @@ public ref partial struct Html
 
     // EVENT HANDLERS
 
-    public bool AppendFormatted(Action eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
-    public bool AppendFormatted(Action<Event> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
-    public bool AppendFormatted(Func<Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
-    public bool AppendFormatted(Func<Event, Task> eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null) => AppendEventHandler(eventHandler, format, expression);
-    private bool AppendEventHandler<T>(T eventHandler, string? format = null, [CallerArgumentExpression(nameof(eventHandler))] string? expression = null)
+    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
+    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
+    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
+    public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventHandler(listener, format, expression);
+    private bool AppendEventHandler<T>(T listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        // var @continue = composer.WriteEventHandler(ref this, eventHandler, format, expression);
-        var @continue = eventHandler switch
+        var @continue = listener switch
         {
             // Ex: <button onclick={ Increment }>Clicks: { c }</button>
             // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>

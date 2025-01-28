@@ -69,14 +69,14 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
-            if (html.GetKeyhole(key) is Func<Event?, Task> eventHandler)
+            if (html.GetKeyhole(key) is Func<Event?, Task> listener)
             {
                 // UIThread.Run(async () => {
-                //     await eventHandler(domEvent!);
+                //     await listener(domEvent!);
                 // });
 
                 // State.Invoke(async () => {
-                //     await eventHandler(domEvent!);
+                //     await listener(domEvent!);
                 // });
 
                 var isChanged = false;
@@ -85,7 +85,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
                     var before = html.CaptureSnapshot();
                     try
                     {
-                        await eventHandler(domEvent);
+                        await listener(domEvent);
                     }
                     catch (Exception ex)
                     {

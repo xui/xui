@@ -38,12 +38,12 @@ public class FindKeyholeComposer(string key) : BaseComposer
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
-    public override bool WriteEventHandler(ref Html parent, Action eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Action<Event> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Func<Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
-    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> eventHandler, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, eventHandler);
+    public override bool WriteEventHandler(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventHandler(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventHandler(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool WriteEventHandler(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
 
-    private bool ToCommonSignatureIfMatch<T>(ref Html parent, T eventHandler)
+    private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
         var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         if (key != Key)
@@ -51,7 +51,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
             return base.CompleteFormattedValue();
         }
 
-        EventHandler = eventHandler switch
+        EventHandler = listener switch
         {
             // Example:
             //   void OnClick()
