@@ -56,17 +56,12 @@ async void DoIt(string source)
         Console.Write(".");
     }
     Console.WriteLine();
-    // await Task.Delay(1);
+    await Task.Delay(1);
     Console.WriteLine($"{source}:  end:   {Thread.CurrentThread.Name} {Thread.CurrentThread.ManagedThreadId}");
 }
 
 Action a = new(SomeInstanceMethod);
 void SomeInstanceMethod()
-{
-    Console.WriteLine("I am a static method");
-}
-
-static void SomeStaticMethod()
 {
     Console.WriteLine("I am a static method");
 }
@@ -175,8 +170,8 @@ app.Map("/x01", () => $"""
 
             <input type="checkbox" { @checked => isSelected } />
 
-            <input type="number" { value => c } onchange={ e => c = int.Parse(e.Target.Value) } />
-            <input type="text" { value => name } onchange={ e => name = e.Target.Value } onkeyup={ e => name = e.Target.Value } />
+            <input type="number" { value => c } onchange={ e => c = e.Target.Value } />
+            <input type="text" { value => name } onchange={ e => name = e.Target?.Value ?? "" } onkeyup={ e => name = e.Target?.Value ?? "" } />
 
         </body>
     </html>
@@ -370,6 +365,7 @@ void DoIt2(Event.Input<DateTime> e)
 {
     var a = e.Target.Value;
     Console.WriteLine($"d:{d}");
+    Console.WriteLine($"m:{m}");
     Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
 }
 
@@ -557,10 +553,6 @@ app.MapGet("/wat", async context =>
             memN.CopyTo(memory);
             pipeWriter.Advance(memN.Length);
         }
-    }
-    if (writeCount > 10)
-    {
-        await pipeWriter.FlushAsync();
     }
     // return Task.CompletedTask;
 });
