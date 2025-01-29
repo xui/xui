@@ -108,11 +108,27 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                     break;
                                 case FormatType.String:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"));
                                     break;
                                 case FormatType.Integer:
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
+                                    break;
+                                case FormatType.Long:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"));
+                                    break;
+                                case FormatType.Float:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"));
+                                    break;
+                                case FormatType.Double:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"));
+                                    break;
+                                case FormatType.Decimal:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"));
                                     break;
                             }
                         }
