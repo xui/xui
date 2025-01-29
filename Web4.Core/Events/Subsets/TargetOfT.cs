@@ -13,7 +13,6 @@ public partial interface Events
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.
             /// </summary>
-
             EventTarget<T> Target { get; }
         }
     }
