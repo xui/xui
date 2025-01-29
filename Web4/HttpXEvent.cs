@@ -90,7 +90,7 @@ internal partial record class HttpXEvent(
     double Events.Subsets.Deltas.DeltaY => DeltaY ?? default;
     double Events.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Events.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
-    EventTarget Events.UI.Target => Target ?? EventTarget.Empty;
+    EventTarget Events.Subsets.Target.Target => Target ?? EventTarget.Empty;
     DataTransfer Events.Input.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Events.Input<int>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Events.Input<long>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
@@ -105,6 +105,12 @@ internal partial record class HttpXEvent(
     string Events.Input<double>.InputType => InputType ?? string.Empty;
     string Events.Input<decimal>.InputType => InputType ?? string.Empty;
     string Events.Input<DateTime>.InputType => InputType ?? string.Empty;
+    EventTarget<int> Events.Subsets.Target<int>.Target => new(Target);
+    EventTarget<long> Events.Subsets.Target<long>.Target => new(Target);
+    EventTarget<float> Events.Subsets.Target<float>.Target => new(Target);
+    EventTarget<double> Events.Subsets.Target<double>.Target => new(Target);
+    EventTarget<decimal> Events.Subsets.Target<decimal>.Target => new(Target);
+    EventTarget<DateTime> Events.Subsets.Target<DateTime>.Target => new(Target);
     EventTarget<int> Events.Input<int>.Target => new(Target);
     EventTarget<long> Events.Input<long>.Target => new(Target);
     EventTarget<float> Events.Input<float>.Target => new(Target);

@@ -4,9 +4,11 @@ namespace Web4;
 
 public partial interface Events
 {
-    public interface UI
+    public interface UI: Subsets.Target
     {
-        const string Format = "detail,bubbles,cancelable,composed,currentTarget,defaultPrevented,eventPhase,isTrusted,target,timeStamp,type";
+        new const string Format = 
+            "detail,bubbles,cancelable,composed,currentTarget,defaultPrevented,eventPhase,isTrusted,target,timeStamp,type," +
+            Subsets.Target.Format;
         
         /// <summary>
         /// Returns a long with details about the event, depending on the event type.
@@ -48,11 +50,6 @@ public partial interface Events
         /// </summary>
         bool IsTrusted { get; }
         
-        /// <summary>
-        /// A reference to the object to which the event was originally dispatched.
-        /// </summary>
-        EventTarget Target { get; }
-
         /// <summary>
         /// The time at which the event was created (in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a DOMHighResTimeStamp instead.
         /// </summary>

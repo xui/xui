@@ -4,11 +4,12 @@ namespace Web4;
 
 public partial interface Events
 {
-    public interface Input<T> : UI, Subsets.Data, Subsets.IsComposing
+    public interface Input<T> : UI, Subsets.Target<T>, Subsets.Data, Subsets.IsComposing
         where T : unmanaged, IParsable<T>
     {
         new const string Format = "dataTransfer,inputType," + 
             UI.Format + "," + 
+            Subsets.Target<T>.Format + "," +
             Subsets.IsComposing.Format + "," +
             Subsets.Data.Format;
         
