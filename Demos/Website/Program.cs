@@ -283,6 +283,7 @@ async Task OnClickAsync(Event e)
 string s = "Rylan";
 bool b = true;
 int i = 3;
+float f = 3.1f;
 double d = 3.14;
 decimal m = 3.1415m;
 DateTime t = DateTime.Now;
@@ -341,14 +342,21 @@ app.Map("/signatures", () => $"""
                 <button onclick={e => WithTouchEventAsync(e):x,y}>e => WithTouchEventAsync(e):x,y</button>
             </p>
 
+            <h3>Input Values</h3>
+            <p>
+                <input type="text" { value => name } oninput={ e => s = e.Target?.Value ?? "error" } /> {s}
+                <input type="number" { value => i } oninput={ e => i = e.Target.Value } step="1" /> {i}
+                <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f}
+                <input type="number" { value => d } oninput={ e => d = e.Target.Value } step="0.1" /> {d}
+                <input type="number" { value => m } oninput={ e => m = e.Target.Value } step="0.1" /> {m}
+                <input type="date" { value => t } oninput={ e => t = e.Target.Value } /> {t}
+            </p>
+
             <button id="itID" name="itName" onclick={DoIt2}>DoIt2</button>
-            <button onclick={e => Console.WriteLine($"{e.X}")}>lambda</button>
+            <input type="number" oninput={e => Console.WriteLine(e.RelatedTarget.Value)}>lambda</input>
+            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
             <button onclick={e => d = e.X}>lambda</button>
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
-            <input type="text" { value => name } oninput={ e => name = e.Target?.Value ?? "wat" } />
-            <input type="number" { value => c } onchange={ e => c = e.Target.Value } />
-            <input type="date" { value => t } oninput={ e => t = e.Target.Value } />
-            <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
         </body>
     </html>
     """);
@@ -362,8 +370,19 @@ async Task WithEventAsync(Event e)              { Console.WriteLine($"WithEventA
 async Task WithMouseEventAsync(Event.Mouse e)   { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
 async Task WithTouchEventAsync(Event.Touch e)   { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
 
-void DoIt2(Event.Input<DateTime> e)
+void DoIt2(Event.Input<float> e)
 {
+    //   Next, `{ e => t = e.Target.Value }` should serialize smaller (as a subset). 
+    //     - Does this need separated ones for int and DateTime?
+    //     - Does it become ambiguous if my expression only includes e.Target.Name?
+    //     - Don't forget about CurrentTarget and RelatedTarget too.
+    //   Also, holy redundant serialization Batmam!  I need a lookup approach.  (View source now)
+    //   Did I just alias an interface by extending it with nothing?  Does this mean I can have TWO XY?  No need for Subsets namespace anymore?
+    //   Then implement the rest of the window-level events (well all of them).  There are many.
+    //   What about IBlockingEvent?  This might need a duplicate tree hierarchy?
+    //      - initEvent(), preventDefault(), stopImmediatePropagation(), stopPropagation()
+    //      - alt idea: instead of blocking the browser, can I stop*Propagation and re-dispatch if necessary?
+
     var a = e.Target.Value;
     Console.WriteLine($"d:{d}");
     Console.WriteLine($"m:{m}");
