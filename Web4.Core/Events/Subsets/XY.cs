@@ -16,14 +16,14 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Subsets.XY> listener, 
-        string? format = Events.Subsets.XY.Format, 
+        Action<Event.Subsets.XY> listener, 
+        string? format = Event.Subsets.XY.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Subsets.XY, Task> listener, 
-        string? format = Events.Subsets.XY.Format, 
+        Func<Event.Subsets.XY, Task> listener, 
+        string? format = Event.Subsets.XY.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

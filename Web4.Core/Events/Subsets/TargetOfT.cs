@@ -21,25 +21,25 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Subsets.Target<int>> listener, 
-        string? format = Events.Subsets.Target<int>.Format, 
+        Action<Event.Subsets.Target<int>> listener, 
+        string? format = Event.Subsets.Target<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Subsets.Target<int>, Task> listener, 
-        string? format = Events.Subsets.Target<int>.Format, 
+        Func<Event.Subsets.Target<int>, Task> listener, 
+        string? format = Event.Subsets.Target<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Action<Events.Subsets.Target<DateTime>> listener, 
-        string? format = Events.Subsets.Target<int>.Format, 
+        Action<Event.Subsets.Target<DateTime>> listener, 
+        string? format = Event.Subsets.Target<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Subsets.Target<DateTime>, Task> listener, 
-        string? format = Events.Subsets.Target<int>.Format, 
+        Func<Event.Subsets.Target<DateTime>, Task> listener, 
+        string? format = Event.Subsets.Target<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);}

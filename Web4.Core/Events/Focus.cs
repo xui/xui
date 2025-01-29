@@ -15,15 +15,15 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Focus> listener, 
-        string? format = Events.Focus.Format, 
+        Action<Event.Focus> listener, 
+        string? format = Event.Focus.Format, 
         [CallerArgumentExpression(nameof(listener))] 
         string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Focus, Task> listener, 
-        string? format = Events.Focus.Format, 
+        Func<Event.Focus, Task> listener, 
+        string? format = Event.Focus.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

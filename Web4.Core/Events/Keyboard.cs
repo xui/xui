@@ -36,14 +36,14 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Keyboard> listener, 
-        string? format = Events.Keyboard.Format, 
+        Action<Event.Keyboard> listener, 
+        string? format = Event.Keyboard.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Keyboard, Task> listener, 
-        string? format = Events.Keyboard.Format, 
+        Func<Event.Keyboard, Task> listener, 
+        string? format = Event.Keyboard.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

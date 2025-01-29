@@ -30,26 +30,26 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Input<int>> listener, 
-        string? format = Events.Input<int>.Format, 
+        Action<Event.Input<int>> listener, 
+        string? format = Event.Input<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Input<int>, Task> listener, 
-        string? format = Events.Input<int>.Format, 
+        Func<Event.Input<int>, Task> listener, 
+        string? format = Event.Input<int>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Action<Events.Input<DateTime>> listener, 
-        string? format = Events.Input<DateTime>.Format, 
+        Action<Event.Input<DateTime>> listener, 
+        string? format = Event.Input<DateTime>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Input<DateTime>, Task> listener, 
-        string? format = Events.Input<DateTime>.Format, 
+        Func<Event.Input<DateTime>, Task> listener, 
+        string? format = Event.Input<DateTime>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

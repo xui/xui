@@ -18,14 +18,14 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Mouse> listener, 
-        string? format = Events.Mouse.Format, 
+        Action<Event.Mouse> listener, 
+        string? format = Event.Mouse.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Mouse, Task> listener, 
-        string? format = Events.Mouse.Format, 
+        Func<Event.Mouse, Task> listener, 
+        string? format = Event.Mouse.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

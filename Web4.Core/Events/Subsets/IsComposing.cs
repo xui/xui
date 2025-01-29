@@ -21,14 +21,14 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Events.Subsets.IsComposing> listener, 
-        string? format = Events.Subsets.IsComposing.Format, 
+        Action<Event.Subsets.IsComposing> listener, 
+        string? format = Event.Subsets.IsComposing.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
-        Func<Events.Subsets.IsComposing, Task> listener, 
-        string? format = Events.Subsets.IsComposing.Format, 
+        Func<Event.Subsets.IsComposing, Task> listener, 
+        string? format = Event.Subsets.IsComposing.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }
