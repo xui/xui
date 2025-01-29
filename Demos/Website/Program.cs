@@ -344,12 +344,12 @@ app.Map("/signatures", () => $"""
 
             <h3>Input Values</h3>
             <p>
-                <input type="text" { value => name } oninput={ e => s = e.Target?.Value ?? "error" } /> {s}
-                <input type="number" { value => i } oninput={ e => i = e.Target.Value } step="1" /> {i}
-                <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f}
-                <input type="number" { value => d } oninput={ e => d = e.Target.Value } step="0.1" /> {d}
-                <input type="number" { value => m } oninput={ e => m = e.Target.Value } step="0.1" /> {m}
-                <input type="date" { value => t } oninput={ e => t = e.Target.Value } /> {t}
+                <input type="text" { value => name } oninput={ e => s = e.Target?.Value ?? "error" } /> {s}<br/>
+                <input type="number" { value => i } oninput={ e => i = e.Target.Value } step="1" /> {i}<br/>
+                <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f}<br/>
+                <input type="number" { value => d } oninput={ e => d = e.Target.Value } step="0.1" /> {d}<br/>
+                <input type="number" { value => m } oninput={ e => m = e.Target.Value } step="0.1" /> {m}<br/>
+                <input type="date" { value => t } oninput={ e => t = e.Target.Value } /> {t}<br/>
             </p>
 
             <button id="itID" name="itName" onclick={DoIt2}>DoIt2</button>

@@ -102,13 +102,13 @@ public struct HttpXContext(WebSocketPipe? pipe)
                         {
                             switch (keyholeAfter.Type)
                             {
-                                case FormatType.Boolean:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
-                                    break;
                                 case FormatType.String:
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"));
+                                    break;
+                                case FormatType.Boolean:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
                                     break;
                                 case FormatType.Integer:
                                     isChanged = true;
@@ -129,6 +129,14 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                 case FormatType.Decimal:
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"));
+                                    break;
+                                case FormatType.DateTime:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.DateTime}"));
+                                    break;
+                                case FormatType.TimeSpan:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.TimeSpan}"));
                                     break;
                             }
                         }
