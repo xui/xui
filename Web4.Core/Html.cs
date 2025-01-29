@@ -191,7 +191,6 @@ public ref partial struct Html
         Cursor++;
         return @continue;
     }
-
     
     // MUTABLE ELEMENTS
 
