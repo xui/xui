@@ -43,13 +43,13 @@ public ref partial struct Html
 
     public bool AppendFormatted(
         Action<Events.Input<DateTime>> listener, 
-        string? format = Events.Input<int>.Format, 
+        string? format = Events.Input<DateTime>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Events.Input<DateTime>, Task> listener, 
-        string? format = Events.Input<int>.Format, 
+        string? format = Events.Input<DateTime>.Format, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }
