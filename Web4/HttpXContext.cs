@@ -132,11 +132,11 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                     break;
                                 case FormatType.DateTime:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.DateTime}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"));
                                     break;
                                 case FormatType.TimeSpan:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.TimeSpan}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"));
                                     break;
                             }
                         }
