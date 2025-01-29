@@ -347,7 +347,7 @@ app.Map("/signatures", () => $"""
             <h3>Input Values</h3>
             <p>
                 <input type="text" { value => name } oninput={ e => s = e.Target?.Value ?? "error" } /> {s} <br/>
-                <input type="checkbox" { @checked =>b } oninput={ (Event b) => Console.WriteLine($"{b}") } /> {s} <br/>
+                <input type="checkbox" { @checked => b } oninput={ (Event b) => Console.WriteLine($"{b}") } /> {s} <br/>
                 <input type="number" { value => i } oninput={ e => i = e.Target.Value } step="1" /> {i} <br/>
                 <input type="number" { value => l } oninput={ e => l = e.Target.Value } step="1000000" /> {l} <br/>
                 <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f} <br/>
