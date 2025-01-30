@@ -102,46 +102,11 @@ public ref partial struct Html
 
     // MUTABLE ATTRIBUTES
 
-    // Ex (primary):   <p { style => GetStyle() }>Hello</p>
-    // or (ambiguous): <button onclick={ (Event e) => name = e.Target.Name }>Click me</button>
-    public bool AppendFormatted(
-        Func<Event, string> attribute, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(attribute))] string? expression = null) => 
-            AppendAmbiguous<string, int>(
-                GetArgName(expression), 
-                attribute, 
-                formatForAttribute: format, 
-                formatForListener: format,
-                expression: expression);
-    
-    // Ex (primary):   <input type="text" { disabled => isDisabled } />
-    // or (ambiguous): <button onclick={ (Event e) => isDisabled = !isDisabled }>Click me</button>
-    public bool AppendFormatted(
-        Func<Event, bool> attribute, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(attribute))] string? expression = null) => 
-            AppendAmbiguous<bool, int>(
-                GetArgName(expression), 
-                attribute, 
-                formatForAttribute: format, 
-                formatForListener: format,
-                expression: expression);
-    
-    // Ex (primary):   <input type="text" { maxlength => c } />
-    // or (ambiguous): <button onclick={ (Event e) => c++ }>Click me</button>
-    public bool AppendFormatted<T>(
-        Func<Event, T> attribute, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(attribute))] string? expression = null) 
-            where T : struct, IUtf8SpanFormattable => 
-            AppendAmbiguous(
-                GetArgName(expression), 
-                attribute, 
-                attribute, 
-                formatForAttribute: format, 
-                formatForListener: format,
-                expression: expression);
+    // The following signatures used to be defined here but became redundant
+    // from the more specific signatures inside Target<T>.
+    //   - Func<Event, string> attribute
+    //   - Func<Event, bool> attribute
+    //   - Func<Event, T> attribute (where T : struct, IUtf8SpanFormattable)
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public bool AppendFormatted(
