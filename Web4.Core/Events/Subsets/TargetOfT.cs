@@ -6,7 +6,7 @@ public partial interface Events
 {
     public partial interface Subsets
     {
-        public interface Target<T> where T : unmanaged, IParsable<T>
+        public interface Target<T>
         {
             const string Format = "target";
 
@@ -20,6 +20,30 @@ public partial interface Events
 
 public ref partial struct Html
 {
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<string>, string> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous<string, int>(
+                GetArgName(expression), 
+                listener, 
+                null, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<string>.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<bool>, bool> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous<bool, int>(
+                GetArgName(expression), 
+                listener, 
+                null, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<bool>.Format, 
+                expression: expression);
+
     public bool AppendFormatted(
         Func<Event.Subsets.Target<int>, int> listener, 
         string? format = null, 

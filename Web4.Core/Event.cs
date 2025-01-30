@@ -9,6 +9,8 @@ public partial interface Event :
     Events.Composition, 
     Events.Focus, 
     Events.Input, 
+    Events.Input<string>,
+    Events.Input<bool>,
     Events.Input<int>,
     Events.Input<long>,
     Events.Input<float>,
@@ -512,23 +514,32 @@ public record class EventTarget(
 {
     public static readonly EventTarget Empty = new();
 
-    public T GetValue<T>() where T : unmanaged, IParsable<T>
-        => T.TryParse(Value, null, out var value) ? value : default;
-
-    public int? ValueAsInt => int.TryParse(Value, out int i) ? i : null;
-    public float? ValueAsFloat => float.TryParse(Value, out float f) ? f : null;
-    public double? ValueAsDouble => double.TryParse(Value, out double d) ? d : null;
-    public decimal? ValueAsDecimal => decimal.TryParse(Value, out decimal m) ? m : null;
-    public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out DateTime t) ? t : null;
+    public bool? ValueAsBool => Checked;
+    public int? ValueAsInt => int.TryParse(Value, out var i) ? i : null;
+    public long? ValueAsLong => long.TryParse(Value, out var i) ? i : null;
+    public float? ValueAsFloat => float.TryParse(Value, out var f) ? f : null;
+    public double? ValueAsDouble => double.TryParse(Value, out var d) ? d : null;
+    public decimal? ValueAsDecimal => decimal.TryParse(Value, out var m) ? m : null;
+    public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out var d) ? d : null;
 }
 
-public struct EventTarget<T>(EventTarget? target) where T : unmanaged, IParsable<T>
+public struct EventTarget<T>(EventTarget? target)
 {
     public readonly string ID => target?.ID ?? "";
     public readonly string Name => target?.Name ?? "";
     public readonly string Type => target?.Type ?? "";
-    public readonly T Value 
-        => T.TryParse(target?.Value ?? "", null, out var value) ? value : default;
+    public readonly bool Checked => target?.Checked ?? false;
+    public T Value => default(T) switch
+    {
+        bool => (T)(object)(target?.ValueAsBool ?? default),
+        int => (T)(object)(int.TryParse(target?.Value, null, out var value) ? value : default),
+        long => (T)(object)(long.TryParse(target?.Value, null, out var value) ? value : default),
+        float => (T)(object)(float.TryParse(target?.Value, null, out var value) ? value : default),
+        double => (T)(object)(double.TryParse(target?.Value, null, out var value) ? value : default),
+        decimal => (T)(object)(decimal.TryParse(target?.Value, null, out var value) ? value : default),
+        DateTime => (T)(object)(DateTime.TryParse(target?.Value, null, out var value) ? value : default),
+        /*string*/ _ => (T)(object)(target?.Value ?? string.Empty), // ...because string is a class and default(T) behaves differently
+    };
 }
 
 public record class DataTransfer(

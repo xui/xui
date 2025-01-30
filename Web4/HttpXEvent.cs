@@ -117,6 +117,10 @@ internal partial record class HttpXEvent(
     EventTarget<double> Event.Input<double>.Target => new(Target);
     EventTarget<decimal> Event.Input<decimal>.Target => new(Target);
     EventTarget<DateTime> Event.Input<DateTime>.Target => new(Target);
+    EventTarget<string> Events.Input<string>.Target => new(Target);
+    EventTarget<string> Events.Subsets.Target<string>.Target => new(Target);
+    EventTarget<bool> Events.Input<bool>.Target => new(Target);
+    EventTarget<bool> Events.Subsets.Target<bool>.Target => new(Target);
     string Event.UI.Type => Type ?? string.Empty;
     EventTarget Event.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     EventTarget Event.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;
