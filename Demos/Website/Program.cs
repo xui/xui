@@ -2,6 +2,7 @@ global using Web4;
 global using Web4.ZeroScript;
 global using System.Buffers;
 using Web4.Composers;
+using System.Drawing;
 Action<string> Log = Console.WriteLine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -289,6 +290,7 @@ float f = 3.1f;
 double d = 3.14;
 decimal m = 3.1415m;
 DateTime t = DateTime.Now;
+Color color = Color.Red;
 app.Map("/signatures", () => $"""
     <!doctype html>
     <html>
