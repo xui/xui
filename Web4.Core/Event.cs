@@ -507,6 +507,7 @@ public record class EventTarget(
     string ID = "",
     string Name = "",
     string Type = "",
+    bool? Checked = false,
     string Value = "")
 {
     public static readonly EventTarget Empty = new();
