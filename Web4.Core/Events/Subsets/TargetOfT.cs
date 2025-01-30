@@ -22,45 +22,75 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Func<Event.Subsets.Target<int>, int> listener, 
-        string? format = Event.Subsets.Target<int>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<int>.Format, 
+                expression: expression);
 
     public bool AppendFormatted(
         Func<Event.Subsets.Target<long>, long> listener, 
-        string? format = Event.Subsets.Target<long>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<long>.Format, 
+                expression: expression);
 
     public bool AppendFormatted(
         Func<Event.Subsets.Target<float>, float> listener, 
-        string? format = Event.Subsets.Target<float>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<float>.Format, 
+                expression: expression);
 
     public bool AppendFormatted(
         Func<Event.Subsets.Target<double>, double> listener, 
-        string? format = Event.Subsets.Target<double>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<double>.Format, 
+                expression: expression);
 
     public bool AppendFormatted(
         Func<Event.Subsets.Target<decimal>, decimal> listener, 
-        string? format = Event.Subsets.Target<decimal>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<decimal>.Format, 
+                expression: expression);
 
     public bool AppendFormatted(
         Func<Event.Subsets.Target<DateTime>, DateTime> listener, 
-        string? format = Event.Subsets.Target<DateTime>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendAmbiguous(
-                GetArgName(expression), listener, listener, format: format, expression: expression);
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<DateTime>.Format, 
+                expression: expression);
 
     // Note: Browsers only return dates, no TimeSpans.
 }

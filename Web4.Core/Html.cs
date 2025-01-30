@@ -111,7 +111,8 @@ public ref partial struct Html
             AppendAmbiguous<string, int>(
                 GetArgName(expression), 
                 attribute, 
-                format: format, 
+                formatForAttribute: format, 
+                formatForListener: format,
                 expression: expression);
     
     // Ex (primary):   <input type="text" { disabled => isDisabled } />
@@ -123,7 +124,8 @@ public ref partial struct Html
             AppendAmbiguous<bool, int>(
                 GetArgName(expression), 
                 attribute, 
-                format: format, 
+                formatForAttribute: format, 
+                formatForListener: format,
                 expression: expression);
     
     // Ex (primary):   <input type="text" { maxlength => c } />
@@ -137,7 +139,8 @@ public ref partial struct Html
                 GetArgName(expression), 
                 attribute, 
                 attribute, 
-                format: format, 
+                formatForAttribute: format, 
+                formatForListener: format,
                 expression: expression);
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
@@ -218,7 +221,8 @@ public ref partial struct Html
         ReadOnlySpan<char> argName, 
         Func<Event, T> func, 
         Func<Event, Utf8>? funcUtf8 = null, 
-        string? format = null,
+        string? formatForAttribute = null,
+        string? formatForListener = null,
         string? expression = null)
             where Utf8 : struct, IUtf8SpanFormattable
     {
@@ -232,14 +236,14 @@ public ref partial struct Html
                 => composer.WriteEventListener(
                         ref this, 
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
-                        format: format,
+                        format: formatForListener,
                         expression: expression
                     ),
             _ when argName.StartsWith("(Event")
                 => composer.WriteEventListener(
                         ref this, 
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
-                        format: format,
+                        format: formatForListener,
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
@@ -265,7 +269,7 @@ public ref partial struct Html
                         ref this,
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcUtf8, // returns int, long, float, double, etc
-                        format: format, // All primitives except string and bool are utf8-formattable
+                        format: formatForAttribute, // All primitives except string and bool are utf8-formattable
                         expression: expression
                     ),
             _ => throw new InvalidOperationException("Html does not support this type."),
