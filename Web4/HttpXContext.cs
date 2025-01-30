@@ -108,7 +108,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                     break;
                                 case FormatType.Boolean:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Boolean}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"));
                                     break;
                                 case FormatType.Integer:
                                     isChanged = true;
