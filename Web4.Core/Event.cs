@@ -566,7 +566,7 @@ public interface EventTarget<T>
     public T Value { get; }
 }
 
-public record class DataTransfer(
+public record struct DataTransfer(
     string DropEffect,
     string EffectAllowed,
     string[] Files,
@@ -578,14 +578,14 @@ public record class DataTransfer(
     public static readonly DataTransfer Empty = new();
 }
 
-public record class DataTransferItem(
+public record struct DataTransferItem(
     string Kind = "",
     string Type = ""
 ) {
     public static readonly DataTransferItem Empty = new();
 }
 
-public record class TouchPoint(
+public record struct TouchPoint(
     long Identifier = 0,
     double ScreenX = 0,
     double ScreenY = 0,
