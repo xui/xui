@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Web4.Composers;
@@ -58,43 +59,46 @@ public ref partial struct Html
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public bool AppendFormatted(string value) => WriteMutableValue(value);
-    public bool AppendFormatted(bool value) => WriteMutableValue(value);
-    public bool AppendFormatted(int value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(long value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(float value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(double value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(decimal value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(DateTime value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(TimeSpan value, string? format = null) => WriteMutableValue(value, format);
-
-    private bool WriteMutableValue(string value)
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
-        var @continue = composer.WriteMutableValue(ref this, value);
-        Cursor++;
-        return @continue;
-    }
-
-    private bool WriteMutableValue(bool value)
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
-        var @continue = composer.WriteMutableValue(ref this, value);
-        Cursor++;
-        return @continue;
-    }
+    public bool AppendFormatted(string value, string? format = null) => WriteMutableValue(value, format);
+    public bool AppendFormatted(bool value, string? format = null) => WriteMutableValue(value, format);
+    public bool AppendFormatted(Color value, string? format = null) => WriteMutableValue(value, format);
+    public bool AppendFormatted(Uri value, string? format = null) => WriteMutableValue(value, format);
+    public bool AppendFormatted(int value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(long value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(float value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(double value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(decimal value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(DateTime value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(DateOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(TimeSpan value, string? format = null) => WriteMutableValueUtf8(value, format);
+    public bool AppendFormatted(TimeOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
 
     private bool WriteMutableValue<T>(T value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+        
+        var @continue = value switch
+        {
+            string s => composer.WriteMutableValue(ref this, s),
+            bool b => composer.WriteMutableValue(ref this, b),
+            Color c => composer.WriteMutableValue(ref this, c),
+            Uri u => composer.WriteMutableValue(ref this, u),
+            _ => true
+        };
+
+        Cursor++;
+        return @continue;
+    }
+
+    private bool WriteMutableValueUtf8<T>(T value, string? format = null)
          where T : struct, IUtf8SpanFormattable
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
         var @continue = composer.WriteMutableValue(ref this, value, format);
+
         Cursor++;
         return @continue;
     }
@@ -227,6 +231,20 @@ public ref partial struct Html
                         ref this,
                         attrName: argName, // argName is guaranteed to never be empty
                         attrValue: funcBool, // returns bool
+                        expression: expression
+                    ),
+            _ when func is Func<Event, Color> funcColor
+                => composer.WriteMutableAttribute(
+                        ref this,
+                        attrName: argName, // argName is guaranteed to never be empty
+                        attrValue: funcColor, // returns Color
+                        expression: expression
+                    ),
+            _ when func is Func<Event, Uri> funcUri
+                => composer.WriteMutableAttribute(
+                        ref this,
+                        attrName: argName, // argName is guaranteed to never be empty
+                        attrValue: funcUri, // returns Uri
                         expression: expression
                     ),
             _ when funcUtf8 is not null 

@@ -289,8 +289,11 @@ long l = 5_000_000_000;
 float f = 3.1f;
 double d = 3.14;
 decimal m = 3.1415m;
-DateTime t = DateTime.Now;
+DateTime dt = DateTime.Now;
+DateOnly dO = DateOnly.FromDateTime(DateTime.Now);
+TimeOnly tO = TimeOnly.FromDateTime(DateTime.Now);
 Color color = Color.Red;
+Uri u = new("http://Itcanbeanything");
 app.Map("/signatures", () => $"""
     <!doctype html>
     <html>
@@ -300,7 +303,7 @@ app.Map("/signatures", () => $"""
             <p>bool: {b}</p>
             <p>int: {i} {i:c}</p>
             <p>double: {d} {d:#000.000}</p>
-            <p>DateTime: {t} {t:hh:mm:ss}</p>
+            <p>DateTime: {dt} {dt:hh:mm:ss}</p>
             <p>html: {TempFooter()}
 
             <h2>Mutable Attributes</h2>
@@ -357,7 +360,12 @@ app.Map("/signatures", () => $"""
                 <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f} <br/>
                 <input type="number" { value => d } oninput={ e => d = e.Target.Value } step="0.1" /> {d} <br/>
                 <input type="number" { value => m } oninput={ e => m = e.Target.Value } step="0.1" /> {m} <br/>
-                <input type="date" { value => t } oninput={ e => t = e.Target.Value } /> {t} <br/>
+                <input type="datetime-local" { value => dt } oninput={ e => dt = e.Target.Value } /> {dt} <br/>
+                <input type="date" { value => dO } oninput={ e => dO = e.Target.Value } /> {dO} <br/>
+                <input type="time" { value => tO } oninput={ e => tO = e.Target.Value } /> {tO} <br/>
+                <input type="color" { value => color } oninput={ e => color = e.Target.Value } /> {color} <br/>
+                <input type="url" { value => u } oninput={ e => u = e.Target.Value } /> {u} <br/>
+                <input type="file" { value => u } oninput={ e => u = e.Target.Value } /> {u} <br/>
             </p>
 
             <button id="itID" name="itName" onclick={DoIt2}>DoIt2</button>

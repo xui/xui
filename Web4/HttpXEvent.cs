@@ -1,4 +1,6 @@
 
+using System.Drawing;
+
 namespace Web4;
 
 internal partial record class HttpXEvent(
@@ -111,6 +113,10 @@ internal partial record class HttpXEvent(
     EventTarget<double> Event.Subsets.Target<double>.Target => Target ?? EventTarget.Empty;
     EventTarget<decimal> Event.Subsets.Target<decimal>.Target => Target ?? EventTarget.Empty;
     EventTarget<DateTime> Event.Subsets.Target<DateTime>.Target => Target ?? EventTarget.Empty;
+    EventTarget<DateOnly> Event.Subsets.Target<DateOnly>.Target => Target ?? EventTarget.Empty;
+    EventTarget<TimeOnly> Event.Subsets.Target<TimeOnly>.Target => Target ?? EventTarget.Empty;
+    EventTarget<Color> Event.Subsets.Target<Color>.Target => Target ?? EventTarget.Empty;
+    EventTarget<Uri> Event.Subsets.Target<Uri>.Target => Target ?? EventTarget.Empty;
     EventTarget<string> Events.Input<string>.Target => Target ?? EventTarget.Empty;
     EventTarget<bool> Events.Input<bool>.Target => Target ?? EventTarget.Empty;
     EventTarget<int> Event.Input<int>.Target => Target ?? EventTarget.Empty;
@@ -119,6 +125,10 @@ internal partial record class HttpXEvent(
     EventTarget<double> Event.Input<double>.Target => Target ?? EventTarget.Empty;
     EventTarget<decimal> Event.Input<decimal>.Target => Target ?? EventTarget.Empty;
     EventTarget<DateTime> Event.Input<DateTime>.Target => Target ?? EventTarget.Empty;
+    EventTarget<DateOnly> Event.Input<DateOnly>.Target => Target ?? EventTarget.Empty;
+    EventTarget<TimeOnly> Event.Input<TimeOnly>.Target => Target ?? EventTarget.Empty;
+    EventTarget<Color> Event.Input<Color>.Target => Target ?? EventTarget.Empty;
+    EventTarget<Uri> Event.Input<Uri>.Target => Target ?? EventTarget.Empty;
     string Event.UI.Type => Type ?? string.Empty;
     EventTarget Event.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     EventTarget Event.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;

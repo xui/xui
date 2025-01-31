@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -88,6 +89,30 @@ public class DiffComposer : BaseComposer
         return base.WriteMutableValue(ref parent, value);
     }
 
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot.Buffer[index];
+        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Color = value;
+        keyhole.Type = FormatType.Color;
+        keyhole.Format = format;
+
+        return base.WriteMutableValue(ref parent, value);
+    }
+
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot.Buffer[index];
+        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Uri = value;
+        keyhole.Type = FormatType.Uri;
+        keyhole.Format = format;
+
+        return base.WriteMutableValue(ref parent, value);
+    }
+
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
@@ -122,9 +147,17 @@ public class DiffComposer : BaseComposer
                 keyhole.DateTime = dt;
                 keyhole.Type = FormatType.DateTime;
                 break;
+            case DateOnly dO:
+                keyhole.DateOnly = dO;
+                keyhole.Type = FormatType.DateOnly;
+                break;
             case TimeSpan ts:
                 keyhole.TimeSpan = ts;
                 keyhole.Type = FormatType.TimeSpan;
+                break;
+            case TimeOnly tO:
+                keyhole.TimeOnly = tO;
+                keyhole.Type = FormatType.TimeOnly;
                 break;
             default:
                 // In the future, possibly support other/custom IUtf8SpanFormattable types?

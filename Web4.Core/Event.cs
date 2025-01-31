@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace Web4;
 
 /// <summary>
@@ -16,6 +18,10 @@ public partial interface Event :
     Events.Input<double>,
     Events.Input<decimal>,
     Events.Input<DateTime>,
+    Events.Input<DateOnly>,
+    Events.Input<TimeOnly>,
+    Events.Input<Color>,
+    Events.Input<Uri>,
     Events.Keyboard, 
     Events.Mouse, 
     Events.Touch, 
@@ -517,7 +523,11 @@ public record class EventTarget(
       EventTarget<float>,
       EventTarget<double>,
       EventTarget<decimal>,
-      EventTarget<DateTime>
+      EventTarget<DateTime>,
+      EventTarget<DateOnly>,
+      EventTarget<TimeOnly>,
+      EventTarget<Color>,
+      EventTarget<Uri>
 {
     public static readonly EventTarget Empty = new();
 
@@ -528,6 +538,11 @@ public record class EventTarget(
     public double? ValueAsDouble => double.TryParse(Value, out var d) ? d : null;
     public decimal? ValueAsDecimal => decimal.TryParse(Value, out var m) ? m : null;
     public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out var d) ? d : null;
+    public DateOnly? ValueAsDateOnly => DateOnly.TryParse(Value, out var d) ? d : null;
+    public TimeOnly? ValueAsTimeOnly => TimeOnly.TryParse(Value, out var t) ? t : null;
+    public Color? ValueAsColor => Value != null ? ColorTranslator.FromHtml(Value) : null;
+    public Uri? ValueAsUri => Uri.TryCreate(Value, UriKind.RelativeOrAbsolute, out var u) ? u : null;
+
     string EventTarget<string>.Value => Value ?? string.Empty;
     bool EventTarget<bool>.Value => ValueAsBool ?? default;
     int EventTarget<int>.Value => ValueAsInt ?? default;
@@ -536,6 +551,10 @@ public record class EventTarget(
     double EventTarget<double>.Value => ValueAsDouble ?? default;
     decimal EventTarget<decimal>.Value => ValueAsDecimal ?? default;
     DateTime EventTarget<DateTime>.Value => ValueAsDateTime ?? default;
+    DateOnly EventTarget<DateOnly>.Value => ValueAsDateOnly ?? default;
+    TimeOnly EventTarget<TimeOnly>.Value => ValueAsTimeOnly ?? default;
+    Color EventTarget<Color>.Value => ValueAsColor ?? default;
+    Uri EventTarget<Uri>.Value => ValueAsUri ?? ValueAsUri.Empty();
 }
 
 public interface EventTarget<T>
@@ -576,4 +595,10 @@ public record class TouchPoint(
     double PageY = 0
 ) {
     public static readonly TouchPoint Empty = new();
+}
+
+public static class EmptyUri
+{
+    private static Uri? empty = null;
+    public static Uri Empty(this Uri? uri) => empty ??= new Uri("about:blank");
 }

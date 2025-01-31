@@ -110,6 +110,14 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"));
                                     break;
+                                case FormatType.Color:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"));
+                                    break;
+                                case FormatType.Uri:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"));
+                                    break;
                                 case FormatType.Integer:
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
@@ -134,9 +142,17 @@ public struct HttpXContext(WebSocketPipe? pipe)
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"));
                                     break;
+                                case FormatType.DateOnly:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"));
+                                    break;
                                 case FormatType.TimeSpan:
                                     isChanged = true;
                                     await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"));
+                                    break;
+                                case FormatType.TimeOnly:
+                                    isChanged = true;
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"));
                                     break;
                             }
                         }

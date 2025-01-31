@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Runtime.CompilerServices;
 
 namespace Web4;
@@ -116,5 +117,51 @@ public ref partial struct Html
                 formatForListener: format ?? Event.Subsets.Target<DateTime>.Format, 
                 expression: expression);
 
-    // Note: Browsers only return dates, no TimeSpans.
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<DateOnly>, DateOnly> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous(
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<DateOnly>.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<TimeOnly>, TimeOnly> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous(
+                GetArgName(expression), 
+                listener, 
+                listener, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<TimeOnly>.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<Color>, Color> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous<Color, int>(
+                GetArgName(expression), 
+                listener, 
+                null, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<Color>.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Func<Event.Subsets.Target<Uri>, Uri> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => AppendAmbiguous<Uri, int>(
+                GetArgName(expression), 
+                listener, 
+                null, 
+                formatForAttribute: format,
+                formatForListener: format ?? Event.Subsets.Target<Uri>.Format, 
+                expression: expression);
 }

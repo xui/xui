@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
 using Web4.Composers;
@@ -51,6 +52,8 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
     public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableString(ref parent, value.Name);
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => WriteMutableString(ref parent, value.ToString()); // TODO: Memory allocation!
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {

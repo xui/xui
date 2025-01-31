@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Web4.Composers;
@@ -134,6 +135,8 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override bool WriteMutableValue(ref Html parent, string value) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue(ref Html parent, bool value) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => IncrementCursor().CompleteFormattedValue();
     
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();

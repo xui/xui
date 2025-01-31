@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Text;
 
 namespace Web4.Composers;
@@ -29,6 +30,28 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? Boolean.TrueString : Boolean.FalseString;
+        var destination = Writer.GetSpan(output.Length);
+        var length = Encoding.UTF8.GetBytes(output, destination);
+        Writer.Advance(length);
+
+        return base.WriteMutableValue(ref parent, value);
+    }
+
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
+    {
+        // TODO: Color could have some great format strings
+        var output = value.Name;
+        var destination = Writer.GetSpan(output.Length);
+        var length = Encoding.UTF8.GetBytes(output, destination);
+        Writer.Advance(length);
+
+        return base.WriteMutableValue(ref parent, value);
+    }
+
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
+    {
+        // TODO: Fix memory allocation happening here
+        var output = value.ToString();
         var destination = Writer.GetSpan(output.Length);
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
