@@ -68,7 +68,7 @@ public abstract class BaseComposer
 
     public virtual bool WriteMutableValue(ref Html parent, string value) => CompleteFormattedValue();
     public virtual bool WriteMutableValue(ref Html parent, bool value) => CompleteFormattedValue();
-    public virtual bool WriteMutableValue<T>(ref Html parent, T value, string? format = default) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
+    public virtual bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
     
     public virtual bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => CompleteFormattedValue();

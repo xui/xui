@@ -51,7 +51,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
     public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? Boolean.TrueString : Boolean.FalseString);
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default)
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the mutable value with a comment tag on one side 

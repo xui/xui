@@ -134,7 +134,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     public override bool WriteMutableValue(ref Html parent, string value) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue(ref Html parent, bool value) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => IncrementCursor().CompleteFormattedValue();
     
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();

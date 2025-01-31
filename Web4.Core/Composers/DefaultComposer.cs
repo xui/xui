@@ -36,7 +36,7 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return base.WriteMutableValue(ref parent, value);
     }
 
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = default)
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var destination = Writer.GetSpan();
