@@ -378,7 +378,7 @@ async Task WithEventAsync(Event e)              { Console.WriteLine($"WithEventA
 async Task WithMouseEventAsync(Event.Mouse e)   { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
 async Task WithTouchEventAsync(Event.Touch e)   { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
 
-void DoIt2(Event.Input e)
+void DoIt2(Event.Input<string> e)
 {
     var a = e.Target.Value;
     Console.WriteLine($"d:{d}");

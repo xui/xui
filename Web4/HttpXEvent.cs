@@ -91,14 +91,12 @@ internal partial record class HttpXEvent(
     double Event.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Event.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Event.Subsets.Target.Target => Target ?? EventTarget.Empty;
-    DataTransfer Event.Input.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<int>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<long>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<float>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<double>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<decimal>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
     DataTransfer Event.Input<DateTime>.DataTransfer => DataTransfer ?? DataTransfer.Empty;
-    string Event.Input.InputType => InputType ?? string.Empty;
     string Event.Input<int>.InputType => InputType ?? string.Empty;
     string Event.Input<long>.InputType => InputType ?? string.Empty;
     string Event.Input<float>.InputType => InputType ?? string.Empty;

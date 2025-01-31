@@ -8,7 +8,6 @@ public partial interface Event :
     Events.UI,
     Events.Composition, 
     Events.Focus, 
-    Events.Input, 
     Events.Input<string>,
     Events.Input<bool>,
     Events.Input<int>,
