@@ -510,6 +510,14 @@ public record class EventTarget(
     string Type = "",
     bool? Checked = false,
     string Value = "")
+    : EventTarget<string>,
+      EventTarget<bool>,
+      EventTarget<int>,
+      EventTarget<long>,
+      EventTarget<float>,
+      EventTarget<double>,
+      EventTarget<decimal>,
+      EventTarget<DateTime>
 {
     public static readonly EventTarget Empty = new();
 
@@ -520,25 +528,23 @@ public record class EventTarget(
     public double? ValueAsDouble => double.TryParse(Value, out var d) ? d : null;
     public decimal? ValueAsDecimal => decimal.TryParse(Value, out var m) ? m : null;
     public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out var d) ? d : null;
+    string EventTarget<string>.Value => Value ?? string.Empty;
+    bool EventTarget<bool>.Value => ValueAsBool ?? default;
+    int EventTarget<int>.Value => ValueAsInt ?? default;
+    long EventTarget<long>.Value => ValueAsLong ?? default;
+    float EventTarget<float>.Value => ValueAsFloat ?? default;
+    double EventTarget<double>.Value => ValueAsDouble ?? default;
+    decimal EventTarget<decimal>.Value => ValueAsDecimal ?? default;
+    DateTime EventTarget<DateTime>.Value => ValueAsDateTime ?? default;
 }
 
-public struct EventTarget<T>(EventTarget? target)
+public interface EventTarget<T>
 {
-    public readonly string ID => target?.ID ?? "";
-    public readonly string Name => target?.Name ?? "";
-    public readonly string Type => target?.Type ?? "";
-    public readonly bool Checked => target?.Checked ?? false;
-    public T Value => default(T) switch
-    {
-        bool => (T)(object)(target?.ValueAsBool ?? default),
-        int => (T)(object)(int.TryParse(target?.Value, null, out var value) ? value : default),
-        long => (T)(object)(long.TryParse(target?.Value, null, out var value) ? value : default),
-        float => (T)(object)(float.TryParse(target?.Value, null, out var value) ? value : default),
-        double => (T)(object)(double.TryParse(target?.Value, null, out var value) ? value : default),
-        decimal => (T)(object)(decimal.TryParse(target?.Value, null, out var value) ? value : default),
-        DateTime => (T)(object)(DateTime.TryParse(target?.Value, null, out var value) ? value : default),
-        /*string*/ _ => (T)(object)(target?.Value ?? string.Empty), // ...because string is a class and default(T) behaves differently
-    };
+    public string ID { get; }
+    public string Name { get; }
+    public string Type { get; }
+    public bool? Checked { get; }
+    public T Value { get; }
 }
 
 public record class DataTransfer(
