@@ -9,6 +9,7 @@ public struct Keyhole
     public string Key;
     public FormatType Type;
     public string? String;
+    public bool? Boolean;
     public int? Integer;
     public long? Long;
     public float? Float;
@@ -16,7 +17,6 @@ public struct Keyhole
     public decimal? Decimal;
     public DateTime? DateTime;
     public TimeSpan? TimeSpan;
-    public bool? Boolean;
     public string? Format;
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);

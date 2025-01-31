@@ -4,12 +4,12 @@ public enum FormatType
 {
     StringLiteral,
     String,
+    Boolean,
     Integer,
     Long,
     Float,
     Double,
     Decimal,
-    Boolean,
     DateTime,
     TimeSpan,
     Attribute,
