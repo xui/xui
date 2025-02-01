@@ -9,8 +9,8 @@ public partial interface Events
         new const string Format = "dataTransfer,inputType," + 
             UI.Format + "," + 
             Subsets.Target<T>.Format + "," +
-            Subsets.IsComposing.Format + "," +
-            Subsets.Data.Format;
+            Subsets.Data.Format + "," +
+            Subsets.IsComposing.Format;
         
         /// <summary>
         /// Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.
