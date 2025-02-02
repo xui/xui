@@ -377,6 +377,8 @@ app.Map("/signatures", () => $"""
             <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
             <button onclick={e => d = e.X}>lambda</button>
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
+            <input type="number" { value => i } oninput={DoIt3} step="1" /> {i} <br/>
+            <input type="text" oninput={DoIt2}>DoIt2</input>
         </body>
     </html>
     """);
@@ -397,6 +399,13 @@ void DoIt2(Event.Input<string> e)
     Console.WriteLine($"m:{m}");
     Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
 }
+
+async Task DoIt3(Event.Subsets.Target<Color> e)
+{
+    await Task.Delay(1);
+    color = e.Target.Value;
+}
+
 
 
 
