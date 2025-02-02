@@ -540,7 +540,7 @@ public record class EventTarget(
     public DateTime? ValueAsDateTime => DateTime.TryParse(Value, out var d) ? d : null;
     public DateOnly? ValueAsDateOnly => DateOnly.TryParse(Value, out var d) ? d : null;
     public TimeOnly? ValueAsTimeOnly => TimeOnly.TryParse(Value, out var t) ? t : null;
-    public Color? ValueAsColor => Value != null ? ColorTranslator.FromHtml(Value) : null;
+    public Color? ValueAsColor => Value != null ? ColorTranslator.FromHtml(Value) : null; // TODO: Should "TryParse" not throw.
     public Uri? ValueAsUri => Uri.TryCreate(Value, UriKind.RelativeOrAbsolute, out var u) ? u : null;
 
     string EventTarget<string>.Value => Value ?? string.Empty;
