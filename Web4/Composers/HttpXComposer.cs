@@ -77,7 +77,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>reg('key{key}')</script>
+                <script>key('{key}')</script>
                 """);
         }
         cursor++;
@@ -99,7 +99,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
-            Writer.Inject($"""<script>reg('key{key}')</script>""");
+            Writer.Inject($"""<script>key('{key}')</script>""");
         }
         cursor++;
 
@@ -208,7 +208,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
         if (!suppressSentinels)
         {
             Writer.Inject($"""
-                <script>reg('key{partial.Key}')</script>
+                <script>key('{partial.Key}')</script>
                 """);
         }
 
@@ -223,7 +223,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     {
         if (!isJsRegisterWritten)
         {
-            Writer.Inject($$"""<script>ui={};function reg(k){ui[k]=document.currentScript.previousSibling;}reg('key{{key}}');</script>""");
+            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k]=document.currentScript.previousSibling;}key('{{key}}');</script>""");
             isJsRegisterWritten = true;
             return false;
         }
