@@ -163,6 +163,13 @@ public ref partial struct Html
         Cursor++;
         return @continue;
     }
+    // Ex: <button { onclick => OnClick() }>Clicks: { c }</button>
+    public bool AppendFormatted(Action<object> listener, [CallerArgumentExpression(nameof(listener))] string? expression = null) =>
+        composer.WriteEventListener(
+            ref this, 
+            GetArgName(expression),
+            listener,
+            expression);
     
     // MUTABLE ELEMENTS
 
@@ -216,9 +223,12 @@ public ref partial struct Html
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
-                => throw new ArgumentException($$"""
-                    Cannot use the notation <button {onclick => ...}> for event handlers; that's only valid for regular attributes.  Instead, try <button onclick={...}> or <button onclick={() => ...}> or <button onclick={(Event e) => ...}.
-                """, expression),
+                => composer.WriteEventListener(
+                        ref this, 
+                        argName,
+                        e => { func(null!); }, // Convert signature.  Zero arguments here.  Event handlers always return void.
+                        expression: expression
+                    ),
             _ when func is Func<Event, string> funcString
                 => composer.WriteMutableAttribute(
                         ref this,

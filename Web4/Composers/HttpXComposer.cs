@@ -160,6 +160,7 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
+    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => WriteEventListener(ref parent, argName);
     private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (includeEventArg && format != null)
@@ -189,9 +190,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
             """);
         // Note: When the attribute name is included as a part of the expression 
-        // (e.g. $"<button { onclick => c++ }>Click me</button>")
+        // (e.g. $"<button { onclick => Onclick() }>Click me</button>")
         // then there's never a way to ALSO pass the event arg into the method signature.
-        // For that, you'd need $"<button onclick={ e => c++ }Click me</button>">
+        // For that, you'd need $"<button onclick={ e => OnClick(e) }Click me</button>">
         return CompleteFormattedValue();
     }
 

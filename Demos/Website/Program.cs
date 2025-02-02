@@ -327,6 +327,10 @@ app.Map("/signatures", () => $"""
                 <button onclick={e => WithEventAsync(e)}>e => WithEventAsync(e)</button>
                 <button onclick={e => WithEvent(e):x,y}>e => WithEvent(e):x,y</button>
                 <button onclick={e => WithEventAsync(e):x,y}>e => WithEventAsync(e):x,y</button>
+                <button onclick={() => Console.WriteLine("hi")}>Anonymous, returns void</button>
+                <button onclick={() => i++}>Anonymous, has return value</button>
+                <button {onclick => Console.WriteLine("hi")}>Anonymous, arg-as-name, reuturns void</button>
+                <button {onclick => i++}>Anonymous, arg-as-name, has return value</button>
             </p>
 
             <h3>Event.Mouse</h3>
@@ -337,6 +341,7 @@ app.Map("/signatures", () => $"""
                 <button onclick={e => WithMouseEventAsync(e)}>e => WithMouseEventAsync(e)</button>
                 <button onclick={e => WithMouseEvent(e):x,y}>e => WithMouseEvent(e):x,y</button>
                 <button onclick={e => WithMouseEventAsync(e):x,y}>e => WithMouseEventAsync(e):x,y</button>
+                <button onclick={e => Console.WriteLine($"{e.X},{e.Y}")}>e => Console.WriteLine($"e.X,e.Y")</button>
             </p>
 
             <h3>Event.Touch</h3>
@@ -392,6 +397,11 @@ void DoIt2(Event.Input<string> e)
     Console.WriteLine($"d:{d}");
     Console.WriteLine($"m:{m}");
     Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
+}
+
+void LogName(string name)
+{
+    Console.WriteLine(name);
 }
 
 
