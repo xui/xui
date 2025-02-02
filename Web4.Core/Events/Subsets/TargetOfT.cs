@@ -22,6 +22,16 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
+        Action<Event.Subsets.Target<string>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
+                expression: expression);
+
+    public bool AppendFormatted(
         Func<Event.Subsets.Target<string>, string> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -30,7 +40,17 @@ public ref partial struct Html
                 listener, 
                 null, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<string>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<bool>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -42,7 +62,17 @@ public ref partial struct Html
                 listener, 
                 null, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<bool>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<int>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -54,7 +84,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<int>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<long>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -66,7 +106,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<long>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<float>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -78,7 +128,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<float>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<double>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -90,7 +150,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<double>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<decimal>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -102,7 +172,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<decimal>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<DateTime>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -114,7 +194,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<DateTime>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<DateOnly>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -126,7 +216,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<DateOnly>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<TimeOnly>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -138,7 +238,17 @@ public ref partial struct Html
                 listener, 
                 listener, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<TimeOnly>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<Color>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -150,7 +260,17 @@ public ref partial struct Html
                 listener, 
                 null, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<Color>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
+                expression: expression);
+
+    public bool AppendFormatted(
+        Action<Event.Subsets.Target<Uri>> listener, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+            => composer.WriteEventListener(
+                ref this,
+                listener,
+                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -162,6 +282,6 @@ public ref partial struct Html
                 listener, 
                 null, 
                 formatForAttribute: format,
-                formatForListener: format ?? Event.Subsets.Target<Uri>.Format, 
+                formatForListener: format ?? Event.Subsets.Target.Format, 
                 expression: expression);
 }
