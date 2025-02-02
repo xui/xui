@@ -163,13 +163,7 @@ public ref partial struct Html
         Cursor++;
         return @continue;
     }
-    // Ex: <button { onclick => OnClick() }>Clicks: { c }</button>
-    public bool AppendFormatted(Action<object> listener, [CallerArgumentExpression(nameof(listener))] string? expression = null) =>
-        composer.WriteEventListener(
-            ref this, 
-            GetArgName(expression),
-            listener,
-            expression);
+
     
     // MUTABLE ELEMENTS
 

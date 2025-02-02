@@ -329,7 +329,6 @@ app.Map("/signatures", () => $"""
                 <button onclick={e => WithEventAsync(e):x,y}>e => WithEventAsync(e):x,y</button>
                 <button onclick={() => Console.WriteLine("hi")}>Anonymous, returns void</button>
                 <button onclick={() => i++}>Anonymous, has return value</button>
-                <button {onclick => Console.WriteLine("hi")}>Anonymous, arg-as-name, reuturns void</button>
                 <button {onclick => i++}>Anonymous, arg-as-name, has return value</button>
             </p>
 
