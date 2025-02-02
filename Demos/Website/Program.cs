@@ -399,11 +399,6 @@ void DoIt2(Event.Input<string> e)
     Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
 }
 
-void LogName(string name)
-{
-    Console.WriteLine(name);
-}
-
 
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
