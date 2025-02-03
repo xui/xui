@@ -6,10 +6,6 @@ public partial interface Events
 {
     public interface UI: Subsets.Target
     {
-        new const string Format = 
-            "detail,bubbles,cancelable,composed,currentTarget,defaultPrevented,eventPhase,isTrusted,timeStamp,type," +
-            Subsets.Target.Format;
-        
         /// <summary>
         /// Returns a long with details about the event, depending on the event type.
         /// </summary>

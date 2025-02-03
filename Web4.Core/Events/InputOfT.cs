@@ -7,12 +7,6 @@ public partial interface Events
 {
     public interface Input<T> : UI, Subsets.Target<T>, Subsets.Data, Subsets.IsComposing
     {
-        new const string Format = "dataTransfer,inputType," + 
-            UI.Format + "," + 
-            Subsets.Target<T>.Format + "," +
-            Subsets.Data.Format + "," +
-            Subsets.IsComposing.Format;
-        
         /// <summary>
         /// Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.
         /// </summary>
