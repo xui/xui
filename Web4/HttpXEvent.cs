@@ -59,8 +59,6 @@ internal partial record class HttpXEvent(
     string? Type = null
 ) : Event
 {
-    KeyLocation Event.Keyboard.Location => Location ?? KeyLocation.Standard;
-    bool Event.Keyboard.Repeat => Repeat ?? default;
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
     long Event.UI.Detail => Detail ?? default;
     bool Event.UI.Bubbles => Bubbles ?? default;
@@ -72,6 +70,10 @@ internal partial record class HttpXEvent(
     double Event.UI.TimeStamp => TimeStamp ?? default;
     Button Event.Subsets.Buttons.Button => Button ?? Web4.Button.Main;
     ButtonFlag Event.Subsets.Buttons.Buttons => Buttons ?? ButtonFlag.None;
+    string Event.Subsets.Keys.Code => Code ?? string.Empty;
+    string Event.Subsets.Keys.Key => Key ?? string.Empty;
+    KeyLocation Event.Subsets.Keys.Location => Location ?? KeyLocation.Standard;
+    bool Event.Subsets.Keys.Repeat => Repeat ?? default;
     double Event.Subsets.X.X => X ?? default;
     double Event.Subsets.Y.Y => Y ?? default;
     double Event.Subsets.ClientXY.ClientX => ClientX ?? default;
@@ -93,32 +95,32 @@ internal partial record class HttpXEvent(
     double Event.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Event.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Event.Subsets.Target.Target => Target ?? EventTarget.Empty;
-    DataTransfer Events.Input<string>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Events.Input<bool>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Events.Input<Color>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Events.Input<Uri>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransfer Event.Input<string>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransfer Event.Input<bool>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransfer Event.Input<Color>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransfer Event.Input<Uri>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<int>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<long>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<float>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<double>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<decimal>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     DataTransfer Event.Input<DateTime>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Events.Input<DateOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Events.Input<TimeOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    string Events.Input<string>.InputType => InputType ?? string.Empty;
-    string Events.Input<bool>.InputType => InputType ?? string.Empty;
-    string Events.Input<Color>.InputType => InputType ?? string.Empty;
-    string Events.Input<Uri>.InputType => InputType ?? string.Empty;
+    DataTransfer Event.Input<DateOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransfer Event.Input<TimeOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    string Event.Input<string>.InputType => InputType ?? string.Empty;
+    string Event.Input<bool>.InputType => InputType ?? string.Empty;
+    string Event.Input<Color>.InputType => InputType ?? string.Empty;
+    string Event.Input<Uri>.InputType => InputType ?? string.Empty;
     string Event.Input<int>.InputType => InputType ?? string.Empty;
     string Event.Input<long>.InputType => InputType ?? string.Empty;
     string Event.Input<float>.InputType => InputType ?? string.Empty;
     string Event.Input<double>.InputType => InputType ?? string.Empty;
     string Event.Input<decimal>.InputType => InputType ?? string.Empty;
     string Event.Input<DateTime>.InputType => InputType ?? string.Empty;
-    string Events.Input<DateOnly>.InputType => InputType ?? string.Empty;
-    string Events.Input<TimeOnly>.InputType => InputType ?? string.Empty;
-    EventTarget<string> Events.Subsets.Target<string>.Target => Target ?? EventTarget.Empty;
-    EventTarget<bool> Events.Subsets.Target<bool>.Target => Target ?? EventTarget.Empty;
+    string Event.Input<DateOnly>.InputType => InputType ?? string.Empty;
+    string Event.Input<TimeOnly>.InputType => InputType ?? string.Empty;
+    EventTarget<string> Event.Subsets.Target<string>.Target => Target ?? EventTarget.Empty;
+    EventTarget<bool> Event.Subsets.Target<bool>.Target => Target ?? EventTarget.Empty;
     EventTarget<int> Event.Subsets.Target<int>.Target => Target ?? EventTarget.Empty;
     EventTarget<long> Event.Subsets.Target<long>.Target => Target ?? EventTarget.Empty;
     EventTarget<float> Event.Subsets.Target<float>.Target => Target ?? EventTarget.Empty;
@@ -129,8 +131,8 @@ internal partial record class HttpXEvent(
     EventTarget<TimeOnly> Event.Subsets.Target<TimeOnly>.Target => Target ?? EventTarget.Empty;
     EventTarget<Color> Event.Subsets.Target<Color>.Target => Target ?? EventTarget.Empty;
     EventTarget<Uri> Event.Subsets.Target<Uri>.Target => Target ?? EventTarget.Empty;
-    EventTarget<string> Events.Input<string>.Target => Target ?? EventTarget.Empty;
-    EventTarget<bool> Events.Input<bool>.Target => Target ?? EventTarget.Empty;
+    EventTarget<string> Event.Input<string>.Target => Target ?? EventTarget.Empty;
+    EventTarget<bool> Event.Input<bool>.Target => Target ?? EventTarget.Empty;
     EventTarget<int> Event.Input<int>.Target => Target ?? EventTarget.Empty;
     EventTarget<long> Event.Input<long>.Target => Target ?? EventTarget.Empty;
     EventTarget<float> Event.Input<float>.Target => Target ?? EventTarget.Empty;
@@ -147,7 +149,5 @@ internal partial record class HttpXEvent(
     TouchPoint[] Event.Subsets.Touches.ChangedTouches => ChangedTouches ?? [];
     TouchPoint[] Event.Subsets.Touches.TargetTouches => TargetTouches ?? [];
     TouchPoint[] Event.Subsets.Touches.Touches => Touches ?? [];
-    string Event.Keyboard.Code => Code ?? string.Empty;
-    string Event.Keyboard.Key => Key ?? string.Empty;
     string Event.Subsets.Data.Data => Data ?? string.Empty;
 }
