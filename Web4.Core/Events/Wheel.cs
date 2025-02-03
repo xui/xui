@@ -12,18 +12,3 @@ public partial interface Events
             Subsets.Deltas.Format;
     }
 }
-
-public ref partial struct Html
-{
-    public bool AppendFormatted(
-        Action<Event.Wheel> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
-
-    public bool AppendFormatted(
-        Func<Event.Wheel, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
-}
