@@ -31,8 +31,13 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
 
     public WindowBuilder AddEventListener(
         string type, 
-        Action<Event.Mouse> listener) => 
-            AddEventListener(type, listener, Event.Mouse.Format);
+        Action<Event.Subsets.XY> listener) => 
+            AddEventListener(type, listener, Event.Subsets.XY.Format);
+
+    public WindowBuilder AddEventListener(
+        string type, 
+        Action<Event> listener) => 
+            AddEventListener(type, listener);
     
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
