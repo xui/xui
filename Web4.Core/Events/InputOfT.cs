@@ -31,145 +31,145 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Event.Input<string>> listener, 
-        string? format = Event.Input<string>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<string>, Task> listener, 
-        string? format = Event.Input<string>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<bool>> listener, 
-        string? format = Event.Input<bool>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<bool>, Task> listener, 
-        string? format = Event.Input<bool>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<int>> listener, 
-        string? format = Event.Input<int>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<int>, Task> listener, 
-        string? format = Event.Input<int>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<long>> listener, 
-        string? format = Event.Input<long>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<long>, Task> listener, 
-        string? format = Event.Input<long>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<float>> listener, 
-        string? format = Event.Input<float>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<float>, Task> listener, 
-        string? format = Event.Input<float>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<double>> listener, 
-        string? format = Event.Input<double>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<double>, Task> listener, 
-        string? format = Event.Input<double>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<decimal>> listener, 
-        string? format = Event.Input<decimal>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<decimal>, Task> listener, 
-        string? format = Event.Input<decimal>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<DateTime>> listener, 
-        string? format = Event.Input<DateTime>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<DateTime>, Task> listener, 
-        string? format = Event.Input<DateTime>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<DateOnly>> listener, 
-        string? format = Event.Input<DateOnly>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<DateOnly>, Task> listener, 
-        string? format = Event.Input<DateOnly>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<TimeOnly>> listener, 
-        string? format = Event.Input<TimeOnly>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<TimeOnly>, Task> listener, 
-        string? format = Event.Input<TimeOnly>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<Color>> listener, 
-        string? format = Event.Input<Color>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<Color>, Task> listener, 
-        string? format = Event.Input<Color>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Event.Input<Uri>> listener, 
-        string? format = Event.Input<Uri>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.Input<Uri>, Task> listener, 
-        string? format = Event.Input<Uri>.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

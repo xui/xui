@@ -66,13 +66,13 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Event.UI> listener, 
-        string? format = Event.UI.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Func<Event.UI, Task> listener, 
-        string? format = Event.UI.Format, 
+        string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }
