@@ -7,7 +7,7 @@ public partial interface Events
     public interface UI: Subsets.Target
     {
         new const string Format = 
-            "detail,bubbles,cancelable,composed,currentTarget,defaultPrevented,eventPhase,isTrusted,target,timeStamp,type," +
+            "detail,bubbles,cancelable,composed,currentTarget,defaultPrevented,eventPhase,isTrusted,timeStamp,type," +
             Subsets.Target.Format;
         
         /// <summary>
