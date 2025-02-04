@@ -80,7 +80,9 @@ internal partial record class HttpXEvent(
 
     bool? LengthComputable = null,
     long? Loaded = null,
-    long? Total = null
+    long? Total = null,
+
+    EventTarget? Submitter = null
 ) : Event
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
@@ -194,4 +196,5 @@ internal partial record class HttpXEvent(
     bool Events.Progress.LengthComputable => LengthComputable ?? default;
     long Events.Progress.Loaded => Loaded ?? default;
     long Events.Progress.Total => Total ?? default;
+    EventTarget Events.Submit.Submitter => Submitter ?? EventTarget.Empty;
 }

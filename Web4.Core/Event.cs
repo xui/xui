@@ -27,6 +27,7 @@ public partial interface Event :
     Events.Mouse, 
     Events.Pointer,
     Events.Progress,
+    Events.Submit,
     Events.Touch,
     Events.UI,
     Events.Wheel
@@ -518,6 +519,12 @@ public partial interface Event :
     /// and doesn't include headers and other overhead.
     /// </summary>
     new long? Total { get; }
+
+    /// <summary>
+    /// An HTMLElement object which identifies the button or other element 
+    /// which was invoked to trigger the form being submitted.
+    /// </summary>
+    new EventTarget? Submitter { get; }
 }
 
 public enum EventPhase : int
