@@ -76,7 +76,11 @@ internal partial record class HttpXEvent(
     double? TiltY = null,
     double? Twist = null,
     string? PointerType = null,
-    bool? IsPrimary = null
+    bool? IsPrimary = null,
+
+    bool? LengthComputable = null,
+    long? Loaded = null,
+    long? Total = null
 ) : Event
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
@@ -187,4 +191,7 @@ internal partial record class HttpXEvent(
     double Events.Pointer.Twist => Twist ?? default;
     string Events.Pointer.PointerType => PointerType ?? string.Empty;
     bool Events.Pointer.IsPrimary => IsPrimary ?? default;
+    bool Events.Progress.LengthComputable => LengthComputable ?? default;
+    long Events.Progress.Loaded => Loaded ?? default;
+    long Events.Progress.Total => Total ?? default;
 }
