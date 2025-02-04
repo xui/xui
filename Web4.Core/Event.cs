@@ -7,7 +7,6 @@ namespace Web4;
 /// </summary>
 public partial interface Event : 
     Events,
-    Events.UI,
     Events.Animation,
     Events.Composition, 
     Events.Focus, 
@@ -25,7 +24,8 @@ public partial interface Event :
     Events.Input<Uri>,
     Events.Keyboard, 
     Events.Mouse, 
-    Events.Touch, 
+    Events.Touch,
+    Events.UI,
     Events.Wheel
 {
     // Event (base)
