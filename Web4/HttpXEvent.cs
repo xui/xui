@@ -56,7 +56,11 @@ internal partial record class HttpXEvent(
     bool? IsTrusted = null,
     EventTarget? Target = null,
     double? TimeStamp = null,
-    string? Type = null
+    string? Type = null,
+
+    string? AnimationName = null,
+    float? ElapsedTime = null,
+    string? PseudoElement = null
 ) : Event
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
@@ -150,4 +154,7 @@ internal partial record class HttpXEvent(
     TouchPoint[] Event.Subsets.Touches.TargetTouches => TargetTouches ?? [];
     TouchPoint[] Event.Subsets.Touches.Touches => Touches ?? [];
     string Event.Subsets.Data.Data => Data ?? string.Empty;
+    string Events.Subsets.Animation.AnimationName => AnimationName ?? string.Empty;
+    float Events.Subsets.Animation.ElapsedTime => ElapsedTime ?? default;
+    string Events.Subsets.Animation.PseudoElement => PseudoElement ?? string.Empty;
 }

@@ -8,6 +8,7 @@ namespace Web4;
 public partial interface Event : 
     Events,
     Events.UI,
+    Events.Animation,
     Events.Composition, 
     Events.Focus, 
     Events.Input<string>,
