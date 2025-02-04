@@ -61,13 +61,13 @@ internal partial record class HttpXEvent(
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
     long Event.UI.Detail => Detail ?? default;
-    bool Event.UI.Bubbles => Bubbles ?? default;
-    bool Event.UI.Cancelable => Cancelable ?? default;
-    bool Event.UI.Composed => Composed ?? default;
-    bool Event.UI.DefaultPrevented => DefaultPrevented ?? default;
-    EventPhase Event.UI.EventPhase => EventPhase ?? Web4.EventPhase.None;
-    bool Event.UI.IsTrusted => IsTrusted ?? default;
-    double Event.UI.TimeStamp => TimeStamp ?? default;
+    bool Event.Base.Bubbles => Bubbles ?? default;
+    bool Event.Base.Cancelable => Cancelable ?? default;
+    bool Event.Base.Composed => Composed ?? default;
+    bool Event.Base.DefaultPrevented => DefaultPrevented ?? default;
+    EventPhase Event.Base.EventPhase => EventPhase ?? Web4.EventPhase.None;
+    bool Event.Base.IsTrusted => IsTrusted ?? default;
+    double Event.Base.TimeStamp => TimeStamp ?? default;
     Button Event.Subsets.Buttons.Button => Button ?? Web4.Button.Main;
     ButtonFlag Event.Subsets.Buttons.Buttons => Buttons ?? ButtonFlag.None;
     string Event.Subsets.Keys.Code => Code ?? string.Empty;
@@ -143,8 +143,8 @@ internal partial record class HttpXEvent(
     EventTarget<TimeOnly> Event.Input<TimeOnly>.Target => Target ?? EventTarget.Empty;
     EventTarget<Color> Event.Input<Color>.Target => Target ?? EventTarget.Empty;
     EventTarget<Uri> Event.Input<Uri>.Target => Target ?? EventTarget.Empty;
-    string Event.UI.Type => Type ?? string.Empty;
-    EventTarget Event.UI.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
+    string Event.Base.Type => Type ?? string.Empty;
+    EventTarget Event.Base.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     EventTarget Event.Subsets.RelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;
     TouchPoint[] Event.Subsets.Touches.ChangedTouches => ChangedTouches ?? [];
     TouchPoint[] Event.Subsets.Touches.TargetTouches => TargetTouches ?? [];
