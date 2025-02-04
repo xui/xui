@@ -63,7 +63,20 @@ internal partial record class HttpXEvent(
     string? PseudoElement = null,
 
     string? NewUrl = null,
-    string? OldUrl = null
+    string? OldUrl = null,
+
+    double? AltitudeAngle = null,
+    double? AzimuthAngle = null,
+    int? PointerID = null,
+    int? Width = null,
+    int? Height = null,
+    double? Pressure = null,
+    double? TangentialPressure = null,
+    double? TiltX = null,
+    double? TiltY = null,
+    double? Twist = null,
+    string? PointerType = null,
+    bool? IsPrimary = null
 ) : Event
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
@@ -162,4 +175,16 @@ internal partial record class HttpXEvent(
     string Events.Subsets.Animation.PseudoElement => PseudoElement ?? string.Empty;
     string Events.Subsets.HashChange.NewUrl => NewUrl ?? string.Empty;
     string Events.Subsets.HashChange.OldUrl => OldUrl ?? string.Empty;
+    double Events.Pointer.AltitudeAngle => AltitudeAngle ?? default;
+    double Events.Pointer.AzimuthAngle => AzimuthAngle ?? default;
+    int Events.Pointer.PointerID => PointerID ?? default;
+    int Events.Pointer.Width => Width ?? default;
+    int Events.Pointer.Height => Height ?? default;
+    double Events.Pointer.Pressure => Pressure ?? default;
+    double Events.Pointer.TangentialPressure => TangentialPressure ?? default;
+    double Events.Pointer.TiltX => TiltX ?? default;
+    double Events.Pointer.TiltY => TiltY ?? default;
+    double Events.Pointer.Twist => Twist ?? default;
+    string Events.Pointer.PointerType => PointerType ?? string.Empty;
+    bool Events.Pointer.IsPrimary => IsPrimary ?? default;
 }
