@@ -376,6 +376,29 @@ public partial interface Event :
 
     // public static readonly Event Empty = new();
     // static abstract Event Empty();
+
+    // AnimationEvent
+
+    /// <summary>
+    /// A string containing the value of the animation-name that generated the animation.
+    /// </summary>
+    new string? AnimationName { get; }
+
+    /// <summary>
+    /// A float giving the amount of time the animation has been running, in seconds, 
+    /// when this event fired, excluding any time the animation was paused. 
+    /// For an animationstart event, elapsedTime is 0.0 unless there was a negative 
+    /// value for animation-delay, in which case the event will be fired with 
+    /// elapsedTime containing (-1 * delay).
+    /// </summary>
+    new float? ElapsedTime { get; }
+
+    /// <summary>
+    /// A string, starting with '::', containing the name of the pseudo-element the 
+    /// animation runs on. If the animation doesn't run on a pseudo-element but 
+    /// on the element, an empty string: ''.
+    /// </summary>
+    new string? PseudoElement { get; }
 }
 
 public enum EventPhase : int
