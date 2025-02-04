@@ -29,6 +29,7 @@ public partial interface Event :
     Events.Progress,
     Events.Submit,
     Events.Touch,
+    Events.Transition,
     Events.UI,
     Events.Wheel
 {
@@ -525,6 +526,11 @@ public partial interface Event :
     /// which was invoked to trigger the form being submitted.
     /// </summary>
     new EventTarget? Submitter { get; }
+
+    /// <summary>
+    /// A string containing the name CSS property associated with the transition.
+    /// </summary>
+    new string? PropertyName { get; }
 }
 
 public enum EventPhase : int

@@ -82,9 +82,12 @@ internal partial record class HttpXEvent(
     long? Loaded = null,
     long? Total = null,
 
-    EventTarget? Submitter = null
+    EventTarget? Submitter = null,
+
+    string? PropertyName = null
 ) : Event
 {
+    string Event.Animation.AnimationName => AnimationName ?? string.Empty;
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
     long Event.UI.Detail => Detail ?? default;
     bool Event.Base.Bubbles => Bubbles ?? default;
@@ -176,7 +179,6 @@ internal partial record class HttpXEvent(
     TouchPoint[] Event.Subsets.Touches.TargetTouches => TargetTouches ?? [];
     TouchPoint[] Event.Subsets.Touches.Touches => Touches ?? [];
     string Event.Subsets.Data.Data => Data ?? string.Empty;
-    string Event.Subsets.Animation.AnimationName => AnimationName ?? string.Empty;
     float Event.Subsets.Animation.ElapsedTime => ElapsedTime ?? default;
     string Event.Subsets.Animation.PseudoElement => PseudoElement ?? string.Empty;
     string Event.Subsets.HashChange.NewUrl => NewUrl ?? string.Empty;
@@ -197,4 +199,5 @@ internal partial record class HttpXEvent(
     long Event.Progress.Loaded => Loaded ?? default;
     long Event.Progress.Total => Total ?? default;
     EventTarget Event.Submit.Submitter => Submitter ?? EventTarget.Empty;
+    string Event.Transition.PropertyName => PropertyName ?? string.Empty;
 }

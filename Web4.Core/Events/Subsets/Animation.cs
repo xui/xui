@@ -8,12 +8,7 @@ public partial interface Events
     {
         public interface Animation
         {
-            const string Format = "animationName,elapsedTime,PseudoElement";
-
-            /// <summary>
-            /// A string containing the value of the animation-name that generated the animation.
-            /// </summary>
-            string AnimationName { get; }
+            const string Format = "elapsedTime,PseudoElement";
 
             /// <summary>
             /// A float giving the amount of time the animation has been running, in seconds, 
