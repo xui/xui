@@ -32,7 +32,7 @@ void OnClick(Event e)
 }
 
 window.AddEventListener("click", e => {
-    Console.WriteLine($"{e}");
+    Console.WriteLine($"{e.X} {e.Y}");
 });
 
 window.MapGet("/about", ctx => {
