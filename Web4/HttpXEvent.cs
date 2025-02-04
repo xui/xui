@@ -60,7 +60,10 @@ internal partial record class HttpXEvent(
 
     string? AnimationName = null,
     float? ElapsedTime = null,
-    string? PseudoElement = null
+    string? PseudoElement = null,
+
+    string? NewUrl = null,
+    string? OldUrl = null
 ) : Event
 {
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
@@ -157,4 +160,6 @@ internal partial record class HttpXEvent(
     string Events.Subsets.Animation.AnimationName => AnimationName ?? string.Empty;
     float Events.Subsets.Animation.ElapsedTime => ElapsedTime ?? default;
     string Events.Subsets.Animation.PseudoElement => PseudoElement ?? string.Empty;
+    string Events.Subsets.HashChange.NewUrl => NewUrl ?? string.Empty;
+    string Events.Subsets.HashChange.OldUrl => OldUrl ?? string.Empty;
 }
