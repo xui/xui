@@ -37,7 +37,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public WindowBuilder AddEventListener(
         string type, 
         Action<Event> listener) => 
-            AddEventListener(type, listener);
+            AddEventListener(type, listener, null);
     
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
