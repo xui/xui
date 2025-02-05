@@ -9,6 +9,8 @@ public partial interface Event :
     Events,
     Events.Animation,
     Events.Composition, 
+    Events.DeviceMotion,
+    Events.DeviceOrientation,
     Events.Focus, 
     Events.HashChange,
     Events.Input<string>,
@@ -751,6 +753,22 @@ public record struct TouchPoint(
     double PageY = 0
 ) {
     public static readonly TouchPoint Empty = new();
+}
+
+public record struct XYZ(
+    double X = 0,
+    double Y = 0,
+    double Z = 0
+) {
+    public static readonly XYZ Empty = new();
+}
+
+public record struct ABG(
+    double Alpha = 0,
+    double Beta = 0,
+    double Gamma = 0
+) {
+    public static readonly ABG Empty = new();
 }
 
 public static class EmptyUri

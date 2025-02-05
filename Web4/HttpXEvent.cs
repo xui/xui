@@ -84,9 +84,20 @@ internal partial record class HttpXEvent(
 
     EventTarget? Submitter = null,
 
-    string? PropertyName = null
+    string? PropertyName = null,
+
+    XYZ? Acceleration = null,
+    XYZ? AccelerationIncludingGravity = null,
+    ABG? RotationRate = null,
+    double? Interval = null,
+
+    bool? Absolute = null,
+    double? Alpha = null,
+    double? Beta = null,
+    double? Gamma = null
 ) : Event
 {
+
     string Event.Animation.AnimationName => AnimationName ?? string.Empty;
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
     long Event.UI.Detail => Detail ?? default;
@@ -200,4 +211,12 @@ internal partial record class HttpXEvent(
     long Event.Progress.Total => Total ?? default;
     EventTarget Event.Submit.Submitter => Submitter ?? EventTarget.Empty;
     string Event.Transition.PropertyName => PropertyName ?? string.Empty;
+    XYZ Event.Subsets.DeviceMotion.Acceleration => Acceleration ?? XYZ.Empty;
+    XYZ Event.Subsets.DeviceMotion.AccelerationIncludingGravity => AccelerationIncludingGravity ?? XYZ.Empty;
+    ABG Event.Subsets.DeviceMotion.RotationRate => RotationRate ?? ABG.Empty;
+    double Event.Subsets.DeviceMotion.Interval => Interval ?? default;
+    bool Event.Subsets.DeviceOrientation.Absolute => Absolute ?? default;
+    double Event.Subsets.DeviceOrientation.Alpha => Alpha ?? default;
+    double Event.Subsets.DeviceOrientation.Beta => Beta ?? default;
+    double Event.Subsets.DeviceOrientation.Gamma => Gamma ?? default;
 }
