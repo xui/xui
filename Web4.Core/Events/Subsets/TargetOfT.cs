@@ -22,16 +22,6 @@ public partial interface Events
 public ref partial struct Html
 {
     public bool AppendFormatted(
-        Action<Event.Subsets.Target<string>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<string>, string> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -41,25 +31,6 @@ public ref partial struct Html
                 null, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<string>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<bool>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -75,25 +46,6 @@ public ref partial struct Html
                 expression: expression);
 
     public bool AppendFormatted(
-        Func<Event.Subsets.Target<bool>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<int>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<int>, int> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -103,25 +55,6 @@ public ref partial struct Html
                 listener, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<int>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<long>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -137,25 +70,6 @@ public ref partial struct Html
                 expression: expression);
 
     public bool AppendFormatted(
-        Func<Event.Subsets.Target<long>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<float>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<float>, float> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -165,25 +79,6 @@ public ref partial struct Html
                 listener, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<float>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<double>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -199,25 +94,6 @@ public ref partial struct Html
                 expression: expression);
 
     public bool AppendFormatted(
-        Func<Event.Subsets.Target<double>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<decimal>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<decimal>, decimal> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -227,25 +103,6 @@ public ref partial struct Html
                 listener, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<decimal>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<DateTime>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -261,25 +118,6 @@ public ref partial struct Html
                 expression: expression);
 
     public bool AppendFormatted(
-        Func<Event.Subsets.Target<DateTime>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<DateOnly>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<DateOnly>, DateOnly> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -289,25 +127,6 @@ public ref partial struct Html
                 listener, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<DateOnly>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<TimeOnly>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -323,25 +142,6 @@ public ref partial struct Html
                 expression: expression);
 
     public bool AppendFormatted(
-        Func<Event.Subsets.Target<TimeOnly>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<Color>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
         Func<Event.Subsets.Target<Color>, Color> listener, 
         string? format = null, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
@@ -351,25 +151,6 @@ public ref partial struct Html
                 null, 
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
-                expression: expression);
-
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<Color>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
-    public bool AppendFormatted(
-        Action<Event.Subsets.Target<Uri>> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => composer.WriteEventListener(
-                ref this,
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
                 expression: expression);
 
     public bool AppendFormatted(
@@ -383,13 +164,4 @@ public ref partial struct Html
                 formatForAttribute: format,
                 formatForListener: format ?? Event.Subsets.Target.Format, 
                 expression: expression);
-    public bool AppendFormatted(
-        Func<Event.Subsets.Target<Uri>, Task> listener, 
-        string? format = null, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(
-                listener,
-                format: format ?? Event.Subsets.Target.Format,
-                expression: expression);
-
 }

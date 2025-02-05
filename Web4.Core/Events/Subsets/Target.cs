@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Runtime.CompilerServices;
 
 namespace Web4;
@@ -6,14 +7,26 @@ public partial interface Events
 {
     public partial interface Subsets
     {
-        public interface Target
+        public interface Target : 
+            Target<string>,
+            Target<bool>,
+            Target<int>,
+            Target<long>,
+            Target<float>,
+            Target<double>,
+            Target<decimal>,
+            Target<DateTime>,
+            Target<DateOnly>,
+            Target<TimeOnly>,
+            Target<Color>,
+            Target<Uri>
         {
-            const string Format = "target";
+            new const string Format = "target";
 
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.
             /// </summary>
-            EventTarget Target { get; }
+            new EventTarget Target { get; }
         }
     }
 }

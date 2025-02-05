@@ -2,7 +2,7 @@ namespace Web4;
 
 public partial interface Events
 {
-    public interface Input<T> : UI, Subsets.Target<T>, Subsets.Data, Subsets.IsComposing
+    public interface Input<T> : UI, Subsets.Target, Subsets.Data, Subsets.IsComposing
     {
         /// <summary>
         /// Returns a DataTransfer object containing information about richtext or plaintext data being added to or removed from editable content.
