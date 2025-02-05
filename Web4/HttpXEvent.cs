@@ -97,7 +97,6 @@ internal partial record class HttpXEvent(
     double? Gamma = null
 ) : Event
 {
-
     string Event.Animation.AnimationName => AnimationName ?? string.Empty;
     bool Event.Subsets.IsComposing.IsComposing => IsComposing ?? default;
     long Event.UI.Detail => Detail ?? default;
@@ -135,18 +134,6 @@ internal partial record class HttpXEvent(
     double Event.Subsets.Deltas.DeltaZ => DeltaZ ?? default;
     DeltaMode Event.Subsets.Deltas.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
     EventTarget Event.Subsets.Target.Target => Target ?? EventTarget.Empty;
-    DataTransfer Event.Input<string>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<bool>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<Color>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<Uri>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<int>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<long>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<float>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<double>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<decimal>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<DateTime>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<DateOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
-    DataTransfer Event.Input<TimeOnly>.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
     string Event.Input<string>.InputType => InputType ?? string.Empty;
     string Event.Input<bool>.InputType => InputType ?? string.Empty;
     string Event.Input<Color>.InputType => InputType ?? string.Empty;
@@ -219,4 +206,5 @@ internal partial record class HttpXEvent(
     double Event.Subsets.DeviceOrientation.Alpha => Alpha ?? default;
     double Event.Subsets.DeviceOrientation.Beta => Beta ?? default;
     double Event.Subsets.DeviceOrientation.Gamma => Gamma ?? default;
+    DataTransfer Event.Subsets.DataTransfer.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
 }

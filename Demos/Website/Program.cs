@@ -373,12 +373,13 @@ app.Map("/signatures", () => $"""
             </p>
 
             <button id="itID" name="itName" onclick={DoIt2}>DoIt2</button>
-            <input type="number" oninput={e => Console.WriteLine(e.RelatedTarget.Value)}>lambda</input>
+            <input type="number" oninput={e => Console.WriteLine(e.DataTransfer.DropEffect)}>lambda</input>
             <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
             <button onclick={e => d = e.X}>lambda</button>
             <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
             <input type="number" { value => i } oninput={DoIt3} step="1" /> {i} <br/>
-            <input type="text" oninput={DoIt2}>DoIt2</input>
+            <input type="text" oninput={DoIt4}>DoIt2</input>
+            <button onclick={DoIt4}>DoIt4</button>
         </body>
     </html>
     """);
@@ -392,9 +393,10 @@ async Task WithEventAsync(Event e)              { Console.WriteLine($"WithEventA
 async Task WithMouseEventAsync(Event.Mouse e)   { Console.WriteLine($"WithMouseEventAsync(Event.Mouse e): {e}"); await Task.Delay(1); }
 async Task WithTouchEventAsync(Event.Touch e)   { Console.WriteLine($"WithTouchEventAsync(Event.Touch e): {e}"); await Task.Delay(1); }
 
-void DoIt2(Event.Input<string> e)
+void DoIt2(Event.Input<double> e)
 {
     var a = e.Target.Value;
+    Console.WriteLine($"a:{a}");
     Console.WriteLine($"d:{d}");
     Console.WriteLine($"m:{m}");
     Console.WriteLine($"{e.Target.ID} {e.Target.Name} {e.EventPhase} {e}\n\n{e}");
@@ -403,7 +405,13 @@ void DoIt2(Event.Input<string> e)
 async Task DoIt3(Event.Subsets.Target<Color> e)
 {
     await Task.Delay(1);
+    Console.WriteLine($"{e.Target.Value}");
     color = e.Target.Value;
+}
+
+void DoIt4(Event.Subsets.DataTransfer e)
+{
+    Console.WriteLine($"{e.DataTransfer}");
 }
 
 
