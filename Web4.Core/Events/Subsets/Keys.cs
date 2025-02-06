@@ -1,49 +1,53 @@
 using System.Runtime.CompilerServices;
 
-namespace Web4;
-
-public partial interface Events
+namespace Web4
 {
-    public partial interface Subsets
+    namespace Events
     {
-        public interface Keys
+        public partial interface OneLevelRemoved
         {
-            const string Format = "code,key,location,repeat";
+            public partial interface Subsets
+            {
+                public interface Keys
+                {
+                    const string Format = "code,key,location,repeat";
 
-            /// <summary>
-            /// Returns a string with the code value of the physical key represented by the event.
-            /// </summary>
-            string Code { get; }
+                    /// <summary>
+                    /// Returns a string with the code value of the physical key represented by the event.
+                    /// </summary>
+                    string Code { get; }
 
-            /// <summary>
-            /// Returns a string representing the key value of the key represented by the event.
-            /// </summary>
-            string Key { get; }
+                    /// <summary>
+                    /// Returns a string representing the key value of the key represented by the event.
+                    /// </summary>
+                    string Key { get; }
 
-            /// <summary>
-            /// Returns a number representing the location of the key on the keyboard or other input device.
-            /// </summary>
-            KeyLocation Location { get; }
+                    /// <summary>
+                    /// Returns a number representing the location of the key on the keyboard or other input device.
+                    /// </summary>
+                    KeyLocation Location { get; }
 
-            /// <summary>
-            /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
-            /// </summary>
-            bool Repeat { get; }
+                    /// <summary>
+                    /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
+                    /// </summary>
+                    bool Repeat { get; }
+                }
+            }
         }
     }
-}
 
-public ref partial struct Html
-{
-    public bool AppendFormatted(
-        Action<Event.Subsets.Keys> listener, 
-        string? format = Event.Subsets.Keys.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+    public ref partial struct Html
+    {
+        public bool AppendFormatted(
+            Action<Event.Subsets.Keys> listener, 
+            string? format = Event.Subsets.Keys.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
 
-    public bool AppendFormatted(
-        Func<Event.Subsets.Keys, Task> listener, 
-        string? format = Event.Subsets.Keys.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+        public bool AppendFormatted(
+            Func<Event.Subsets.Keys, Task> listener, 
+            string? format = Event.Subsets.Keys.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
+    }
 }

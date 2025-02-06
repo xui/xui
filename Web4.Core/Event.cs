@@ -1,4 +1,5 @@
 using System.Drawing;
+using Web4.Events;
 
 namespace Web4;
 
@@ -6,34 +7,34 @@ namespace Web4;
 /// A DOM event
 /// </summary>
 public partial interface Event : 
-    Events,
-    Events.Animation,
-    Events.Composition, 
-    Events.DeviceMotion,
-    Events.DeviceOrientation,
-    Events.Focus, 
-    Events.HashChange,
-    Events.Input<string>,
-    Events.Input<bool>,
-    Events.Input<int>,
-    Events.Input<long>,
-    Events.Input<float>,
-    Events.Input<double>,
-    Events.Input<decimal>,
-    Events.Input<DateTime>,
-    Events.Input<DateOnly>,
-    Events.Input<TimeOnly>,
-    Events.Input<Color>,
-    Events.Input<Uri>,
-    Events.Keyboard, 
-    Events.Mouse, 
-    Events.Pointer,
-    Events.Progress,
-    Events.Submit,
-    Events.Touch,
-    Events.Transition,
-    Events.UI,
-    Events.Wheel
+    OneLevelRemoved,
+    OneLevelRemoved.Animation,
+    OneLevelRemoved.Composition, 
+    OneLevelRemoved.DeviceMotion,
+    OneLevelRemoved.DeviceOrientation,
+    OneLevelRemoved.Focus, 
+    OneLevelRemoved.HashChange,
+    OneLevelRemoved.Input<string>,
+    OneLevelRemoved.Input<bool>,
+    OneLevelRemoved.Input<int>,
+    OneLevelRemoved.Input<long>,
+    OneLevelRemoved.Input<float>,
+    OneLevelRemoved.Input<double>,
+    OneLevelRemoved.Input<decimal>,
+    OneLevelRemoved.Input<DateTime>,
+    OneLevelRemoved.Input<DateOnly>,
+    OneLevelRemoved.Input<TimeOnly>,
+    OneLevelRemoved.Input<Color>,
+    OneLevelRemoved.Input<Uri>,
+    OneLevelRemoved.Keyboard, 
+    OneLevelRemoved.Mouse, 
+    OneLevelRemoved.Pointer,
+    OneLevelRemoved.Progress,
+    OneLevelRemoved.Submit,
+    OneLevelRemoved.Touch,
+    OneLevelRemoved.Transition,
+    OneLevelRemoved.UI,
+    OneLevelRemoved.Wheel
 {
     // Event (base)
     /// <summary>

@@ -1,34 +1,38 @@
 using System.Runtime.CompilerServices;
 
-namespace Web4;
-
-public partial interface Events
+namespace Web4
 {
-    public partial interface Subsets
+    namespace Events
     {
-        public interface DataTransfer
+        public partial interface OneLevelRemoved
         {
-            const string Format = "dataTransfer";
+            public partial interface Subsets
+            {
+                public interface DataTransfer
+                {
+                    const string Format = "dataTransfer";
 
-            /// <summary>
-            /// Returns a DataTransfer object containing contextual information.
-            /// </summary>
-            Web4.DataTransfer DataTransfer { get; }
+                    /// <summary>
+                    /// Returns a DataTransfer object containing contextual information.
+                    /// </summary>
+                    Web4.DataTransfer DataTransfer { get; }
+                }
+            }
         }
     }
-}
 
-public ref partial struct Html
-{
-    public bool AppendFormatted(
-        Action<Event.Subsets.DataTransfer> listener, 
-        string? format = Event.Subsets.DataTransfer.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+    public ref partial struct Html
+    {
+        public bool AppendFormatted(
+            Action<Event.Subsets.DataTransfer> listener, 
+            string? format = Event.Subsets.DataTransfer.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
 
-    public bool AppendFormatted(
-        Func<Event.Subsets.DataTransfer, Task> listener, 
-        string? format = Event.Subsets.DataTransfer.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+        public bool AppendFormatted(
+            Func<Event.Subsets.DataTransfer, Task> listener, 
+            string? format = Event.Subsets.DataTransfer.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
+    }
 }

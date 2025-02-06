@@ -1,34 +1,38 @@
 using System.Runtime.CompilerServices;
 
-namespace Web4;
-
-public partial interface Events
+namespace Web4
 {
-    public partial interface Subsets
+    namespace Events
     {
-        public interface RelatedTarget
+        public partial interface OneLevelRemoved
         {
-            const string Format = "relatedTarget";
+            public partial interface Subsets
+            {
+                public interface RelatedTarget
+                {
+                    const string Format = "relatedTarget";
 
-            /// <summary>
-            /// The secondary target for the event, if there is one.
-            /// </summary>
-            EventTarget RelatedTarget { get; }
+                    /// <summary>
+                    /// The secondary target for the event, if there is one.
+                    /// </summary>
+                    EventTarget RelatedTarget { get; }
+                }
+            }
         }
     }
-}
 
-public ref partial struct Html
-{
-    public bool AppendFormatted(
-        Action<Event.Subsets.RelatedTarget> listener, 
-        string? format = Event.Subsets.RelatedTarget.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+    public ref partial struct Html
+    {
+        public bool AppendFormatted(
+            Action<Event.Subsets.RelatedTarget> listener, 
+            string? format = Event.Subsets.RelatedTarget.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
 
-    public bool AppendFormatted(
-        Func<Event.Subsets.RelatedTarget, Task> listener, 
-        string? format = Event.Subsets.RelatedTarget.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+        public bool AppendFormatted(
+            Func<Event.Subsets.RelatedTarget, Task> listener, 
+            string? format = Event.Subsets.RelatedTarget.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
+    }
 }

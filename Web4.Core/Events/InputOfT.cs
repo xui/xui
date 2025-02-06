@@ -1,6 +1,6 @@
-namespace Web4;
+namespace Web4.Events;
 
-public partial interface Events
+public partial interface OneLevelRemoved
 {
     public interface Input<T> : UI, Subsets.Target, Subsets.Data, Subsets.DataTransfer, Subsets.IsComposing
     {

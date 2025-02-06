@@ -1,34 +1,38 @@
 using System.Runtime.CompilerServices;
 
-namespace Web4;
-
-public partial interface Events
+namespace Web4
 {
-    public partial interface Subsets
+    namespace Events
     {
-        public interface ModifierAlt
+        public partial interface OneLevelRemoved
         {
-            const string Format = "altKey";
+            public partial interface Subsets
+            {
+                public interface ModifierAlt
+                {
+                    const string Format = "altKey";
 
-            /// <summary>
-            /// Returns true if the alt key was down when the event was fired.
-            /// </summary>
-            bool AltKey { get; }
+                    /// <summary>
+                    /// Returns true if the alt key was down when the event was fired.
+                    /// </summary>
+                    bool AltKey { get; }
+                }
+            }
         }
     }
-}
 
-public ref partial struct Html
-{
-    public bool AppendFormatted(
-        Action<Event.Subsets.ModifierAlt> listener, 
-        string? format = Event.Subsets.ModifierAlt.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+    public ref partial struct Html
+    {
+        public bool AppendFormatted(
+            Action<Event.Subsets.ModifierAlt> listener, 
+            string? format = Event.Subsets.ModifierAlt.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
 
-    public bool AppendFormatted(
-        Func<Event.Subsets.ModifierAlt, Task> listener, 
-        string? format = Event.Subsets.ModifierAlt.Format, 
-        [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-            => AppendEventListener(listener, format, expression);
+        public bool AppendFormatted(
+            Func<Event.Subsets.ModifierAlt, Task> listener, 
+            string? format = Event.Subsets.ModifierAlt.Format, 
+            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
+                => AppendEventListener(listener, format, expression);
+    }
 }

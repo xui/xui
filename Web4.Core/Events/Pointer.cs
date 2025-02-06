@@ -1,6 +1,6 @@
-namespace Web4;
+namespace Web4.Events;
 
-public partial interface Events
+public partial interface OneLevelRemoved
 {
     public interface Pointer : UI, Mouse, Subsets.Angles, Subsets.WidthHeight, Subsets.Pressures, Subsets.Tilts
     {
