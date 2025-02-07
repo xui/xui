@@ -592,7 +592,7 @@ public record class EventTarget(
     DateOnly EventTarget<DateOnly>.Value => ValueAsDateOnly ?? default;
     TimeOnly EventTarget<TimeOnly>.Value => ValueAsTimeOnly ?? default;
     Color EventTarget<Color>.Value => ValueAsColor ?? default;
-    Uri EventTarget<Uri>.Value => ValueAsUri ?? ValueAsUri.Empty();
+    Uri EventTarget<Uri>.Value => ValueAsUri ?? new Uri("about:blank");
 }
 
 public interface EventTarget<T>
@@ -649,12 +649,6 @@ public record struct ABG(
     double Gamma = 0
 ) {
     public static readonly ABG Empty = new();
-}
-
-public static class EmptyUri
-{
-    private static Uri? empty = null;
-    public static Uri Empty(this Uri? uri) => empty ??= new Uri("about:blank");
 }
 
 #pragma warning restore IDE1006 // Naming Styles
