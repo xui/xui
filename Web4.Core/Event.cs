@@ -40,6 +40,26 @@ public partial interface Event :
     Aliases.Wheel
 {
     /// <summary>
+    /// A boolean that indicates whether or not the device is providing orientation data absolutely.
+    /// </summary>
+    new bool? Absolute { get; }
+
+    /// <summary>
+    /// An object giving the acceleration of the device on the three axis X, Y and Z. Acceleration is expressed in m/s².
+    /// </summary>
+    new XYZ? Acceleration { get; }
+
+    /// <summary>
+    /// An object giving the acceleration of the device on the three axis X, Y and Z with the effect of gravity. Acceleration is expressed in m/s².
+    /// </summary>
+    new XYZ? AccelerationIncludingGravity { get; }
+
+    /// <summary>
+    /// A number representing the motion of the device around the z axis, express in degrees with values ranging from 0 (inclusive) to 360 (exclusive).
+    /// </summary>
+    new double? Alpha { get; }
+
+    /// <summary>
     /// Represents the angle between a transducer (a pointer or stylus) axis and the X-Y plane of a device screen.
     /// </summary>
     new double? AltitudeAngle { get; }
@@ -58,6 +78,11 @@ public partial interface Event :
     /// Represents the angle between the Y-Z plane and the plane containing both the transducer (a pointer or stylus) axis and the Y axis.
     /// </summary>
     new double? AzimuthAngle { get; }
+
+    /// <summary>
+    /// A number representing the motion of the device around the x axis, express in degrees with values ranging from -180 (inclusive) to 180 (exclusive). This represents a front to back motion of the device.
+    /// </summary>
+    new double? Beta { get; }
 
     /// <summary>
     /// A nullable boolean value indicating whether or not the event bubbles up through the DOM.  
@@ -165,6 +190,11 @@ public partial interface Event :
     new EventPhase? EventPhase { get; }
 
     /// <summary>
+    /// A number representing the motion of the device around the y axis, express in degrees with values ranging from -90 (inclusive) to 90 (exclusive). This represents a left to right motion of the device.
+    /// </summary>
+    new double? Gamma { get; }
+
+    /// <summary>
     /// The height (magnitude on the Y axis), in CSS pixels, of the contact geometry of the pointer.
     /// </summary>
     new int? Height { get; }
@@ -173,6 +203,11 @@ public partial interface Event :
     /// Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.
     /// </summary>
     new string? InputType { get; }
+
+    /// <summary>
+    /// A number representing the interval of time, in milliseconds, at which data is obtained from the device.
+    /// </summary>
+    new double? Interval { get; }
 
     /// <summary>
     /// Returns a boolean value that is true if the event is fired between after compositionstart and before compositionend.
@@ -289,6 +324,11 @@ public partial interface Event :
     /// </summary>
     new bool? Repeat { get; }
 
+    /// <summary>
+    /// An object giving the rate of change of the device's orientation on the three orientation axis alpha, beta and gamma. Rotation rate is expressed in degrees per seconds.
+    /// </summary>
+    new ABG? RotationRate { get; }
+    
     /// <summary>
     /// The X coordinate of the mouse pointer in screen coordinates.
     /// </summary>
