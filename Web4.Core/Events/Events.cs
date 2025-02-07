@@ -6,7 +6,7 @@ public interface IAnimationEvent            : IBaseEvent, Animation { }
 public interface ICompositionEvent          : IUIEvent, Data { }
 public interface IDeviceMotionEvent         : IBaseEvent, DeviceMotion { }
 public interface IDeviceOrientationEvent    : IBaseEvent, DeviceOrientation { }
-public interface IDragEvent                 : IMouseEvent, Event.Subsets.DataTransfer { }
+public interface IDragEvent                 : IMouseEvent, DataTransfer { }
 public interface IFocusEvent                : IUIEvent, RelatedTarget { }
 public interface IHashChangeEvent           : IBaseEvent, HashChange { }
 public interface IKeyboardEvent             : IUIEvent, Modifiers, IsComposing, Keys { }
@@ -82,7 +82,7 @@ public interface IBaseEvent : Target
     string Type { get; }
 }
 
-public interface IInputEvent<T> : IUIEvent, Data, Event.Subsets.DataTransfer, IsComposing
+public interface IInputEvent<T> : IUIEvent, Data, DataTransfer, IsComposing
 {
     /// <summary>
     /// Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.

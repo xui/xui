@@ -45,7 +45,7 @@ internal partial record class HttpXEvent(
     bool? Repeat = null,
 
     string? Data = null,
-    DataTransfer? DataTransfer = null,
+    DataTransferContainer? DataTransfer = null,
     string? InputType = null,
 
     bool? Bubbles = null,
@@ -208,5 +208,5 @@ internal partial record class HttpXEvent(
     double IDeviceOrientationSubset.Alpha => Alpha ?? default;
     double IDeviceOrientationSubset.Beta => Beta ?? default;
     double IDeviceOrientationSubset.Gamma => Gamma ?? default;
-    DataTransfer IDataTransferSubset.DataTransfer => DataTransfer ?? Web4.DataTransfer.Empty;
+    DataTransferContainer IDataTransferSubset.DataTransfer => DataTransfer ?? DataTransferContainer.Empty;
 }

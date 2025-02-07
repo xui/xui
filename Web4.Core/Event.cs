@@ -370,7 +370,7 @@ public partial interface Event :
     /// <br/><br/>Tip: Event's interface includes fields found in all possible event types and each field is made nullable to cater to JavaScript's dynamic nature.
     /// For statically typed events, use Event.Mouse, Event.Keyboard, Event.Focus, Event.Input, Event.Touch, Event.Wheel and Event.Composition.
     /// </summary>
-    new DataTransfer? DataTransfer { get; }
+    new DataTransferContainer? DataTransfer { get; }
 
     /// <summary>
     /// Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.
@@ -603,25 +603,6 @@ public interface EventTarget<T>
     public string Type { get; }
     public bool? Checked { get; }
     public T Value { get; }
-}
-
-public record struct DataTransfer(
-    string DropEffect,
-    string EffectAllowed,
-    string[] Files,
-    DataTransferItem[] Items,
-    string[] Types
-) {
-    public DataTransfer() : this("", "", [], [], []) {}
-
-    public static readonly DataTransfer Empty = new();
-}
-
-public record struct DataTransferItem(
-    string Kind = "",
-    string Type = ""
-) {
-    public static readonly DataTransferItem Empty = new();
 }
 
 #pragma warning restore IDE1006 // Naming Styles
