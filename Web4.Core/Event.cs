@@ -1,3 +1,5 @@
+#pragma warning disable IDE1006 // Naming Styles
+
 using System.Drawing;
 using Web4.Events;
 
@@ -777,3 +779,5 @@ public static class EmptyUri
     private static Uri? empty = null;
     public static Uri Empty(this Uri? uri) => empty ??= new Uri("about:blank");
 }
+
+#pragma warning restore IDE1006 // Naming Styles
