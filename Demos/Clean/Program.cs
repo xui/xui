@@ -31,11 +31,13 @@ void OnClick(Event e)
     c++;
 }
 
-window.AddEventListener("click", e => {
+window.AddEventListener("click", e => 
+{
     Console.WriteLine($"{e.X} {e.Y}");
 });
 
-window.MapGet("/about", ctx => {
+window.MapGet("/about", ctx => 
+{
     name = "Reset";
     c = 0;
 });

@@ -46,7 +46,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     {
         routeGroupBuilder.Map(
             pattern,
-            async context => {
+            async context => 
+            {
                 await Task.Delay(1);
             }
         );

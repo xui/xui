@@ -82,12 +82,14 @@ var window = app.Map("/x02", () => $"""
     </html>
     """);
 
-window.MapGet("/about", ctx => {
+window.MapGet("/about", ctx => 
+{
     c = 0;
     name = "about";
 });
 
-window.AddEventListener("click", e => {
+window.AddEventListener("click", e => 
+{
     Console.WriteLine(e.AltKey);
 });
 
@@ -182,13 +184,16 @@ app.Map("/x01", () => $"""
     </html>
     """
 );
-// .MapGet("/", state => {
+// .MapGet("/", state => 
+// {
 //     name = "/Rylan/";
 // })
-// .MapGet("/actives", state => {
+// .MapGet("/actives", state => 
+// {
 //     c = 14;
 // })
-// .MapGet("/deleted", state => {
+// .MapGet("/deleted", state => 
+// {
 //     c++;
 // });
 
