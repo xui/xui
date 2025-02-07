@@ -192,8 +192,6 @@ public partial interface Event :
     /// </summary>
     new double? Y { get; }
 
-    // TouchEvent
-
     /// <summary>
     /// A TouchList of all the Touch objects representing individual points of contact whose states changed between the previous touch event and this one.
     /// </summary>
@@ -208,17 +206,6 @@ public partial interface Event :
     /// A TouchList of all the Touch objects representing all current points of contact with the surface, regardless of target or changed status.
     /// </summary>
     new TouchPoint[]? Touches { get; }
-    // Overlapping (redundant) properties:
-    // bool? altKey { get; }
-    // bool? ctrlKey { get; }
-    // bool? metaKey { get; }
-    // bool? shiftKey { get; }
-
-    // FocusEvent
-    // Overlapping (redundant) properties:
-    // HtmlElement? relatedTarget { get; }
-
-    // KeyboardEvent
 
     /// <summary>
     /// Returns a string with the code value of the physical key represented by the event.
@@ -244,13 +231,6 @@ public partial interface Event :
     /// Returns a boolean value that is true if the key is being held down such that it is automatically repeating.
     /// </summary>
     new bool? Repeat { get; }
-    // Overlapping (redundant) properties:
-    // bool? altKey { get; }
-    // bool? ctrlKey { get; }
-    // bool? metaKey { get; }
-    // bool? shiftKey { get; }
-
-    // WheelEvent
 
     /// <summary>
     /// Returns a double representing the horizontal scroll amount.
@@ -288,17 +268,6 @@ public partial interface Event :
     /// Returns the type of change for editable content such as, for example, inserting, deleting, or formatting text.
     /// </summary>
     new string? InputType { get; }
-    // Overlapping (redundant) properties:
-    // bool? isComposing { get; }
-
-    // CompositionEvent
-    // Overlapping (redundant) properties:
-    // string? data { get; }
-
-    // public static readonly Event Empty = new();
-    // static abstract Event Empty();
-
-    // AnimationEvent
 
     /// <summary>
     /// A string containing the value of the animation-name that generated the animation.
@@ -306,18 +275,12 @@ public partial interface Event :
     new string? AnimationName { get; }
 
     /// <summary>
-    /// A float giving the amount of time the animation has been running, in seconds, 
-    /// when this event fired, excluding any time the animation was paused. 
-    /// For an animationstart event, elapsedTime is 0.0 unless there was a negative 
-    /// value for animation-delay, in which case the event will be fired with 
-    /// elapsedTime containing (-1 * delay).
+    /// A float giving the amount of time the animation has been running, in seconds, when this event fired, excluding any time the animation was paused. For an animationstart event, elapsedTime is 0.0 unless there was a negative value for animation-delay, in which case the event will be fired with elapsedTime containing (-1 * delay).
     /// </summary>
     new float? ElapsedTime { get; }
 
     /// <summary>
-    /// A string, starting with '::', containing the name of the pseudo-element the 
-    /// animation runs on. If the animation doesn't run on a pseudo-element but 
-    /// on the element, an empty string: ''.
+    /// A string, starting with '::', containing the name of the pseudo-element the animation runs on. If the animation doesn't run on a pseudo-element but on the element, an empty string: ''.
     /// </summary>
     new string? PseudoElement { get; }
 
@@ -332,14 +295,12 @@ public partial interface Event :
     new string? OldUrl { get; }
 
     /// <summary>
-    /// Represents the angle between a transducer (a pointer or stylus) axis 
-    /// and the X-Y plane of a device screen.
+    /// Represents the angle between a transducer (a pointer or stylus) axis and the X-Y plane of a device screen.
     /// </summary>
     new double? AltitudeAngle { get; }
 
     /// <summary>
-    /// Represents the angle between the Y-Z plane and the plane containing 
-    /// both the transducer (a pointer or stylus) axis and the Y axis.
+    /// Represents the angle between the Y-Z plane and the plane containing both the transducer (a pointer or stylus) axis and the Y axis.
     /// </summary>
     new double? AzimuthAngle { get; }
 
@@ -349,97 +310,67 @@ public partial interface Event :
     new int? PointerID { get; }
 
     /// <summary>
-    /// The width (magnitude on the X axis), in CSS pixels, 
-    /// of the contact geometry of the pointer.
+    /// The width (magnitude on the X axis), in CSS pixels, of the contact geometry of the pointer.
     /// </summary>
     new int? Width { get; }
 
     /// <summary>
-    /// The height (magnitude on the Y axis), in CSS pixels, 
-    /// of the contact geometry of the pointer.
+    /// The height (magnitude on the Y axis), in CSS pixels, of the contact geometry of the pointer.
     /// </summary>
     new int? Height { get; }
 
     /// <summary>
-    /// The normalized pressure of the pointer input in the range 0 to 1, 
-    /// where 0 and 1 represent the minimum and maximum pressure the 
-    /// hardware is capable of detecting, respectively.
+    /// The normalized pressure of the pointer input in the range 0 to 1, where 0 and 1 represent the minimum and maximum pressure the hardware is capable of detecting, respectively.
     /// </summary>
     new double? Pressure { get; }
 
     /// <summary>
-    /// The normalized tangential pressure of the pointer input 
-    /// (also known as barrel pressure or cylinder stress) in the 
-    /// range -1 to 1, where 0 is the neutral position of the control.
+    /// The normalized tangential pressure of the pointer input (also known as barrel pressure or cylinder stress) in the range -1 to 1, where 0 is the neutral position of the control.
     /// </summary>
     new double? TangentialPressure { get; }
 
     /// <summary>
-    /// The plane angle (in degrees, in the range of -90 to 90) between 
-    /// the Y–Z plane and the plane containing both the pointer 
-    /// (e.g. pen stylus) axis and the Y axis.
+    /// The plane angle (in degrees, in the range of -90 to 90) between the Y–Z plane and the plane containing both the pointer (e.g. pen stylus) axis and the Y axis.
     /// </summary>
     new double? TiltX { get; }
 
     /// <summary>
-    /// The plane angle (in degrees, in the range of -90 to 90) between 
-    /// the X–Z plane and the plane containing both the pointer 
-    /// (e.g. pen stylus) axis and the X axis.
+    /// The plane angle (in degrees, in the range of -90 to 90) between the X–Z plane and the plane containing both the pointer (e.g. pen stylus) axis and the X axis.
     /// </summary>
     new double? TiltY { get; }
 
     /// <summary>
-    /// The clockwise rotation of the pointer (e.g. pen stylus) around 
-    /// its major axis in degrees, with a value in the range 0 to 359.
+    /// The clockwise rotation of the pointer (e.g. pen stylus) around its major axis in degrees, with a value in the range 0 to 359.
     /// </summary>
     new double? Twist { get; }
 
     /// <summary>
-    /// Indicates the device type that caused the event 
-    /// (mouse, pen, touch, etc.).
+    /// Indicates the device type that caused the event (mouse, pen, touch, etc.).
     /// </summary>
     new string? PointerType { get; }
 
     /// <summary>
-    /// Indicates if the pointer represents the primary pointer of 
-    /// this pointer type.
+    /// Indicates if the pointer represents the primary pointer of this pointer type.
     /// </summary>
     new bool? IsPrimary { get; }
 
     /// <summary>
-    /// A boolean flag indicating if the ratio between the size of the data 
-    /// already transmitted or processed (loaded), and the total size of the 
-    /// data (total), is calculable. In other words, it tells if the 
-    /// progress is measurable or not.
+    /// A boolean flag indicating if the ratio between the size of the data already transmitted or processed (loaded), and the total size of the data (total), is calculable. In other words, it tells if the progress is measurable or not.
     /// </summary>
     new bool? LengthComputable { get; }
 
     /// <summary>
-    /// A 64-bit unsigned integer indicating the size, in bytes, of the data 
-    /// already transmitted or processed. The ratio can be calculated by 
-    /// dividing ProgressEvent.total by the value of this property. When 
-    /// downloading a resource using HTTP, this only counts the body of 
-    /// the HTTP message, and doesn't include headers and other overhead. 
-    /// Note that for compressed requests of unknown total size, loaded 
-    /// might contain the size of the compressed, or decompressed, data, 
-    /// depending on the browser. As of 2024, it contains the size of the 
-    /// compressed data in Firefox, and the size of the uncompressed data 
-    /// in Chrome.
+    /// A 64-bit unsigned integer indicating the size, in bytes, of the data already transmitted or processed. The ratio can be calculated by dividing ProgressEvent.total by the value of this property. When downloading a resource using HTTP, this only counts the body of the HTTP message, and doesn't include headers and other overhead. Note that for compressed requests of unknown total size, loaded might contain the size of the compressed, or decompressed, data, depending on the browser. As of 2024, it contains the size of the compressed data in Firefox, and the size of the uncompressed data in Chrome.
     /// </summary>
     new long? Loaded { get; }
 
     /// <summary>
-    /// A 64-bit unsigned integer indicating the total size, in bytes, 
-    /// of the data being transmitted or processed. When downloading a 
-    /// resource using HTTP, this value is taken from the Content-Length 
-    /// response header. It only counts the body of the HTTP message, 
-    /// and doesn't include headers and other overhead.
+    /// A 64-bit unsigned integer indicating the total size, in bytes, of the data being transmitted or processed. When downloading a resource using HTTP, this value is taken from the Content-Length response header. It only counts the body of the HTTP message, and doesn't include headers and other overhead.
     /// </summary>
     new long? Total { get; }
 
     /// <summary>
-    /// An HTMLElement object which identifies the button or other element 
-    /// which was invoked to trigger the form being submitted.
+    /// An HTMLElement object which identifies the button or other element which was invoked to trigger the form being submitted.
     /// </summary>
     new EventTarget? Submitter { get; }
 
