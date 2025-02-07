@@ -9,13 +9,13 @@ namespace Web4;
 /// <summary>
 /// A DOM event
 /// </summary>
-public partial interface Event : 
+public partial interface Event :
     Aliases,
     Aliases.Animation,
-    Aliases.Composition, 
+    Aliases.Composition,
     Aliases.DeviceMotion,
     Aliases.DeviceOrientation,
-    Aliases.Focus, 
+    Aliases.Focus,
     Aliases.HashChange,
     Aliases.Input<string>,
     Aliases.Input<bool>,
@@ -29,8 +29,8 @@ public partial interface Event :
     Aliases.Input<TimeOnly>,
     Aliases.Input<Color>,
     Aliases.Input<Uri>,
-    Aliases.Keyboard, 
-    Aliases.Mouse, 
+    Aliases.Keyboard,
+    Aliases.Mouse,
     Aliases.Pointer,
     Aliases.Progress,
     Aliases.Submit,
@@ -44,12 +44,12 @@ public partial interface Event :
     /// A nullable boolean value indicating whether or not the event bubbles up through the DOM.  
     /// </summary>
     new bool? Bubbles { get; }
-    
+
     /// <summary>
     /// A nullable boolean value indicating whether the event is cancelable.
     /// </summary>
     new bool? Cancelable { get; }
-    
+
     /// <summary>
     /// A nullable boolean indicating whether or not the event can bubble across the boundary between the shadow DOM and the regular DOM.
     /// </summary>
@@ -69,7 +69,7 @@ public partial interface Event :
     /// A nullable int which indicates which phase of the event flow is being processed. It is one of the following numbers: NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
     /// </summary>
     new EventPhase? EventPhase { get; }
-    
+
     /// <summary>
     /// A nullable boolean which indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, for example).
     /// </summary>
@@ -219,7 +219,7 @@ public partial interface Event :
     // HtmlElement? relatedTarget { get; }
 
     // KeyboardEvent
-    
+
     /// <summary>
     /// Returns a string with the code value of the physical key represented by the event.
     /// </summary>
