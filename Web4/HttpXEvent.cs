@@ -106,10 +106,10 @@ internal partial record class HttpXEvent(
     bool IBaseEvent.Cancelable => Cancelable ?? default;
     bool IBaseEvent.Composed => Composed ?? default;
     bool IBaseEvent.DefaultPrevented => DefaultPrevented ?? default;
-    EventPhase IBaseEvent.EventPhase => EventPhase ?? Web4.EventPhase.None;
+    EventPhase IBaseEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
     bool IBaseEvent.IsTrusted => IsTrusted ?? default;
     double IBaseEvent.TimeStamp => TimeStamp ?? default;
-    Button IButtonsSubset.Button => Button ?? Web4.Button.Main;
+    Button IButtonsSubset.Button => Button ?? Web4.Events.Button.Main;
     ButtonFlag IButtonsSubset.Buttons => Buttons ?? ButtonFlag.None;
     string IKeysSubset.Code => Code ?? string.Empty;
     string IKeysSubset.Key => Key ?? string.Empty;
@@ -134,7 +134,7 @@ internal partial record class HttpXEvent(
     double IDeltasSubset.DeltaX => DeltaX ?? default;
     double IDeltasSubset.DeltaY => DeltaY ?? default;
     double IDeltasSubset.DeltaZ => DeltaZ ?? default;
-    DeltaMode IDeltasSubset.DeltaMode => DeltaMode ?? Web4.DeltaMode.Pixel;
+    DeltaMode IDeltasSubset.DeltaMode => DeltaMode ?? Web4.Events.DeltaMode.Pixel;
     EventTarget ITargetSubset.Target => Target ?? EventTarget.Empty;
     string IInputEvent<string>.InputType => InputType ?? string.Empty;
     string IInputEvent<bool>.InputType => InputType ?? string.Empty;
