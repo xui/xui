@@ -2,6 +2,7 @@
 
 using System.Drawing;
 using Web4.Events;
+using Web4.Events.Subsets;
 
 namespace Web4;
 
@@ -621,34 +622,6 @@ public record struct DataTransferItem(
     string Type = ""
 ) {
     public static readonly DataTransferItem Empty = new();
-}
-
-public record struct TouchPoint(
-    long Identifier = 0,
-    double ScreenX = 0,
-    double ScreenY = 0,
-    double ClientX = 0,
-    double ClientY = 0,
-    double PageX = 0,
-    double PageY = 0
-) {
-    public static readonly TouchPoint Empty = new();
-}
-
-public record struct XYZ(
-    double X = 0,
-    double Y = 0,
-    double Z = 0
-) {
-    public static readonly XYZ Empty = new();
-}
-
-public record struct ABG(
-    double Alpha = 0,
-    double Beta = 0,
-    double Gamma = 0
-) {
-    public static readonly ABG Empty = new();
 }
 
 #pragma warning restore IDE1006 // Naming Styles
