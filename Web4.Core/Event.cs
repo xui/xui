@@ -39,7 +39,6 @@ public partial interface Event :
     Aliases.UI,
     Aliases.Wheel
 {
-    // Event (base)
     /// <summary>
     /// A nullable boolean value indicating whether or not the event bubbles up through the DOM.  
     /// </summary>
@@ -90,13 +89,11 @@ public partial interface Event :
     /// </summary>
     new string? Type { get; }
 
-    // UIEvent
     /// <summary>
     /// Returns a nullable long with details about the event, depending on the event type.
     /// </summary>
     new long? Detail { get; }
 
-    // MouseEvent
     /// <summary>
     /// Returns true if the alt key was down when the mouse event was fired.
     /// </summary>
@@ -251,8 +248,6 @@ public partial interface Event :
     /// Returns an unsigned long representing the unit of the delta* values' scroll amount.
     /// </summary>
     new DeltaMode? DeltaMode { get; }
-
-    // InputEvent
 
     /// <summary>
     /// Returns a string with the inserted characters. This may be an empty string if the change doesn't insert text (for example, when deleting characters).
