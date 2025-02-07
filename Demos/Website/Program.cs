@@ -3,6 +3,8 @@ global using Web4.ZeroScript;
 global using System.Buffers;
 using Web4.Composers;
 using System.Drawing;
+using Web4.Events;
+using Web4.Events.Subsets;
 Action<string> Log = Console.WriteLine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -376,7 +378,6 @@ app.Map("/signatures", () => $"""
             <input type="number" oninput={e => Console.WriteLine(e.DataTransfer.DropEffect)}>lambda</input>
             <input type="number" { value => c } onchange={ e => Console.WriteLine($"{e.RelatedTarget.ValueAsInt}") } />
             <button onclick={e => d = e.X}>lambda</button>
-            <button onclick={e => isSelected = e.IsTrusted}>lambda</button>
             <input type="number" { value => i } oninput={DoIt3} step="1" /> {i} <br/>
             <input type="text" oninput={DoIt4}>DoIt2</input>
             <button onclick={DoIt4}>DoIt4</button>
@@ -409,9 +410,9 @@ async Task DoIt3(Event.Subsets.Target<Color> e)
     color = e.Target.Value;
 }
 
-void DoIt4(Event.Subsets.DataTransfer e)
+void DoIt4(Event.Subsets.ModifierShift e)
 {
-    Console.WriteLine($"{e.DataTransfer}");
+    Console.WriteLine($"{e.ShiftKey}");
 }
 
 

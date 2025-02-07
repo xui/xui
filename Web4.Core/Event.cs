@@ -1,4 +1,5 @@
 using System.Drawing;
+using Web4.Events;
 
 namespace Web4;
 
@@ -6,34 +7,34 @@ namespace Web4;
 /// A DOM event
 /// </summary>
 public partial interface Event : 
-    Events,
-    Events.Animation,
-    Events.Composition, 
-    Events.DeviceMotion,
-    Events.DeviceOrientation,
-    Events.Focus, 
-    Events.HashChange,
-    Events.Input<string>,
-    Events.Input<bool>,
-    Events.Input<int>,
-    Events.Input<long>,
-    Events.Input<float>,
-    Events.Input<double>,
-    Events.Input<decimal>,
-    Events.Input<DateTime>,
-    Events.Input<DateOnly>,
-    Events.Input<TimeOnly>,
-    Events.Input<Color>,
-    Events.Input<Uri>,
-    Events.Keyboard, 
-    Events.Mouse, 
-    Events.Pointer,
-    Events.Progress,
-    Events.Submit,
-    Events.Touch,
-    Events.Transition,
-    Events.UI,
-    Events.Wheel
+    Aliases,
+    Aliases.Animation,
+    Aliases.Composition, 
+    Aliases.DeviceMotion,
+    Aliases.DeviceOrientation,
+    Aliases.Focus, 
+    Aliases.HashChange,
+    Aliases.Input<string>,
+    Aliases.Input<bool>,
+    Aliases.Input<int>,
+    Aliases.Input<long>,
+    Aliases.Input<float>,
+    Aliases.Input<double>,
+    Aliases.Input<decimal>,
+    Aliases.Input<DateTime>,
+    Aliases.Input<DateOnly>,
+    Aliases.Input<TimeOnly>,
+    Aliases.Input<Color>,
+    Aliases.Input<Uri>,
+    Aliases.Keyboard, 
+    Aliases.Mouse, 
+    Aliases.Pointer,
+    Aliases.Progress,
+    Aliases.Submit,
+    Aliases.Touch,
+    Aliases.Transition,
+    Aliases.UI,
+    Aliases.Wheel
 {
     // Event (base)
     /// <summary>

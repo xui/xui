@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Web4.Events.Subsets;
 
 namespace Web4;
 
@@ -26,8 +27,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
 
     public WindowBuilder AddEventListener(
         string type, 
-        Action<Event.Subsets.Modifiers> listener) => 
-            AddEventListener(type, listener, Event.Subsets.Modifiers.Format);
+        Action<Event.Subsets.ClientXY> listener) => 
+            AddEventListener(type, listener, Event.Subsets.ClientXY.Format);
 
     public WindowBuilder AddEventListener(
         string type, 

@@ -314,7 +314,9 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
                 eval(event.data);
             };
 
-            const rootKeys = ["altKey","bubbles","button","buttons","cancelable","changedTouches","clientX","clientY","code","composed","ctrlKey","currentTarget","data","dataTransfer","defaultPrevented","deltaMode","deltaX","deltaY","deltaZ","detail","eventPhase","inputType","isComposing","isTrusted","key","location","metaKey","movementX","movementY","offsetX","offsetY","pageX","pageY","relatedTarget","repeat","screenX","screenY","shiftKey","target","targetTouches","timeStamp","touches","type","x","y"];
+            const rootKeys = ["altKey","bubbles","button","buttons","cancelable","changedTouches","clientX","clientY","code","composed","ctrlKey","currentTarget","data","dataTransfer","defaultPrevented","deltaMode","deltaX","deltaY","deltaZ","detail","eventPhase","inputType","isComposing","isTrusted","key","location","metaKey","movementX","movementY","offsetX","offsetY","pageX","pageY","relatedTarget","repeat","screenX","screenY","shiftKey","target","targetTouches","timeStamp","touches","type","x","y",
+                "elapsedTime","pseudoElement"
+            ];
             const eventTargetKeys = ["id","name","type","value","checked"];
             function encodeEvent(e,incl) {
                 const allowList = incl?.split(",") ?? rootKeys;
