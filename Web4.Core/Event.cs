@@ -36,7 +36,6 @@ public partial interface Event :
     Aliases.Submit,
     Aliases.Touch,
     Aliases.Transition,
-    Aliases.UI,
     Aliases.Wheel
 {
     /// <summary>

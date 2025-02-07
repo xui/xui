@@ -3,30 +3,26 @@ using static Web4.Events.Aliases.Subsets;
 
 namespace Web4.Events;
 
-public interface IAnimationEvent            : IBaseEvent, Animation { }
-public interface ICompositionEvent          : IUIEvent, Data { }
-public interface IDeviceMotionEvent         : IBaseEvent, DeviceMotion { }
-public interface IDeviceOrientationEvent    : IBaseEvent, DeviceOrientation { }
 public interface IDragEvent                 : IMouseEvent, DataTransfer { }
-public interface IFocusEvent                : IUIEvent, RelatedTarget { }
-public interface IHashChangeEvent           : IBaseEvent, HashChange { }
-public interface IKeyboardEvent             : IUIEvent, Modifiers, IsComposing, Keys { }
+public interface IPointerEvent              : IMouseEvent, Pointer, Angles, WidthHeight, Pressures, Tilts { }
+public interface IWheelEvent                : IMouseEvent, Deltas { }
+
 public interface IMouseEvent                : IUIEvent, Buttons, Coordinates, Modifiers, RelatedTarget { }
-public interface IPointerEvent              : IUIEvent, IMouseEvent, Pointer, Angles, WidthHeight, Pressures, Tilts { }
-public interface IProgressEvent             : IBaseEvent, Progress { }
-public interface ISubmitEvent               : IBaseEvent, Submitter { }
-public interface ITransitionEvent           : IBaseEvent, Animation { }
+public interface ICompositionEvent          : IUIEvent, Data { }
+public interface IFocusEvent                : IUIEvent, RelatedTarget { }
+public interface IKeyboardEvent             : IUIEvent, Modifiers, IsComposing, Keys { }
 public interface ITouchEvent                : IUIEvent, Modifiers, Touches { }
-public interface IWheelEvent                : IUIEvent, IMouseEvent, Deltas { }
 
+public interface IUIEvent                   : IEvent, Detail { }
+public interface IAnimationEvent            : IEvent, Animation { }
+public interface IDeviceMotionEvent         : IEvent, DeviceMotion { }
+public interface IDeviceOrientationEvent    : IEvent, DeviceOrientation { }
+public interface IHashChangeEvent           : IEvent, HashChange { }
+public interface IProgressEvent             : IEvent, Progress { }
+public interface ISubmitEvent               : IEvent, Submitter { }
+public interface ITransitionEvent           : IEvent, Animation { }
 
-
-
-
-
-
-
-public interface IBaseEvent : Target
+public interface IEvent : Target
 {
     /// <summary>
     /// A boolean value indicating whether or not the event bubbles up through the DOM.
@@ -94,12 +90,4 @@ public interface IInputEvent<T> : IUIEvent, Data, DataTransfer, IsComposing
     /// A reference to the object to which the event was originally dispatched.
     /// </summary>
     new EventTarget<T> Target { get; }
-}
-
-public interface IUIEvent: IBaseEvent
-{
-    /// <summary>
-    /// Returns a long with details about the event, depending on the event type.
-    /// </summary>
-    long Detail { get; }
 }
