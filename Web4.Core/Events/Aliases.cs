@@ -35,6 +35,7 @@ public interface Aliases
         public interface Detail : IDetail { }
         public interface DeviceMotion : IDeviceMotion { }
         public interface DeviceOrientation : IDeviceOrientation { }
+        public interface Error : IError { }
         public interface HashChange : IHashChange { }
         public interface IsComposing : IIsComposing { }
         public interface Keys : IKeys { }

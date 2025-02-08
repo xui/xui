@@ -17,6 +17,7 @@ public interface IUIEvent                   : IEvent, Detail { }
 public interface IAnimationEvent            : IEvent, Animation { }
 public interface IDeviceMotionEvent         : IEvent, DeviceMotion { }
 public interface IDeviceOrientationEvent    : IEvent, DeviceOrientation { }
+public interface IErrorEvent                : IEvent, Error { }
 public interface IHashChangeEvent           : IEvent, HashChange { }
 public interface IProgressEvent             : IEvent, Progress { }
 public interface ISubmitEvent               : IEvent, Submitter { }
