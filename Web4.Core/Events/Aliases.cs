@@ -11,7 +11,7 @@ public interface Aliases
     public interface DeviceMotion : IDeviceMotionEvent { }
     public interface DeviceOrientation : IDeviceOrientationEvent { }
     public interface Drag : IDragEvent { }
-    public interface Error : IError { }
+    public interface Error : IErrorEvent { }
     public interface Focus : IFocusEvent { }
     public interface HashChange: IHashChangeEvent { }
     public interface Input<T> : IInputEvent<T> { }
