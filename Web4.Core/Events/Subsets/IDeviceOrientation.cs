@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDeviceOrientation
+        public interface IDeviceOrientation : ISubset
         {
             const string Format = "absolute,alpha,beta,gamma";
 

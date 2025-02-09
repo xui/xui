@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITouches
+        public interface ITouches : ISubset
         {
             const string Format = "changedTouches,targetTouches,touches";
 

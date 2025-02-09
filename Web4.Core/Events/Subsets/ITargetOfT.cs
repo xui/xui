@@ -6,7 +6,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITarget<T>
+        public interface ITarget<T> : ISubset
         {
             const string Format = "target";
 

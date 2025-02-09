@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IButtons
+        public interface IButtons : ISubset
         {
             const string Format = "button,buttons";
 

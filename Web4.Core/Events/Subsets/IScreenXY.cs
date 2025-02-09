@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IScreenXY
+        public interface IScreenXY : ISubset
         {
             const string Format = "screenX,screenY";
 

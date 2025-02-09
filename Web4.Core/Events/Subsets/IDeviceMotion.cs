@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDeviceMotion
+        public interface IDeviceMotion : ISubset
         {
             const string Format = "acceleration,acceleratinIncludingGravity,rotationRate,interval";
 

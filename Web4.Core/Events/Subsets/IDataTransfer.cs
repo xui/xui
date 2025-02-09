@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDataTransfer
+        public interface IDataTransfer : ISubset
         {
             const string Format = "dataTransfer";
 

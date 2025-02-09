@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IIsComposing
+        public interface IIsComposing : ISubset
         {
             const string Format = "isComposing";
 

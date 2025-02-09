@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPageXY
+        public interface IPageXY : ISubset
         {
             const string Format = "pageX,pageY";
 

@@ -7,6 +7,7 @@ namespace Web4
     namespace Events.Subsets
     {
         public interface ITarget : 
+            ISubset,
             Target<string>,
             Target<bool>,
             Target<int>,

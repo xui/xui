@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IKeys
+        public interface IKeys : ISubset
         {
             const string Format = "code,key,location,repeat";
 

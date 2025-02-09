@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierAlt
+        public interface IModifierAlt : ISubset
         {
             const string Format = "altKey";
 

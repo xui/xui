@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierCtrl
+        public interface IModifierCtrl : ISubset
         {
             const string Format = "ctrlKey";
 

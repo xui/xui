@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ISubmitter
+        public interface ISubmitter : ISubset
         {
             const string Format = "submitter";
 

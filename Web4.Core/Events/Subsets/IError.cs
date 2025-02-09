@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IError
+        public interface IError : ISubset
         {
             const string Format = "error";
 

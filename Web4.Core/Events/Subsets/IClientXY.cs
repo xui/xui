@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IClientXY
+        public interface IClientXY : ISubset
         {
             const string Format = "clientX,clientY";
 

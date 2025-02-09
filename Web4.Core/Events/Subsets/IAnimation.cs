@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IAnimation
+        public interface IAnimation : ISubset
         {
             const string Format = "animationName,elapsedTime,propertyName,pseudoElement";
 

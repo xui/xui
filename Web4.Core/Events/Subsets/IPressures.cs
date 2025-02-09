@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPressures
+        public interface IPressures : ISubset
         {
             const string Format = "pressure,tangentialPressure";
 

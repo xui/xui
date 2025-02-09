@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IProgress
+        public interface IProgress : ISubset
         {
             const string Format = "lengthComputable,loaded,total";
 

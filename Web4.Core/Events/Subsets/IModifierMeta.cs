@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierMeta
+        public interface IModifierMeta : ISubset
         {
             const string Format = "metaKey";
 

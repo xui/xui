@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDetail
+        public interface IDetail : ISubset
         {
             const string Format = "detail";
 

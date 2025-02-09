@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IAngles
+        public interface IAngles : ISubset
         {
             const string Format = "altitudeAngle,azimuthAngle";
 

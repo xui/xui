@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IRelatedTarget
+        public interface IRelatedTarget : ISubset
         {
             const string Format = "relatedTarget";
 

@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IMovementXY
+        public interface IMovementXY : ISubset
         {
             const string Format = "movementX,movementY";
 

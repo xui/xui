@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDeltas
+        public interface IDeltas : ISubset
         {
             const string Format = "deltaX,deltaY,deltaZ,deltaMode";
 

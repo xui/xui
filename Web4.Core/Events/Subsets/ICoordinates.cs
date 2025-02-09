@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ICoordinates : XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY
+        public interface ICoordinates : ISubset, XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY
         {
             new const string Format = 
                 XY.Format + "," + 

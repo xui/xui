@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPointer
+        public interface IPointer : ISubset
         {
             const string Format = "pointerID,twist,pointerType,isPrimary";
 

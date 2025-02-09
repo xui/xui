@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IWidthHeight
+        public interface IWidthHeight : ISubset
         {
             const string Format = "width,height";
 

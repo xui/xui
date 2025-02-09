@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierShift
+        public interface IModifierShift : ISubset
         {
             const string Format = "shiftKey";
 

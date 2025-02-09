@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITilts
+        public interface ITilts : ISubset
         {
             const string Format = "tiltX,tiltY";
 
