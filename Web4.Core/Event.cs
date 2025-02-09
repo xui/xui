@@ -15,6 +15,7 @@ public partial interface Event :
     Aliases.Composition,
     Aliases.DeviceMotion,
     Aliases.DeviceOrientation,
+    Aliases.Drag,
     Aliases.Error,
     Aliases.Focus,
     Aliases.HashChange,
