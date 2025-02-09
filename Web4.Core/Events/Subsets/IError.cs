@@ -19,7 +19,9 @@ namespace Web4
         public record struct DOMException(
             string Name = "",
             string Message = ""
-        );
+        ) {
+            public static readonly DOMException Empty = new();
+        }
     }
 
     public ref partial struct Html

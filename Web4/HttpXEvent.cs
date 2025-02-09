@@ -23,6 +23,7 @@ internal partial record class HttpXEvent(
     double? ClientX = null,
     double? ClientY = null,
     string? Code = null,
+    int? ColNo = null,
     bool? Composed = null,
     bool? CtrlKey = null,
     EventTarget? CurrentTarget = null,
@@ -35,7 +36,9 @@ internal partial record class HttpXEvent(
     double? DeltaZ = null,
     long? Detail = null,
     float? ElapsedTime = null,
+    DOMException? Error = null,
     EventPhase? EventPhase = null,
+    string? FileName = null,
     double? Gamma = null,
     int? Height = null,
     string? InputType = null,
@@ -45,8 +48,10 @@ internal partial record class HttpXEvent(
     bool? IsTrusted = null,
     string? Key = null,
     bool? LengthComputable = null,
+    int? LineNo = null,
     long? Loaded = null,
     KeyLocation? Location = null,
+    string? Message = null,
     bool? MetaKey = null,
     double? MovementX = null,
     double? MovementY = null,
@@ -100,6 +105,7 @@ internal partial record class HttpXEvent(
     double IClientXY.ClientX => ClientX ?? default;
     double IClientXY.ClientY => ClientY ?? default;
     string IKeys.Code => Code ?? string.Empty;
+    int IError.ColNo => ColNo ?? default;
     bool IEvent.Composed => Composed ?? default;
     bool IModifierCtrl.CtrlKey => CtrlKey ?? default;
     EventTarget IEvent.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
@@ -112,7 +118,9 @@ internal partial record class HttpXEvent(
     double IDeltas.DeltaZ => DeltaZ ?? default;
     long IDetail.Detail => Detail ?? default;
     float IAnimation.ElapsedTime => ElapsedTime ?? default;
+    DOMException IError.Error => Error ?? DOMException.Empty;
     EventPhase IEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
+    string IError.FileName => FileName ?? string.Empty;
     double IDeviceOrientation.Gamma => Gamma ?? default;
     int IWidthHeight.Height => Height ?? default;
     string IInputEvent<string>.InputType => InputType ?? string.Empty;
@@ -133,8 +141,10 @@ internal partial record class HttpXEvent(
     bool IEvent.IsTrusted => IsTrusted ?? default;
     string IKeys.Key => Key ?? string.Empty;
     bool IProgress.LengthComputable => LengthComputable ?? default;
+    int IError.LineNo => LineNo ?? default;
     long IProgress.Loaded => Loaded ?? default;
     KeyLocation IKeys.Location => Location ?? KeyLocation.Standard;
+    string IError.Message => Message ?? string.Empty;
     bool IModifierMeta.MetaKey => MetaKey ?? default;
     double IMovementXY.MovementX => MovementX ?? default;
     double IMovementXY.MovementY => MovementY ?? default;
