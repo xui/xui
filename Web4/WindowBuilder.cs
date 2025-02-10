@@ -121,7 +121,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public WindowBuilder AddEventListener(string type, Action<Event.Subsets.XY> listener) => AddEventListener(type, listener, Event.Subsets.XY.Format);
     public WindowBuilder AddEventListener(string type, Action<Event.Subsets.Y> listener) => AddEventListener(type, listener, Event.Subsets.Y.Format);
 
-   public Action<Event>? OnAbort { set { if (value is not null) AddEventListener("abort", value); } }
+    public Action<Event>? OnAbort { set { if (value is not null) AddEventListener("abort", value); } }
     public Action<Event>? OnAfterPrint { set { if (value is not null) AddEventListener("afterprint", value); } }
     public Action<Event>? OnAnimationEnd { set { if (value is not null) AddEventListener("animationend", value); } }
     public Action<Event>? OnAnimationIteration { set { if (value is not null) AddEventListener("animationiteration", value); } }
