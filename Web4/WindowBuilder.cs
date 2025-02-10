@@ -42,7 +42,6 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
         return this;
     }
 
-    public WindowBuilder AddEventListener(string type, Action<Event> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.Animation> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.Composition> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.DeviceMotion> listener) => AddEventListener(type, listener, null);
