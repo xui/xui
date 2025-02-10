@@ -146,9 +146,6 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public Action<Event>? OnContextRestored { set { if (value is not null) AddEventListener("contextrestored", value); } }
     public Action<Event>? OnCueChange { set { if (value is not null) AddEventListener("cuechange", value); } }
     public Action<Event>? OnDblClick { set { if (value is not null) AddEventListener("dblclick", value); } }
-    public Action<Event.DeviceMotion>? OnDeviceMotion { set { if (value is not null) AddEventListener("devicemotion", value); } }
-    public Action<Event.DeviceOrientation>? OnDeviceOrientation { set { if (value is not null) AddEventListener("deviceorientation", value); } }
-    public Action<Event.DeviceOrientation>? OnDeviceOrientationAbsolute { set { if (value is not null) AddEventListener("deviceorientationabsolute", value); } }
     public Action<Event.Drag>? OnDrag { set { if (value is not null) AddEventListener("drag", value); } }
     public Action<Event.Drag>? OnDragEnd { set { if (value is not null) AddEventListener("dragend", value); } }
     public Action<Event.Drag>? OnDragEnter { set { if (value is not null) AddEventListener("dragenter", value); } }
@@ -175,6 +172,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public Action<Event>? OnLoadedMetaData { set { if (value is not null) AddEventListener("loadedmetadata", value); } }
     public Action<Event>? OnLoadStart { set { if (value is not null) AddEventListener("loadstart", value); } }
     public Action<Event>? OnLostPointerCapture { set { if (value is not null) AddEventListener("lostpointercapture", value); } }
+    public Action<Event>? OnMessage { set { if (value is not null) AddEventListener("message", value); } }
+    public Action<Event>? OnMessageError { set { if (value is not null) AddEventListener("messageerror", value); } }
     public Action<Event>? OnMouseDown { set { if (value is not null) AddEventListener("mousedown", value); } }
     public Action<Event>? OnMouseEnter { set { if (value is not null) AddEventListener("mouseenter", value); } }
     public Action<Event>? OnMouseLeave { set { if (value is not null) AddEventListener("mouseleave", value); } }
@@ -183,6 +182,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public Action<Event>? OnMouseOver { set { if (value is not null) AddEventListener("mouseover", value); } }
     public Action<Event>? OnMouseUp { set { if (value is not null) AddEventListener("mouseup", value); } }
     public Action<Event>? OnMouseWheel { set { if (value is not null) AddEventListener("mousewheel", value); } }
+    public Action<Event>? OnOffline { set { if (value is not null) AddEventListener("offline", value); } }
+    public Action<Event>? OnOnline { set { if (value is not null) AddEventListener("online", value); } }
     public Action<Event.HashChange>? OnPageHide { set { if (value is not null) AddEventListener("pagehide", value); } }
     public Action<Event.HashChange>? OnPageReveal { set { if (value is not null) AddEventListener("pagereveal", value); } }
     public Action<Event.HashChange>? OnPageShow { set { if (value is not null) AddEventListener("pageshow", value); } }
@@ -218,9 +219,10 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public Action<Event>? OnSelectStart { set { if (value is not null) AddEventListener("selectstart", value); } }
     public Action<Event>? OnSlotChange { set { if (value is not null) AddEventListener("slotchange", value); } }
     public Action<Event>? OnStalled { set { if (value is not null) AddEventListener("stalled", value); } }
+    public Action<Event>? OnStorage { set { if (value is not null) AddEventListener("storage", value); } }
     public Action<Event>? OnSubmit { set { if (value is not null) AddEventListener("submit", value); } }
     public Action<Event>? OnSuspend { set { if (value is not null) AddEventListener("suspend", value); } }
-    public Action<Event>? OnGimeUpdate { set { if (value is not null) AddEventListener("timeupdate", value); } }
+    public Action<Event>? OnTimeUpdate { set { if (value is not null) AddEventListener("timeupdate", value); } }
     public Action<Event>? OnToggle { set { if (value is not null) AddEventListener("toggle", value); } }
     public Action<Event>? OnTransitionCancel { set { if (value is not null) AddEventListener("transitioncancel", value); } }
     public Action<Event>? OnTransitionEnd { set { if (value is not null) AddEventListener("transitionend", value); } }
