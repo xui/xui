@@ -150,13 +150,13 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public Action<Event.DeviceMotion>? OnDeviceMotion { set { if (value is not null) AddEventListener("devicemotion", value); } }
     public Action<Event.DeviceOrientation>? OnDeviceOrientation { set { if (value is not null) AddEventListener("deviceorientation", value); } }
     public Action<Event.DeviceOrientation>? OnDeviceOrientationAbsolute { set { if (value is not null) AddEventListener("deviceorientationabsolute", value); } }
-    public Action<Event>? OnDrag { set { if (value is not null) AddEventListener("drag", value); } }
-    public Action<Event>? OnDragEnd { set { if (value is not null) AddEventListener("dragend", value); } }
-    public Action<Event>? OnDragEnter { set { if (value is not null) AddEventListener("dragenter", value); } }
-    public Action<Event>? OnDragLeave { set { if (value is not null) AddEventListener("dragleave", value); } }
-    public Action<Event>? OnDragOver { set { if (value is not null) AddEventListener("dragover", value); } }
-    public Action<Event>? OnDragStart { set { if (value is not null) AddEventListener("dragstart", value); } }
-    public Action<Event>? OnDrop { set { if (value is not null) AddEventListener("drop", value); } }
+    public Action<Event.Drag>? OnDrag { set { if (value is not null) AddEventListener("drag", value); } }
+    public Action<Event.Drag>? OnDragEnd { set { if (value is not null) AddEventListener("dragend", value); } }
+    public Action<Event.Drag>? OnDragEnter { set { if (value is not null) AddEventListener("dragenter", value); } }
+    public Action<Event.Drag>? OnDragLeave { set { if (value is not null) AddEventListener("dragleave", value); } }
+    public Action<Event.Drag>? OnDragOver { set { if (value is not null) AddEventListener("dragover", value); } }
+    public Action<Event.Drag>? OnDragStart { set { if (value is not null) AddEventListener("dragstart", value); } }
+    public Action<Event.Drag>? OnDrop { set { if (value is not null) AddEventListener("drop", value); } }
     public Action<Event>? OnDurationChange { set { if (value is not null) AddEventListener("durationchange", value); } }
     public Action<Event>? OnEmptied { set { if (value is not null) AddEventListener("emptied", value); } }
     public Action<Event>? OnEnded { set { if (value is not null) AddEventListener("ended", value); } }
