@@ -2,19 +2,22 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SignalR;
+using Web4.Events;
 using Web4.Events.Subsets;
+using Web4.EventListeners;
 
 namespace Web4;
 
-public record struct EventListener(
-    Action<Event> Listener,
-    string? Format = null
-);
-
-public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
+public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) : 
+    IKeyboardEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
+
+    public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
+    public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
 
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
@@ -29,16 +32,6 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
             }
         );
 
-        return this;
-    }
-
-    public WindowBuilder AddEventListener(string type, Action<Event> listener, string? format = null)
-    {
-        var item = new EventListener(listener, format);
-        if (listeners.TryGetValue(type, out List<EventListener>? value))
-            value.Add(item);
-        else
-            listeners.Add(type, [item]);
         return this;
     }
 
@@ -120,117 +113,51 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder)
     public WindowBuilder AddEventListener(string type, Action<Event.Subsets.XY> listener) => AddEventListener(type, listener, Event.Subsets.XY.Format);
     public WindowBuilder AddEventListener(string type, Action<Event.Subsets.Y> listener) => AddEventListener(type, listener, Event.Subsets.Y.Format);
 
-    public Action<Event>? OnAbort { set { if (value is not null) AddEventListener("abort", value); } }
-    public Action<Event>? OnAfterPrint { set { if (value is not null) AddEventListener("afterprint", value); } }
-    public Action<Event>? OnAnimationEnd { set { if (value is not null) AddEventListener("animationend", value); } }
-    public Action<Event>? OnAnimationIteration { set { if (value is not null) AddEventListener("animationiteration", value); } }
-    public Action<Event>? OnAnimationStart { set { if (value is not null) AddEventListener("animationstart", value); } }
-    public Action<Event>? OnAppInstalled { set { if (value is not null) AddEventListener("appinstalled", value); } }
-    public Action<Event>? OnAuxClick { set { if (value is not null) AddEventListener("auxclick", value); } }
-    public Action<Event>? OnBeforeInput { set { if (value is not null) AddEventListener("beforeinput", value); } }
-    public Action<Event>? OnBeforeInstallPrompt { set { if (value is not null) AddEventListener("beforeinstallprompt", value); } }
-    public Action<Event>? OnBeforeMatch { set { if (value is not null) AddEventListener("beforeMmatch", value); } }
-    public Action<Event>? OnBeforePrint { set { if (value is not null) AddEventListener("beforeprint", value); } }
-    public Action<Event>? OnBeforeToggle { set { if (value is not null) AddEventListener("beforetoggle", value); } }
-    public Action<Event>? OnBeforeXrSelect { set { if (value is not null) AddEventListener("beforexrselect", value); } }
-    public Action<Event.Focus>? OnBlur { set { if (value is not null) AddEventListener("blur", value); } }
-    public Action<Event>? OnCancel { set { if (value is not null) AddEventListener("cancel", value); } }
-    public Action<Event>? OnCanPlay { set { if (value is not null) AddEventListener("canplay", value); } }
-    public Action<Event>? OnCanPlayThrough { set { if (value is not null) AddEventListener("canplaythrough", value); } }
-    public Action<Event>? OnChange { set { if (value is not null) AddEventListener("change", value); } }
-    public Action<Event>? OnClick { set { if (value is not null) AddEventListener("click", value); } }
-    public Action<Event>? OnClose { set { if (value is not null) AddEventListener("close", value); } }
-    public Action<Event>? OnContentVisibilityAutoStateChange { set { if (value is not null) AddEventListener("contentvisibilityautostatechange", value); } }
-    public Action<Event>? OnContextLost { set { if (value is not null) AddEventListener("contextlost", value); } }
-    public Action<Event>? OnContextMenu { set { if (value is not null) AddEventListener("contextmenu", value); } }
-    public Action<Event>? OnContextRestored { set { if (value is not null) AddEventListener("contextrestored", value); } }
-    public Action<Event>? OnCueChange { set { if (value is not null) AddEventListener("cuechange", value); } }
-    public Action<Event>? OnDblClick { set { if (value is not null) AddEventListener("dblclick", value); } }
-    public Action<Event.Drag>? OnDrag { set { if (value is not null) AddEventListener("drag", value); } }
-    public Action<Event.Drag>? OnDragEnd { set { if (value is not null) AddEventListener("dragend", value); } }
-    public Action<Event.Drag>? OnDragEnter { set { if (value is not null) AddEventListener("dragenter", value); } }
-    public Action<Event.Drag>? OnDragLeave { set { if (value is not null) AddEventListener("dragleave", value); } }
-    public Action<Event.Drag>? OnDragOver { set { if (value is not null) AddEventListener("dragover", value); } }
-    public Action<Event.Drag>? OnDragStart { set { if (value is not null) AddEventListener("dragstart", value); } }
-    public Action<Event.Drag>? OnDrop { set { if (value is not null) AddEventListener("drop", value); } }
-    public Action<Event>? OnDurationChange { set { if (value is not null) AddEventListener("durationchange", value); } }
-    public Action<Event>? OnEmptied { set { if (value is not null) AddEventListener("emptied", value); } }
-    public Action<Event>? OnEnded { set { if (value is not null) AddEventListener("ended", value); } }
-    public Action<Event.Error>? OnError { set { if (value is not null) AddEventListener("error", value); } }
-    public Action<Event.Focus>? OnFocus { set { if (value is not null) AddEventListener("focus", value); } }
-    public Action<Event>? OnFormdata { set { if (value is not null) AddEventListener("formdata", value); } }
-    public Action<Event>? OnGotPointerCapture { set { if (value is not null) AddEventListener("gotpointercapture", value); } }
-    public Action<Event.HashChange>? OnHashChange { set { if (value is not null) AddEventListener("hashchange", value); } }
-    public Action<Event>? OnInput { set { if (value is not null) AddEventListener("input", value); } }
-    public Action<Event>? OnInvalid { set { if (value is not null) AddEventListener("invalid", value); } }
-    public Action<Event>? OnKeyDown { set { if (value is not null) AddEventListener("keydown", value); } }
-    public Action<Event>? OnKeyPress { set { if (value is not null) AddEventListener("keypress", value); } }
-    public Action<Event>? OnKeyUp { set { if (value is not null) AddEventListener("keyup", value); } }
-    public Action<Event>? OnLanguageChange { set { if (value is not null) AddEventListener("languagechange", value); } }
-    public Action<Event>? OnLoad { set { if (value is not null) AddEventListener("load", value); } }
-    public Action<Event>? OnLoadedData { set { if (value is not null) AddEventListener("loadeddata", value); } }
-    public Action<Event>? OnLoadedMetaData { set { if (value is not null) AddEventListener("loadedmetadata", value); } }
-    public Action<Event>? OnLoadStart { set { if (value is not null) AddEventListener("loadstart", value); } }
-    public Action<Event>? OnLostPointerCapture { set { if (value is not null) AddEventListener("lostpointercapture", value); } }
-    public Action<Event>? OnMessage { set { if (value is not null) AddEventListener("message", value); } }
-    public Action<Event>? OnMessageError { set { if (value is not null) AddEventListener("messageerror", value); } }
-    public Action<Event>? OnMouseDown { set { if (value is not null) AddEventListener("mousedown", value); } }
-    public Action<Event>? OnMouseEnter { set { if (value is not null) AddEventListener("mouseenter", value); } }
-    public Action<Event>? OnMouseLeave { set { if (value is not null) AddEventListener("mouseleave", value); } }
-    public Action<Event>? OnMouseMove { set { if (value is not null) AddEventListener("mousemove", value); } }
-    public Action<Event>? OnMouseOut { set { if (value is not null) AddEventListener("mouseout", value); } }
-    public Action<Event>? OnMouseOver { set { if (value is not null) AddEventListener("mouseover", value); } }
-    public Action<Event>? OnMouseUp { set { if (value is not null) AddEventListener("mouseup", value); } }
-    public Action<Event>? OnMouseWheel { set { if (value is not null) AddEventListener("mousewheel", value); } }
-    public Action<Event>? OnOffline { set { if (value is not null) AddEventListener("offline", value); } }
-    public Action<Event>? OnOnline { set { if (value is not null) AddEventListener("online", value); } }
-    public Action<Event.HashChange>? OnPageHide { set { if (value is not null) AddEventListener("pagehide", value); } }
-    public Action<Event.HashChange>? OnPageReveal { set { if (value is not null) AddEventListener("pagereveal", value); } }
-    public Action<Event.HashChange>? OnPageShow { set { if (value is not null) AddEventListener("pageshow", value); } }
-    public Action<Event.HashChange>? OnPageSwap { set { if (value is not null) AddEventListener("pageswap", value); } }
-    public Action<Event>? OnPause { set { if (value is not null) AddEventListener("pause", value); } }
-    public Action<Event>? OnPlay { set { if (value is not null) AddEventListener("play", value); } }
-    public Action<Event>? OnPlaying { set { if (value is not null) AddEventListener("playing", value); } }
-    public Action<Event>? OnPointerCancel { set { if (value is not null) AddEventListener("pointercancel", value); } }
-    public Action<Event>? OnPointerDown { set { if (value is not null) AddEventListener("pointerdown", value); } }
-    public Action<Event>? OnPointerEnter { set { if (value is not null) AddEventListener("pointerenter", value); } }
-    public Action<Event>? OnPointerLeave { set { if (value is not null) AddEventListener("pointerleave", value); } }
-    public Action<Event>? OnPointerMove { set { if (value is not null) AddEventListener("pointermove", value); } }
-    public Action<Event>? OnPointerOut { set { if (value is not null) AddEventListener("pointerout", value); } }
-    public Action<Event>? OnPointerOver { set { if (value is not null) AddEventListener("pointerover", value); } }
-    public Action<Event>? OnPointerRawUpdate { set { if (value is not null) AddEventListener("pointerrawupdate", value); } }
-    public Action<Event>? OnPointerUp { set { if (value is not null) AddEventListener("pointerup", value); } }
-    public Action<Event>? OnPopState { set { if (value is not null) AddEventListener("popstate", value); } }
-    public Action<Event>? OnProgress { set { if (value is not null) AddEventListener("progress", value); } }
-    public Action<Event>? OnRateChange { set { if (value is not null) AddEventListener("ratechange", value); } }
-    public Action<Event>? OnRejectionHandled { set { if (value is not null) AddEventListener("rejectionhandled", value); } }
-    public Action<Event>? OnReset { set { if (value is not null) AddEventListener("reset", value); } }
-    public Action<Event>? OnResize { set { if (value is not null) AddEventListener("resize", value); } }
-    public Action<Event>? OnScroll { set { if (value is not null) AddEventListener("scroll", value); } }
-    public Action<Event>? OnScrollend { set { if (value is not null) AddEventListener("scrollend", value); } }
-    public Action<Event>? OnScrollSnapChange { set { if (value is not null) AddEventListener("scrollsnapchange", value); } }
-    public Action<Event>? OnScrollSnapChanging { set { if (value is not null) AddEventListener("scrollsnapchanging", value); } }
-    public Action<Event>? OnSearch { set { if (value is not null) AddEventListener("search", value); } }
-    public Action<Event>? OnSecurityPolicyViolation { set { if (value is not null) AddEventListener("securitypolicyviolation", value); } }
-    public Action<Event>? OnSeeked { set { if (value is not null) AddEventListener("seeked", value); } }
-    public Action<Event>? OnSeeking { set { if (value is not null) AddEventListener("seeking", value); } }
-    public Action<Event>? OnSelect { set { if (value is not null) AddEventListener("select", value); } }
-    public Action<Event>? OnSelectionChange { set { if (value is not null) AddEventListener("selectionchange", value); } }
-    public Action<Event>? OnSelectStart { set { if (value is not null) AddEventListener("selectstart", value); } }
-    public Action<Event>? OnSlotChange { set { if (value is not null) AddEventListener("slotchange", value); } }
-    public Action<Event>? OnStalled { set { if (value is not null) AddEventListener("stalled", value); } }
-    public Action<Event>? OnStorage { set { if (value is not null) AddEventListener("storage", value); } }
-    public Action<Event>? OnSubmit { set { if (value is not null) AddEventListener("submit", value); } }
-    public Action<Event>? OnSuspend { set { if (value is not null) AddEventListener("suspend", value); } }
-    public Action<Event>? OnTimeUpdate { set { if (value is not null) AddEventListener("timeupdate", value); } }
-    public Action<Event>? OnToggle { set { if (value is not null) AddEventListener("toggle", value); } }
-    public Action<Event>? OnTransitionCancel { set { if (value is not null) AddEventListener("transitioncancel", value); } }
-    public Action<Event>? OnTransitionEnd { set { if (value is not null) AddEventListener("transitionend", value); } }
-    public Action<Event>? OnTransitionRun { set { if (value is not null) AddEventListener("transitionrun", value); } }
-    public Action<Event>? OnTransitionStart { set { if (value is not null) AddEventListener("transitionstart", value); } }
-    public Action<Event>? OnUnhandledRejection { set { if (value is not null) AddEventListener("unhandledrejection", value); } }
-    public Action<Event>? OnUnload { set { if (value is not null) AddEventListener("unload", value); } }
-    public Action<Event>? OnVolumeChange { set { if (value is not null) AddEventListener("volumechange", value); } }
-    public Action<Event>? OnWaiting { set { if (value is not null) AddEventListener("waiting", value); } }
-    public Action<Event>? OnWheel { set { if (value is not null) AddEventListener("wheel", value); } }
+    public WindowBuilder AddEventListener(string type, Action<Event>? listener, string? format = null)
+        => AddEventListener(type, listener, false, format);
+
+    private WindowBuilder AddEventListener(
+        string type, 
+        Action<Event>? listener, 
+        bool isOnEvent = false,
+        string? format = null)
+    {
+        listeners.TryGetValue(type, out var listenerSet);
+
+        if (isOnEvent)
+        {
+            // Example: "OnClick" => "click"
+            type = type[2..].ToLower();
+
+            // Setting multiple listeners using OnEvents like `window.OnClick = ...` 
+            // does not create multiple listeners, it replaces the pre-existing OnEvent, if any.
+            listenerSet?.RemoveAll(l => l.IsOnEvent);
+        }
+
+        // This approach also ensures listeners are called in the proper order.  For example:
+        //   window.OnClick = e => console.log("click1");
+        //   window.AddEventListener("click", e => console.log("click2"));
+        //   window.OnClick = e => null;
+        //   window.OnClick = e => console.log("click3");
+        //   window.AddEventListener("click", e => console.log("click4"));
+        // Outputs:
+        //   click2
+        //   click3
+        //   click4
+
+        if (listener is not null)
+        {
+            var item = new EventListener(listener, format, isOnEvent);
+            if (listenerSet is null)
+            {
+                listeners[type] = [item];
+            }
+            else
+            {
+                listenerSet.Add(item);
+            }
+        }
+
+        return this;
+    }
 }

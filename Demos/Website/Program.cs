@@ -93,9 +93,6 @@ window.AddEventListener("click", e =>
     Console.WriteLine(e.AltKey);
 });
 
-window.OnAbort = e => Console.WriteLine(e.AltKey);
-
-
 
 
 app.Map("/x01", () => $"""
