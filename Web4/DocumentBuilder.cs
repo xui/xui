@@ -6,6 +6,7 @@ namespace Web4;
 public class DocumentBuilder :
     IEventListeners,
     IAnimationEventListeners,
+    IClipboardListeners,
     IKeyboardEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
@@ -19,6 +20,10 @@ public class DocumentBuilder :
     public Action<Aliases.Animation>? OnAnimationEnd { set => AddEventListener(nameof(OnAnimationEnd), value, true); }
     public Action<Aliases.Animation>? OnAnimationIteration { set => AddEventListener(nameof(OnAnimationIteration), value, true); }
     public Action<Aliases.Animation>? OnAnimationStart { set => AddEventListener(nameof(OnAnimationStart), value, true); }
+
+    public Action<Event>? OnCopy { set => AddEventListener(nameof(OnCopy), value, true); }
+    public Action<Event>? OnCut { set => AddEventListener(nameof(OnCut), value, true); }
+    public Action<Event>? OnPaste { set => AddEventListener(nameof(OnPaste), value, true); }
 
     public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
     public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
