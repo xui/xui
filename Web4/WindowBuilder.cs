@@ -12,7 +12,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     IEventListeners,
     IAnimationEventListeners,
     IClipboardListeners,
-    IKeyboardEventListeners
+    IKeyboardEventListeners,
+    ITransitionEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
 
@@ -34,6 +35,11 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
 
     public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
     public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
+
+    public Action<Aliases.Transition>? OnTransitionCancel { set => AddEventListener(nameof(OnTransitionCancel), value, true); }
+    public Action<Aliases.Transition>? OnTransitionEnd { set => AddEventListener(nameof(OnTransitionEnd), value, true); }
+    public Action<Aliases.Transition>? OnTransitionRun { set => AddEventListener(nameof(OnTransitionRun), value, true); }
+    public Action<Aliases.Transition>? OnTransitionStart { set => AddEventListener(nameof(OnTransitionStart), value, true); }
 
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
