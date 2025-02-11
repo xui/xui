@@ -4,15 +4,22 @@ using Web4.EventListeners;
 namespace Web4;
 
 public class DocumentBuilder :
+    IEventListeners,
     IAnimationEventListeners,
     IKeyboardEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
 
+    public Action<Event>? OnBeforeInput { set => AddEventListener(nameof(OnBeforeInput), value, true); }
+    public Action<Event>? OnContentVisibilityAutoStateChange { set => AddEventListener(nameof(OnContentVisibilityAutoStateChange), value, true); }
+    public Action<Event>? OnInput { set => AddEventListener(nameof(OnInput), value, true); }
+    public Action<Event>? OnSecurityPolicyViolation { set => AddEventListener(nameof(OnSecurityPolicyViolation), value, true); }
+
     public Action<Aliases.Animation>? OnAnimationCancel { set => AddEventListener(nameof(OnAnimationCancel), value, true); }
     public Action<Aliases.Animation>? OnAnimationEnd { set => AddEventListener(nameof(OnAnimationEnd), value, true); }
     public Action<Aliases.Animation>? OnAnimationIteration { set => AddEventListener(nameof(OnAnimationIteration), value, true); }
     public Action<Aliases.Animation>? OnAnimationStart { set => AddEventListener(nameof(OnAnimationStart), value, true); }
+
     public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
     public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
 
