@@ -7,6 +7,7 @@ public class DocumentBuilder :
     IEventListeners,
     IAnimationEventListeners,
     IClipboardListeners,
+    IDragEventListeners,
     IKeyboardEventListeners,
     ITransitionEventListeners
 {
@@ -26,6 +27,14 @@ public class DocumentBuilder :
     public Action<Event>? OnCut { set => AddEventListener(nameof(OnCut), value, true); }
     public Action<Event>? OnPaste { set => AddEventListener(nameof(OnPaste), value, true); }
 
+    public Action<Aliases.Drag>? OnDrag { set => AddEventListener(nameof(OnDrag), value, true); }
+    public Action<Aliases.Drag>? OnDragEnd { set => AddEventListener(nameof(OnDragEnd), value, true); }
+    public Action<Aliases.Drag>? OnDragEnter { set => AddEventListener(nameof(OnDragEnter), value, true); }
+    public Action<Aliases.Drag>? OnDragLeave { set => AddEventListener(nameof(OnDragLeave), value, true); }
+    public Action<Aliases.Drag>? OnDragOver { set => AddEventListener(nameof(OnDragOver), value, true); }
+    public Action<Aliases.Drag>? OnDragStart { set => AddEventListener(nameof(OnDragStart), value, true); }
+    public Action<Aliases.Drag>? OnDrop { set => AddEventListener(nameof(OnDrop), value, true); }
+    
     public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
     public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
 
