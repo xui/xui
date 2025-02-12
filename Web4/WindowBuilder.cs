@@ -13,7 +13,12 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     IAnimationEventListeners,
     IClipboardListeners,
     IDragEventListeners,
+    IFocusEventListeners,
     IKeyboardEventListeners,
+    IMouseEventListeners,
+    IPointerEventListeners,
+    IScrollEventListeners,
+    ITouchEventListeners,
     ITransitionEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
@@ -25,30 +30,66 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     public Action<Event>? OnInput { set => AddEventListener(nameof(OnInput), value, true); }
     public Action<Event>? OnSecurityPolicyViolation { set => AddEventListener(nameof(OnSecurityPolicyViolation), value, true); }
 
-    public Action<Aliases.Animation>? OnAnimationCancel { set => AddEventListener(nameof(OnAnimationCancel), value, true); }
-    public Action<Aliases.Animation>? OnAnimationEnd { set => AddEventListener(nameof(OnAnimationEnd), value, true); }
-    public Action<Aliases.Animation>? OnAnimationIteration { set => AddEventListener(nameof(OnAnimationIteration), value, true); }
-    public Action<Aliases.Animation>? OnAnimationStart { set => AddEventListener(nameof(OnAnimationStart), value, true); }
+    public Action<Event.Animation>? OnAnimationCancel { set => AddEventListener(nameof(OnAnimationCancel), value, true); }
+    public Action<Event.Animation>? OnAnimationEnd { set => AddEventListener(nameof(OnAnimationEnd), value, true); }
+    public Action<Event.Animation>? OnAnimationIteration { set => AddEventListener(nameof(OnAnimationIteration), value, true); }
+    public Action<Event.Animation>? OnAnimationStart { set => AddEventListener(nameof(OnAnimationStart), value, true); }
 
     public Action<Event>? OnCopy { set => AddEventListener(nameof(OnCopy), value, true); }
     public Action<Event>? OnCut { set => AddEventListener(nameof(OnCut), value, true); }
     public Action<Event>? OnPaste { set => AddEventListener(nameof(OnPaste), value, true); }
 
-    public Action<Aliases.Drag>? OnDrag { set => AddEventListener(nameof(OnDrag), value, true); }
-    public Action<Aliases.Drag>? OnDragEnd { set => AddEventListener(nameof(OnDragEnd), value, true); }
-    public Action<Aliases.Drag>? OnDragEnter { set => AddEventListener(nameof(OnDragEnter), value, true); }
-    public Action<Aliases.Drag>? OnDragLeave { set => AddEventListener(nameof(OnDragLeave), value, true); }
-    public Action<Aliases.Drag>? OnDragOver { set => AddEventListener(nameof(OnDragOver), value, true); }
-    public Action<Aliases.Drag>? OnDragStart { set => AddEventListener(nameof(OnDragStart), value, true); }
-    public Action<Aliases.Drag>? OnDrop { set => AddEventListener(nameof(OnDrop), value, true); }
+    public Action<Event.Drag>? OnDrag { set => AddEventListener(nameof(OnDrag), value, true); }
+    public Action<Event.Drag>? OnDragEnd { set => AddEventListener(nameof(OnDragEnd), value, true); }
+    public Action<Event.Drag>? OnDragEnter { set => AddEventListener(nameof(OnDragEnter), value, true); }
+    public Action<Event.Drag>? OnDragLeave { set => AddEventListener(nameof(OnDragLeave), value, true); }
+    public Action<Event.Drag>? OnDragOver { set => AddEventListener(nameof(OnDragOver), value, true); }
+    public Action<Event.Drag>? OnDragStart { set => AddEventListener(nameof(OnDragStart), value, true); }
+    public Action<Event.Drag>? OnDrop { set => AddEventListener(nameof(OnDrop), value, true); }
 
-    public Action<Aliases.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
-    public Action<Aliases.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
+    public Action<Event.Focus>? OnBlur { set => AddEventListener(nameof(OnBlur), value, true); }
+    public Action<Event.Focus>? OnFocus { set => AddEventListener(nameof(OnFocus), value, true); }
+    public Action<Event.Focus>? OnFocusIn { set => AddEventListener(nameof(OnFocusIn), value, true); }
+    public Action<Event.Focus>? OnFocusOut { set => AddEventListener(nameof(OnFocusOut), value, true); }
 
-    public Action<Aliases.Transition>? OnTransitionCancel { set => AddEventListener(nameof(OnTransitionCancel), value, true); }
-    public Action<Aliases.Transition>? OnTransitionEnd { set => AddEventListener(nameof(OnTransitionEnd), value, true); }
-    public Action<Aliases.Transition>? OnTransitionRun { set => AddEventListener(nameof(OnTransitionRun), value, true); }
-    public Action<Aliases.Transition>? OnTransitionStart { set => AddEventListener(nameof(OnTransitionStart), value, true); }
+    public Action<Event.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
+    public Action<Event.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
+
+    public Action<Event.Mouse>? OnAuxClick { set => AddEventListener(nameof(OnAuxClick), value, true); }
+    public Action<Event.Mouse>? OnClick { set => AddEventListener(nameof(OnClick), value, true); }
+    public Action<Event.Mouse>? OnContextMenu { set => AddEventListener(nameof(OnContextMenu), value, true); }
+    public Action<Event.Mouse>? OnDblClick { set => AddEventListener(nameof(OnDblClick), value, true); }
+    public Action<Event.Mouse>? OnMouseDown { set => AddEventListener(nameof(OnMouseDown), value, true); }
+    public Action<Event.Mouse>? OnMouseEnter { set => AddEventListener(nameof(OnMouseEnter), value, true); }
+    public Action<Event.Mouse>? OnMouseLeave { set => AddEventListener(nameof(OnMouseLeave), value, true); }
+    public Action<Event.Mouse>? OnMouseMove { set => AddEventListener(nameof(OnMouseMove), value, true); }
+    public Action<Event.Mouse>? OnMouseOut { set => AddEventListener(nameof(OnMouseOut), value, true); }
+    public Action<Event.Mouse>? OnMouseOver { set => AddEventListener(nameof(OnMouseOver), value, true); }
+    public Action<Event.Mouse>? OnMouseUp { set => AddEventListener(nameof(OnMouseUp), value, true); }
+
+    public Action<Event.Pointer>? OnGotPointerCapture { set => AddEventListener(nameof(OnGotPointerCapture), value, true); }
+    public Action<Event.Pointer>? OnLostPointerCapture { set => AddEventListener(nameof(OnLostPointerCapture), value, true); }
+    public Action<Event.Pointer>? OnPointerCancel { set => AddEventListener(nameof(OnPointerCancel), value, true); }
+    public Action<Event.Pointer>? OnPointerDown { set => AddEventListener(nameof(OnPointerDown), value, true); }
+    public Action<Event.Pointer>? OnPointerEnter { set => AddEventListener(nameof(OnPointerEnter), value, true); }
+    public Action<Event.Pointer>? OnPointerLeave { set => AddEventListener(nameof(OnPointerLeave), value, true); }
+    public Action<Event.Pointer>? OnPointerMove { set => AddEventListener(nameof(OnPointerMove), value, true); }
+    public Action<Event.Pointer>? OnPointerOut { set => AddEventListener(nameof(OnPointerOut), value, true); }
+    public Action<Event.Pointer>? OnPointerOver { set => AddEventListener(nameof(OnPointerOver), value, true); }
+    public Action<Event.Pointer>? OnPointerUp { set => AddEventListener(nameof(OnPointerUp), value, true); }
+
+    public Action<Event>? OnScroll { set => AddEventListener(nameof(OnScroll), value, true); }
+    public Action<Event>? OnScrollEnd { set => AddEventListener(nameof(OnScrollEnd), value, true); }
+
+    public Action<Event.Touch>? OnToucheCancel { set => AddEventListener(nameof(OnToucheCancel), value, true); }
+    public Action<Event.Touch>? OnTouchEnd { set => AddEventListener(nameof(OnTouchEnd), value, true); }
+    public Action<Event.Touch>? OnTouchMove { set => AddEventListener(nameof(OnTouchMove), value, true); }
+    public Action<Event.Touch>? OnTouchStart { set => AddEventListener(nameof(OnTouchStart), value, true); }
+
+    public Action<Event.Transition>? OnTransitionCancel { set => AddEventListener(nameof(OnTransitionCancel), value, true); }
+    public Action<Event.Transition>? OnTransitionEnd { set => AddEventListener(nameof(OnTransitionEnd), value, true); }
+    public Action<Event.Transition>? OnTransitionRun { set => AddEventListener(nameof(OnTransitionRun), value, true); }
+    public Action<Event.Transition>? OnTransitionStart { set => AddEventListener(nameof(OnTransitionStart), value, true); }
 
     public WindowBuilder MapGet(
         [StringSyntax("Route")] string pattern, 
@@ -66,6 +107,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
         return this;
     }
 
+    public WindowBuilder AddEventListener(string type, Action listener) => AddEventListener(type, e => listener(), null);
     public WindowBuilder AddEventListener(string type, Action<Event.Animation> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.Composition> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.DeviceMotion> listener) => AddEventListener(type, listener, null);
