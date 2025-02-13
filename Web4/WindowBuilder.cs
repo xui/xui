@@ -12,12 +12,16 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     IEventListeners,
     IAnimationEventListeners,
     IClipboardListeners,
+    IContentVisibilityEventListeners,
     IDragEventListeners,
     IFocusEventListeners,
+    IFormDataEventListeners,
     IKeyboardEventListeners,
     IMouseEventListeners,
     IPointerEventListeners,
     IScrollEventListeners,
+    ISubmitEventListeners,
+    IToggleEventListeners,
     ITouchEventListeners,
     ITransitionEventListeners
 {
@@ -26,18 +30,28 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     public DocumentBuilder Document { get; } = new();
 
     public Action<Event>? OnBeforeInput { set => AddEventListener(nameof(OnBeforeInput), value, true); }
-    public Action<Event>? OnContentVisibilityAutoStateChange { set => AddEventListener(nameof(OnContentVisibilityAutoStateChange), value, true); }
+    public Action<Event>? OnCancel { set => AddEventListener(nameof(OnCancel), value, true); }
+    public Action<Event>? OnChange { set => AddEventListener(nameof(OnChange), value, true); }
+    public Action<Event>? OnCueChange { set => AddEventListener(nameof(OnCueChange), value, true); }
     public Action<Event>? OnInput { set => AddEventListener(nameof(OnInput), value, true); }
+    public Action<Event>? OnInvalid { set => AddEventListener(nameof(OnInvalid), value, true); }
+    public Action<Event>? OnLoad { set => AddEventListener(nameof(OnLoad), value, true); }
+    public Action<Event>? OnReset { set => AddEventListener(nameof(OnReset), value, true); }
+    public Action<Event>? OnSelect { set => AddEventListener(nameof(OnSelect), value, true); }
     public Action<Event>? OnSecurityPolicyViolation { set => AddEventListener(nameof(OnSecurityPolicyViolation), value, true); }
+    public Action<Event>? OnSelectStart { set => AddEventListener(nameof(OnSelectStart), value, true); }
+    public Action<Event>? OnSlotChange { set => AddEventListener(nameof(OnSlotChange), value, true); }
 
     public Action<Event.Animation>? OnAnimationCancel { set => AddEventListener(nameof(OnAnimationCancel), value, true); }
     public Action<Event.Animation>? OnAnimationEnd { set => AddEventListener(nameof(OnAnimationEnd), value, true); }
     public Action<Event.Animation>? OnAnimationIteration { set => AddEventListener(nameof(OnAnimationIteration), value, true); }
     public Action<Event.Animation>? OnAnimationStart { set => AddEventListener(nameof(OnAnimationStart), value, true); }
 
-    public Action<Event>? OnCopy { set => AddEventListener(nameof(OnCopy), value, true); }
-    public Action<Event>? OnCut { set => AddEventListener(nameof(OnCut), value, true); }
-    public Action<Event>? OnPaste { set => AddEventListener(nameof(OnPaste), value, true); }
+    public Action<Event.Clipboard>? OnCopy { set => AddEventListener(nameof(OnCopy), value, true); }
+    public Action<Event.Clipboard>? OnCut { set => AddEventListener(nameof(OnCut), value, true); }
+    public Action<Event.Clipboard>? OnPaste { set => AddEventListener(nameof(OnPaste), value, true); }
+
+    public Action<Event.ContentVisibilityAutoStateChange>? OnContentVisibilityAutoStateChange { set => AddEventListener(nameof(OnContentVisibilityAutoStateChange), value, true); }
 
     public Action<Event.Drag>? OnDrag { set => AddEventListener(nameof(OnDrag), value, true); }
     public Action<Event.Drag>? OnDragEnd { set => AddEventListener(nameof(OnDragEnd), value, true); }
@@ -51,6 +65,8 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     public Action<Event.Focus>? OnFocus { set => AddEventListener(nameof(OnFocus), value, true); }
     public Action<Event.Focus>? OnFocusIn { set => AddEventListener(nameof(OnFocusIn), value, true); }
     public Action<Event.Focus>? OnFocusOut { set => AddEventListener(nameof(OnFocusOut), value, true); }
+
+    public Action<Event.FormData>? OnFormData { set => AddEventListener(nameof(OnFormData), value, true); }
 
     public Action<Event.Keyboard>? OnKeyDown { set => AddEventListener(nameof(OnKeyDown), value, true); }
     public Action<Event.Keyboard>? OnKeyUp { set => AddEventListener(nameof(OnKeyUp), value, true); }
@@ -81,7 +97,12 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     public Action<Event>? OnScroll { set => AddEventListener(nameof(OnScroll), value, true); }
     public Action<Event>? OnScrollEnd { set => AddEventListener(nameof(OnScrollEnd), value, true); }
 
-    public Action<Event.Touch>? OnToucheCancel { set => AddEventListener(nameof(OnToucheCancel), value, true); }
+    public Action<Event.Submit>? OnSubmit { set => AddEventListener(nameof(OnSubmit), value, true); }
+
+    public Action<Event.Toggle>? OnBeforeToggle { set => AddEventListener(nameof(OnBeforeToggle), value, true); }
+    public Action<Event.Toggle>? OnToggle { set => AddEventListener(nameof(OnToggle), value, true); }
+
+    public Action<Event.Touch>? OnTouchCancel { set => AddEventListener(nameof(OnTouchCancel), value, true); }
     public Action<Event.Touch>? OnTouchEnd { set => AddEventListener(nameof(OnTouchEnd), value, true); }
     public Action<Event.Touch>? OnTouchMove { set => AddEventListener(nameof(OnTouchMove), value, true); }
     public Action<Event.Touch>? OnTouchStart { set => AddEventListener(nameof(OnTouchStart), value, true); }
@@ -107,7 +128,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
         return this;
     }
 
-    public WindowBuilder AddEventListener(string type, Action listener) => AddEventListener(type, e => listener(), null);
+    public WindowBuilder AddEventListener(string type, Action listener) => AddEventListener(type, e => listener(), string.Empty);
     public WindowBuilder AddEventListener(string type, Action<Event.Animation> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.Composition> listener) => AddEventListener(type, listener, null);
     public WindowBuilder AddEventListener(string type, Action<Event.DeviceMotion> listener) => AddEventListener(type, listener, null);

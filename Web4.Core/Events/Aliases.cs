@@ -7,19 +7,30 @@ namespace Web4.Events;
 public interface Aliases
 {
     public interface Animation : IAnimationEvent { }
+    public interface BeforeUnload : IBeforeUnloadEvent { }
+    public interface Clipboard : IClipboardEvent { }
     public interface Composition : ICompositionEvent { }
+    public interface ContentVisibilityAutoStateChange : IContentVisibilityAutoStateChangeEvent { }
     public interface DeviceMotion : IDeviceMotionEvent { }
     public interface DeviceOrientation : IDeviceOrientationEvent { }
     public interface Drag : IDragEvent { }
     public interface Error : IErrorEvent { }
     public interface Focus : IFocusEvent { }
+    public interface FormData : IFormDataEvent { }
+    public interface Gamepad : IGamepadEvent { }
     public interface HashChange: IHashChangeEvent { }
     public interface Input<T> : IInputEvent<T> { }
     public interface Keyboard : IKeyboardEvent { }
+    public interface Message : IMessageEvent { }
     public interface Mouse : IMouseEvent { }
+    public interface PageTransition : IPageTransitionEvent { }
     public interface Pointer: IPointerEvent { }
+    public interface PopState : IPopStateEvent { }
     public interface Progress : IProgressEvent { }
+    public interface PromiseRejection : IPromiseRejectionEvent { }
+    public interface Storage : IStorageEvent { }
     public interface Submit : ISubmitEvent { }
+    public interface Toggle : IToggleEvent { }
     public interface Touch : ITouchEvent { }
     public interface Transition : ITransitionEvent { }
     public interface Wheel : IWheelEvent { }

@@ -5,7 +5,7 @@ public interface ITouchEventListeners
     /// <summary>
     /// Fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many touch points are created).
     /// </summary>
-    Action<Event.Touch>? OnToucheCancel { set; }
+    Action<Event.Touch>? OnTouchCancel { set; }
     
     /// <summary>
     /// Fired when one or more touch points are removed from the touch surface.
