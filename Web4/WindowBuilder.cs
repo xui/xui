@@ -9,6 +9,7 @@ using Web4.EventListeners;
 namespace Web4;
 
 public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) : 
+    IWindowEventListeners,
     IEventListeners,
     IAnimationEventListeners,
     IClipboardListeners,
@@ -28,6 +29,28 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     private readonly Dictionary<string, List<EventListener>> listeners = [];
 
     public DocumentBuilder Document { get; } = new();
+
+    public Action<Event>? OnAfterPrint { set => AddEventListener(nameof(OnAfterPrint), value, true); }
+    public Action<Event>? OnBeforePrint { set => AddEventListener(nameof(OnBeforePrint), value, true); }
+    public Action<Event.BeforeUnload>? OnBeforeUnload { set => AddEventListener(nameof(OnBeforeUnload), value, true); }
+    public Action<Event.DeviceMotion>? OnDeviceMotion { set => AddEventListener(nameof(OnDeviceMotion), value, true); }
+    public Action<Event.DeviceOrientation>? OnDeviceOrientation { set => AddEventListener(nameof(OnDeviceOrientation), value, true); }
+    public Action<Event.DeviceOrientation>? OnDeviceOrientationAbsolute { set => AddEventListener(nameof(OnDeviceOrientationAbsolute), value, true); }
+    public Action<Event.Gamepad>? OnGamepadConnected { set => AddEventListener(nameof(OnGamepadConnected), value, true); }
+    public Action<Event.Gamepad>? OnGamepadDisconnected { set => AddEventListener(nameof(OnGamepadDisconnected), value, true); }
+    public Action<Event.HashChange>? OnHashChange { set => AddEventListener(nameof(OnHashChange), value, true); }
+    public Action<Event>? OnLanguageChange { set => AddEventListener(nameof(OnLanguageChange), value, true); }
+    public Action<Event.Message>? OnMessage { set => AddEventListener(nameof(OnMessage), value, true); }
+    public Action<Event.Message>? OnMessageError { set => AddEventListener(nameof(OnMessageError), value, true); }
+    public Action<Event>? OnOffline { set => AddEventListener(nameof(OnOffline), value, true); }
+    public Action<Event>? OnOnline { set => AddEventListener(nameof(OnOnline), value, true); }
+    public Action<Event.PageTransition>? OnPageHide { set => AddEventListener(nameof(OnPageHide), value, true); }
+    public Action<Event.PageTransition>? OnPageShow { set => AddEventListener(nameof(OnPageShow), value, true); }
+    public Action<Event.PopState>? OnPopState { set => AddEventListener(nameof(OnPopState), value, true); }
+    public Action<Event.PromiseRejection>? OnRejectionHandled { set => AddEventListener(nameof(OnRejectionHandled), value, true); }
+    public Action<Event>? OnResize { set => AddEventListener(nameof(OnResize), value, true); }
+    public Action<Event.Storage>? OnStorage { set => AddEventListener(nameof(OnStorage), value, true); }
+    public Action<Event.PromiseRejection>? OnUnhandledRejection { set => AddEventListener(nameof(OnUnhandledRejection), value, true); }
 
     public Action<Event>? OnBeforeInput { set => AddEventListener(nameof(OnBeforeInput), value, true); }
     public Action<Event>? OnCancel { set => AddEventListener(nameof(OnCancel), value, true); }

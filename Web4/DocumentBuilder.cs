@@ -5,6 +5,7 @@ using System.Drawing;
 namespace Web4;
 
 public class DocumentBuilder :
+    IDocumentEventListeners,
     IEventListeners,
     IAnimationEventListeners,
     IClipboardListeners,
@@ -22,6 +23,10 @@ public class DocumentBuilder :
     ITransitionEventListeners
 {
     private readonly Dictionary<string, List<EventListener>> listeners = [];
+
+    public Action<Event>? OnReadStateChange { set => AddEventListener(nameof(OnReadStateChange), value, true); }
+    public Action<Event>? OnSelectionChange { set => AddEventListener(nameof(OnSelectionChange), value, true); }
+    public Action<Event>? OnVisibilityChange { set => AddEventListener(nameof(OnVisibilityChange), value, true); }
 
     public Action<Event>? OnBeforeInput { set => AddEventListener(nameof(OnBeforeInput), value, true); }
     public Action<Event>? OnCancel { set => AddEventListener(nameof(OnCancel), value, true); }
