@@ -306,7 +306,8 @@ public class HttpXComposer(IBufferWriter<byte> writer) : DefaultComposer(writer)
             }
 
             var l = location;
-            const ws = new WebSocket(`ws://${l.host}${l.pathname}`);
+            var p = window.location.protocol.replace("http","ws");
+            const ws = new WebSocket(`${p}//${l.host}${l.pathname}`);
             ws.onopen = (event) => { console.debug(`onopen`, event); };
             ws.onclose = (event) => { console.debug(`onclose`, event); };
             ws.onerror = (event) => { console.error(`onerror`, event); };
