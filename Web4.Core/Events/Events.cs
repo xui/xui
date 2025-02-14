@@ -16,6 +16,7 @@ public interface ITouchEvent                : IUIEvent, Modifiers, Touches { }
 public interface IUIEvent                   : IEvent, Detail { }
 public interface IAnimationEvent            : IEvent, Animation { }
 public interface IBeforeUnloadEvent         : IEvent { }
+public interface IContentVisibilityAutoStateChangeEvent : IEvent, Skipped { }
 public interface IDeviceMotionEvent         : IEvent, DeviceMotion { }
 public interface IDeviceOrientationEvent    : IEvent, DeviceOrientation { }
 public interface IErrorEvent                : IEvent, Error { }
@@ -28,7 +29,6 @@ public interface IToggleEvent               : IEvent, States { }
 public interface ITransitionEvent           : IEvent, Animation { }
 
 // TODO: Implement
-public interface IContentVisibilityAutoStateChangeEvent : IEvent { }
 public interface IGamepadEvent              : IEvent { }
 
 public interface IClipboardEvent            : IEvent { }

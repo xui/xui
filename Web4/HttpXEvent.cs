@@ -76,6 +76,7 @@ internal partial record class HttpXEvent(
     double? ScreenX = null,
     double? ScreenY = null,
     bool? ShiftKey = null,
+    bool? Skipped = null,
     EventTarget? Submitter = null,
     double? TangentialPressure = null,
     EventTarget? Target = null,
@@ -173,6 +174,7 @@ internal partial record class HttpXEvent(
     double IScreenXY.ScreenX => ScreenX ?? default;
     double IScreenXY.ScreenY => ScreenY ?? default;
     bool IModifierShift.ShiftKey => ShiftKey ?? default;
+    bool ISkipped.Skipped => Skipped ?? default;
     EventTarget ISubmitter.Submitter => Submitter ?? EventTarget.Empty;
     double IPressures.TangentialPressure => TangentialPressure ?? default;
     EventTarget ITarget.Target => Target ?? EventTarget.Empty;

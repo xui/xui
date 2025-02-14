@@ -66,6 +66,7 @@ public interface Aliases
         public interface Progress : IProgress { }
         public interface RelatedTarget: IRelatedTarget { }
         public interface ScreenXY : IScreenXY { }
+        public interface Skipped : ISkipped { }
         public interface States: IStates { }
         public interface Submitter : ISubmitter { }
         public interface Target : ITarget { }
