@@ -55,9 +55,11 @@ internal partial record class HttpXEvent(
     bool? MetaKey = null,
     double? MovementX = null,
     double? MovementY = null,
+    string? NewState = null,
     string? NewUrl = null,
     double? OffsetX = null,
     double? OffsetY = null,
+    string? OldState = null,
     string? OldUrl = null,
     double? PageX = null,
     double? PageY = null,
@@ -149,9 +151,11 @@ internal partial record class HttpXEvent(
     bool IModifierMeta.MetaKey => MetaKey ?? default;
     double IMovementXY.MovementX => MovementX ?? default;
     double IMovementXY.MovementY => MovementY ?? default;
+    string IStates.NewState => NewState ?? string.Empty;
     string IHashChange.NewUrl => NewUrl ?? string.Empty;
     double IOffsetXY.OffsetX => OffsetX ?? default;
     double IOffsetXY.OffsetY => OffsetY ?? default;
+    string IStates.OldState => OldState ?? string.Empty;
     string IHashChange.OldUrl => OldUrl ?? string.Empty;
     double IPageXY.PageX => PageX ?? default;
     double IPageXY.PageY => PageY ?? default;
