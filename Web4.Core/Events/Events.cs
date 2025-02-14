@@ -29,10 +29,9 @@ public interface IToggleEvent               : IEvent, States { }
 public interface ITransitionEvent           : IEvent, Animation { }
 
 // TODO: Implement
-public interface IGamepadEvent              : IEvent { }
-
 public interface IClipboardEvent            : IEvent { }
 public interface IFormDataEvent             : IEvent { }
+public interface IGamepadEvent              : IEvent { }
 public interface IMessageEvent              : IEvent { }
 public interface IPopStateEvent             : IEvent { }
 public interface IPromiseRejectionEvent     : IEvent { }
