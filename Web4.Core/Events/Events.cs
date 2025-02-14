@@ -22,6 +22,7 @@ public interface IErrorEvent                : IEvent, Error { }
 public interface IHashChangeEvent           : IEvent, HashChange { }
 public interface IPageTransitionEvent       : IEvent, Persisted { }
 public interface IProgressEvent             : IEvent, Progress { }
+public interface IStorageEvent              : IEvent, Length { }
 public interface ISubmitEvent               : IEvent, Submitter { }
 public interface IToggleEvent               : IEvent, States { }
 public interface ITransitionEvent           : IEvent, Animation { }
@@ -29,7 +30,6 @@ public interface ITransitionEvent           : IEvent, Animation { }
 // TODO: Implement
 public interface IContentVisibilityAutoStateChangeEvent : IEvent { }
 public interface IGamepadEvent              : IEvent { }
-public interface IStorageEvent              : IEvent { }
 
 public interface IClipboardEvent            : IEvent { }
 public interface IFormDataEvent             : IEvent { }

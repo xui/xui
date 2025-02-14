@@ -51,6 +51,7 @@ public interface Aliases
         public interface HashChange : IHashChange { }
         public interface IsComposing : IIsComposing { }
         public interface Keys : IKeys { }
+        public interface Length: ILength { }
         public interface ModifierAlt : IModifierAlt { }
         public interface ModifierCtrl : IModifierCtrl { }
         public interface ModifierMeta : IModifierMeta { }

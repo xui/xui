@@ -47,6 +47,7 @@ internal partial record class HttpXEvent(
     bool? IsPrimary = null,
     bool? IsTrusted = null,
     string? Key = null,
+    int? Length = null,
     bool? LengthComputable = null,
     int? LineNo = null,
     long? Loaded = null,
@@ -143,6 +144,7 @@ internal partial record class HttpXEvent(
     bool IPointer.IsPrimary => IsPrimary ?? default;
     bool IEvent.IsTrusted => IsTrusted ?? default;
     string IKeys.Key => Key ?? string.Empty;
+    int ILength.Length => Length ?? default;
     bool IProgress.LengthComputable => LengthComputable ?? default;
     int IError.LineNo => LineNo ?? default;
     long IProgress.Loaded => Loaded ?? default;
