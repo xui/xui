@@ -59,6 +59,7 @@ public interface Aliases
         public interface MovementXY : IMovementXY { }
         public interface OffsetXY : IOffsetXY { }
         public interface PageXY : IPageXY { }
+        public interface Persisted : IPersisted { }
         public interface Pointer : IPointer { }
         public interface Pressures : IPressures { }
         public interface Progress : IProgress { }

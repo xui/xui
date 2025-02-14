@@ -15,6 +15,7 @@ public interface ITouchEvent                : IUIEvent, Modifiers, Touches { }
 
 public interface IUIEvent                   : IEvent, Detail { }
 public interface IAnimationEvent            : IEvent, Animation { }
+public interface IBeforeUnloadEvent         : IEvent { }
 public interface IDeviceMotionEvent         : IEvent, DeviceMotion { }
 public interface IDeviceOrientationEvent    : IEvent, DeviceOrientation { }
 public interface IErrorEvent                : IEvent, Error { }
@@ -24,17 +25,17 @@ public interface ISubmitEvent               : IEvent, Submitter { }
 public interface ITransitionEvent           : IEvent, Animation { }
 
 // TODO: Implement
-public interface IBeforeUnloadEvent         : IEvent { }
-public interface IClipboardEvent            : IEvent { }
 public interface IContentVisibilityAutoStateChangeEvent : IEvent { }
-public interface IFormDataEvent             : IEvent { }
 public interface IGamepadEvent              : IEvent { }
-public interface IMessageEvent              : IEvent { }
-public interface IPageTransitionEvent       : IEvent { }
-public interface IPopStateEvent             : IEvent { }
+public interface IPageTransitionEvent       : IEvent, Persisted { }
 public interface IPromiseRejectionEvent     : IEvent { }
 public interface IStorageEvent              : IEvent { }
 public interface IToggleEvent               : IEvent { }
+
+public interface IMessageEvent              : IEvent { }
+public interface IClipboardEvent            : IEvent { }
+public interface IFormDataEvent             : IEvent { }
+public interface IPopStateEvent             : IEvent { }
 
 public interface IEvent : Target
 {

@@ -61,6 +61,7 @@ internal partial record class HttpXEvent(
     string? OldUrl = null,
     double? PageX = null,
     double? PageY = null,
+    bool? Persisted = null,
     int? PointerID = null,
     string? PointerType = null,
     double? Pressure = null,
@@ -154,6 +155,7 @@ internal partial record class HttpXEvent(
     string IHashChange.OldUrl => OldUrl ?? string.Empty;
     double IPageXY.PageX => PageX ?? default;
     double IPageXY.PageY => PageY ?? default;
+    bool IPersisted.Persisted => Persisted ?? default;
     int IPointer.PointerID => PointerID ?? default;
     string IPointer.PointerType => PointerType ?? string.Empty;
     double IPressures.Pressure => Pressure ?? default;
