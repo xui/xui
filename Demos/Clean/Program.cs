@@ -36,6 +36,8 @@ window.AddEventListener("click", e =>
     Console.WriteLine($"{e.X} {e.Y}");
 });
 
+window.Document.OnSelectionChange = e => Console.WriteLine($"{e.Type}");
+
 window.MapGet("/about", ctx => 
 {
     name = "Reset";
