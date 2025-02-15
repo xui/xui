@@ -422,7 +422,6 @@ void DoIt4(Event.Subsets.ModifierShift e)
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
 var composer = new DefaultComposer(null);
-var httpx = new HttpXComposer(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
 
