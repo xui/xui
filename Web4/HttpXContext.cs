@@ -40,17 +40,17 @@ public struct HttpXContext(WebSocketPipe? pipe)
         }
     }
 
-    public async Task ListenForEvents(Func<Html> html, CancellationToken cancellationToken)
+    public async Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(Pipe);
 
         await Task.WhenAll(
-            Receive(html), 
+            Receive(window), 
             Pipe.RunAsync(cancellationToken)
         );
     }
 
-    private async Task Receive(Func<Html> html)
+    private async Task Receive(WindowBuilder window)
     {
         if (Pipe is null)
             return;
@@ -69,7 +69,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
             Pipe.Input.AdvanceTo(result.Buffer.End);
 
-            if (html.GetKeyhole(key) is Func<Event?, Task> listener)
+            if (window.GetKeyhole(key) is Func<Event?, Task> listener)
             {
                 // UIThread.Run(async () => 
                 // {
@@ -84,7 +84,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
                 var isChanged = false;
                 // TODO: Surround with "batch" concept.
                 {
-                    var before = html.CaptureSnapshot();
+                    var before = window.CaptureSnapshot();
                     try
                     {
                         await listener(domEvent);
@@ -93,7 +93,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
                     {
                         Console.WriteLine(ex);
                     }
-                    var after = html.CaptureSnapshot();
+                    var after = window.CaptureSnapshot();
 
                     for (int i = 0; i < after.RootLength; i++)
                     {
@@ -163,7 +163,7 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
                 // TODO: State invalidations will not live here
                 if (isChanged)
-                    await html.DebugSnapshot(Pipe.Output);
+                    await window.DebugSnapshot(Pipe.Output);
             }
             else
             {

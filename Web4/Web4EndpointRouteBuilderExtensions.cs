@@ -75,7 +75,7 @@ public static class Web4EndpointRouteBuilderExtensions
         app.UseWebSockets();
 
         var group = app.MapGroup(pattern);
-        var window = new WindowBuilder(group);
+        var window = new WindowBuilder(group, html);
         group.Map(
             "/",
             async httpContext =>
@@ -90,7 +90,7 @@ public static class Web4EndpointRouteBuilderExtensions
                     using (var pipe = await WebSocketPipe.Upgrade(httpContext))
                     {
                         var httpxContext = new HttpXContext(pipe);
-                        await httpxContext.ListenForEvents(html, httpContext.RequestAborted);
+                        await httpxContext.ListenForEvents(window, httpContext.RequestAborted);
                     }
                 }
                 else if (
@@ -122,7 +122,9 @@ public static class Web4EndpointRouteBuilderExtensions
                     // by pushing DOM mutation instructions to the browser.
 
                     var pipeWriter = httpContext.Response.BodyWriter;
-                    await html.WriteAsync(pipeWriter, sentinels: true);
+                    var cancellationToken = httpContext.RequestAborted;
+                    var composer = new HttpXComposer(pipeWriter, window);
+                    await pipeWriter.WriteAsync(composer, $"{html()}", cancellationToken);
                 }
             }
         );
