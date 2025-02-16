@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace Web4;
 
-public class DocumentBuilder :
+public class DocumentBuilder(WindowBuilder window) :
     IDocumentEventListeners,
     IEventListeners,
     IAnimationEventListeners,
@@ -22,8 +22,6 @@ public class DocumentBuilder :
     ITouchEventListeners,
     ITransitionEventListeners
 {
-    private readonly Dictionary<string, List<EventListener>> listeners = [];
-
     public Action<Event>? OnReadStateChange { set => AddEventListener(nameof(OnReadStateChange), value, true); }
     public Action<Event>? OnSelectionChange { set => AddEventListener(nameof(OnSelectionChange), value, true); }
     public Action<Event>? OnVisibilityChange { set => AddEventListener(nameof(OnVisibilityChange), value, true); }
@@ -199,7 +197,7 @@ public class DocumentBuilder :
         bool isOnNotation = false,
         string? format = null)
     {
-        listeners.TryGetValue(type, out var listenerSet);
+        window.Listeners.TryGetValue(type, out var listenerSet);
 
         if (isOnNotation)
         {
@@ -227,7 +225,7 @@ public class DocumentBuilder :
             var item = new EventListener(listener, format, isOnNotation);
             if (listenerSet is null)
             {
-                listeners[type] = [item];
+                window.Listeners[type] = [item];
             }
             else
             {

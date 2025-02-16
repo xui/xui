@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Web4.Events;
 using Web4.EventListeners;
+using Web4.Composers;
+using System.IO.Pipelines;
 
 namespace Web4;
 
-public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) : 
+public class WindowBuilder : 
     IWindowEventListeners,
     IEventListeners,
     IAnimationEventListeners,
@@ -26,9 +28,19 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
     ITouchEventListeners,
     ITransitionEventListeners
 {
-    private readonly Dictionary<string, List<EventListener>> listeners = [];
+    private RouteGroupBuilder routeGroupBuilder;
+    private Func<Html> html;
 
-    public DocumentBuilder Document { get; } = new();
+    internal Dictionary<string, List<EventListener>> Listeners { get; } = [];
+
+    public DocumentBuilder Document { get; init; }
+
+    public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> html)
+    {
+        this.routeGroupBuilder = routeGroupBuilder;
+        this.html = html;
+        Document = new(this);
+    }
 
     public Action<Event>? OnAfterPrint { set => AddEventListener(nameof(OnAfterPrint), value, true); }
     public Action<Event>? OnBeforePrint { set => AddEventListener(nameof(OnBeforePrint), value, true); }
@@ -239,7 +251,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
         bool isOnEvent = false,
         string? format = null)
     {
-        listeners.TryGetValue(type, out var listenerSet);
+        Listeners.TryGetValue(type, out var listenerSet);
 
         if (isOnEvent)
         {
@@ -267,7 +279,7 @@ public class WindowBuilder(RouteGroupBuilder routeGroupBuilder) :
             var item = new EventListener(listener, format, isOnEvent);
             if (listenerSet is null)
             {
-                listeners[type] = [item];
+                Listeners[type] = [item];
             }
             else
             {
