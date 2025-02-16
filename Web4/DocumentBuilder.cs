@@ -196,12 +196,12 @@ public class DocumentBuilder :
     private DocumentBuilder AddEventListener(
         string type, 
         Action<Event>? listener, 
-        bool isOnEvent = false,
+        bool isOnNotation = false,
         string? format = null)
     {
         listeners.TryGetValue(type, out var listenerSet);
 
-        if (isOnEvent)
+        if (isOnNotation)
         {
             // Example: "OnClick" => "click"
             type = type[2..].ToLower();
@@ -224,7 +224,7 @@ public class DocumentBuilder :
 
         if (listener is not null)
         {
-            var item = new EventListener(listener, format, isOnEvent);
+            var item = new EventListener(listener, format, isOnNotation);
             if (listenerSet is null)
             {
                 listeners[type] = [item];
