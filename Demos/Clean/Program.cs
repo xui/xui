@@ -31,12 +31,14 @@ void OnClick(Event e)
     c++;
 }
 
-window.AddEventListener("click", e => 
-{
-    Console.WriteLine($"{e.X} {e.Y}");
-});
+window.OnClick = e => Console.WriteLine($"window.OnClick 0: {e}");
+window.AddEventListener("afterprint", (Event e) => Console.WriteLine($"afterprint: {e}"));
+window.AddEventListener("dblclick", () => Console.WriteLine("dblclick:"));
+window.AddEventListener("click", e => Console.WriteLine($"click: {e.X} {e.Y}"));
+window.OnClick = e => Console.WriteLine($"window.OnClick 1: {e}");
 
 window.Document.OnSelectionChange = e => Console.WriteLine($"{e.Type}");
+window.Document.AddEventListener("click", e => Console.WriteLine($"document.onclick: {e.X}"));
 
 window.MapGet("/about", ctx => 
 {

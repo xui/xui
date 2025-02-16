@@ -31,7 +31,8 @@ public class WindowBuilder :
     private readonly RouteGroupBuilder routeGroupBuilder;
     private readonly Func<Html> html;
 
-    internal Dictionary<string, List<EventListener>> Listeners { get; } = [];
+    internal record struct EventListener(string Html, Func<Event, Task> Listener, string? OnNotation = null);
+    internal List<EventListener> Listeners { get; } = [];
 
     public DocumentBuilder Document { get; init; }
 
@@ -243,52 +244,46 @@ public class WindowBuilder :
     public WindowBuilder AddEventListener(string type, Action<Event.Subsets.Y> listener) => AddEventListener(type, listener, Event.Subsets.Y.Format);
 
     public WindowBuilder AddEventListener(string type, Action<Event>? listener, string? format = null)
-        => AddEventListener(type, listener, false, format);
+        => AddEventListener(type, listener, false, false, format);
 
-    private WindowBuilder AddEventListener(
+    internal WindowBuilder AddEventListener(
         string type, 
         Action<Event>? listener, 
-        bool isOnEvent = false,
+        bool isOnNotation = false,
+        bool isDocument = false,
         string? format = null)
     {
-        Listeners.TryGetValue(type, out var listenerSet);
-
-        if (isOnEvent)
+        if (isOnNotation)
         {
             // Example: "OnClick" => "click"
             type = type[2..].ToLower();
 
-            // Setting multiple listeners using OnEvents like `window.OnClick = ...` 
-            // does not create multiple listeners, it replaces the pre-existing OnEvent, if any.
-            listenerSet?.RemoveAll(l => l.IsOnEvent);
+            //Listeners.Add($"");
         }
-
-        // This approach also ensures listeners are called in the proper order.  For example:
-        //   window.OnClick = e => console.log("click1");
-        //   window.AddEventListener("click", e => console.log("click2"));
-        //   window.OnClick = e => null;
-        //   window.OnClick = e => console.log("click3");
-        //   window.AddEventListener("click", e => console.log("click4"));
-        // Outputs:
-        //   click2
-        //   click3
-        //   click4
-
-        if (listener is not null)
+        else if (listener is not null)
         {
-            var item = new EventListener(listener, format, isOnEvent);
-            if (listenerSet is null)
-            {
-                Listeners[type] = [item];
-            }
-            else
-            {
-                listenerSet.Add(item);
-            }
+            var options = "{passive:true}";
+
+            Listeners.Add(new(
+                CreateListenerString(format, type, isDocument ? "document" : "window", options),
+                e => { listener(e); return Task.CompletedTask; }
+            ));
         }
 
         return this;
     }
+
+    private string CreateListenerString(string? format, string type, string target, string options) => format switch
+    {
+        // Serialize nothing – the event object is never used
+        ""      => $"{target}.addEventListener('{type}', () => rpc('{target[..3]}{Listeners.Count}'), {options});",
+
+        // Serialize the event – the event object is needed
+        null    => $"{target}.addEventListener('{type}', e => rpc('{target[..3]}{Listeners.Count}', e), {options});",
+
+        // Serialize selectively – only a few properties are ever used
+        _       => $"{target}.addEventListener('{type}', e => rpc('{target[..3]}{Listeners.Count}', e, '{format}'), {options});",
+    };
 
     internal Func<Event?, Task>? GetKeyhole(string? key)
     {

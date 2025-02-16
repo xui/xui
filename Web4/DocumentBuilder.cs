@@ -197,42 +197,7 @@ public class DocumentBuilder(WindowBuilder window) :
         bool isOnNotation = false,
         string? format = null)
     {
-        window.Listeners.TryGetValue(type, out var listenerSet);
-
-        if (isOnNotation)
-        {
-            // Example: "OnClick" => "click"
-            type = type[2..].ToLower();
-
-            // Setting multiple listeners using OnEvents like `window.OnClick = ...` 
-            // does not create multiple listeners, it replaces the pre-existing OnEvent, if any.
-            listenerSet?.RemoveAll(l => l.IsOnEvent);
-        }
-
-        // This approach also ensures listeners are called in the proper order.  For example:
-        //   document.OnClick = e => console.log("click1");
-        //   document.AddEventListener("click", e => console.log("click2"));
-        //   document.OnClick = e => null;
-        //   document.OnClick = e => console.log("click3");
-        //   document.AddEventListener("click", e => console.log("click4"));
-        // Outputs:
-        //   click2
-        //   click3
-        //   click4
-
-        if (listener is not null)
-        {
-            var item = new EventListener(listener, format, isOnNotation);
-            if (listenerSet is null)
-            {
-                window.Listeners[type] = [item];
-            }
-            else
-            {
-                listenerSet.Add(item);
-            }
-        }
-
+        window.AddEventListener(type, listener, isOnNotation, true, format);
         return this;
     }
 }
