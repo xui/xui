@@ -28,8 +28,8 @@ public class WindowBuilder :
     ITouchEventListeners,
     ITransitionEventListeners
 {
-    private RouteGroupBuilder routeGroupBuilder;
-    private Func<Html> html;
+    private readonly RouteGroupBuilder routeGroupBuilder;
+    private readonly Func<Html> html;
 
     internal Dictionary<string, List<EventListener>> Listeners { get; } = [];
 
