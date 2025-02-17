@@ -62,7 +62,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         // on the other side which registers it without the need 
         // for id= or document.getElementById().
         // It should end up looking like this:
-        // $"<!-- -->{value:format}<script>r('key{id}')</script>"
+        // $"<!-- -->{value:format}<script>key`{id}`)</script>"
 
         if (!suppressSentinels)
         {
@@ -109,7 +109,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -117,7 +117,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -126,7 +126,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-        Writer.Inject($" key{Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -145,7 +145,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
 
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" key{key}=\"{attrName}\"");
+        Writer.Inject($" {key}=\"{attrName}\"");
 
         parentKey = parent.Key;
         parentLength = parent.Length;
