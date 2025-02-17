@@ -34,13 +34,13 @@ namespace Web4
 
         public bool AppendFormatted(
             Action<Event.PreventDefault> listener, 
-            string? format = PreventDefault.Format, 
+            string? format = "preventDefault,null", 
             [CallerArgumentExpression(nameof(listener))] string? expression = null) 
                 => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
             Func<Event.PreventDefault, Task> listener, 
-            string? format = PreventDefault.Format, 
+            string? format = "preventDefault,null", 
             [CallerArgumentExpression(nameof(listener))] string? expression = null) 
                 => AppendEventListener(listener, format, expression);
     }

@@ -36,8 +36,6 @@ public interface IMessageEvent              : IEvent { }
 public interface IPopStateEvent             : IEvent { }
 public interface IPromiseRejectionEvent     : IEvent { }
 
-public interface IPreventDefaultEvent       : IEvent, PreventDefault { }
-
 public interface IEvent : Target
 {
     /// <summary>
@@ -106,4 +104,35 @@ public interface IInputEvent<T> : IUIEvent, Data, DataTransfer, IsComposing
     /// A reference to the object to which the event was originally dispatched.
     /// </summary>
     new EventTarget<T> Target { get; }
+}
+
+public interface IPreventDefaultEvent : IEvent, PreventDefault,
+    IDragEvent,
+    IPointerEvent,
+    IWheelEvent,
+    IMouseEvent,
+    ICompositionEvent,
+    IFocusEvent,
+    IKeyboardEvent,
+    ITouchEvent,
+    IAnimationEvent,
+    IBeforeUnloadEvent,
+    IContentVisibilityAutoStateChangeEvent,
+    IDeviceMotionEvent,
+    IDeviceOrientationEvent,
+    IErrorEvent,
+    IHashChangeEvent,
+    IPageTransitionEvent,
+    IProgressEvent,
+    IStorageEvent,
+    ISubmitEvent,
+    IToggleEvent,
+    ITransitionEvent,
+    IClipboardEvent,
+    IFormDataEvent,
+    IGamepadEvent,
+    IMessageEvent,
+    IPopStateEvent,
+    IPromiseRejectionEvent
+{
 }
