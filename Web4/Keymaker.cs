@@ -3,7 +3,7 @@ namespace Web4;
 internal struct Keymaker
 {
     // Note: Not all characters are used so that no curse words can be injected into people's HTML.
-    private static readonly char[] VALID_CHARS = "ABCDEF0123456789".ToCharArray();
+    private static readonly char[] VALID_CHARS = "abcdef0123456789".ToCharArray();
     private static readonly int BASE = VALID_CHARS!.Length;
     private static Dictionary<string, string>.AlternateLookup<ReadOnlySpan<char>> cache 
         = new Dictionary<string, string>().GetAlternateLookup<ReadOnlySpan<char>>();
