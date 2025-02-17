@@ -31,14 +31,14 @@ void OnClick(Event e)
     c++;
 }
 
-window.OnClick = e => Console.WriteLine($"window.OnClick 0: {e}");
-window.AddEventListener("afterprint", (Event e) => Console.WriteLine($"afterprint: {e}"));
-window.AddEventListener("dblclick", () => Console.WriteLine("dblclick:"));
-window.AddEventListener("click", e => Console.WriteLine($"click: {e.X} {e.Y}"));
-window.OnClick = e => Console.WriteLine($"window.OnClick 1: {e}");
+window.OnClick = e => Console.WriteLine($"win0: window.OnClick 0: {"e"}");
+window.AddEventListener("afterprint", (Event e) => Console.WriteLine($"win1: afterprint: {"e"}"));
+window.AddEventListener("dblclick", () => Console.WriteLine("win2: dblclick:"));
+window.AddEventListener("click", e => Console.WriteLine($"win3: click: {e.X} {e.Y}"));
+window.OnClick = e => Console.WriteLine($"win4: window.OnClick 1: {"e"}");
 
-window.Document.OnSelectionChange = e => Console.WriteLine($"{e.Type}");
-window.Document.AddEventListener("click", e => Console.WriteLine($"document.onclick: {e.X}"));
+window.Document.OnSelectionChange = e => Console.WriteLine($"doc5: {e.Type}");
+window.Document.AddEventListener("click", e => Console.WriteLine($"doc6: document.onclick: {e.X}"));
 
 window.MapGet("/about", ctx => 
 {
