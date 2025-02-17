@@ -296,6 +296,9 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
             }
 
             function rpc(key,ev,incl) {
+                if (incl?.includes('preventDefault')) {
+                    ev.preventDefault();
+                }
                 if (ev) {
                     let body = (ev) ? encodeEvent(ev,incl) : '';
                     let command = 

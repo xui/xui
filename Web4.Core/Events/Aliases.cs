@@ -26,6 +26,7 @@ public interface Aliases
     public interface PageTransition : IPageTransitionEvent { }
     public interface Pointer: IPointerEvent { }
     public interface PopState : IPopStateEvent { }
+    public interface PreventDefault : IPreventDefaultEvent { }
     public interface Progress : IProgressEvent { }
     public interface PromiseRejection : IPromiseRejectionEvent { }
     public interface Storage : IStorageEvent { }
@@ -63,6 +64,7 @@ public interface Aliases
         public interface Persisted : IPersisted { }
         public interface Pointer : IPointer { }
         public interface Pressures : IPressures { }
+        public interface PreventDefault : IPreventDefault { }
         public interface Progress : IProgress { }
         public interface RelatedTarget: IRelatedTarget { }
         public interface ScreenXY : IScreenXY { }

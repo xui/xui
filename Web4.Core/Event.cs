@@ -42,6 +42,7 @@ public partial interface Event :
     Aliases.PageTransition,
     Aliases.Pointer,
     Aliases.PopState,
+    Aliases.PreventDefault,
     Aliases.Progress,
     Aliases.PromiseRejection,
     Aliases.Storage,

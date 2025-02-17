@@ -36,6 +36,8 @@ public interface IMessageEvent              : IEvent { }
 public interface IPopStateEvent             : IEvent { }
 public interface IPromiseRejectionEvent     : IEvent { }
 
+public interface IPreventDefaultEvent       : IEvent, PreventDefault { }
+
 public interface IEvent : Target
 {
     /// <summary>
