@@ -304,8 +304,10 @@ public class WindowBuilder :
                 return null;
             case string s1 when s1.StartsWith("win"):
             case string s2 when s2.StartsWith("doc"):
-                int index = int.Parse(key.AsSpan()[..3]);
-                return Listeners[index].Listener;
+                if (int.TryParse(key.AsSpan()[3..], out var index))
+                    return Listeners[index].Listener;
+                else
+                    return null;
             default:
                 var composer = new FindKeyholeComposer(key);
                 composer.Compose($"{html()}");

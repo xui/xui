@@ -223,7 +223,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
     {
         if (!isJsRegisterWritten)
         {
-            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k]=document.currentScript.previousSibling;}key('{{key}}');</script>""");
+            Writer.Inject($$"""<script>ui={};function key(k){ui[k]=document.currentScript.previousSibling;}key('{{key}}');</script>""");
             isJsRegisterWritten = true;
             return false;
         }
@@ -286,7 +286,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                 if (ev) {
                     let body = (ev) ? encodeEvent(ev,incl) : '';
                     let command = 
-        `CALL /app#key${key} XTTP/0.1
+        `CALL /app#${key} XTTP/0.1
         Content-Type: application/json
         Content-Length: ${body.length}
 
@@ -294,7 +294,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                     ws.send(command);
                 } else {
                     let command = 
-        `CALL /app#key${key} XTTP/0.1
+        `CALL /app#${key} XTTP/0.1
         Content-Length: 0
 
         `;

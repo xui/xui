@@ -15,15 +15,20 @@ internal struct Keymaker
     /// <returns></returns>
     public static string GetKey(string parentKey, int cursor, int siblings)
     {
+        var isRoot = parentKey.Length == 0;
+        var parentKeyLength = isRoot ? 3 : parentKey.Length; // 3 for "key" prefix.
         var numberWidth = GetNumberWidth(siblings / 2);
-        var keyLength = parentKey.Length + numberWidth;
+        var keyLength = parentKeyLength + numberWidth;
 
         Span<char> key = stackalloc char[keyLength];
-        parentKey.CopyTo(key);
+        if (isRoot)
+            "key".CopyTo(key);
+        else
+            parentKey.CopyTo(key);
 
         while (numberWidth > 0)
         {
-            var index = parentKey.Length + numberWidth - 1;
+            var index = keyLength - 1;
             var thisDigit = cursor % BASE;
             key[index] = VALID_CHARS[thisDigit];
             cursor /= BASE;
@@ -37,6 +42,11 @@ internal struct Keymaker
             return value;
         }
         return value;
+    }
+
+    public static void CacheKey(string key)
+    {
+        cache[key] = key;
     }
 
     /// <summary>

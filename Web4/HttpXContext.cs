@@ -106,55 +106,55 @@ public struct HttpXContext(WebSocketPipe? pipe)
                             {
                                 case FormatType.String:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"));
                                     break;
                                 case FormatType.Boolean:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"));
                                     break;
                                 case FormatType.Color:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"));
                                     break;
                                 case FormatType.Uri:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"));
                                     break;
                                 case FormatType.Integer:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
                                     break;
                                 case FormatType.Long:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"));
                                     break;
                                 case FormatType.Float:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"));
                                     break;
                                 case FormatType.Double:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"));
                                     break;
                                 case FormatType.Decimal:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"));
                                     break;
                                 case FormatType.DateTime:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"));
                                     break;
                                 case FormatType.DateOnly:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"));
                                     break;
                                 case FormatType.TimeSpan:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"));
                                     break;
                                 case FormatType.TimeOnly:
                                     isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.key{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"));
+                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"));
                                     break;
                             }
                         }
@@ -279,10 +279,10 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
     private static string? GetKey(ReadOnlySpan<byte> line)
     {
-        var keyStart = line.IndexOf("#key"u8);
+        var keyStart = line.IndexOf("#"u8);
         if (keyStart < 0)
             return null;
-        keyStart += 4;
+        keyStart += 1;
         var keyEnd = line[keyStart..].IndexOf((byte)' ');
         return Keymaker.GetKeyIfCached(line[keyStart..(keyStart+keyEnd)]);
     }
