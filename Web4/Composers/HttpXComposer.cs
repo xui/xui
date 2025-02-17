@@ -255,7 +255,20 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         {
             var beforeBody = literal.AsSpan(0, index);
             var afterBody = literal.AsSpan(index, literal.Length - index);
-            Writer.Inject($"{beforeBody}{JS}{afterBody}");
+
+
+            if (window.Listeners.Count > 0)
+            {
+                Writer.Inject($"{beforeBody}\n<script>");
+                foreach (var listener in window.Listeners)
+                    Writer.Inject($"\n  {listener.Html}");
+                Writer.Inject($"\n</script>\n\n{JS}{afterBody}");
+            }
+            else
+            {
+                Writer.Inject($"{beforeBody}{JS}{afterBody}");
+            }
+
 
             suppressSentinels = true;
             CompleteStringLiteral(literal.Length);
