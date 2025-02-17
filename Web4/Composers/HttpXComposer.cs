@@ -77,7 +77,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>key('{key}')</script>
+                <script>key`{key.AsSpan()[3..]}`</script>
                 """);
         }
         cursor++;
@@ -99,7 +99,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
-            Writer.Inject($"""<script>key('{key}')</script>""");
+            Writer.Inject($"""<script>key`{key.AsSpan()[3..]}`</script>""");
         }
         cursor++;
 
@@ -208,7 +208,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         if (!suppressSentinels)
         {
             Writer.Inject($"""
-                <script>key('{partial.Key}')</script>
+                <script>key`{partial.Key.AsSpan()[3..]}`</script>
                 """);
         }
 
@@ -223,7 +223,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
     {
         if (!isJsRegisterWritten)
         {
-            Writer.Inject($$"""<script>ui={};function key(k){ui[k]=document.currentScript.previousSibling;}key('{{key}}');</script>""");
+            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k[0]]=document.currentScript.previousSibling;}key`{{key.AsSpan()[3..]}}`;</script>""");
             isJsRegisterWritten = true;
             return false;
         }
