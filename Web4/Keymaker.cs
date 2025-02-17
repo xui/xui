@@ -28,7 +28,7 @@ internal struct Keymaker
 
         while (numberWidth > 0)
         {
-            var index = keyLength - 1;
+            var index = parentKeyLength + numberWidth - 1;
             var thisDigit = cursor % BASE;
             key[index] = VALID_CHARS[thisDigit];
             cursor /= BASE;
