@@ -74,9 +74,7 @@ public interface Aliases
         public interface Tilts : ITilts { }
         public interface Touches : ITouches { }
         public interface WidthHeight : IWidthHeight { }
-        public interface X : IX { }
         public interface XY : IXY { }
-        public interface Y : IY { }
     }
 }
 

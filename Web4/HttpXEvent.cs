@@ -211,6 +211,6 @@ internal partial record class HttpXEvent(
     double IPointer.Twist => Twist ?? default;
     string IEvent.Type => Type ?? string.Empty;
     int IWidthHeight.Width => Width ?? default;
-    double IX.X => X ?? default;
-    double IY.Y => Y ?? default;
+    double IXY.X => X ?? default;
+    double IXY.Y => Y ?? default;
 }
