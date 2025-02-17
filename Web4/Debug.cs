@@ -96,13 +96,13 @@ public static class Debug
                 if (keyhole.Key != string.Empty)
                 {
                     output.AppendLine($"""
-                        console.group(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
                         """);
                 }
                 else
                 {
                     output.AppendLine($"""
-                        console.group(`{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        console.groupCollapsed(`{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
                         """);
                 }
 
@@ -117,7 +117,7 @@ public static class Debug
                 break;
             default:
                 output.AppendLine($"""
-                    console.group(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🔴 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
+                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
                     console.log(`
                     SET /app XTTP/0.1
                     Host: myapp.ui.cloud
