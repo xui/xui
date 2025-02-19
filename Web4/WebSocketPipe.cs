@@ -47,36 +47,21 @@ public class WebSocketPipe : IDuplexPipe, IDisposable
         {
             try
             {
-                var message = await webSocket.ReceiveAsync(
-                    inputPipe.Writer.GetMemory(receiveBufferSize), 
-                    cancellation
-                );
-
-                while (
-                    !cancellation.IsCancellationRequested && 
-                    !message.EndOfMessage && 
-                    message.MessageType != WebSocketMessageType.Close
-                ) {
-                    if (message.Count == 0)
-                        break;
-
+                while (true)
+                {
+                    var memory = inputPipe.Writer.GetMemory(receiveBufferSize);
+                    var message = await webSocket.ReceiveAsync(memory, cancellation);
                     inputPipe.Writer.Advance(message.Count);
-                    message = await webSocket.ReceiveAsync(
-                        inputPipe.Writer.GetMemory(receiveBufferSize), 
-                        cancellation
-                    );
+
+                    if (message.Count == 0 ||
+                        message.EndOfMessage ||
+                        cancellation.IsCancellationRequested ||
+                        message.MessageType == WebSocketMessageType.Close)
+                    {
+                        break;
+                    }
                 }
 
-                // Message isn't complete yet, don't flush.
-                if (
-                    cancellation.IsCancellationRequested || 
-                    !message.EndOfMessage || 
-                    message.MessageType == WebSocketMessageType.Close
-                ) {
-                    break;
-                }
-
-                inputPipe.Writer.Advance(message.Count);
                 var result = await inputPipe.Writer.FlushAsync(cancellation);
                 if (result.IsCompleted)
                     break;
@@ -139,6 +124,6 @@ class WebSocketStream(WebSocket webSocket) : Stream
             new ReadOnlyMemory<byte>([]), // TODO: Find out why it's not flushing.
             WebSocketMessageType.Text,
             true,
-            default
+            cancellationToken
         );
 }

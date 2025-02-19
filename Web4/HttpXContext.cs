@@ -57,12 +57,13 @@ public struct HttpXContext(WebSocketPipe? pipe)
 
         while (await Pipe.Input.ReadAsync() is var result && !result.IsCompleted)
         {
-            // TODO: Buffer might be multiple segments one day.
-            var buffer = result.Buffer.First;
+            var (key, domEvent) = Parse(result);
 
             // long gc1 = GC.GetAllocatedBytesForCurrentThread();
             // var sw1 = Stopwatch.GetTimestamp();
-            var (key, domEvent) = ParseEvent(buffer.Span);
+            // TODO: Buffer might be multiple segments one day.
+//            var buffer = result.Buffer.First;
+//            var (key, domEvent) = ParseEvent(buffer.Span);
             // var elapsed = Stopwatch.GetElapsedTime(sw1);
             // long gc2 = GC.GetAllocatedBytesForCurrentThread();
             // Console.WriteLine($"ParseEvent: key:{key} elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
@@ -173,6 +174,68 @@ public struct HttpXContext(WebSocketPipe? pipe)
                 Console.WriteLine($"Event handler not found for key:{key}");
             }
         }
+    }
+
+    private static (string?, Event?) Parse(ReadResult result)
+    {
+        int i = 0;
+        foreach (var sequence in result.Buffer)
+        {
+            var str = Encoding.UTF8.GetString(sequence.Span);
+            Console.WriteLine($"sequence{++i}: {str}");
+        }
+        // return (null, null);
+
+        string? key = null;
+        try
+        {
+            var reader = new Utf8JsonReader(result.Buffer, new()
+            {
+                AllowTrailingCommas = false,
+                CommentHandling = JsonCommentHandling.Disallow
+            });
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
+                {
+                    reader.Read();
+                    key = reader.GetString(); // TODO: Use Keymaker?
+                }
+                Console.Write(reader.TokenType);
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.PropertyName:
+                    case JsonTokenType.String:
+                        {
+                            string? text = reader.GetString();
+                            Console.Write(" ");
+                            Console.Write(text);
+                            break;
+                        }
+
+                    case JsonTokenType.Number:
+                        {
+                            int intValue = reader.GetInt32();
+                            Console.Write(" ");
+                            Console.Write(intValue);
+                            break;
+                        }
+
+                        // Other token types elided for brevity
+                }
+                Console.WriteLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        Console.WriteLine($"key:{key}");
+
+        return (key, new HttpXEvent());
     }
 
     public static (string?, Event?) ParseEvent(ReadOnlySpan<byte> buffer)

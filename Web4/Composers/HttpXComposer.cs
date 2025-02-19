@@ -302,21 +302,16 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                     if (incl == 'null') incl = null;
                 }
                 if (ev) {
-                    let body = (ev) ? encodeEvent(ev,incl) : '';
-                    let command = 
-        `CALL /app#${key} XTTP/0.1
-        Content-Type: application/json
-        Content-Length: ${body.length}
-
-        ${body}`;
-                    ws.send(command);
+                    ws.send(JSON.stringify({
+                        jsonrpc: "2.0",
+                        method: key,
+                        params: encodeEvent(ev,incl)
+                    }));
                 } else {
-                    let command = 
-        `CALL /app#${key} XTTP/0.1
-        Content-Length: 0
-
-        `;
-                    ws.send(command);
+                    ws.send(JSON.stringify({
+                        jsonrpc: "2.0",
+                        method: key
+                    }));
                 }
             }
 
@@ -421,6 +416,7 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                 "y"
             ];
             const eventTargetKeys = ["id","name","type","value","checked"];
+            let eventID = 0;
             function encodeEvent(e,incl) {
                 const allowList = incl?.split(",") ?? rootKeys;
                 const json = {};
@@ -439,7 +435,9 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                         }
                     }
                 }
-                return JSON.stringify(json);
+                if (!e._id) e._id = ++eventID;
+                json._id = e._id;
+                return json;
             }
 
             function replaceNode(node, content) {
