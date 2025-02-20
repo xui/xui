@@ -105,8 +105,8 @@ public struct HttpXContext: IDisposable
 
             if (!result.EndOfMessage)
             {
-                WebSocketSegment segmentStart = new(buffer);
-                WebSocketSegment segmentEnd = segmentStart;
+                var segmentStart = new WebSocketSegment(buffer);
+                var segmentEnd = segmentStart;
                 while (!result.EndOfMessage)
                 {
                     buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
