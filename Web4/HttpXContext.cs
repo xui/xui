@@ -92,29 +92,24 @@ public struct HttpXContext: IDisposable
         [EnumeratorCancellation] 
         CancellationToken cancellationToken = default)
     {
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
+        var owner = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH);
+        var buffer = owner.Memory;
         while (true)
         {
-            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-            if (result.CloseStatus != null)
-            {
-                Console.WriteLine($"WebSocket closed: {result.CloseStatusDescription ?? "No description"}");
-                break;
-            }
-
-            var sequence = new ReadOnlySequence<byte>(buffer, 0, result.Count);
+            var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+            var sequence = new ReadOnlySequence<byte>(buffer[..result.Count]);
 
             if (!result.EndOfMessage)
             {
-                var segmentStart = new WebSocketSegment(buffer);
+                var segmentStart = new WebSocketSegment(buffer[..result.Count]);
                 var segmentEnd = segmentStart;
                 while (!result.EndOfMessage)
                 {
-                    buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
-                    // TODO: ^ This guy messes up the Rent/Return!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    buffer = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH).Memory;
+                    // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-                    segmentEnd = segmentEnd.Append(buffer);
+                    result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                    segmentEnd = segmentEnd.Append(buffer[..result.Count]);
                     continue;
                 }
                 sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
