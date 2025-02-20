@@ -1,8 +1,10 @@
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO.Pipelines;
 using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -12,184 +14,222 @@ using Web4.Composers;
 
 namespace Web4;
 
-public struct HttpXContext(WebSocketPipe? pipe)
+public struct HttpXContext: IDisposable
 {
+    private static readonly ConcurrentDictionary<string, HttpXContext> contextLookup = [];
+    const int BUFFER_LENGTH = 1024;
     const int STATE_READ_METHOD = 0;
     const int STATE_READ_HEADERS = 1;
     const int STATE_READ_BODY = 2;
     const int STATE_COMPLETED = 3;
 
-    public WebSocketPipe? Pipe { get; set; } = pipe;
-    public readonly bool IsWebSocketOpen => Pipe is not null && Pipe.State == WebSocketState.Open;
+    private readonly WebSocket webSocket;
+    public readonly bool IsWebSocketOpen => webSocket.State == WebSocketState.Open;
 
-    public static HttpXContext Get(HttpContext httpContext)
+    public static bool TryGet(HttpContext httpContext, out HttpXContext httpxContext)
     {
         // TODO: Move to header approach?
         var key = httpContext.Connection.Id;
-        var pipe = WebSocketPipe.Get(key);
-        return new HttpXContext(pipe);
+        return contextLookup.TryGetValue(key, out httpxContext);
+    }
+
+    public static async Task<HttpXContext> Upgrade(HttpContext httpContext)
+    {
+        var webSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
+        var context = new HttpXContext(webSocket);
+
+        // TODO: Switch to header.
+        var key = httpContext.Connection.Id;
+        contextLookup[key] = context;
+
+        return context;
+    }
+
+    private HttpXContext(WebSocket webSocket)
+    {
+        this.webSocket = webSocket;
     }
 
     public async readonly Task UpdatePath(PathString path)
     {
-        if (Pipe is not null && Pipe.State == WebSocketState.Open)
+        if (webSocket.State == WebSocketState.Open)
         {
-            var writer = Pipe.Output;
-            writer.Inject($"window.history.pushState({{}},'', '{ path.ToUriComponent() }')");
-            await writer.FlushAsync();
+            // var writer = Pipe.Output;
+            // writer.Inject($"window.history.pushState({{}},'', '{ path.ToUriComponent() }')");
+            // await writer.FlushAsync();
+            await Task.Delay(0);
         }
     }
 
+// long gc1 = GC.GetAllocatedBytesForCurrentThread();
+// var sw1 = Stopwatch.GetTimestamp();
+// var elapsed = Stopwatch.GetElapsedTime(sw1);
+// long gc2 = GC.GetAllocatedBytesForCurrentThread();
+// Console.WriteLine($"ParseEvent: key:{"key"} elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
+
     public async Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(Pipe);
-
-        await Task.WhenAll(
-            Receive(window), 
-            Pipe.RunAsync(cancellationToken)
-        );
-    }
-
-    private async Task Receive(WindowBuilder window)
-    {
-        if (Pipe is null)
-            return;
-
-        while (await Pipe.Input.ReadAsync() is var result && !result.IsCompleted)
+        await foreach (var message in GetNextMessage(cancellationToken))
         {
-            var (key, domEvent) = Parse(result);
+            var (key, e) = Parse(message);
 
-            // long gc1 = GC.GetAllocatedBytesForCurrentThread();
-            // var sw1 = Stopwatch.GetTimestamp();
-            // TODO: Buffer might be multiple segments one day.
-//            var buffer = result.Buffer.First;
-//            var (key, domEvent) = ParseEvent(buffer.Span);
-            // var elapsed = Stopwatch.GetElapsedTime(sw1);
-            // long gc2 = GC.GetAllocatedBytesForCurrentThread();
-            // Console.WriteLine($"ParseEvent: key:{key} elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
+            var listener = window.GetKeyhole(key);
 
-            Pipe.Input.AdvanceTo(result.Buffer.End);
-
-            if (window.GetKeyhole(key) is Func<Event?, Task> listener)
+            if (listener is not null)
             {
-                // UIThread.Run(async () => 
-                // {
-                //     await listener(domEvent!);
-                // });
-
-                // State.Invoke(async () => 
-                // {
-                //     await listener(domEvent!);
-                // });
-
-                var isChanged = false;
-                // TODO: Surround with "batch" concept.
-                {
-                    var before = window.CaptureSnapshot();
-                    try
-                    {
-                        await listener(domEvent);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                    }
-                    var after = window.CaptureSnapshot();
-
-                    for (int i = 0; i < after.RootLength; i++)
-                    {
-                        ref var keyholeBefore = ref before.Buffer[i];
-                        ref var keyholeAfter = ref after.Buffer[i];
-
-                        if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
-                        {
-                            switch (keyholeAfter.Type)
-                            {
-                                case FormatType.String:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"));
-                                    break;
-                                case FormatType.Boolean:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"));
-                                    break;
-                                case FormatType.Color:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"));
-                                    break;
-                                case FormatType.Uri:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"));
-                                    break;
-                                case FormatType.Integer:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"));
-                                    break;
-                                case FormatType.Long:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"));
-                                    break;
-                                case FormatType.Float:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"));
-                                    break;
-                                case FormatType.Double:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"));
-                                    break;
-                                case FormatType.Decimal:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"));
-                                    break;
-                                case FormatType.DateTime:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"));
-                                    break;
-                                case FormatType.DateOnly:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"));
-                                    break;
-                                case FormatType.TimeSpan:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"));
-                                    break;
-                                case FormatType.TimeOnly:
-                                    isChanged = true;
-                                    await Pipe.Output.WriteAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"));
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                // TODO: State invalidations will not live here
-                if (isChanged)
-                    await window.DebugSnapshot(Pipe.Output);
+                await HandleEvent(listener, e, window, cancellationToken);
             }
             else
             {
-                // TODO: Interesting consideration.  What if it's gone?  
-                // This is possible by race condition as messages pass 
-                // each other across the network.
+                // TODO: Possible race condition: as a component gets unloaded
+                // messages might pass each other across the network.
                 Console.WriteLine($"Event handler not found for key:{key}");
             }
         }
     }
 
-    private static (string?, Event?) Parse(ReadResult result)
+    private async readonly IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage(
+        [EnumeratorCancellation] 
+        CancellationToken cancellationToken = default)
     {
-        int i = 0;
-        foreach (var sequence in result.Buffer)
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
+        while (await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken) is var result)
         {
-            var str = Encoding.UTF8.GetString(sequence.Span);
-            Console.WriteLine($"sequence{++i}: {str}");
-        }
-        // return (null, null);
+            if (result.CloseStatus != null)
+            {
+                Console.WriteLine($"WebSocket closed: {result.CloseStatusDescription ?? "No description"}");
+                break;
+            }
 
+            var sequence = new ReadOnlySequence<byte>(buffer, 0, result.Count);
+
+            if (!result.EndOfMessage)
+            {
+                WebSocketSegment segmentStart = new(buffer);
+                WebSocketSegment segmentEnd = segmentStart;
+                while (!result.EndOfMessage)
+                {
+                    buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
+                    // TODO: ^ This guy messes up the Rent/Return!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
+                    segmentEnd = segmentEnd.Append(buffer);
+                    continue;
+                }
+                sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
+            }
+
+            yield return sequence;
+        }
+    }
+
+    private async readonly Task HandleEvent(
+        Func<Event?, Task> listener, 
+        Event? e, 
+        WindowBuilder window, 
+        CancellationToken cancellationToken = default)
+    {
+        // UIThread.Run(async () => 
+        // {
+        //     await listener(domEvent!);
+        // });
+
+        // State.Invoke(async () => 
+        // {
+        //     await listener(domEvent!);
+        // });
+
+        var isChanged = false;
+        // TODO: Surround with "batch" concept.
+        {
+            var before = window.CaptureSnapshot();
+            try
+            {
+                await listener(e);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            var after = window.CaptureSnapshot();
+
+            for (int i = 0; i < after.RootLength; i++)
+            {
+                ref var keyholeBefore = ref before.Buffer[i];
+                ref var keyholeAfter = ref after.Buffer[i];
+
+                if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+                {
+                    switch (keyholeAfter.Type)
+                    {
+                        case FormatType.String:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Boolean:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Color:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Uri:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Integer:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Long:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Float:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Double:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.Decimal:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.DateTime:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.DateOnly:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.TimeSpan:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                        case FormatType.TimeOnly:
+                            isChanged = true;
+                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
+                            break;
+                    }
+                }
+            }
+        }
+
+        // // TODO: State invalidations will not live here
+        // if (isChanged)
+        //     await window.DebugSnapshot(Pipe.Output);
+    }
+    
+    private static (string?, Event?) Parse(ReadOnlySequence<byte> sequence)
+    {
         string? key = null;
         try
         {
-            var reader = new Utf8JsonReader(result.Buffer, new()
+            var reader = new Utf8JsonReader(sequence, new()
             {
                 AllowTrailingCommas = false,
                 CommentHandling = JsonCommentHandling.Disallow
@@ -238,115 +278,26 @@ public struct HttpXContext(WebSocketPipe? pipe)
         return (key, new HttpXEvent());
     }
 
-    public static (string?, Event?) ParseEvent(ReadOnlySpan<byte> buffer)
+    public void Dispose()
     {
-        try
-        {
-            string? key = null;
-            Event? @event = null;
-            string? method = null;
-            ReadOnlySpan<byte> contentType = null;
-            int? contentLength = null;
-
-            var lines = buffer.Split((byte)'\n');
-            var state = STATE_READ_METHOD;
-            foreach (var range in lines)
-            {
-                var line = buffer[range];
-                switch (state)
-                {
-                    case STATE_READ_METHOD:
-                        switch (true)
-                        {
-                            case bool b when line.StartsWith("CALL "u8):
-                                method = "CALL";
-                                key = GetKey(line);
-                                state = STATE_READ_HEADERS;
-                                continue; // parse next line
-                            case bool b when line.StartsWith("SET "u8):
-                                method = "SET";
-                                key = GetKey(line);
-                                state = STATE_READ_HEADERS;
-                                continue; // parse next line
-                        }
-                        // Fail if the first line doesn't include a supported method.
-                        state = STATE_COMPLETED;
-                        break;
-
-                    case STATE_READ_HEADERS:
-                        var pair = line.Split((byte)':');
-                        if (pair.MoveNext())
-                        {
-                            var headerName = line[pair.Current];
-                            var headerLength = headerName.Length;
-                            switch (true)
-                            {
-                                case bool b when Ascii.EqualsIgnoreCase(headerName, "Content-Length"u8):
-                                    if (pair.MoveNext())
-                                    {
-                                        var value = line[pair.Current];
-                                        while (value.Length > 0 && value[0] == (byte)' ')
-                                            value = value[1..]; // TrimStart
-                                        contentLength = int.Parse(value);
-                                    }
-                                    break;
-                                case bool b when Ascii.EqualsIgnoreCase(headerName, "Content-Type"u8):
-                                    if (pair.MoveNext())
-                                    {
-                                        var value = line[pair.Current];
-                                        while (value.Length > 0 && value[0] == (byte)' ')
-                                            value = value[1..]; // TrimStart
-                                        contentType = value;
-                                    }
-                                    break;
-                                case bool b when headerLength == 0:
-                                    state = (contentLength > 0)
-                                        ? STATE_READ_BODY
-                                        : STATE_COMPLETED;
-                                    continue; // parse next line
-                            }
-                        }
-                        break;
-
-                    case STATE_READ_BODY:
-                        // Currently, the only valid type for CALL is application/json.
-                        if (
-                            method == "CALL" &&
-                            contentLength is int length && 
-                            Ascii.EqualsIgnoreCase(contentType, "application/json"u8))
-                        {
-                            var bodyStart = range.Start.Value;
-                            var bodyEnd = bodyStart + length;
-                            if (bodyEnd <= buffer.Length)
-                            {
-                                var body = buffer[bodyStart..bodyEnd];
-                                @event = JsonSerializer.Deserialize<HttpXEvent>(body, JsonSerializerOptions.Web);
-                            }
-                        }
-                        state = STATE_COMPLETED;
-                        break;
-                    
-                    case STATE_COMPLETED:
-                        break;
-                }
-            }
-            return (key, @event);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-        return (null, null);
+        // TODO: Implement cleanup?  Delayed cleanup?
     }
 
-    private static string? GetKey(ReadOnlySpan<byte> line)
+    internal class WebSocketSegment : ReadOnlySequenceSegment<byte>
     {
-        var keyStart = line.IndexOf("#"u8);
-        if (keyStart < 0)
-            return null;
-        keyStart += 1;
-        var keyEnd = line[keyStart..].IndexOf((byte)' ');
-        return Keymaker.GetKeyIfCached(line[keyStart..(keyStart+keyEnd)]);
+        public WebSocketSegment(ReadOnlyMemory<byte> memory)
+        {
+            Memory = memory;
+        }
+
+        public WebSocketSegment Append(ReadOnlyMemory<byte> memory)
+        {
+            var segment = new WebSocketSegment(memory)
+            {
+                RunningIndex = RunningIndex + Memory.Length
+            };
+            Next = segment;
+            return segment;
+        }
     }
 }

@@ -87,14 +87,13 @@ public static class Web4EndpointRouteBuilderExtensions
                     // Switch protocols and await the pipe reader which receives
                     // DOM events that have been bubbled up beyond the browser.
 
-                    using (var pipe = await WebSocketPipe.Upgrade(httpContext))
+                    using (var httpxContext = await HttpXContext.Upgrade(httpContext))
                     {
-                        var httpxContext = new HttpXContext(pipe);
                         await httpxContext.ListenForEvents(window, httpContext.RequestAborted);
                     }
                 }
                 else if (
-                    HttpXContext.Get(httpContext) is var httpxContext && 
+                    HttpXContext.TryGet(httpContext, out var httpxContext) && 
                     httpxContext.IsWebSocketOpen)
                 {
                     // --- 204 ---
