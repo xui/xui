@@ -18,10 +18,6 @@ public struct HttpXContext: IDisposable
 {
     private static readonly ConcurrentDictionary<string, HttpXContext> contextLookup = [];
     const int BUFFER_LENGTH = 1024;
-    const int STATE_READ_METHOD = 0;
-    const int STATE_READ_HEADERS = 1;
-    const int STATE_READ_BODY = 2;
-    const int STATE_COMPLETED = 3;
 
     private readonly WebSocket webSocket;
     public readonly bool IsWebSocketOpen => webSocket.State == WebSocketState.Open;
