@@ -87,6 +87,9 @@ public struct HttpXContext: IDisposable
         while (true)
         {
             var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+            if (result.MessageType == WebSocketMessageType.Close)
+                break; // TODO: Memory leak?
+
             var sequence = new ReadOnlySequence<byte>(buffer[..result.Count]);
 
             if (!result.EndOfMessage)
@@ -99,6 +102,9 @@ public struct HttpXContext: IDisposable
                     // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                     result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                    if (result.MessageType == WebSocketMessageType.Close)
+                        break; // TODO: Memory leak?
+
                     segmentEnd = segmentEnd.Append(buffer[..result.Count]);
                     continue;
                 }
