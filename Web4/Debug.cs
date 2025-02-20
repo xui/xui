@@ -146,4 +146,19 @@ public static class Debug
             ? inlined[..(maxLength-3)] + "..."
             : inlined;
     }
+
+    public static IDisposable PerfCheck(string name = "unnamed") => new Perf(name);
+
+    private class Perf(string name) : IDisposable
+    {
+        readonly long gc1 = GC.GetAllocatedBytesForCurrentThread();
+        readonly long sw1 = Stopwatch.GetTimestamp();
+
+        public void Dispose()
+        {
+            var elapsed = Stopwatch.GetElapsedTime(sw1);
+            long gc2 = GC.GetAllocatedBytesForCurrentThread();
+            Console.WriteLine($"Perf({name}): elapsed:{elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
+        }
+    }
 }

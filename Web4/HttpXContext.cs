@@ -61,20 +61,19 @@ public struct HttpXContext: IDisposable
         }
     }
 
-// long gc1 = GC.GetAllocatedBytesForCurrentThread();
-// var sw1 = Stopwatch.GetTimestamp();
-// var elapsed = Stopwatch.GetElapsedTime(sw1);
-// long gc2 = GC.GetAllocatedBytesForCurrentThread();
-// Console.WriteLine($"ParseEvent: key:{"key"} elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
-
     public async Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
     {
         await foreach (var message in GetNextMessage(cancellationToken))
         {
+            var perf = Debug.PerfCheck("Parse");
             var (key, e) = Parse(message);
+            perf.Dispose();
 
+            perf = Debug.PerfCheck("GetKeyhole");
             var listener = window.GetKeyhole(key);
+            perf.Dispose();
 
+            perf = Debug.PerfCheck("HandleEvent");
             if (listener is not null)
             {
                 await HandleEvent(listener, e, window, cancellationToken);
@@ -85,6 +84,7 @@ public struct HttpXContext: IDisposable
                 // messages might pass each other across the network.
                 Console.WriteLine($"Event handler not found for key:{key}");
             }
+            perf.Dispose();
         }
     }
 
