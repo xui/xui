@@ -93,8 +93,9 @@ public struct HttpXContext: IDisposable
         CancellationToken cancellationToken = default)
     {
         byte[] buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
-        while (await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken) is var result)
+        while (true)
         {
+            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
             if (result.CloseStatus != null)
             {
                 Console.WriteLine($"WebSocket closed: {result.CloseStatusDescription ?? "No description"}");
