@@ -51,7 +51,7 @@ public struct HttpXContext: IDisposable
         }
     }
 
-    public async Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
+    public async readonly Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
     {
         await foreach (var message in GetNextMessage(cancellationToken))
         {
