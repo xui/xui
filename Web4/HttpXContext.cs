@@ -60,11 +60,11 @@ public struct HttpXContext: IDisposable
             perf.Dispose();
 
             perf = Debug.PerfCheck("GetKeyhole");
-            var listener = window.GetKeyhole(key);
+            var keyhole = window.GetKeyhole(key);
             perf.Dispose();
 
             perf = Debug.PerfCheck("HandleEvent");
-            if (listener is not null)
+            if (keyhole is EventListener listener)
             {
                 await HandleEvent(listener, e, window, cancellationToken);
             }
@@ -82,41 +82,52 @@ public struct HttpXContext: IDisposable
         [EnumeratorCancellation] 
         CancellationToken cancellationToken = default)
     {
+        ReadOnlySequence<byte> sequence;
         var owner = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH);
         var buffer = owner.Memory;
         while (true)
         {
-            var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
-            if (result.MessageType == WebSocketMessageType.Close)
-                break; // TODO: Memory leak?
-
-            var sequence = new ReadOnlySequence<byte>(buffer[..result.Count]);
-
-            if (!result.EndOfMessage)
+            var perf = Debug.PerfCheck("GetNextMessage");
+            try
             {
-                var segmentStart = new WebSocketSegment(buffer[..result.Count]);
-                var segmentEnd = segmentStart;
-                while (!result.EndOfMessage)
+                var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                if (result.MessageType == WebSocketMessageType.Close)
+                    break; // TODO: Memory leak?
+
+                sequence = new ReadOnlySequence<byte>(buffer[..result.Count]);
+
+                if (!result.EndOfMessage)
                 {
-                    buffer = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH).Memory;
-                    // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    var segmentStart = new WebSocketSegment(buffer[..result.Count]);
+                    var segmentEnd = segmentStart;
+                    while (!result.EndOfMessage)
+                    {
+                        buffer = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH).Memory;
+                        // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                    result = await webSocket.ReceiveAsync(buffer, cancellationToken);
-                    if (result.MessageType == WebSocketMessageType.Close)
-                        break; // TODO: Memory leak?
+                        result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                        if (result.MessageType == WebSocketMessageType.Close)
+                            break; // TODO: Memory leak?
 
-                    segmentEnd = segmentEnd.Append(buffer[..result.Count]);
-                    continue;
+                        segmentEnd = segmentEnd.Append(buffer[..result.Count]);
+                        continue;
+                    }
+                    sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
                 }
-                sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
+            }
+            catch (WebSocketException ex)
+            {
+                Console.WriteLine(ex);
+                break;
             }
 
+            perf.Dispose();
             yield return sequence;
         }
     }
 
     private async readonly Task HandleEvent(
-        Func<Event?, Task> listener, 
+        EventListener listener,
         Event? e, 
         WindowBuilder window, 
         CancellationToken cancellationToken = default)
@@ -137,7 +148,7 @@ public struct HttpXContext: IDisposable
             var before = window.CaptureSnapshot();
             try
             {
-                await listener(e);
+                await listener.Invoke(e);
             }
             catch (Exception ex)
             {
@@ -211,8 +222,9 @@ public struct HttpXContext: IDisposable
             }
         }
 
-        // // TODO: State invalidations will not live here
-        // if (isChanged)
+        // TODO: State invalidations will not live here
+        if (isChanged)
+            Console.WriteLine($"isChanged:{isChanged}");
         //     await window.DebugSnapshot(Pipe.Output);
     }
     

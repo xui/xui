@@ -31,7 +31,6 @@ public class WindowBuilder :
     private readonly RouteGroupBuilder routeGroupBuilder;
     private readonly Func<Html> html;
 
-    internal record struct EventListener(string Html, Func<Event?, Task> Listener, string? OnNotation = null);
     internal List<EventListener> Listeners { get; } = [];
 
     public DocumentBuilder Document { get; init; }
@@ -256,12 +255,12 @@ public class WindowBuilder :
             // e.g. window.OnClick
             onNotation = $"{target}.{type}";
             
-            // e.g. "OnClick" => "click"
+            // e.g. "OnClick" -> "click"
             type = type[2..].ToLower();
 
             // e.g. using window.onClick twice overwrites the first one
             for (int i = 0; i < Listeners.Count; i++)
-                if (Listeners[i].OnNotation == onNotation && !Listeners[i].Html.StartsWith("//"))
+                if (Listeners[i].OnNotation == onNotation && !Listeners[i].Html!.StartsWith("//"))
                     Listeners[i] = Listeners[i] with { Html = "// " + Listeners[i].Html };
         }
         
@@ -272,11 +271,11 @@ public class WindowBuilder :
 
             var options = "{passive:true}";
 
-            Listeners.Add(new(
-                CreateListenerString(format, type, target, key, options),
-                e => { listener(e!); return Task.CompletedTask; },
-                onNotation
-            ));
+            Listeners.Add(new(listener)
+            {
+                Html = CreateListenerString(format, type, target, key, options),
+                OnNotation = onNotation,
+            });
         }
 
         return this;
@@ -294,7 +293,8 @@ public class WindowBuilder :
         _       => $"{target}.addEventListener('{type}', e => rpc('{key}', e, '{format}'), {options});",
     };
 
-    internal Func<Event?, Task>? GetKeyhole(string? key)
+    static FindKeyholeComposer? composer = null;
+    internal EventListener? GetKeyhole(string? key)
     {
         switch (key)
         {
@@ -303,13 +303,14 @@ public class WindowBuilder :
             case string s1 when s1.StartsWith("win"):
             case string s2 when s2.StartsWith("doc"):
                 if (int.TryParse(key.AsSpan()[3..], out var index))
-                    return Listeners[index].Listener;
+                    return Listeners[index];
                 else
                     return null;
             default:
-                var composer = new FindKeyholeComposer(key);
+                // var composer = new FindKeyholeComposer(key);
+                composer ??= new FindKeyholeComposer(key);
                 composer.Compose($"{html()}");
-                return composer.EventListener;
+                return composer.Listener;
         }
     }
 

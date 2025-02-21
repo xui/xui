@@ -12,10 +12,20 @@ public class FindKeyholeComposer(string key) : BaseComposer
     private string parentKey = string.Empty;
     private int parentLength = 0;
     private int cursor = 0;
+    private Action? action = null;
+    private Action<Event>? actionEvent = null;
+    private Func<Task>? func = null;
+    private Func<Event, Task>? funcEvent = null;
 
     public string Key { get; init; } = key;
 
-    public Func<Event?, Task>? EventListener { get; set; } = null;
+    public EventListener Listener { get => new()
+    {
+        Action = action, 
+        ActionEvent = actionEvent, 
+        Func = func, 
+        FuncEvent = funcEvent,
+    };}
 
     protected override void Clear()
     {
@@ -53,21 +63,25 @@ public class FindKeyholeComposer(string key) : BaseComposer
             return base.CompleteFormattedValue();
         }
 
-        EventListener = listener switch
+        switch (listener)
         {
             // Example:
             //   void OnClick()
             //   {
             //       Console.WriteLine($"Button was clicked");
             //   }
-            Action action => Map(action),
+            case Action a:
+                action = a;
+                break;
 
             // Example:
             //   void OnClick(Event e)
             //   {
-            //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
+            //       Console.WriteLine($"Button {e.Target.ID} was clicked");
             //   }
-            Action<Event> action => Map(action),
+            case Action<Event> ae:
+                actionEvent = ae;
+                break;
 
             // Example:
             //   async Task OnClick()
@@ -75,30 +89,44 @@ public class FindKeyholeComposer(string key) : BaseComposer
             //       await Task.Delay(1000);
             //       Console.WriteLine($"Button was clicked");
             //   }
-            Func<Task> func => Map(func),
+            case Func<Task> f:
+                func = f;
+                break;
 
             // Example:
             //   async Task OnClick(Event e)
             //   {
             //       await Task.Delay(1000);
-            //       Console.WriteLine($"Button {e.currentTarget.id} was clicked");
+            //       Console.WriteLine($"Button {e.Target.ID} was clicked");
             //   }
-            Func<Event, Task> func => Map(func),
-            _ => null
+            case Func<Event, Task> fe:
+                funcEvent = fe;
+                break;
         };
 
-        Clear();
+        // Clear();
 
         // Found it so save some time.  Return false to
         // short circuit any following calls to html.Append*().
-        return false;
+        // return false;
+        return base.CompleteFormattedValue();
     }
 
-    private static Func<Event?, Task> Map(Action action) => e =>
+    // private static Func<Event?, Task> Map(Action action) => e =>
+    // {
+    //     action();
+    //     return Task.CompletedTask;
+    // };
+
+    private static Func<Event?, Task>? Map(Action action)
     {
-        action();
-        return Task.CompletedTask;
-    };
+        // Task Wat(Event? e)
+        // {
+        //     return null;
+        // }
+
+        return null;
+    }
 
     private static Func<Event?, Task> Map(Action<Event> action) => e =>
     {
