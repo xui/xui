@@ -54,7 +54,7 @@ internal struct Keymaker
     /// to prevent rampant memory allocations.
     /// Prevents OutOfMemory issues by only returning a key 
     /// if its already in the pool due to hackers filling the pool 
-    /// with nonsensical keys from custom-constructed GET/SET/CALL requests.
+    /// with nonsensical keys from custom-constructed RPCs.
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
