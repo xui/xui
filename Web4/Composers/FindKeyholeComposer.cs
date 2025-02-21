@@ -112,38 +112,6 @@ public class FindKeyholeComposer(string key) : BaseComposer
         return base.CompleteFormattedValue();
     }
 
-    // private static Func<Event?, Task> Map(Action action) => e =>
-    // {
-    //     action();
-    //     return Task.CompletedTask;
-    // };
-
-    private static Func<Event?, Task>? Map(Action action)
-    {
-        // Task Wat(Event? e)
-        // {
-        //     return null;
-        // }
-
-        return null;
-    }
-
-    private static Func<Event?, Task> Map(Action<Event> action) => e =>
-    {
-        action(e!);
-        return Task.CompletedTask;
-    };
-
-    private static Func<Event?, Task> Map(Func<Task> func) => e =>
-    {
-        return func();
-    };
-
-    private static Func<Event?, Task> Map(Func<Event, Task> func) => e =>
-    {
-        return func(e!);
-    };
-
     public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
     {
         parentKey = parent.Key;
