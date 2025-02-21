@@ -104,12 +104,14 @@ public class FindKeyholeComposer(string key) : BaseComposer
                 break;
         };
 
-        // Clear();
-
-        // Found it so save some time.  Return false to
-        // short circuit any following calls to html.Append*().
-        // return false;
+        // TODO: Shortcircuiting seems to leak memory.  But where?  For now, keep the full flow.
+        // Test this by perf-surrounding `var keyhole = window.GetKeyhole(key);` in HttpXContext.ListenForEvents.
         return base.CompleteFormattedValue();
+
+        // // Found it so save some time.  Return false to
+        // // short circuit any following calls to html.Append*().
+        // Clear();
+        // return false;
     }
 
     public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
