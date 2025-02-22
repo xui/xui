@@ -244,7 +244,10 @@ public struct HttpXContext: IDisposable
                 if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
                 {
                     reader.Read();
-                    key = reader.GetString(); // TODO: Use Keymaker?
+                    ReadOnlySpan<byte> value = reader.HasValueSequence
+                        ? reader.ValueSequence.ToArray()
+                        : reader.ValueSpan;
+                    key = Keymaker.GetKeyIfCached(value);
                 }
 Console.Write(reader.TokenType);
 
