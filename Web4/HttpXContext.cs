@@ -246,7 +246,7 @@ public struct HttpXContext: IDisposable
                     reader.Read();
                     key = reader.GetString(); // TODO: Use Keymaker?
                 }
-                Console.Write(reader.TokenType);
+Console.Write(reader.TokenType);
 
                 switch (reader.TokenType)
                 {
@@ -254,22 +254,20 @@ public struct HttpXContext: IDisposable
                     case JsonTokenType.String:
                         {
                             string? text = reader.GetString();
-                            Console.Write(" ");
-                            Console.Write(text);
+Console.Write(" ");
+Console.Write(text);
                             break;
                         }
 
                     case JsonTokenType.Number:
                         {
                             int intValue = reader.GetInt32();
-                            Console.Write(" ");
-                            Console.Write(intValue);
+Console.Write(" ");
+Console.Write(intValue);
                             break;
                         }
-
-                        // Other token types elided for brevity
                 }
-                Console.WriteLine();
+Console.WriteLine();
             }
         }
         catch (Exception ex)
@@ -277,7 +275,7 @@ public struct HttpXContext: IDisposable
             Console.WriteLine(ex);
         }
 
-        Console.WriteLine($"key:{key}");
+Console.WriteLine($"key:{key}");
 
         return (key, new HttpXEvent());
     }
