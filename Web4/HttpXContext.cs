@@ -56,11 +56,13 @@ public struct HttpXContext: IDisposable
         await foreach (var message in GetNextMessage(cancellationToken))
         {
             var perf = Debug.PerfCheck("Parse");
-            var key = ParseKey(message);
+            var method = ParseMethod(message);
             perf.Dispose();
+            if (method is null)
+                continue;
 
             perf = Debug.PerfCheck("GetKeyhole");
-            var keyhole = window.GetKeyhole(key);
+            var keyhole = window.GetKeyhole(method, );
             perf.Dispose();
 
             perf = Debug.PerfCheck("HandleEvent");
@@ -129,7 +131,7 @@ public struct HttpXContext: IDisposable
         }
     }
 
-    private static string? ParseKey(ReadOnlySequence<byte> sequence)
+    private static string? ParseMethod(ReadOnlySequence<byte> sequence)
     {
         string? key = null;
         try
