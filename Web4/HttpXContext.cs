@@ -62,7 +62,7 @@ public struct HttpXContext: IDisposable
                 continue;
 
             perf = Debug.PerfCheck("GetKeyhole");
-            var keyhole = window.GetKeyhole(method, );
+            var keyhole = window.GetKeyhole(method);
             perf.Dispose();
 
             perf = Debug.PerfCheck("HandleEvent");
