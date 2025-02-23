@@ -56,7 +56,7 @@ public struct HttpXContext: IDisposable
         await foreach (var message in GetNextMessage(cancellationToken))
         {
             var perf = Debug.PerfCheck("Parse");
-            var (key, e) = Parse(message);
+            var key = ParseKey(message);
             perf.Dispose();
 
             perf = Debug.PerfCheck("GetKeyhole");
@@ -66,7 +66,10 @@ public struct HttpXContext: IDisposable
             perf = Debug.PerfCheck("HandleEvent");
             if (keyhole is EventListener listener)
             {
-                await HandleEvent(listener, e, window, cancellationToken);
+                var e = new HttpXEvent();
+                // Do not await
+                _ = HandleEvent(listener, e, window)
+                    .ContinueWith(t => t.Dispose());
             }
             else
             {
@@ -124,6 +127,34 @@ public struct HttpXContext: IDisposable
             perf.Dispose();
             yield return sequence;
         }
+    }
+
+    private static string? ParseKey(ReadOnlySequence<byte> sequence)
+    {
+        string? key = null;
+        try
+        {
+            var reader = new Utf8JsonReader(sequence);
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
+                {
+                    reader.Read();
+                    ReadOnlySpan<byte> value = reader.HasValueSequence
+                        ? reader.ValueSequence.ToArray()
+                        : reader.ValueSpan;
+                    key = Keymaker.GetKeyIfCached(value);
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        return key;
     }
 
     private async readonly Task HandleEvent(
@@ -226,61 +257,6 @@ public struct HttpXContext: IDisposable
         if (isChanged)
             Console.WriteLine($"isChanged:{isChanged}");
         //     await window.DebugSnapshot(Pipe.Output);
-    }
-    
-    private static (string?, Event?) Parse(ReadOnlySequence<byte> sequence)
-    {
-        string? key = null;
-        try
-        {
-            var reader = new Utf8JsonReader(sequence, new()
-            {
-                AllowTrailingCommas = false,
-                CommentHandling = JsonCommentHandling.Disallow
-            });
-
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
-                {
-                    reader.Read();
-                    ReadOnlySpan<byte> value = reader.HasValueSequence
-                        ? reader.ValueSequence.ToArray()
-                        : reader.ValueSpan;
-                    key = Keymaker.GetKeyIfCached(value);
-                }
-Console.Write(reader.TokenType);
-
-                switch (reader.TokenType)
-                {
-                    case JsonTokenType.PropertyName:
-                    case JsonTokenType.String:
-                        {
-                            string? text = reader.GetString();
-Console.Write(" ");
-Console.Write(text);
-                            break;
-                        }
-
-                    case JsonTokenType.Number:
-                        {
-                            int intValue = reader.GetInt32();
-Console.Write(" ");
-Console.Write(intValue);
-                            break;
-                        }
-                }
-Console.WriteLine();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-Console.WriteLine($"key:{key}");
-
-        return (key, new HttpXEvent());
     }
 
     public void Dispose()
