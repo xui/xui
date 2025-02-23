@@ -55,7 +55,7 @@ public struct HttpXContext: IDisposable
     {
         await foreach (var message in GetNextMessage(cancellationToken))
         {
-            var perf = Debug.PerfCheck("Parse");
+            var perf = Debug.PerfCheck("ParseMethod");
             var method = ParseMethod(message);
             perf.Dispose();
             if (method is null)
