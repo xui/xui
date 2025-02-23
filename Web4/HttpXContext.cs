@@ -59,7 +59,10 @@ public struct HttpXContext: IDisposable
             var method = ParseMethod(message);
             perf.Dispose();
             if (method is null)
+            {
+                Console.WriteLine($"🔴 Could not parse the method from the message.");
                 continue;
+            }
 
             perf = Debug.PerfCheck("GetKeyhole");
             var keyhole = window.GetKeyhole(method);
@@ -77,7 +80,7 @@ public struct HttpXContext: IDisposable
             {
                 // TODO: Possible race condition: as a component gets unloaded
                 // messages might pass each other across the network.
-                Console.WriteLine($"Event handler not found for key:{key}");
+                Console.WriteLine($"🔴 Event handler not found for key:{method}");
             }
             perf.Dispose();
         }
