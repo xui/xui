@@ -7,8 +7,61 @@ using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal partial record class DefaultEvent() : Event
+internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
 {
+    public void Parse(bool canIgnoreReferences = false)
+    {
+        double d = 1.23;
+        var raw1 = BitConverter.DoubleToUInt64Bits(d);
+        var raw2 = BitConverter.DoubleToInt64Bits(d);
+
+        try
+        {
+            var reader = new Utf8JsonReader(message);
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
+                {
+                    reader.Read();
+                    ReadOnlySpan<byte> value = reader.HasValueSequence
+                        ? reader.ValueSequence.ToArray()
+                        : reader.ValueSpan;
+                    // key = Keymaker.GetKeyIfCached(value);
+                }
+Console.Write(reader.TokenType);
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.PropertyName:
+                    case JsonTokenType.String:
+                        {
+                            string? text = reader.GetString();
+Console.Write(" ");
+Console.Write(text);
+                            break;
+                        }
+
+                    case JsonTokenType.Number:
+                        {
+                            int intValue = reader.GetInt32();
+Console.Write(" ");
+Console.Write(intValue);
+                            break;
+                        }
+                }
+Console.WriteLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+
+
+
     private bool areValuesParsed = false;
     private bool areReferencesParsed = false;
     private readonly Dictionary<string, long>? values = []; // 64 bit placeholder
@@ -16,10 +69,23 @@ internal partial record class DefaultEvent() : Event
 
     private void EnsureParsed(bool canIgnoreReferences = false)
     {
-        areValuesParsed = true;
+        if (!areValuesParsed)
+        {
+            using (Debug.PerfCheck("Parse values only"))
+            {
+                Parse(canIgnoreReferences);
+                areValuesParsed = true;
+            }
+        }
         
         if (!canIgnoreReferences)
-            areReferencesParsed = true;
+        {
+            using (Debug.PerfCheck("Parse with references"))
+            {
+                Parse(canIgnoreReferences);
+                areReferencesParsed = true;
+            }
+        }
     }
 
     private object? GetReference(string propName)

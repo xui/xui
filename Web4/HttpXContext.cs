@@ -68,13 +68,15 @@ public struct HttpXContext: IDisposable
             var keyhole = window.GetKeyhole(method);
             perf.Dispose();
 
-            perf = Debug.PerfCheck("HandleEvent");
             if (keyhole is EventListener listener)
             {
-                var e = new HttpXEvent();
+                var e = new DefaultEvent(message);
+
                 // Do not await
+                perf = Debug.PerfCheck("HandleEvent");
                 _ = HandleEvent(listener, e, window)
                     .ContinueWith(t => t.Dispose());
+                perf.Dispose();
             }
             else
             {
@@ -82,7 +84,6 @@ public struct HttpXContext: IDisposable
                 // messages might pass each other across the network.
                 Console.WriteLine($"🔴 Event handler not found for key:{method}");
             }
-            perf.Dispose();
         }
     }
 
