@@ -11,46 +11,20 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
 {
     public void Parse(bool canIgnoreReferences = false)
     {
-        double d = 1.23;
-        var raw1 = BitConverter.DoubleToUInt64Bits(d);
-        var raw2 = BitConverter.DoubleToInt64Bits(d);
-
         try
         {
             var reader = new Utf8JsonReader(message);
-
             while (reader.Read())
             {
-                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
+                if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    reader.Read();
-                    ReadOnlySpan<byte> value = reader.HasValueSequence
-                        ? reader.ValueSequence.ToArray()
-                        : reader.ValueSpan;
-                    // key = Keymaker.GetKeyIfCached(value);
+                    if (reader.ValueTextEquals("x"))
+                    {
+                        reader.Read();
+                        double value = reader.GetDouble();
+                        values[nameof(X)] = BitConverter.DoubleToInt64Bits(value);
+                    }
                 }
-Console.Write(reader.TokenType);
-
-                switch (reader.TokenType)
-                {
-                    case JsonTokenType.PropertyName:
-                    case JsonTokenType.String:
-                        {
-                            string? text = reader.GetString();
-Console.Write(" ");
-Console.Write(text);
-                            break;
-                        }
-
-                    case JsonTokenType.Number:
-                        {
-                            int intValue = reader.GetInt32();
-Console.Write(" ");
-Console.Write(intValue);
-                            break;
-                        }
-                }
-Console.WriteLine();
             }
         }
         catch (Exception ex)
