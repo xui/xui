@@ -97,25 +97,25 @@ Console.WriteLine();
     private bool? GetBool(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(nameof(propName), out long value) ? value != 0 : null;
+        return values.TryGetValue(propName, out long value) ? value != 0 : null;
     }
 
     private int? GetInt(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(nameof(propName), out long value) ? (int)value : null;
+        return values.TryGetValue(propName, out long value) ? (int)value : null;
     }
 
     private long? GetLong(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(nameof(propName), out long value) ? value : null;
+        return values.TryGetValue(propName, out long value) ? value : null;
     }
 
     private float? GetFloat(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(nameof(propName), out long value) 
+        return values.TryGetValue(propName, out long value) 
             ? (float)BitConverter.Int64BitsToDouble(value) 
             : null;
     }
@@ -123,7 +123,7 @@ Console.WriteLine();
     private double? GetDouble(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(nameof(propName), out long value) 
+        return values.TryGetValue(propName, out long value) 
             ? BitConverter.Int64BitsToDouble(value) 
             : null;
     }
