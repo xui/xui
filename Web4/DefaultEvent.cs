@@ -9,6 +9,32 @@ namespace Web4;
 
 internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
 {
+    private readonly Dictionary<string, long> values = []; // 64 bit placeholder
+    private readonly Dictionary<string, object> references = [];
+    private bool areValuesParsed = false;
+    private bool areReferencesParsed = false;
+
+    private void EnsureParsed(bool canIgnoreReferences = false)
+    {
+        if (!areValuesParsed)
+        {
+            using (Debug.PerfCheck("Parse values only"))
+            {
+                Parse(canIgnoreReferences);
+                areValuesParsed = true;
+            }
+        }
+        
+        if (!canIgnoreReferences)
+        {
+            using (Debug.PerfCheck("Parse with references"))
+            {
+                Parse(canIgnoreReferences);
+                areReferencesParsed = true;
+            }
+        }
+    }
+
     public void Parse(bool canIgnoreReferences = false)
     {
         try
@@ -30,35 +56,6 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-        }
-    }
-
-
-
-
-    private bool areValuesParsed = false;
-    private bool areReferencesParsed = false;
-    private readonly Dictionary<string, long> values = []; // 64 bit placeholder
-    private readonly Dictionary<string, object> references = [];
-
-    private void EnsureParsed(bool canIgnoreReferences = false)
-    {
-        if (!areValuesParsed)
-        {
-            using (Debug.PerfCheck("Parse values only"))
-            {
-                Parse(canIgnoreReferences);
-                areValuesParsed = true;
-            }
-        }
-        
-        if (!canIgnoreReferences)
-        {
-            using (Debug.PerfCheck("Parse with references"))
-            {
-                Parse(canIgnoreReferences);
-                areReferencesParsed = true;
-            }
         }
     }
 
