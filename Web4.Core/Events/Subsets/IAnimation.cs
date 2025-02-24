@@ -21,7 +21,7 @@ namespace Web4
             /// value for animation-delay, in which case the event will be fired with 
             /// elapsedTime containing (-1 * delay).
             /// </summary>
-            float ElapsedTime { get; }
+            double ElapsedTime { get; }
 
             /// <summary>
             /// A string containing the name CSS property associated with the transition.

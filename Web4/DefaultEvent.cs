@@ -186,8 +186,8 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
     public long? Detail => GetLong(nameof(Detail));
     long IDetail.Detail => Detail ?? default;
 
-    public float? ElapsedTime => GetFloat(nameof(ElapsedTime));
-    float IAnimation.ElapsedTime => ElapsedTime ?? default;
+    public double? ElapsedTime => GetDouble(nameof(ElapsedTime));
+    double IAnimation.ElapsedTime => ElapsedTime ?? default;
 
     public DOMException? Error { get; private set; } = null; // TODO:
     DOMException IError.Error => Error ?? DOMException.Empty;

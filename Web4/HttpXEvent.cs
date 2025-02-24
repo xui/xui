@@ -35,7 +35,7 @@ internal partial record class HttpXEvent(
     double? DeltaY = null,
     double? DeltaZ = null,
     long? Detail = null,
-    float? ElapsedTime = null,
+    double? ElapsedTime = null,
     DOMException? Error = null,
     EventPhase? EventPhase = null,
     string? FileName = null,
@@ -122,7 +122,7 @@ internal partial record class HttpXEvent(
     double IDeltas.DeltaY => DeltaY ?? default;
     double IDeltas.DeltaZ => DeltaZ ?? default;
     long IDetail.Detail => Detail ?? default;
-    float IAnimation.ElapsedTime => ElapsedTime ?? default;
+    double IAnimation.ElapsedTime => ElapsedTime ?? default;
     DOMException IError.Error => Error ?? DOMException.Empty;
     EventPhase IEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
     string IError.FileName => FileName ?? string.Empty;

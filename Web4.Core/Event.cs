@@ -195,7 +195,7 @@ public partial interface Event :
     /// <summary>
     /// A float giving the amount of time the animation has been running, in seconds, when this event fired, excluding any time the animation was paused. For an animationstart event, elapsedTime is 0.0 unless there was a negative value for animation-delay, in which case the event will be fired with elapsedTime containing (-1 * delay).
     /// </summary>
-    new float? ElapsedTime { get; }
+    new double? ElapsedTime { get; }
 
     /// <summary>
     /// A nullable int which indicates which phase of the event flow is being processed. It is one of the following numbers: NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE.
