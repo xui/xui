@@ -3,19 +3,37 @@ using System.Buffers;
 using System.Drawing;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.ObjectPool;
 using Web4.Events;
 using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
+internal record class DefaultEvent : Event, IResettable
 {
-    private readonly Dictionary<string, long> values = []; // 64 bit placeholder
+    private ReadOnlySequence<byte>? message = null;
+    private readonly Dictionary<string, long> values = []; // 64 bit placeholders
     private readonly Dictionary<string, object> references = [];
     private bool areValuesParsed = false;
     private bool areReferencesParsed = false;
 
-    private void EnsureParsed(bool canIgnoreReferences = false)
+    public DefaultEvent Init(ReadOnlySequence<byte> message)
+    {
+        this.message = message;
+        return this;
+    }
+
+    public bool TryReset()
+    {
+        message = null;
+        values.Clear();
+        references.Clear();
+        areValuesParsed = false;
+        areReferencesParsed = false;
+        return true;
+    }
+
+    private void LazyParse(bool canIgnoreReferences = false)
     {
         if (!areValuesParsed)
         {
@@ -38,9 +56,12 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
 
     public void Parse(bool canIgnoreReferences = false)
     {
+        if (!message.HasValue)
+            throw new ArgumentNullException(nameof(message));
+
         try
         {
-            var reader = new Utf8JsonReader(message);
+            var reader = new Utf8JsonReader(message.Value);
             while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
@@ -54,16 +75,44 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
                         reader.Read();
                         if (types.TryGetValue(propertyName, out var type))
                         {
-                            if (type == typeof(bool))
-                                values[propertyName] = reader.GetBoolean() ? 1 : 0;
-                            else if (type == typeof(int))
-                                values[propertyName] = reader.GetInt32();
-                            else if (type == typeof(long))
-                                values[propertyName] = reader.GetInt64();
-                            else if (type == typeof(double))
-                                values[propertyName] = BitConverter.DoubleToInt64Bits(reader.GetDouble());
-                            else
-                                throw new NotSupportedException(type.ToString());
+                            if (!areValuesParsed)
+                            {
+                                if (type == typeof(bool))
+                                    values[propertyName] = reader.GetBoolean() ? 1 : 0;
+                                else if (type == typeof(int))
+                                    values[propertyName] = reader.GetInt32();
+                                else if (type == typeof(long))
+                                    values[propertyName] = reader.GetInt64();
+                                else if (type == typeof(double))
+                                    values[propertyName] = BitConverter.DoubleToInt64Bits(reader.GetDouble());
+                            }
+                            if (!areReferencesParsed && !canIgnoreReferences)
+                            {
+                                if (type == typeof(string))
+                                {
+                                    var str = reader.GetString();
+                                    if (str is not null)
+                                        references[propertyName] = str;
+                                }
+                                else if (type == typeof(ABG))
+                                {
+                                }
+                                else if (type == typeof(DataTransferContainer))
+                                {
+                                }
+                                else if (type == typeof(DOMException))
+                                {
+                                }
+                                else if (type == typeof(EventTarget))
+                                {
+                                }
+                                else if (type == typeof(TouchPoint[]))
+                                {
+                                }
+                                else if (type == typeof(XYZ))
+                                {
+                                }
+                            }
                         }
                     }
                 }
@@ -77,31 +126,31 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
 
     private object? GetReference(string propName)
     {
-        EnsureParsed(canIgnoreReferences: false);
+        LazyParse(canIgnoreReferences: false);
         return references.GetValueOrDefault(propName);
     }
 
     private bool? GetBool(string propName)
     {
-        EnsureParsed(canIgnoreReferences: true);
+        LazyParse(canIgnoreReferences: true);
         return values.TryGetValue(propName, out long value) ? value != 0 : null;
     }
 
     private int? GetInt(string propName)
     {
-        EnsureParsed(canIgnoreReferences: true);
+        LazyParse(canIgnoreReferences: true);
         return values.TryGetValue(propName, out long value) ? (int)value : null;
     }
 
     private long? GetLong(string propName)
     {
-        EnsureParsed(canIgnoreReferences: true);
+        LazyParse(canIgnoreReferences: true);
         return values.TryGetValue(propName, out long value) ? value : null;
     }
 
     private double? GetDouble(string propName)
     {
-        EnsureParsed(canIgnoreReferences: true);
+        LazyParse(canIgnoreReferences: true);
         return values.TryGetValue(propName, out long value) 
             ? BitConverter.Int64BitsToDouble(value) 
             : null;
@@ -193,7 +242,8 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
         ["type"] = typeof(string),
         ["width"] = typeof(int),
         ["x"] = typeof(double),
-        ["y"] = typeof(double)
+        ["y"] = typeof(double),
+        ["_id"] = typeof(int)
     };
 
     static DefaultEvent()
@@ -222,6 +272,19 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
                     stringBuilder.Append($"{pair.Key}: {GetLong(pair.Key)}");
                 else if (type == typeof(double))
                     stringBuilder.Append($"{pair.Key}: {GetDouble(pair.Key)}");
+            }
+        }
+        foreach (var pair in references)
+        {
+            if (isFirst)
+                isFirst = false;
+            else
+                stringBuilder.Append(", ");
+
+            if (types.TryGetValue(pair.Key, out var type))
+            {
+                if (type == typeof(string))
+                    stringBuilder.Append($"{pair.Key}: \"{GetReference(pair.Key)}\"");
             }
         }
         return true;

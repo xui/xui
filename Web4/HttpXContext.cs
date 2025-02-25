@@ -5,12 +5,14 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Web4;
 
 public struct HttpXContext: IDisposable
 {
     private static readonly ConcurrentDictionary<string, HttpXContext> contextLookup = [];
+    private static readonly ObjectPool<DefaultEvent> eventPool = ObjectPool.Create<DefaultEvent>();
     const int BUFFER_LENGTH = 1024;
 
     private readonly WebSocket webSocket;
@@ -70,13 +72,25 @@ public struct HttpXContext: IDisposable
 
             if (keyhole is EventListener listener)
             {
-                var e = new DefaultEvent(message);
-
-                // Do not await
-                perf = Debug.PerfCheck("HandleEvent");
-                _ = HandleEvent(listener, e, window)
-                    .ContinueWith(t => t.Dispose());
+                perf = Debug.PerfCheck("CaptureSnapshot (before)");
+                var before = window.CaptureSnapshot();
                 perf.Dispose();
+
+                perf = Debug.PerfCheck("HandleEvent");
+                HandleEvent(listener, message);
+                perf.Dispose();
+
+                perf = Debug.PerfCheck("CaptureSnapshot (after)");
+                var after = window.CaptureSnapshot();
+                perf.Dispose();
+
+                // TODO: State invalidations will not live here
+                perf = Debug.PerfCheck("DiffAndSendMutations");
+                await DiffAndSendMutations(before, after, cancellationToken);
+                perf.Dispose();
+
+                before.Dispose();
+                after.Dispose();
             }
             else
             {
@@ -84,6 +98,7 @@ public struct HttpXContext: IDisposable
                 // messages might pass each other across the network.
                 Console.WriteLine($"🔴 Event handler not found for key:{method}");
             }
+            Console.WriteLine();
         }
     }
 
@@ -96,10 +111,10 @@ public struct HttpXContext: IDisposable
         var buffer = owner.Memory;
         while (true)
         {
-            var perf = Debug.PerfCheck("GetNextMessage");
             try
             {
                 var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                var perf = Debug.PerfCheck("GetNextMessage");
                 if (result.MessageType == WebSocketMessageType.Close)
                     break; // TODO: Memory leak?
 
@@ -123,6 +138,7 @@ public struct HttpXContext: IDisposable
                     }
                     sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
                 }
+                perf.Dispose();
             }
             catch (WebSocketException ex)
             {
@@ -130,7 +146,6 @@ public struct HttpXContext: IDisposable
                 break;
             }
 
-            perf.Dispose();
             yield return sequence;
         }
     }
@@ -163,105 +178,115 @@ public struct HttpXContext: IDisposable
         return key;
     }
 
-    private async readonly Task HandleEvent(
-        EventListener listener,
-        Event? e, 
-        WindowBuilder window, 
-        CancellationToken cancellationToken = default)
+    private static void HandleEvent(EventListener listener, ReadOnlySequence<byte> message)
     {
-        // UIThread.Run(async () => 
-        // {
-        //     await listener(domEvent!);
-        // });
-
-        // State.Invoke(async () => 
-        // {
-        //     await listener(domEvent!);
-        // });
-
-        var isChanged = false;
         // TODO: Surround with "batch" concept.
         {
-            var before = window.CaptureSnapshot();
             try
             {
-                await listener.Invoke(e);
+                if (listener.Action is not null)
+                {
+                    listener.Action();
+                }
+                else if (listener.ActionEvent is not null)
+                {
+                    var e = eventPool.Get().Init(message);
+                    listener.ActionEvent(e);
+                    eventPool.Return(e);
+                }
+                else if (listener.Func is not null)
+                {
+                    _ = listener.Func();
+                }
+                else if (listener.FuncEvent is not null)
+                {
+                    var e = eventPool.Get().Init(message);
+                    _ = listener
+                        .FuncEvent(e)
+                        .ContinueWith(t => eventPool.Return(e));
+                        // TODO: Allocation!  Learn how to Return(e) without capturing.
+                }
+                else
+                {
+                    Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-            var after = window.CaptureSnapshot();
+        }
+    }
 
-            for (int i = 0; i < after.RootLength; i++)
+    private readonly async Task DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
+    {
+        var isChanged = false;
+        for (int i = 0; i < after.RootLength; i++)
+        {
+            ref var keyholeBefore = ref before.Buffer[i];
+            ref var keyholeAfter = ref after.Buffer[i];
+
+            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
             {
-                ref var keyholeBefore = ref before.Buffer[i];
-                ref var keyholeAfter = ref after.Buffer[i];
-
-                if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+                switch (keyholeAfter.Type)
                 {
-                    switch (keyholeAfter.Type)
-                    {
-                        case FormatType.String:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Boolean:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Color:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Uri:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Integer:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Long:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Float:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Double:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.Decimal:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.DateTime:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.DateOnly:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.TimeSpan:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                        case FormatType.TimeOnly:
-                            isChanged = true;
-                            await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
-                            break;
-                    }
+                    case FormatType.String:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Boolean:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Color:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Uri:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Integer:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Long:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Float:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Double:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.Decimal:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.DateTime:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.DateOnly:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.TimeSpan:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
+                    case FormatType.TimeOnly:
+                        isChanged = true;
+                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
+                        break;
                 }
             }
         }
 
-        // TODO: State invalidations will not live here
-        if (isChanged)
-            Console.WriteLine($"isChanged:{isChanged}");
+        // if (isChanged)
         //     await window.DebugSnapshot(Pipe.Output);
     }
 
