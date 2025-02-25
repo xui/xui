@@ -99,7 +99,7 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
             : null;
     }
 
-    public bool? Absolute => GetBool(nameof(Absolute));
+    public bool? Absolute => GetBool("absolute");
     bool IDeviceOrientation.Absolute => Absolute ?? default;
 
     public XYZ? Acceleration { get; private set; } = null; // TODO:
@@ -108,103 +108,103 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
     public XYZ? AccelerationIncludingGravity { get; private set; } = null; // TODO:
     XYZ IDeviceMotion.AccelerationIncludingGravity => AccelerationIncludingGravity ?? XYZ.Empty;
 
-    public double? Alpha => GetDouble(nameof(Alpha));
+    public double? Alpha => GetDouble("alpha");
     double IDeviceOrientation.Alpha => Alpha ?? default;
 
-    public double? AltitudeAngle => GetDouble(nameof(AltitudeAngle));
+    public double? AltitudeAngle => GetDouble("altitudeAngle");
     double IAngles.AltitudeAngle => AltitudeAngle ?? default;
 
-    public bool? AltKey => GetBool(nameof(AltKey));
+    public bool? AltKey => GetBool("altKey");
     bool IModifierAlt.AltKey => AltKey ?? default;
 
-    public string? AnimationName => GetReference(nameof(AnimationName)) as string;
+    public string? AnimationName => GetReference("animationName") as string;
     string IAnimation.AnimationName => AnimationName ?? string.Empty;
 
-    public double? AzimuthAngle => GetDouble(nameof(AzimuthAngle));
+    public double? AzimuthAngle => GetDouble("azimuthAngle");
     double IAngles.AzimuthAngle => AzimuthAngle ?? default;
 
-    public double? Beta => GetDouble(nameof(Beta));
+    public double? Beta => GetDouble("beta");
     double IDeviceOrientation.Beta => Beta ?? default;
 
-    public bool? Bubbles => GetBool(nameof(Bubbles));
+    public bool? Bubbles => GetBool("bubbles");
     bool IEvent.Bubbles => Bubbles ?? default;
 
-    public Button? Button => GetInt(nameof(Button)) switch { int v => (Button)v, _ => null };
+    public Button? Button => GetInt("button") switch { int v => (Button)v, _ => null };
     Button IButtons.Button => Button ?? Web4.Events.Button.Main;
 
-    public ButtonFlag? Buttons => GetInt(nameof(Button)) switch { int v => (ButtonFlag)v, _ => null };
+    public ButtonFlag? Buttons => GetInt("button") switch { int v => (ButtonFlag)v, _ => null };
     ButtonFlag IButtons.Buttons => Buttons ?? ButtonFlag.None;
 
-    public bool? Cancelable => GetBool(nameof(Cancelable));
+    public bool? Cancelable => GetBool("cancelable");
     bool IEvent.Cancelable => Cancelable ?? default;
 
     public TouchPoint[]? ChangedTouches { get; private set; } = null; // TODO:
     TouchPoint[] ITouches.ChangedTouches => ChangedTouches ?? [];
 
-    public double? ClientX => GetDouble(nameof(ClientX));
+    public double? ClientX => GetDouble("clientX");
     double IClientXY.ClientX => ClientX ?? default;
 
-    public double? ClientY => GetDouble(nameof(ClientY));
+    public double? ClientY => GetDouble("clientY");
     double IClientXY.ClientY => ClientY ?? default;
 
-    public string? Code => GetReference(nameof(Code)) as string;
+    public string? Code => GetReference("code") as string;
     string IKeys.Code => Code ?? string.Empty;
 
-    public int? ColNo => GetInt(nameof(ColNo));
+    public int? ColNo => GetInt("colNo");
     int IError.ColNo => ColNo ?? default;
 
-    public bool? Composed => GetBool(nameof(Composed));
+    public bool? Composed => GetBool("composed");
     bool IEvent.Composed => Composed ?? default;
 
-    public bool? CtrlKey => GetBool(nameof(CtrlKey));
+    public bool? CtrlKey => GetBool("ctrlKey");
     bool IModifierCtrl.CtrlKey => CtrlKey ?? default;
 
     public EventTarget? CurrentTarget { get; private set; } = null; // TODO:
     EventTarget IEvent.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
 
-    public string? Data => GetReference(nameof(Data)) as string;
+    public string? Data => GetReference("data") as string;
     string IData.Data => Data ?? string.Empty;
 
     public DataTransferContainer? DataTransfer { get; private set; } = null; // TODO:
     DataTransferContainer IDataTransfer.DataTransfer => DataTransfer ?? DataTransferContainer.Empty;
 
-    public bool? DefaultPrevented => GetBool(nameof(DefaultPrevented));
+    public bool? DefaultPrevented => GetBool("defaultPrevented");
     bool IEvent.DefaultPrevented => DefaultPrevented ?? default;
 
-    public DeltaMode? DeltaMode => GetInt(nameof(DeltaMode)) switch { int v => (DeltaMode)v, _ => null };
+    public DeltaMode? DeltaMode => GetInt("deltaMode") switch { int v => (DeltaMode)v, _ => null };
     DeltaMode IDeltas.DeltaMode => DeltaMode ?? Web4.Events.DeltaMode.Pixel;
 
-    public double? DeltaX => GetDouble(nameof(DeltaX));
+    public double? DeltaX => GetDouble("deltaX");
     double IDeltas.DeltaX => DeltaX ?? default;
 
-    public double? DeltaY => GetDouble(nameof(DeltaY));
+    public double? DeltaY => GetDouble("deltaY");
     double IDeltas.DeltaY => DeltaY ?? default;
 
-    public double? DeltaZ => GetDouble(nameof(DeltaZ));
+    public double? DeltaZ => GetDouble("deltaZ");
     double IDeltas.DeltaZ => DeltaZ ?? default;
 
-    public long? Detail => GetLong(nameof(Detail));
+    public long? Detail => GetLong("detail");
     long IDetail.Detail => Detail ?? default;
 
-    public double? ElapsedTime => GetDouble(nameof(ElapsedTime));
+    public double? ElapsedTime => GetDouble("elapsedTime");
     double IAnimation.ElapsedTime => ElapsedTime ?? default;
 
     public DOMException? Error { get; private set; } = null; // TODO:
     DOMException IError.Error => Error ?? DOMException.Empty;
 
-    public EventPhase? EventPhase => GetInt(nameof(EventPhase)) switch { int v => (EventPhase)v, _ => null };
+    public EventPhase? EventPhase => GetInt("eventPhase") switch { int v => (EventPhase)v, _ => null };
     EventPhase IEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
 
-    public string? FileName => GetReference(nameof(FileName)) as string;
+    public string? FileName => GetReference("fileName") as string;
     string IError.FileName => FileName ?? string.Empty;
 
-    public double? Gamma => GetDouble(nameof(Gamma));
+    public double? Gamma => GetDouble("gamma");
     double IDeviceOrientation.Gamma => Gamma ?? default;
 
-    public int? Height => GetInt(nameof(Height));
+    public int? Height => GetInt("height");
     int IWidthHeight.Height => Height ?? default;
 
-    public string? InputType => GetReference(nameof(InputType)) as string;
+    public string? InputType => GetReference("inputType") as string;
     string IInputEvent<string>.InputType => InputType ?? string.Empty;
     string IInputEvent<bool>.InputType => InputType ?? string.Empty;
     string IInputEvent<Color>.InputType => InputType ?? string.Empty;
@@ -218,116 +218,116 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
     string IInputEvent<DateOnly>.InputType => InputType ?? string.Empty;
     string IInputEvent<TimeOnly>.InputType => InputType ?? string.Empty;
 
-    public double? Interval => GetDouble(nameof(Interval));
+    public double? Interval => GetDouble("interval");
     double IDeviceMotion.Interval => Interval ?? default;
 
-    public bool? IsComposing => GetBool(nameof(IsComposing));
+    public bool? IsComposing => GetBool("isComposing");
     bool IIsComposing.IsComposing => IsComposing ?? default;
 
-    public bool? IsPrimary => GetBool(nameof(IsPrimary));
+    public bool? IsPrimary => GetBool("isPrimary");
     bool IPointer.IsPrimary => IsPrimary ?? default;
 
-    public bool? IsTrusted => GetBool(nameof(IsTrusted));
+    public bool? IsTrusted => GetBool("isTrusted");
     bool IEvent.IsTrusted => IsTrusted ?? default;
 
-    public string? Key => GetReference(nameof(Key)) as string;
+    public string? Key => GetReference("key") as string;
     string IKeys.Key => Key ?? string.Empty;
 
-    public int? Length => GetInt(nameof(Length));
+    public int? Length => GetInt("length");
     int ILength.Length => Length ?? default;
 
-    public bool? LengthComputable => GetBool(nameof(LengthComputable));
+    public bool? LengthComputable => GetBool("lengthComputable");
     bool IProgress.LengthComputable => LengthComputable ?? default;
 
-    public int? LineNo => GetInt(nameof(LineNo));
+    public int? LineNo => GetInt("lineNo");
     int IError.LineNo => LineNo ?? default;
 
-    public long? Loaded => GetLong(nameof(Loaded));
+    public long? Loaded => GetLong("loaded");
     long IProgress.Loaded => Loaded ?? default;
 
-    public KeyLocation? Location => GetInt(nameof(Location)) switch { int v => (KeyLocation)v, _ => null };
+    public KeyLocation? Location => GetInt("location") switch { int v => (KeyLocation)v, _ => null };
     KeyLocation IKeys.Location => Location ?? KeyLocation.Standard;
 
-    public string? Message => GetReference(nameof(Message)) as string;
+    public string? Message => GetReference("message") as string;
     string IError.Message => Message ?? string.Empty;
 
-    public bool? MetaKey => GetBool(nameof(MetaKey));
+    public bool? MetaKey => GetBool("metaKey");
     bool IModifierMeta.MetaKey => MetaKey ?? default;
 
-    public double? MovementX => GetDouble(nameof(MovementX));
+    public double? MovementX => GetDouble("movementX");
     double IMovementXY.MovementX => MovementX ?? default;
 
-    public double? MovementY => GetDouble(nameof(MovementY));
+    public double? MovementY => GetDouble("movementY");
     double IMovementXY.MovementY => MovementY ?? default;
 
-    public string? NewState => GetReference(nameof(NewState)) as string;
+    public string? NewState => GetReference("newState") as string;
     string IStates.NewState => NewState ?? string.Empty;
 
-    public string? NewUrl => GetReference(nameof(NewUrl)) as string;
+    public string? NewUrl => GetReference("newUrl") as string;
     string IHashChange.NewUrl => NewUrl ?? string.Empty;
 
-    public double? OffsetX => GetDouble(nameof(OffsetX));
+    public double? OffsetX => GetDouble("offsetX");
     double IOffsetXY.OffsetX => OffsetX ?? default;
 
-    public double? OffsetY => GetDouble(nameof(OffsetY));
+    public double? OffsetY => GetDouble("offsetY");
     double IOffsetXY.OffsetY => OffsetY ?? default;
 
-    public string? OldState => GetReference(nameof(OldState)) as string;
+    public string? OldState => GetReference("oldState") as string;
     string IStates.OldState => OldState ?? string.Empty;
 
-    public string? OldUrl => GetReference(nameof(OldUrl)) as string;
+    public string? OldUrl => GetReference("oldUrl") as string;
     string IHashChange.OldUrl => OldUrl ?? string.Empty;
 
-    public double? PageX => GetDouble(nameof(PageX));
+    public double? PageX => GetDouble("pageX");
     double IPageXY.PageX => PageX ?? default;
 
-    public double? PageY => GetDouble(nameof(PageY));
+    public double? PageY => GetDouble("pageY");
     double IPageXY.PageY => PageY ?? default;
 
-    public bool? Persisted => GetBool(nameof(Persisted));
+    public bool? Persisted => GetBool("persisted");
     bool IPersisted.Persisted => Persisted ?? default;
 
-    public int? PointerID => GetInt(nameof(PointerID));
+    public int? PointerID => GetInt("pointerID");
     int IPointer.PointerID => PointerID ?? default;
 
-    public string? PointerType => GetReference(nameof(PointerType)) as string;
+    public string? PointerType => GetReference("pointerType") as string;
     string IPointer.PointerType => PointerType ?? string.Empty;
 
-    public double? Pressure => GetDouble(nameof(Pressure));
+    public double? Pressure => GetDouble("pressure");
     double IPressures.Pressure => Pressure ?? default;
 
-    public string? PropertyName => GetReference(nameof(PropertyName)) as string;
+    public string? PropertyName => GetReference("propertyName") as string;
     string IAnimation.PropertyName => PropertyName ?? string.Empty;
 
-    public string? PseudoElement => GetReference(nameof(PseudoElement)) as string;
+    public string? PseudoElement => GetReference("pseudoElement") as string;
     string IAnimation.PseudoElement => PseudoElement ?? string.Empty;
 
     public EventTarget? RelatedTarget { get; private set; } = null; // TODO:
     EventTarget IRelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;
 
-    public bool? Repeat => GetBool(nameof(Repeat));
+    public bool? Repeat => GetBool("repeat");
     bool IKeys.Repeat => Repeat ?? default;
 
     public ABG? RotationRate { get; private set; } = null; // TODO:
     ABG IDeviceMotion.RotationRate => RotationRate ?? ABG.Empty;
 
-    public double? ScreenX => GetDouble(nameof(ScreenX));
+    public double? ScreenX => GetDouble("screenX");
     double IScreenXY.ScreenX => ScreenX ?? default;
 
-    public double? ScreenY => GetDouble(nameof(ScreenY));
+    public double? ScreenY => GetDouble("screenY");
     double IScreenXY.ScreenY => ScreenY ?? default;
 
-    public bool? ShiftKey => GetBool(nameof(ShiftKey));
+    public bool? ShiftKey => GetBool("shiftKey");
     bool IModifierShift.ShiftKey => ShiftKey ?? default;
 
-    public bool? Skipped => GetBool(nameof(Skipped));
+    public bool? Skipped => GetBool("skipped");
     bool ISkipped.Skipped => Skipped ?? default;
 
     
     public EventTarget? Submitter { get; private set; } = null; // TODO:
     EventTarget ISubmitter.Submitter => Submitter ?? EventTarget.Empty;
 
-    public double? TangentialPressure => GetDouble(nameof(TangentialPressure));
+    public double? TangentialPressure => GetDouble("tangentialPressure");
     double IPressures.TangentialPressure => TangentialPressure ?? default;
 
     public EventTarget? Target { get; private set; } = null; // TODO:
@@ -360,33 +360,33 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
     public TouchPoint[]? TargetTouches { get; private set; } = null; // TODO:
     TouchPoint[] ITouches.TargetTouches => TargetTouches ?? [];
 
-    public double? TimeStamp => GetDouble(nameof(TimeStamp));
+    public double? TimeStamp => GetDouble("timeStamp");
     double IEvent.TimeStamp => TimeStamp ?? default;
 
-    public double? TiltX => GetDouble(nameof(TiltX));
+    public double? TiltX => GetDouble("tiltX");
     double ITilts.TiltX => TiltX ?? default;
 
-    public double? TiltY => GetDouble(nameof(TiltY));
+    public double? TiltY => GetDouble("tiltY");
     double ITilts.TiltY => TiltY ?? default;
 
-    public long? Total => GetLong(nameof(Total));
+    public long? Total => GetLong("total");
     long IProgress.Total => Total ?? default;
 
     public TouchPoint[]? Touches { get; private set; } = null; // TODO:
     TouchPoint[] ITouches.Touches => Touches ?? [];
 
-    public double? Twist => GetDouble(nameof(Twist));
+    public double? Twist => GetDouble("twist");
     double IPointer.Twist => Twist ?? default;
 
-    public string? Type => GetReference(nameof(Type)) as string;
+    public string? Type => GetReference("type") as string;
     string IEvent.Type => Type ?? string.Empty;
 
-    public int? Width => GetInt(nameof(Width));
+    public int? Width => GetInt("width");
     int IWidthHeight.Width => Width ?? default;
 
-    public double? X => GetDouble(nameof(X));
+    public double? X => GetDouble("x");
     double IXY.X => X ?? default;
 
-    public double? Y => GetDouble(nameof(Y));
+    public double? Y => GetDouble("y");
     double IXY.Y => Y ?? default;
 }
