@@ -322,7 +322,6 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
 
     public bool? Skipped => GetBool("skipped");
     bool ISkipped.Skipped => Skipped ?? default;
-
     
     public EventTarget? Submitter { get; private set; } = null; // TODO:
     EventTarget ISubmitter.Submitter => Submitter ?? EventTarget.Empty;
