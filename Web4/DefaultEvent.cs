@@ -215,7 +215,7 @@ internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
             if (types.TryGetValue(pair.Key, out var type))
             {
                 if (type == typeof(bool))
-                    stringBuilder.Append($"{pair.Key}: {GetBool(pair.Key)}");
+                    stringBuilder.Append($"{pair.Key}: {GetBool(pair.Key) switch { true => "true", false => "false", _ => "null" }}");
                 else if (type == typeof(int))
                     stringBuilder.Append($"{pair.Key}: {GetInt(pair.Key)}");
                 else if (type == typeof(long))
