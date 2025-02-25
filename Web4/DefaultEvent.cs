@@ -1,13 +1,14 @@
 
 using System.Buffers;
 using System.Drawing;
+using System.Text;
 using System.Text.Json;
 using Web4.Events;
 using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal class DefaultEvent(ReadOnlySequence<byte> message) : Event
+internal record class DefaultEvent(ReadOnlySequence<byte> message) : Event
 {
     private readonly Dictionary<string, long> values = []; // 64 bit placeholder
     private readonly Dictionary<string, object> references = [];
@@ -201,6 +202,31 @@ internal class DefaultEvent(ReadOnlySequence<byte> message) : Event
             Keymaker.CacheKey(key);
     }
 
+    protected virtual bool PrintMembers(StringBuilder stringBuilder)
+    {
+        bool isFirst = true;
+        foreach (var pair in values)
+        {
+            if (isFirst)
+                isFirst = false;
+            else
+                stringBuilder.Append(", ");
+
+            if (types.TryGetValue(pair.Key, out var type))
+            {
+                if (type == typeof(bool))
+                    stringBuilder.Append($"{pair.Key}: {GetBool(pair.Key)}");
+                else if (type == typeof(int))
+                    stringBuilder.Append($"{pair.Key}: {GetInt(pair.Key)}");
+                else if (type == typeof(long))
+                    stringBuilder.Append($"{pair.Key}: {GetLong(pair.Key)}");
+                else if (type == typeof(double))
+                    stringBuilder.Append($"{pair.Key}: {GetDouble(pair.Key)}");
+            }
+        }
+        return true;
+    }
+    
     public bool? Absolute => GetBool("absolute");
     bool IDeviceOrientation.Absolute => Absolute ?? default;
 
