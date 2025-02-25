@@ -1,3 +1,5 @@
+using System.Buffers;
+
 namespace Web4;
 
 internal struct Keymaker
@@ -71,6 +73,17 @@ internal struct Keymaker
             return value;
         
         return null;
+    }
+
+    internal static string? GetKeyIfCached(ReadOnlySequence<byte> key)
+    {
+        if (key.Length > 1024)
+            return null;
+        
+        Span<byte> bytes = stackalloc byte[(int)key.Length];
+        key.CopyTo(bytes);
+
+        return GetKeyIfCached(bytes);
     }
 
     private static int GetNumberWidth(int digit)

@@ -44,14 +44,10 @@ internal class DefaultEvent(ReadOnlySequence<byte> message) : Event
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    // TODO: Keymaker.GetKeyIfCached should be overloaded
-                    // to support ReadOnlySequence<byte> since it
-                    // leverages stackalloc for small strings.
-                    ReadOnlySpan<byte> propertyNameSpan = reader.HasValueSequence
-                        ? reader.ValueSequence.ToArray()
-                        : reader.ValueSpan;
-                    
-                    var propertyName = Keymaker.GetKeyIfCached(propertyNameSpan);
+                    var propertyName = reader.HasValueSequence
+                        ? Keymaker.GetKeyIfCached(reader.ValueSequence)
+                        : Keymaker.GetKeyIfCached(reader.ValueSpan);
+
                     if (propertyName is not null)
                     {
                         reader.Read();
