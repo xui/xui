@@ -7,7 +7,7 @@ using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
+internal class DefaultEvent(ReadOnlySequence<byte> message) : Event
 {
     private readonly Dictionary<string, long> values = []; // 64 bit placeholder
     private readonly Dictionary<string, object> references = [];
@@ -44,11 +44,28 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    if (reader.ValueTextEquals("x"))
+                    // TODO: Keymaker.GetKeyIfCached should be overloaded
+                    // to support ReadOnlySequence<byte> since it
+                    // leverages stackalloc for small strings.
+                    ReadOnlySpan<byte> propertyNameSpan = reader.HasValueSequence
+                        ? reader.ValueSequence.ToArray()
+                        : reader.ValueSpan;
+                    
+                    var propertyName = Keymaker.GetKeyIfCached(propertyNameSpan);
+                    if (propertyName is not null)
                     {
                         reader.Read();
-                        double value = reader.GetDouble();
-                        values[nameof(X)] = BitConverter.DoubleToInt64Bits(value);
+                        if (types.TryGetValue(propertyName, out var type))
+                        {
+                            if (type == typeof(bool))
+                                values[propertyName] = reader.GetBoolean() ? 1 : 0;
+                            else if (type == typeof(int))
+                                values[propertyName] = reader.GetInt32();
+                            else if (type == typeof(long))
+                                values[propertyName] = reader.GetInt64();
+                            else if (type == typeof(double))
+                                values[propertyName] = BitConverter.DoubleToInt64Bits(reader.GetDouble());
+                        }
                     }
                 }
             }
@@ -83,20 +100,108 @@ internal partial class DefaultEvent(ReadOnlySequence<byte> message) : Event
         return values.TryGetValue(propName, out long value) ? value : null;
     }
 
-    private float? GetFloat(string propName)
-    {
-        EnsureParsed(canIgnoreReferences: true);
-        return values.TryGetValue(propName, out long value) 
-            ? (float)BitConverter.Int64BitsToDouble(value) 
-            : null;
-    }
-
     private double? GetDouble(string propName)
     {
         EnsureParsed(canIgnoreReferences: true);
         return values.TryGetValue(propName, out long value) 
             ? BitConverter.Int64BitsToDouble(value) 
             : null;
+    }
+
+    private static readonly Dictionary<string, Type> types = new()
+    {
+        ["absolute"] = typeof(bool),
+        ["acceleration"] = typeof(XYZ),
+        ["accelerationIncludingGravity"] = typeof(XYZ),
+        ["alpha"] = typeof(double),
+        ["altitudeAngle"] = typeof(double),
+        // ,
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        // [""] = typeof(),
+        ["x"] = typeof(double),
+        ["y"] = typeof(double)
+    };
+
+    static DefaultEvent()
+    {
+        foreach (var key in types.Keys)
+            Keymaker.CacheKey(key);
     }
 
     public bool? Absolute => GetBool("absolute");
