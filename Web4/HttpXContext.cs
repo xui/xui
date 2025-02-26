@@ -232,7 +232,9 @@ public struct HttpXContext: IDisposable
                 {
                     FormatType.String => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`",
                     FormatType.Boolean => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`",
-                    FormatType.Integer => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Integer}`",
+                    FormatType.Integer => $$"""
+                        {"jsonrpc":"2.0","method":"mutate","params":["{{keyholeAfter.Key}}","{{keyholeAfter.Integer}}"]}
+                        """,
                     FormatType.Long => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Long}`",
                     FormatType.Float => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Float}`",
                     FormatType.Double => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Double}`",

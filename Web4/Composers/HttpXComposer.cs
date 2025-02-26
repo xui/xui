@@ -325,8 +325,14 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
             ws.onclose = (event) => { console.debug(`onclose`, event); };
             ws.onerror = (event) => { console.error(`onerror`, event); };
             ws.onmessage = (event) => {
-                eval(event.data);
+                let json = JSON.parse(event.data);
+                // TODO: Support batch.  Check if array.
+                window[json.method].apply(window, json.params);
             };
+
+            function mutate(key,value) {
+                ui[key].nodeValue=value;
+            }
 
             const rootKeys = [
                 "absolute",
