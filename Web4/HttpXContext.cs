@@ -228,60 +228,27 @@ public struct HttpXContext: IDisposable
 
             if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
             {
-                switch (keyholeAfter.Type)
+                var message = keyholeAfter.Type switch
                 {
-                    case FormatType.String:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Boolean:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Color:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Uri:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Integer:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Integer}"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Long:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Long}"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Float:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Float}"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Double:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Double}"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.Decimal:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue={keyholeAfter.Decimal}"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.DateTime:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.DateOnly:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.TimeSpan:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
-                    case FormatType.TimeOnly:
-                        isChanged = true;
-                        await webSocket.SendAsync(Encoding.UTF8.GetBytes($"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`"), WebSocketMessageType.Text, true, cancellationToken);
-                        break;
+                    FormatType.String => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`",
+                    FormatType.Boolean => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`",
+                    FormatType.Integer => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Integer}`",
+                    FormatType.Long => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Long}`",
+                    FormatType.Float => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Float}`",
+                    FormatType.Double => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Double}`",
+                    FormatType.DateTime => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`",
+                    FormatType.DateOnly => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`",
+                    FormatType.TimeSpan => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`",
+                    FormatType.TimeOnly => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`",
+                    FormatType.Color => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`",
+                    FormatType.Uri => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`",
+                    _ => null
+                };
+
+                if (message is not null)
+                {
+                    isChanged = true;
+                    await webSocket.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, cancellationToken);
                 }
             }
         }
