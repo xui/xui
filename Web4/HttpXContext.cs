@@ -228,27 +228,28 @@ public struct HttpXContext: IDisposable
 
             if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
             {
-                var message = keyholeAfter.Type switch
+                var value = keyholeAfter.Type switch
                 {
-                    FormatType.String => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.String}`",
-                    FormatType.Boolean => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Boolean}`",
-                    FormatType.Integer => $$"""
-                        {"jsonrpc":"2.0","method":"mutate","params":["{{keyholeAfter.Key}}","{{keyholeAfter.Integer}}"]}
-                        """,
-                    FormatType.Long => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Long}`",
-                    FormatType.Float => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Float}`",
-                    FormatType.Double => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Double}`",
-                    FormatType.DateTime => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateTime}`",
-                    FormatType.DateOnly => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.DateOnly}`",
-                    FormatType.TimeSpan => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeSpan}`",
-                    FormatType.TimeOnly => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.TimeOnly}`",
-                    FormatType.Color => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Color}`",
-                    FormatType.Uri => $"ui.{keyholeAfter.Key}.nodeValue=`{keyholeAfter.Uri}`",
+                    FormatType.String => $"'{keyholeAfter.String}'",
+                    FormatType.Boolean => keyholeAfter.Boolean!.Value ? "true" : "false",
+                    FormatType.Integer => $"{keyholeAfter.Integer}",
+                    FormatType.Long => $"{keyholeAfter.Long}",
+                    FormatType.Float => $"{keyholeAfter.Float}",
+                    FormatType.Double => $"{keyholeAfter.Double}",
+                    FormatType.DateTime => $"'{keyholeAfter.DateTime}'",
+                    FormatType.DateOnly => $"'{keyholeAfter.DateOnly}'",
+                    FormatType.TimeSpan => $"'{keyholeAfter.TimeSpan}'",
+                    FormatType.TimeOnly => $"'{keyholeAfter.TimeOnly}'",
+                    FormatType.Color => $"'{keyholeAfter.Color}'",
+                    FormatType.Uri => $"'{keyholeAfter.Uri}'",
                     _ => null
                 };
 
-                if (message is not null)
+                if (value is not null)
                 {
+                    var message = $$"""
+                        {"jsonrpc":"2.0","method":"mutate","params":["{{keyholeAfter.Key}}",{{value}}]}
+                        """;
                     isChanged = true;
                     await webSocket.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, cancellationToken);
                 }
