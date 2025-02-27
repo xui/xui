@@ -326,8 +326,8 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
             ws.onerror = (event) => { console.error(`onerror`, event); };
             ws.onmessage = (event) => {
                 let json = JSON.parse(event.data);
-                // TODO: Support batch.  Check if array.
-                window[json.method].apply(window, json.params);
+                if (!Array.isArray(json)) json = [json];
+                json.forEach(m => window[m.method].apply(window, m.params))
             };
 
             function mutate(key,value) {
