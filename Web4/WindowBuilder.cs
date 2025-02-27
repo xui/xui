@@ -293,6 +293,7 @@ public class WindowBuilder :
         _       => $"{target}.addEventListener('{type}', e => rpc('{key}', e, '{format}'), {options});",
     };
 
+    // TODO: Ack!  You forgot to move composers to structs.
     static FindKeyholeComposer? composer = null;
     internal EventListener? GetKeyhole(string? key)
     {
@@ -314,11 +315,13 @@ public class WindowBuilder :
         }
     }
 
+    // TODO: Ack!  You forgot to move composers to structs.
+    static DiffComposer? diffComposer = null;
     internal Snapshot CaptureSnapshot()
     {
-        var composer = new DiffComposer();
-        composer.Compose($"{html()}");
-        return composer.Snapshot;
+        diffComposer ??= new DiffComposer();
+        diffComposer.Compose($"{html()}");
+        return diffComposer.Snapshot;
     }
 
     // private static bool warmedUp = false;
