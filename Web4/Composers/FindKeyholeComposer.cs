@@ -114,7 +114,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
         // return false;
     }
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
     {
         parentKey = parent.Key;
         parentLength = parent.Length;
@@ -143,6 +143,5 @@ public class FindKeyholeComposer(string key) : BaseComposer
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableElement(ref Html parent, Slot slot) => IncrementCursor().CompleteFormattedValue();
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => IncrementCursor().CompleteFormattedValue();
 }

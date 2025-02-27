@@ -86,8 +86,7 @@ public abstract class BaseComposer
     public virtual bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => CompleteFormattedValue();
     
-    public virtual bool WriteMutableElement<TView>(ref Html parent, TView view) where TView : IView => CompleteFormattedValue();
-    public virtual bool WriteMutableElement(ref Html parent, Slot slot) => CompleteFormattedValue();
-    public virtual bool WriteMutableElement(ref Html parent, Html partial, string? expression = null) => CompleteFormattedValue();
+    public virtual bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) where TView : IView => CompleteFormattedValue();
+    public virtual bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null) => CompleteFormattedValue();
     public virtual void PrepareHtml(ref Html parent, int literalLength, int formattedCount) { }
 }

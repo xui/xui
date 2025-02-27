@@ -196,9 +196,8 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => WriteMutableElement(ref parent, view.Render());
-    public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.

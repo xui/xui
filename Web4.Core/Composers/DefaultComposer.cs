@@ -149,16 +149,15 @@ public class DefaultComposer(IBufferWriter<byte> writer) : StreamingComposer(wri
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => WriteMutableElement(ref parent, view.Render());
-    public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler 
         // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         
-        return base.WriteMutableElement(ref parent, partial, expression);
+        return base.WriteMutableElement(ref parent, partial, expression, format);
     }
 }

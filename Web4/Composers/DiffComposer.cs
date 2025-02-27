@@ -237,9 +237,8 @@ public class DiffComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => WriteMutableElement(ref parent, view.Render());
-    public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null)
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
         if (index >= 0)
@@ -255,7 +254,7 @@ public class DiffComposer : BaseComposer
             keyhole.Long = partial.Cursor;
         }
 
-        return base.WriteMutableElement(ref parent, partial, expression);
+        return base.WriteMutableElement(ref parent, partial, expression, format);
     }
 
     public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)

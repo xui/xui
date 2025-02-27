@@ -168,20 +168,16 @@ public ref partial struct Html
     // MUTABLE ELEMENTS
 
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public bool AppendFormatted<TView>(TView view) where TView : IView 
-        => AppendFormatted(view.Render());
-
-    // EX: <div>{ MyComponent(content: () => $"<h1>Hello world</h1>")) }</div>
-    public bool AppendFormatted(Slot slot) 
-        => AppendFormatted(slot());
+    public bool AppendFormatted<TView>(TView view, string? format = null) where TView : IView 
+        => AppendFormatted(view.Render(), format);
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null) 
+    public bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null, string? format = null) 
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableElement(ref this, html, expression);
+        var @continue = composer.WriteMutableElement(ref this, html, expression, format);
         Cursor++;
         return @continue;
     }
