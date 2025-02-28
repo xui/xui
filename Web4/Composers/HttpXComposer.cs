@@ -462,6 +462,17 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
                     node.replaceWith(s);
                 }
             }
+
+            // TODO: What is the performance cost of manipulating the DOM so many times onload?
+            // Clean up the many <script> and <!-- --> nodes.
+            while (document.scripts.length > 0) {
+                var s = document.scripts[0];
+                var c = s.previousSibling.previousSibling;
+                if (c.nodeType == Node.COMMENT_NODE) {
+                    c.parentNode.removeChild(c);
+                }
+                s.parentNode.removeChild(s);
+            }
         </script>
         """;
         // .Replace("\n", "")
