@@ -218,9 +218,8 @@ public struct HttpXContext: IDisposable
         }
     }
 
-    private readonly async Task DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
+    private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        var isChanged = false;
         for (int i = 0; i < after.RootLength; i++)
         {
             ref var keyholeBefore = ref before.Buffer[i];
@@ -250,14 +249,10 @@ public struct HttpXContext: IDisposable
                     var message = $$"""
                         {"jsonrpc":"2.0","method":"mutate","params":["{{keyholeAfter.Key}}",{{value}}]}
                         """;
-                    isChanged = true;
                     await webSocket.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, cancellationToken);
                 }
             }
         }
-
-        // if (isChanged)
-        //     await window.DebugSnapshot(Pipe.Output);
     }
 
     public void Dispose()
