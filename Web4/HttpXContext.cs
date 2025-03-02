@@ -220,37 +220,66 @@ public struct HttpXContext: IDisposable
 
     private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        for (int i = 0; i < after.RootLength; i++)
+        using (var writer = new WebSocketWriter(webSocket, 1024, cancellationToken))
         {
-            ref var keyholeBefore = ref before.Buffer[i];
-            ref var keyholeAfter = ref after.Buffer[i];
-
-            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+            var batchCount = 0;
+            
+            for (int i = 0; i < after.RootLength; i++)
             {
-                var value = keyholeAfter.Type switch
-                {
-                    FormatType.String => $"'{keyholeAfter.String}'",
-                    FormatType.Boolean => keyholeAfter.Boolean!.Value ? "true" : "false",
-                    FormatType.Integer => $"{keyholeAfter.Integer}",
-                    FormatType.Long => $"{keyholeAfter.Long}",
-                    FormatType.Float => $"{keyholeAfter.Float}",
-                    FormatType.Double => $"{keyholeAfter.Double}",
-                    FormatType.DateTime => $"'{keyholeAfter.DateTime}'",
-                    FormatType.DateOnly => $"'{keyholeAfter.DateOnly}'",
-                    FormatType.TimeSpan => $"'{keyholeAfter.TimeSpan}'",
-                    FormatType.TimeOnly => $"'{keyholeAfter.TimeOnly}'",
-                    FormatType.Color => $"'{keyholeAfter.Color}'",
-                    FormatType.Uri => $"'{keyholeAfter.Uri}'",
-                    _ => null
-                };
+                ref var keyholeBefore = ref before.Buffer[i];
+                ref var keyholeAfter = ref after.Buffer[i];
 
-                if (value is not null)
+                switch (keyholeBefore.Type)
                 {
-                    var message = $$"""
-                        {"jsonrpc":"2.0","method":"mutate","params":["{{keyholeAfter.Key}}",{{value}}]}
-                        """;
-                    await webSocket.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, cancellationToken);
+                    case FormatType.Html:
+                    case FormatType.View:
+                    case FormatType.Attribute:
+                    case FormatType.EventListener:
+                        continue;
                 }
+
+                if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+                {
+                    var key = keyholeAfter.Key;
+                    var type = keyholeAfter.Type;
+                    var iValue = keyholeAfter.Integer;
+                    var format = keyholeAfter.Format;
+
+                    if (batchCount++ == 0)
+                        await writer.Write("[");
+                    else
+                        await writer.Write(",");
+                    
+                    await writer.Write($$"""
+                        {"jsonrpc":"2.0","method":"mutate","params":["
+                        """);
+
+                    await writer.Write(key);
+
+                    await writer.Write($$"""
+                        ","
+                        """);
+
+                    switch (type)
+                    {
+                        case FormatType.Integer:
+                            await writer.Write(iValue!.Value, format);
+                            break;
+                        default:
+                            await writer.Write($"I am not an integer: {type}");
+                            break;
+                    }
+
+                    await writer.Write($$"""
+                        "]}
+                        """);
+                }
+            }
+
+            if (batchCount > 0)
+            {
+                await writer.Write("]");
+                await writer.Flush();
             }
         }
     }
