@@ -58,9 +58,6 @@ internal class WebSocketWriter(
         // Growing by small increments is wasteful.  Buffer-growth should at least double.
         // Skip the gradual doubling if we know it won't be enough.
         int growBy = Math.Max(sizeHint, bufferSize);
-
-        var before = bufferSize;
-
         bufferSize += growBy;
 
         // TODO: Should this be a configuration somewhere?
