@@ -16,6 +16,8 @@ public struct HttpXContext: IDisposable
     const int BUFFER_LENGTH = 1024;
 
     private readonly WebSocket webSocket;
+    private readonly WebSocketWriter writer;
+
     public readonly bool IsWebSocketOpen => webSocket.State == WebSocketState.Open;
 
     public static bool TryGet(HttpContext httpContext, out HttpXContext httpxContext)
@@ -40,6 +42,7 @@ public struct HttpXContext: IDisposable
     private HttpXContext(WebSocket webSocket)
     {
         this.webSocket = webSocket;
+        this.writer = new WebSocketWriter(webSocket, BUFFER_LENGTH);
     }
 
     public async readonly Task UpdatePath(PathString path)
@@ -220,10 +223,9 @@ public struct HttpXContext: IDisposable
 
     private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        using (var writer = new WebSocketWriter(webSocket, 1024, cancellationToken))
+        var batchCount = 0;
+        try
         {
-            var batchCount = 0;
-            
             for (int i = 0; i < after.RootLength; i++)
             {
                 ref var keyholeBefore = ref before.Buffer[i];
@@ -275,11 +277,17 @@ public struct HttpXContext: IDisposable
                         """);
                 }
             }
-
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
             if (batchCount > 0)
             {
                 await writer.Write("]");
-                await writer.Flush();
+                await writer.Flush(cancellationToken);
             }
         }
     }
