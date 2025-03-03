@@ -245,6 +245,7 @@ public struct HttpXContext: IDisposable
                     var key = keyholeAfter.Key;
                     var type = keyholeAfter.Type;
                     var iValue = keyholeAfter.Integer;
+                    var dValue = keyholeAfter.Double;
                     var format = keyholeAfter.Format;
 
                     if (batchCount++ == 0)
@@ -266,6 +267,9 @@ public struct HttpXContext: IDisposable
                     {
                         case FormatType.Integer:
                             await writer.Write(iValue!.Value, format);
+                            break;
+                        case FormatType.Double:
+                            await writer.Write(dValue!.Value, format);
                             break;
                         default:
                             await writer.Write($"I am not an integer: {type}");
