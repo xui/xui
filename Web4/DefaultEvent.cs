@@ -37,20 +37,14 @@ internal record class DefaultEvent : Event, IResettable
     {
         if (!areValuesParsed)
         {
-            using (Debug.PerfCheck("Parse values only"))
-            {
-                Parse(canIgnoreReferences);
-                areValuesParsed = true;
-            }
+            Parse(canIgnoreReferences);
+            areValuesParsed = true;
         }
         
         if (!canIgnoreReferences)
         {
-            using (Debug.PerfCheck("Parse with references"))
-            {
-                Parse(canIgnoreReferences);
-                areReferencesParsed = true;
-            }
+            Parse(canIgnoreReferences);
+            areReferencesParsed = true;
         }
     }
 
