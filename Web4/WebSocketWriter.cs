@@ -21,19 +21,15 @@ internal class WebSocketWriter(
             cursor += bytesWritten;
             pendingFlush = true;
         }
+        else if (cursor > 0)
+        {
+            await Flush(endOfMessage: false);
+            await Write(value);
+        }
         else
         {
-            // Write failed.  Try flushing first, if that doesn't work, rent a bigger buffer.
-            if (cursor > 0)
-            {
-                await Flush(endOfMessage: false);
-                await Write(value);
-            }
-            else
-            {
-                GrowBuffer(value.Length);
-                await Write(value);
-            }
+            GrowBuffer(value.Length);
+            await Write(value);
         }
     }
 
@@ -45,19 +41,15 @@ internal class WebSocketWriter(
             cursor += bytesWritten;
             pendingFlush = true;
         }
+        else if (cursor > 0)
+        {
+            await Flush(endOfMessage: false);
+            await Write(value, format);
+        }
         else
         {
-            // Write failed.  Try flushing first, if that doesn't work, rent a bigger buffer.
-            if (cursor > 0)
-            {
-                await Flush(endOfMessage: false);
-                await Write(value, format);
-            }
-            else
-            {
-                GrowBuffer(1);
-                await Write(value, format);
-            }
+            GrowBuffer(1);
+            await Write(value, format);
         }
     }
 
