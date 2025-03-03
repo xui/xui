@@ -27,23 +27,11 @@ internal class WebSocketWriter(
             if (cursor > 0)
             {
                 await Flush(endOfMessage: false);
-                cursor = 0;
-
-                // Try again
                 await Write(value);
             }
             else
             {
-                bufferSize *= 2;
-
-                // TODO: Should this be a configuration somewhere?
-                if (bufferSize > 1_000_000)
-                    throw new ApplicationException("Max buffer size exceeded.");
-
-                ArrayPool<byte>.Shared.Return(buffer);
-                buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-                // Try again
+                GrowBuffer(value.Length);
                 await Write(value);
             }
         }
@@ -63,34 +51,46 @@ internal class WebSocketWriter(
             if (cursor > 0)
             {
                 await Flush(endOfMessage: false);
-                cursor = 0;
-
-                // Try again
                 await Write(value, format);
             }
             else
             {
-                bufferSize *= 2;
-
-                // TODO: Should this be a configuration somewhere?
-                if (bufferSize > 1_000_000)
-                    throw new ApplicationException("Max buffer size exceeded.");
-
-                ArrayPool<byte>.Shared.Return(buffer);
-                buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-                // Try again
+                GrowBuffer(1);
                 await Write(value, format);
             }
         }
     }
 
+    private void GrowBuffer(int sizeHint)
+    {
+        // Growing by small increments is wasteful.  Buffer-growth should at least double.
+        // Skip the gradual doubling if we know it won't be enough.
+        int growBy = Math.Max(sizeHint, bufferSize);
+
+        var before = bufferSize;
+
+        bufferSize += growBy;
+
+        // TODO: Should this be a configuration somewhere?
+        if (bufferSize > 100_000_000)
+            throw new ApplicationException("Max buffer size exceeded.");
+
+        var oldBuffer = buffer;
+        var newBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        oldBuffer.CopyTo(newBuffer, 0);
+        buffer = newBuffer;
+        ArrayPool<byte>.Shared.Return(oldBuffer);
+    }
+
     public ValueTask Flush() => Flush(true);
     private ValueTask Flush(bool endOfMessage = true)
     {
+        var range = 0..cursor;
+        cursor = 0;
         pendingFlush = false;
+
         return webSocket.SendAsync(
-            buffer.AsMemory(..cursor), 
+            buffer.AsMemory(range), 
             WebSocketMessageType.Text, 
             endOfMessage, 
             cancellationToken
