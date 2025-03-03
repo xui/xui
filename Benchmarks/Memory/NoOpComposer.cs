@@ -28,7 +28,6 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     private bool HandleNotSupported() => true;
     private bool HandleNotSupported(ReadOnlySpan<char> attributeName) => true;
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view) => WriteMutableElement(ref parent, view.Render());
-    public override bool WriteMutableElement(ref Html parent, Slot slot) => WriteMutableElement(ref parent, slot());
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null) => true;
+    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null) => true;
 }
