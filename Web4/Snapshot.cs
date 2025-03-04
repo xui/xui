@@ -4,6 +4,7 @@ namespace Web4;
 
 public class Snapshot : IDisposable
 {
+    // TODO: Don't forget to implement the high watermark logic.
     private static int highWaterMark = 2048;
     
     public Keyhole[] Buffer { get; private set; }
