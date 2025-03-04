@@ -54,7 +54,8 @@ public struct Keyhole
             FormatType.EventListener or
             FormatType.View or
             FormatType.Html
-                => false
+                => false,
+            _ => throw new NotImplementedException()
         };
 
     public override readonly bool Equals(object? obj)
