@@ -32,7 +32,7 @@ public struct Keyhole
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {
-            FormatType.StringLiteral or 
+            FormatType.StringLiteral or
             FormatType.String
                 => left.reference == right.reference,
             FormatType.Uri
