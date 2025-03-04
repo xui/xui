@@ -50,7 +50,11 @@ public struct Keyhole
             FormatType.TimeOnly or
             FormatType.Color
                 => left.value == right.value && left.Format == right.Format,
-            _ => false
+            FormatType.Attribute or
+            FormatType.EventListener or
+            FormatType.View or
+            FormatType.Html
+                => false
         };
 
     public override readonly bool Equals(object? obj)
