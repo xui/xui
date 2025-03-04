@@ -91,8 +91,8 @@ public static class Debug
                     """);
                 break;
             case FormatType.Html:
-                int start = keyhole.Integer!.Value;
-                int length = (int)keyhole.Long!.Value;
+                int start = keyhole.Integer;
+                int length = (int)keyhole.Long;
                 if (keyhole.Key != string.Empty)
                 {
                     output.AppendLine($"""

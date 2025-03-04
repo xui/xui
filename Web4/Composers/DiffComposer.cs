@@ -259,8 +259,8 @@ public class DiffComposer : BaseComposer
 
     public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)
     {
-        var start = keyhole.Integer!.Value;
-        var end = start + keyhole.Long!.Value - 1;
+        var start = keyhole.Integer;
+        var end = start + keyhole.Long - 1;
         for (int i = start; i <= end; i++)
         {
             var k = Snapshot.Buffer[i];

@@ -7,43 +7,49 @@ namespace Web4;
 
 public struct Keyhole
 {
-    public string Key;
-    public FormatType Type;
-    public string? String;
-    public bool? Boolean;
-    public Color? Color;
-    public Uri? Uri;
-    public int? Integer;
-    public long? Long;
-    public float? Float;
-    public double? Double;
-    public decimal? Decimal;
-    public DateTime? DateTime;
-    public DateOnly? DateOnly;
-    public TimeSpan? TimeSpan;
-    public TimeOnly? TimeOnly;
-    public string? Format;
+    private long value; // 64 bits
+    private object? reference; // 64 bits
+    public string Key { get; set; } // 64 bits
+    public FormatType Type { get; set; } // 8 bits
+    public string? Format { get; set; } // 64 bits
+
+    public string? String { readonly get => reference as string; set => this.reference = value; }
+    public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
+    public Color Color { readonly get => Color.FromArgb((int)value); set => this.value = value.ToArgb(); }
+    public Uri? Uri { readonly get => reference as Uri; set => this.reference = value; }
+    public int Integer { readonly get => (int)value; set => this.value = value; }
+    public long Long { readonly get => value; set => this.value = value; }
+    public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits(value); }
+    public double Double { readonly get => BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits(value); }
+    public decimal Decimal { readonly get => (decimal)BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits((double)value); } // Note: lossy precision here
+    public DateTime DateTime { readonly get => new(value); set => this.value = value.Ticks; }
+    public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value); set => this.value = value.DayNumber; }
+    public TimeSpan TimeSpan { readonly get => new(value); set => this.value = value.Ticks; }
+    public TimeOnly TimeOnly { readonly get => new(value); set => this.value = value.Ticks; }
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
-    public static bool operator !=(Keyhole left, Keyhole right)
-        => !Equals(ref left, ref right);
+    public static bool operator !=(Keyhole left, Keyhole right) => !Equals(ref left, ref right);
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {
-            FormatType.StringLiteral    => left.String == right.String,
-            FormatType.String           => left.String == right.String,
-            FormatType.Boolean          => left.Boolean == right.Boolean,
-            FormatType.Color            => left.Color == right.Color         && left.Format == right.Format,
-            FormatType.Uri              => left.Uri == right.Uri             && left.Format == right.Format,
-            FormatType.Integer          => left.Integer == right.Integer     && left.Format == right.Format,
-            FormatType.Long             => left.Long == right.Long           && left.Format == right.Format,
-            FormatType.Float            => left.Float == right.Float         && left.Format == right.Format,
-            FormatType.Double           => left.Double == right.Double       && left.Format == right.Format,
-            FormatType.Decimal          => left.Decimal == right.Decimal     && left.Format == right.Format,
-            FormatType.DateTime         => left.DateTime == right.DateTime   && left.Format == right.Format,
-            FormatType.DateOnly         => left.DateOnly == right.DateOnly   && left.Format == right.Format,
-            FormatType.TimeSpan         => left.TimeSpan == right.TimeSpan   && left.Format == right.Format,
-            FormatType.TimeOnly         => left.TimeOnly == right.TimeOnly   && left.Format == right.Format,
+            FormatType.StringLiteral or 
+            FormatType.String
+                => left.reference == right.reference,
+            FormatType.Uri
+                => left.reference == right.reference && left.Format == right.Format,
+            FormatType.Boolean
+                => left.value == right.value,
+            FormatType.Integer or
+            FormatType.Long or
+            FormatType.Float or
+            FormatType.Double or
+            FormatType.Decimal or
+            FormatType.DateTime or
+            FormatType.DateOnly or
+            FormatType.TimeSpan or
+            FormatType.TimeOnly or
+            FormatType.Color
+                => left.value == right.value && left.Format == right.Format,
             _ => false
         };
 

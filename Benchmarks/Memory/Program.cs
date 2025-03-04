@@ -1,4 +1,5 @@
 ﻿global using Web4;
+using System.Drawing;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
@@ -109,15 +110,211 @@ public class Tests
             pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
+    int i = 1;
+    long l = 1;
+    float f = 3.14f;
+    double d = 3.14;
+    decimal m = 3.14m;
+    DateTime dt = DateTime.Now;
+    DateOnly d0 = DateOnly.MaxValue;
+    TimeSpan ts = TimeSpan.MaxValue;
+    TimeOnly t0 = TimeOnly.MaxValue;
+    bool b = true;
+    Color color = Color.Red;
+    string str = "str";
+    Uri uri = new Uri("https://web4.dev");
+
+
     [Benchmark]
-    public void DiffComposer()
+    public void DiffComposerInt()
     {
         diffComposer.Compose($"""
             <html>
                 <body>
-                    Hello {name}
                     <button>
-                        Clicks: {c}
+                        Clicks: {i}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerLong()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {l}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerFloat()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {f}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerDouble()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {d}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerDecimal()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {m}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerDateTime()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {dt}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerDateOnly()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {d0}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerTimeSpan()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {ts}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerTimeOnly()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {t0}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerBool()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {b}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerColor()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {color}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerString()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {str}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerUri()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {uri}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void DiffComposerFormatString()
+    {
+        diffComposer.Compose($"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {c:c}
                     </button>
                 </body>
             </html>
@@ -130,7 +327,6 @@ public class Tests
         diffComposer.Compose($"""
             <html>
                 <body>
-                    Hello {name}
                     <button>
                         Clicks: {cState}
                     </button>

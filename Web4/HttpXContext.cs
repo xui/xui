@@ -266,10 +266,10 @@ public struct HttpXContext: IDisposable
                     switch (type)
                     {
                         case FormatType.Integer:
-                            await writer.Write(iValue!.Value, format);
+                            await writer.Write(iValue, format);
                             break;
                         case FormatType.Double:
-                            await writer.Write(dValue!.Value, format);
+                            await writer.Write(dValue, format);
                             break;
                         default:
                             await writer.Write($"I am not an integer: {type}");
