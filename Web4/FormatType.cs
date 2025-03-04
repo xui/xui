@@ -1,6 +1,6 @@
 namespace Web4;
 
-public enum FormatType : byte
+public enum FormatType
 {
     StringLiteral,
     String,
