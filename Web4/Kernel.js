@@ -43,8 +43,6 @@ function rpc(key, ev, incl) {
   }
 }
 
-function debugSocket(name, ws) {}
-
 var l = location;
 var p = window.location.protocol.replace("http", "ws");
 const ws = new WebSocket(`${p}//${l.host}${l.pathname}`);
