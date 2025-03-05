@@ -29,16 +29,15 @@ public class WindowBuilder :
     ITransitionEventListeners
 {
     private readonly RouteGroupBuilder routeGroupBuilder;
-    private readonly Func<Html> html;
 
-    internal List<EventListener> Listeners { get; } = [];
-
+    public Func<Html> Html { get; }
     public DocumentBuilder Document { get; init; }
+    public List<EventListener> Listeners { get; } = [];
 
     public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> html)
     {
         this.routeGroupBuilder = routeGroupBuilder;
-        this.html = html;
+        Html = html;
         Document = new(this);
     }
 
@@ -292,35 +291,4 @@ public class WindowBuilder :
         // Serialize selectively – only a few properties are ever used
         _       => $"{target}.addEventListener('{type}', e => rpc('{key}', e, '{format}'), {options});",
     };
-
-    // TODO: Ack!  You forgot to move composers to structs.
-    static FindKeyholeComposer? composer = null;
-    internal EventListener? GetKeyhole(string? key)
-    {
-        switch (key)
-        {
-            case null:
-                return null;
-            case string s1 when s1.StartsWith("win"):
-            case string s2 when s2.StartsWith("doc"):
-                if (int.TryParse(key.AsSpan()[3..], out var index))
-                    return Listeners[index];
-                else
-                    return null;
-            default:
-                // var composer = new FindKeyholeComposer(key);
-                composer ??= new FindKeyholeComposer(key);
-                composer.Compose($"{html()}");
-                return composer.Listener;
-        }
-    }
-
-    // TODO: Ack!  You forgot to move composers to structs.
-    static DiffComposer? diffComposer = null;
-    internal Snapshot CaptureSnapshot()
-    {
-        diffComposer ??= new DiffComposer();
-        diffComposer.Compose($"{html()}");
-        return diffComposer.Snapshot;
-    }
 }

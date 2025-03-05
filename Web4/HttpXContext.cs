@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.ObjectPool;
+using Web4.Composers;
 
 namespace Web4;
 
@@ -70,13 +71,13 @@ public struct HttpXContext: IDisposable
             }
 
             perf = Debug.PerfCheck("GetKeyhole");
-            var keyhole = window.GetKeyhole(method);
+            var keyhole = GetKeyhole(method, window);
             perf.Dispose();
 
             if (keyhole is EventListener listener)
             {
                 perf = Debug.PerfCheck("CaptureSnapshot (before)");
-                var before = window.CaptureSnapshot();
+                var before = CaptureSnapshot(window);
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("HandleEvent");
@@ -84,7 +85,7 @@ public struct HttpXContext: IDisposable
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("CaptureSnapshot (after)");
-                var after = window.CaptureSnapshot();
+                var after = CaptureSnapshot(window);
                 perf.Dispose();
 
                 // TODO: State invalidations will not live here
@@ -181,6 +182,38 @@ public struct HttpXContext: IDisposable
         return key;
     }
 
+    // TODO: Ack!  You forgot to move composers to structs.
+    static FindKeyholeComposer? composer = null;
+    private static EventListener? GetKeyhole(string? key, WindowBuilder window)
+    {
+        switch (key)
+        {
+            case null:
+                return null;
+            case string s1 when s1.StartsWith("win"):
+            case string s2 when s2.StartsWith("doc"):
+                if (int.TryParse(key.AsSpan()[3..], out var index))
+                    return window.Listeners[index];
+                else
+                    return null;
+            default:
+                // var composer = new FindKeyholeComposer(key);
+                composer ??= new FindKeyholeComposer(key);
+                composer.Compose($"{window.Html()}");
+                return composer.Listener;
+        }
+    }
+
+    // TODO: Ack!  You forgot to move composers to structs.
+    // static DiffComposer? diffComposer = null;
+    private static Snapshot CaptureSnapshot(WindowBuilder window)
+    {
+        // diffComposer ??= new DiffComposer();
+        var diffComposer = new DiffComposer();
+        diffComposer.Compose($"{window.Html()}");
+        return diffComposer.Snapshot;
+    }
+    
     private static void HandleEvent(EventListener listener, ReadOnlySequence<byte> message)
     {
         // TODO: Surround with "batch" concept.
