@@ -323,43 +323,4 @@ public class WindowBuilder :
         diffComposer.Compose($"{html()}");
         return diffComposer.Snapshot;
     }
-
-    // private static bool warmedUp = false;
-    internal async Task DebugSnapshot(PipeWriter writer)
-    {
-        try
-        {
-            var composer = new DiffComposer();
-            // // Warmup...
-            // var warmup = Stopwatch.StartNew();
-            // long c = 0;
-            // while (warmup.ElapsedMilliseconds < 1000)
-            // {
-            //     c++;
-            // }
-            // Console.WriteLine(c);
-            // if (!warmedUp)
-            // {
-                // for (int i = 0; i < 250_000; i++)
-                    // composer.Compose($"{html()}");
-            //     warmedUp = true;
-            // }
-
-            // long gc1 = GC.GetAllocatedBytesForCurrentThread();
-            // var sw1 = Stopwatch.GetTimestamp();
-            // for (int i = 0; i < 250_000; i++)
-                composer.Compose($"{html()}");
-            // var elapsed = Stopwatch.GetElapsedTime(sw1);
-            // long gc2 = GC.GetAllocatedBytesForCurrentThread();
-            // Console.WriteLine($"elapsed: {elapsed.TotalNanoseconds} ns, allocations: {(gc2 - gc1):n0} bytes");
-
-            var output = Debug.GetOutput(composer);
-            writer.Inject($"{output.ToString()}");
-            await writer.FlushAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
 }

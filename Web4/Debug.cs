@@ -13,10 +13,9 @@ namespace Web4;
 
 public static class Debug
 {
-    public static StringBuilder GetOutput(DiffComposer composer)
+    public static StringBuilder GetOutput(Snapshot snapshot)
     {
         var output = new StringBuilder();
-        var snapshot = composer.Snapshot;
 
         output.Append($"""
             /* DEBUG /app XTTP/0.1
