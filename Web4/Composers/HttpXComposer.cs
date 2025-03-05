@@ -326,8 +326,14 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
             ws.onmessage = e => {
                 let json = JSON.parse(e.data);
                 if (!Array.isArray(json)) json = [json];
-                json.forEach(m => window[m.method].apply(window, m.params))
+                json.forEach(m => getFunction(m.method).apply(window, m.params))
             };
+
+            function getFunction(name) {
+                let f = window;
+                name.split(".").forEach(s => f = f[s]);
+                return f;
+            }
 
             function mutate(key,value) {
                 ui[key].nodeValue=value;
