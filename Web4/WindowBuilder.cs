@@ -268,6 +268,7 @@ public class WindowBuilder :
             var key = $"{target[..3]}{Listeners.Count}";
             Keymaker.CacheKey(key);
 
+            // TODO: Support more event listener options
             var options = "{passive:true}";
 
             Listeners.Add(new(listener)
