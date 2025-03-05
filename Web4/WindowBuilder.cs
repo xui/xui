@@ -41,6 +41,22 @@ public class WindowBuilder :
         Document = new(this);
     }
 
+    public WindowBuilder MapGet(
+        [StringSyntax("Route")] string pattern, 
+        Action<HttpContext> requestDelegate)
+    {
+        routeGroupBuilder.Map(
+            pattern,
+            async context => 
+            {
+                // TODO: Implement
+                await Task.Delay(1);
+            }
+        );
+
+        return this;
+    }
+
     public Action<Event>? OnAfterPrint { set => AddEventListener(nameof(OnAfterPrint), value, null); }
     public Action<Event>? OnBeforePrint { set => AddEventListener(nameof(OnBeforePrint), value, null); }
     public Action<Event.BeforeUnload>? OnBeforeUnload { set => AddEventListener(nameof(OnBeforeUnload), value, null); }
@@ -145,22 +161,6 @@ public class WindowBuilder :
     public Action<Event.Transition>? OnTransitionEnd { set => AddEventListener(nameof(OnTransitionEnd), value, null); }
     public Action<Event.Transition>? OnTransitionRun { set => AddEventListener(nameof(OnTransitionRun), value, null); }
     public Action<Event.Transition>? OnTransitionStart { set => AddEventListener(nameof(OnTransitionStart), value, null); }
-
-    public WindowBuilder MapGet(
-        [StringSyntax("Route")] string pattern, 
-        Action<HttpContext> requestDelegate)
-    {
-        routeGroupBuilder.Map(
-            pattern,
-            async context => 
-            {
-                // TODO: Implement
-                await Task.Delay(1);
-            }
-        );
-
-        return this;
-    }
 
     public WindowBuilder AddEventListener(string type, Action listener) => AddEventListener(type, e => listener(), string.Empty);
     public WindowBuilder AddEventListener(string type, Action<Event.Animation> listener) => AddEventListener(type, listener, null);
