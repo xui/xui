@@ -320,11 +320,11 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
             var l = location;
             var p = window.location.protocol.replace("http","ws");
             const ws = new WebSocket(`${p}//${l.host}${l.pathname}`);
-            ws.onopen = (event) => { console.debug(`onopen`, event); };
-            ws.onclose = (event) => { console.debug(`onclose`, event); };
-            ws.onerror = (event) => { console.error(`onerror`, event); };
-            ws.onmessage = (event) => {
-                let json = JSON.parse(event.data);
+            ws.onopen = console.debug;
+            ws.onclose = console.debug;
+            ws.onerror = console.error;
+            ws.onmessage = e => {
+                let json = JSON.parse(e.data);
                 if (!Array.isArray(json)) json = [json];
                 json.forEach(m => window[m.method].apply(window, m.params))
             };
