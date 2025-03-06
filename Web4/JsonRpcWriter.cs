@@ -53,7 +53,7 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
         batchCount = 0;
     }
 
-    public void WriteRpc(string method, params string[] args)
+    public void WriteRpc(string method, params Span<string> args)
     {
         if (batchCount++ > 0)
             Write(",");
