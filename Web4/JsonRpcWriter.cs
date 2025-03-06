@@ -17,8 +17,9 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
         buffer ??= ArrayPool<byte>.Shared.Rent(bufferSize);
         Span<byte> destination = buffer.AsSpan(cursor..);
 
-        if (Encoding.UTF8.TryGetBytes(value, destination, out var bytesWritten))
+        if (cursor + value.Length < buffer.Length)
         {
+            var bytesWritten = Encoding.UTF8.GetBytes(value, destination);
             cursor += bytesWritten;
         }
         else
