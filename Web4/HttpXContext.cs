@@ -94,7 +94,7 @@ public struct HttpXContext: IDisposable
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("Debug");
-                await Debug.Write(writer, before, after, cancellationToken);
+                await Debug.Write(webSocket, before, after, cancellationToken);
                 perf.Dispose();
 
                 before.Dispose();

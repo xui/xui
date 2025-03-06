@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipelines;
 using System.Net;
+using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -14,119 +15,92 @@ namespace Web4;
 
 public static class Debug
 {
-    const string cssDefault = "font-weight:normal;font-family:monospace,monospace;";
-    const string cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
-    const string cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
-    const string cssHtml = "font-weight:normal;font-family:monospace,monospace;";
-    const string cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
-    const string cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
-    const string cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
-    const string cssOperator = "font-weight:normal;font-family:monospace,monospace;";
-    const string cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
-    const string cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
-    const string cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
-    const string cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssDefault = "font-weight:normal;font-family:monospace,monospace;";
+    private const string cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssHtml = "font-weight:normal;font-family:monospace,monospace;";
+    private const string cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssOperator = "font-weight:normal;font-family:monospace,monospace;";
+    private const string cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
+    private const string cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
-    internal static async ValueTask Write(WebSocketWriter writer, Snapshot before, Snapshot after, CancellationToken cancellationToken)
+    private const int DEBOUNCE_SECONDS = 5;
+    private static DateTime debounceUntil = DateTime.Now;
+
+    internal static ValueTask Write(WebSocket webSocket, Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        await writer.Write('[');
+        using var writer = new JsonRpcWriter(bufferSize: 2^12);
 
-        await writer.WriteRpc("console.groupCollapsed", "Server Diff (2)");
-        await writer.Write(',');
-        await writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
-        await writer.Write(',');
-
-        // for (int i = 0; i < after.Root.Length; i++)
-        // {
-        //     ref Keyhole keyhole = ref after.Buffer[i];
-        //     Append(output, i, ref keyhole, after.Buffer);
-        // }
-
-        await writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
-        await writer.Write(',');
-        await writer.WriteRpc("console.groupEnd");
-
-        await writer.Write(']');
-        await writer.Flush(cancellationToken);
-    }
-
-    private static void Append(StringBuilder output, int index, ref Keyhole keyhole, Span<Keyhole> keyholes)
-    {
-        switch (keyhole.Type)
+        if (debounceUntil > DateTime.Now)
         {
-            case FormatType.StringLiteral:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c\`{InlineString(keyhole.String)}\``, cssVariable, cssLiteral);
-                        console.log(`\n{keyhole.String}\n\n`);
-                    console.groupEnd();
-                    """);
-                break;
-            case FormatType.String:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'`, cssVariable, cssOperator, cssType, cssString);
-                    console.groupEnd();
-                    """);
-                break;
-            case FormatType.Integer:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
-                    console.groupEnd();
-                    """);
-                break;
-            case FormatType.EventListener:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
-                    console.groupEnd();
-                    """);
-                break;
-            case FormatType.Attribute:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
-                    console.groupEnd();
-                    """);
-                break;
-            case FormatType.Html:
-                int start = keyhole.Integer;
-                int length = (int)keyhole.Long;
-                if (keyhole.Key != string.Empty)
-                {
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
-                        """);
-                }
-                else
-                {
-                    output.AppendLine($"""
-                        console.groupCollapsed(`{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]`, cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
-                        """);
-                }
-
-                for (int i = start; i < start + length; i++)
-                {
-                    ref var k = ref keyholes[i];
-                    Append(output, i, ref k, keyholes);
-                }
-                output.AppendLine($"""
-                    console.groupEnd();
-                    """);
-                break;
-            default:
-                output.AppendLine($"""
-                    console.groupCollapsed(`{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}`, cssVariable, cssOperator, cssType, cssNumber);
-                    console.log(`
-                    SET /app XTTP/0.1
-                    Host: myapp.ui.cloud
-                    User-Agent: neato
-                    Content-Type: application/x-www-form-urlencoded
-                    Content-Length: 50
-
-                    keyAFBC={keyhole.DateTime}&keyAbBC={keyhole.DateTime}
-
-                    `);
-                    console.groupEnd();
-                    """);
-                break;
+            writer.WriteRpc("console.log", $"Server diff output limited to 1 per {DEBOUNCE_SECONDS} second(s)...");
+            return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
         }
+        debounceUntil = DateTime.Now.AddSeconds(DEBOUNCE_SECONDS);
+
+        writer.BeginBatch();
+        writer.WriteRpc("console.groupCollapsed", "Server diff (2)");
+        writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
+        for (int index = 0; index < after.Root.Length; index++)
+        {
+            ref Keyhole keyhole = ref after.Buffer[index];
+            switch (keyhole.Type)
+            {
+                case FormatType.StringLiteral:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String) ?? ""}`", cssVariable, cssLiteral);
+                    writer.WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                case FormatType.String:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", cssVariable, cssOperator, cssType, cssString);
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                case FormatType.Integer:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", cssVariable, cssOperator, cssType, cssNumber);
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                case FormatType.EventListener:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                case FormatType.Attribute:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                case FormatType.Html:
+                    int start = keyhole.Integer;
+                    int length = (int)keyhole.Long;
+                    if (keyhole.Key != string.Empty)
+                    {
+                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                    }
+                    else
+                    {
+                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                    }
+
+                    for (int i = start; i < start + length; i++)
+                    {
+                        var keyholes = after.Buffer;
+                        ref var k = ref keyholes[i];
+                        // Append(output, i, ref k, keyholes);
+                    }
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+                default:
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", cssVariable, cssOperator, cssType, cssNumber);
+                    writer.WriteRpc("console.groupEnd");
+                    break;
+            }
+        }
+        writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
+        writer.WriteRpc("console.groupEnd");
+        writer.EndBatch();
+        return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
     }
 
     private static string? InlineString(string? value)
@@ -140,6 +114,15 @@ public static class Debug
         return (inlined.Length > maxLength)
             ? inlined[..(maxLength-3)] + "..."
             : inlined;
+    }
+
+    private static string? EscapeString(string? value)
+    {
+        return value
+            ?.Replace("\"", "\\\"")
+            ?.Replace("\n", "\\n")
+            ?.Replace("\r", "")
+            ?? "";
     }
 
     public static IDisposable PerfCheck(string name = "unnamed") => new Perf(name);
