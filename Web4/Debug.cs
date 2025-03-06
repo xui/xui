@@ -45,31 +45,31 @@ public static class Debug
 
         writer.BeginBatch();
         writer.WriteRpc("console.groupCollapsed", "Server diff (2)");
-        writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
+        writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", CSS_NOTES);
         for (int index = 0; index < after.Root.Length; index++)
         {
             ref Keyhole keyhole = ref after.Buffer[index];
             switch (keyhole.Type)
             {
                 case FormatType.StringLiteral:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String) ?? ""}`", cssVariable, cssLiteral);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String) ?? ""}`", CSS_VARIABLE, CSS_LITERAL);
                     writer.WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.String:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", cssVariable, cssOperator, cssType, cssString);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING);
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.Integer:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", cssVariable, cssOperator, cssType, cssNumber);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.EventListener:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.Attribute:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.Html:
@@ -77,11 +77,11 @@ public static class Debug
                     int length = (int)keyhole.Long;
                     if (keyhole.Key != string.Empty)
                     {
-                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
                     }
                     else
                     {
-                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", cssVariable, cssOperator, cssType, cssBrace, cssDefault, cssBrace, cssLink);
+                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
                     }
 
                     for (int i = start; i < start + length; i++)
@@ -93,12 +93,12 @@ public static class Debug
                     writer.WriteRpc("console.groupEnd");
                     break;
                 default:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", cssVariable, cssOperator, cssType, cssNumber);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                     writer.WriteRpc("console.groupEnd");
                     break;
             }
         }
-        writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
+        writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT);
         writer.WriteRpc("console.groupEnd");
         writer.EndBatch();
         return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
