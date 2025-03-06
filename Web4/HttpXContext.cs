@@ -93,6 +93,10 @@ public struct HttpXContext: IDisposable
                 await DiffAndSendMutations(before, after, cancellationToken);
                 perf.Dispose();
 
+                perf = Debug.PerfCheck("Debug");
+                await Debug.Write(writer, before, after, cancellationToken);
+                perf.Dispose();
+
                 before.Dispose();
                 after.Dispose();
             }
