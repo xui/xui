@@ -31,9 +31,9 @@ public static class Debug
     {
         await writer.Write('[');
 
-        await WriteRpc(writer, "console.groupCollapsed", "Server Diff (2)");
+        await writer.WriteRpc("console.groupCollapsed", "Server Diff (2)");
         await writer.Write(',');
-        await WriteRpc(writer, "console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
+        await writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
         await writer.Write(',');
 
         // for (int i = 0; i < after.Root.Length; i++)
@@ -42,30 +42,12 @@ public static class Debug
         //     Append(output, i, ref keyhole, after.Buffer);
         // }
 
-        await WriteRpc(writer, "console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
+        await writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
         await writer.Write(',');
-        await WriteRpc(writer, "console.groupEnd");
+        await writer.WriteRpc("console.groupEnd");
 
         await writer.Write(']');
         await writer.Flush(cancellationToken);
-    }
-
-    private static async ValueTask WriteRpc(WebSocketWriter writer, string method, params string[] args)
-    {
-        await writer.Write("""
-            {"jsonrpc":"2.0","method":"
-            """);
-        await writer.Write(method);
-        await writer.Write("""
-            ","params":[
-            """);
-        for (int i = 0; i < args.Length; i++)
-        {
-            await writer.Write(i == 0 ? "\"" : ",\"");
-            await writer.Write(args[i]);
-            await writer.Write("\"");
-        }
-        await writer.Write("]}");
     }
 
     private static void Append(StringBuilder output, int index, ref Keyhole keyhole, Span<Keyhole> keyholes)

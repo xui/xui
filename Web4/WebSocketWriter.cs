@@ -54,6 +54,24 @@ internal class WebSocketWriter(WebSocket webSocket, int bufferSize = 1024)
         }
     }
 
+    public async ValueTask WriteRpc(string method, params string[] args)
+    {
+        await Write("""
+            {"jsonrpc":"2.0","method":"
+            """);
+        await Write(method);
+        await Write("""
+            ","params":[
+            """);
+        for (int i = 0; i < args.Length; i++)
+        {
+            await Write(i == 0 ? "\"" : ",\"");
+            await Write(args[i]);
+            await Write("\"");
+        }
+        await Write("]}");
+    }
+
     private void GrowBuffer(int sizeHint)
     {
         ArgumentNullException.ThrowIfNull(buffer);
