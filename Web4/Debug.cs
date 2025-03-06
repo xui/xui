@@ -6,6 +6,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using System.Web;
 using Web4.Composers;
 
@@ -13,45 +14,58 @@ namespace Web4;
 
 public static class Debug
 {
-    public static StringBuilder GetOutput(Snapshot snapshot)
+    const string cssDefault = "font-weight:normal;font-family:monospace,monospace;";
+    const string cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
+    const string cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
+    const string cssHtml = "font-weight:normal;font-family:monospace,monospace;";
+    const string cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
+    const string cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
+    const string cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
+    const string cssOperator = "font-weight:normal;font-family:monospace,monospace;";
+    const string cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
+    const string cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
+    const string cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
+    const string cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
+
+    internal static async ValueTask Write(WebSocketWriter writer, Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        var output = new StringBuilder();
+        await writer.Write('[');
 
-        output.Append($"""
-            /* DEBUG /app XTTP/0.1
-            Content-Type: text/javascript; charset=UTF-8
-            Content-Length: 5000
-            */
+        await WriteRpc(writer, "console.groupCollapsed", "Server Diff (2)");
+        await writer.Write(',');
+        await WriteRpc(writer, "console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", cssNotes);
+        await writer.Write(',');
 
-            var cssDefault = "font-weight:normal;font-family:monospace,monospace;";
-            var cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
-            var cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
-            var cssHtml = "font-weight:normal;font-family:monospace,monospace;";
-            var cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
-            var cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
-            var cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
-            var cssOperator = "font-weight:normal;font-family:monospace,monospace;";
-            var cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
-            var cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
-            var cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
-            var cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
+        // for (int i = 0; i < after.Root.Length; i++)
+        // {
+        //     ref Keyhole keyhole = ref after.Buffer[i];
+        //     Append(output, i, ref keyhole, after.Buffer);
+        // }
 
-            console.groupCollapsed("Server Diff (2)");
-            console.log("%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", cssNotes);
+        await WriteRpc(writer, "console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
+        await writer.Write(',');
+        await WriteRpc(writer, "console.groupEnd");
+
+        await writer.Write(']');
+        await writer.Flush(cancellationToken);
+    }
+
+    private static async ValueTask WriteRpc(WebSocketWriter writer, string method, params string[] args)
+    {
+        await writer.Write("""
+            {"jsonrpc":"2.0","method":"
             """);
-
-        for (int i = 0; i < snapshot.Root.Length; i++)
+        await writer.Write(method);
+        await writer.Write("""
+            ","params":[
+            """);
+        for (int i = 0; i < args.Length; i++)
         {
-            ref Keyhole keyhole = ref snapshot.Buffer[i];
-            Append(output, i, ref keyhole, snapshot.Buffer);
+            await writer.Write(i == 0 ? "\"" : ",\"");
+            await writer.Write(args[i]);
+            await writer.Write("\"");
         }
-
-        output.Append($"""
-            console.log("\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", cssType, cssVariable, cssDefault, cssFunction, cssDefault);
-            console.groupEnd();
-            """);
-
-        return output;
+        await writer.Write("]}");
     }
 
     private static void Append(StringBuilder output, int index, ref Keyhole keyhole, Span<Keyhole> keyholes)
