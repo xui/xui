@@ -29,6 +29,7 @@ public static class Debug
     private const string cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
     private const int DEBOUNCE_SECONDS = 5;
+    private static readonly string DEBOUNCE_MESSAGE = $"Server diff output limited to 1 per {DEBOUNCE_SECONDS} second(s)...";
     private static DateTime debounceUntil = DateTime.Now;
 
     internal static ValueTask Write(WebSocket webSocket, Snapshot before, Snapshot after, CancellationToken cancellationToken)
@@ -37,7 +38,7 @@ public static class Debug
 
         if (debounceUntil > DateTime.Now)
         {
-            writer.WriteRpc("console.log", $"Server diff output limited to 1 per {DEBOUNCE_SECONDS} second(s)...");
+            writer.WriteRpc("console.log", DEBOUNCE_MESSAGE);
             return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
         }
         debounceUntil = DateTime.Now.AddSeconds(DEBOUNCE_SECONDS);
