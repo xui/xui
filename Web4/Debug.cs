@@ -73,6 +73,7 @@ public static class Debug
                     writer.WriteRpc("console.groupEnd");
                     break;
                 case FormatType.Html:
+                    // TODO: The `buffer[7..13]` isn't right anymore now that Keyhole's value is reused
                     int start = keyhole.Integer;
                     int length = (int)keyhole.Long;
                     if (keyhole.Key != string.Empty)
