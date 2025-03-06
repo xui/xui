@@ -15,18 +15,18 @@ namespace Web4;
 
 public static class Debug
 {
-    private const string cssDefault = "font-weight:normal;font-family:monospace,monospace;";
-    private const string cssVariable = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssFunction = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssHtml = "font-weight:normal;font-family:monospace,monospace;";
-    private const string cssNumber = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssString = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssType = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssOperator = "font-weight:normal;font-family:monospace,monospace;";
-    private const string cssLiteral = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssNotes = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssLink = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
-    private const string cssBrace = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_DEFAULT = "font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_VARIABLE = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_FUNCTION = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_HTML = "font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_NUMBER = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_STRING = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_TYPE = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_OPERATOR = "font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_LITERAL = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_NOTES = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_LINK = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
+    private const string CSS_BRACE = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
     private const int DEBOUNCE_SECONDS = 5;
     private static readonly string DEBOUNCE_MESSAGE = $"Server diff output limited to 1 per {DEBOUNCE_SECONDS} second(s)...";
