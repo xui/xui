@@ -32,77 +32,91 @@ public static class Debug
     private static readonly string DEBOUNCE_MESSAGE = $"Server diff output limited to 1 per {DEBOUNCE_SECONDS} second(s)...";
     private static DateTime debounceUntil = DateTime.Now;
 
-    internal static ValueTask Write(WebSocket webSocket, Snapshot before, Snapshot after, CancellationToken cancellationToken)
+    internal static async ValueTask Write(WebSocket webSocket, Snapshot before, Snapshot after, CancellationToken cancellationToken)
     {
-        using var writer = new JsonRpcWriter(bufferSize: 2^12);
+        var writer = new JsonRpcWriter(bufferSize: 2^12);
 
         if (debounceUntil > DateTime.Now)
         {
             writer.WriteRpc("console.log", DEBOUNCE_MESSAGE);
-            return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
+            await webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
+            writer.Dispose();
+            return;
         }
+
         debounceUntil = DateTime.Now.AddSeconds(DEBOUNCE_SECONDS);
 
         writer.BeginBatch();
+
         writer.WriteRpc("console.groupCollapsed", "Server diff (2)");
         writer.WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", CSS_NOTES);
+
         for (int index = 0; index < after.Root.Length; index++)
         {
             ref Keyhole keyhole = ref after.Buffer[index];
-            switch (keyhole.Type)
-            {
-                case FormatType.StringLiteral:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL);
-                    writer.WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                case FormatType.String:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING);
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                case FormatType.Integer:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                case FormatType.EventListener:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                case FormatType.Attribute:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                case FormatType.Html:
-                    // TODO: The `buffer[7..13]` isn't right anymore now that Keyhole's value is reused
-                    int start = keyhole.Integer;
-                    int length = (int)keyhole.Long;
-                    if (keyhole.Key != string.Empty)
-                    {
-                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
-                    }
-                    else
-                    {
-                        writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
-                    }
-
-                    for (int i = start; i < start + length; i++)
-                    {
-                        var keyholes = after.Buffer;
-                        ref var k = ref keyholes[i];
-                        // Append(output, i, ref k, keyholes);
-                    }
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-                default:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
-                    writer.WriteRpc("console.groupEnd");
-                    break;
-            }
+            Write(ref writer, index, ref keyhole, before, after);
         }
+
         writer.WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT);
         writer.WriteRpc("console.groupEnd");
+
         writer.EndBatch();
-        return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
+
+        await webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
+        writer.Dispose();
+    }
+    
+    private static void Write(ref JsonRpcWriter writer, int index, ref Keyhole keyhole, Snapshot before, Snapshot after)
+    {
+        switch (keyhole.Type)
+        {
+            case FormatType.StringLiteral:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL);
+                writer.WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
+                writer.WriteRpc("console.groupEnd");
+                break;
+            case FormatType.String:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING);
+                writer.WriteRpc("console.groupEnd");
+                break;
+            case FormatType.Integer:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                writer.WriteRpc("console.groupEnd");
+                break;
+            // TODO: Support the other FormatTypes too
+            case FormatType.EventListener:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
+                writer.WriteRpc("console.groupEnd");
+                break;
+            case FormatType.Attribute:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
+                writer.WriteRpc("console.groupEnd");
+                break;
+            case FormatType.Html:
+                int start = keyhole.Integer;
+                int length = (int)keyhole.Length;
+                if (keyhole.Key != string.Empty)
+                {
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                }
+                else
+                {
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                }
+
+                for (int i = start; i < start + length; i++)
+                {
+                    var keyholes = after.Buffer;
+                    ref var k = ref keyholes[i];
+                    Write(ref writer, i, ref k, before, after);
+                }
+                writer.WriteRpc("console.groupEnd");
+                break;
+            default:
+                writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                writer.WriteRpc("console.groupEnd");
+                break;
+        }
     }
 
     private static string InlineString(string? value)
@@ -112,6 +126,7 @@ public static class Debug
 
         int maxLength = 100;
         var inlined = new StringBuilder(value)
+            .Replace("\"", "\\\"")
             .Replace("\n", "")
             .Replace("\r", "") 
             .Replace("  ", "")

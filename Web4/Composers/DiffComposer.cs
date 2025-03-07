@@ -251,7 +251,7 @@ public class DiffComposer : BaseComposer
             keyhole.Type = FormatType.Html;
             keyhole.String = expression;
             keyhole.Integer = partial.Index;
-            keyhole.Long = partial.Cursor;
+            keyhole.Length = partial.Cursor;
         }
 
         return base.WriteMutableElement(ref parent, partial, expression, format);

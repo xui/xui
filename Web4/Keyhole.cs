@@ -12,6 +12,7 @@ public struct Keyhole
     public string Key { get; set; } // 64 bits
     public FormatType Type { get; set; } // 8 bits
     public string? Format { get; set; } // 64 bits
+    public int Length { get; set; }
 
     public string? String { readonly get => reference as string; set => this.reference = value; }
     public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
