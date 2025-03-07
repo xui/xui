@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Web4;
 using Microsoft.AspNetCore.WebSockets;
 using Html = Web4.Html;
+using System.Diagnostics;
 
 // TODO: Html namespace collision problem?
 //namespace Microsoft.AspNetCore.Builder;
@@ -120,13 +121,37 @@ public static class Web4EndpointRouteBuilderExtensions
                     // ready to fetch external data, mutate its UI state, and react to it
                     // by pushing DOM mutation instructions to the browser.
 
+                    #if DEBUG
+                    await DebugResponse(httpContext, html, window);
+                    #else
                     var pipeWriter = httpContext.Response.BodyWriter;
                     var cancellationToken = httpContext.RequestAborted;
                     var composer = new HttpXComposer(pipeWriter, window);
                     await pipeWriter.WriteAsync(composer, $"{html()}", cancellationToken);
+                    #endif
                 }
             }
         );
         return window;
+    }
+
+    private static async Task DebugResponse(HttpContext http, Func<Html> html, WindowBuilder window)
+    {
+        var pipeWriter = http.Response.BodyWriter;
+
+        var composer = new HttpXComposer(pipeWriter, window);
+        long gc1 = GC.GetAllocatedBytesForCurrentThread();
+        long stopwatch = Stopwatch.GetTimestamp();
+
+        pipeWriter.Write(composer, $"{html()}");
+
+        var elapsed = Stopwatch.GetElapsedTime(stopwatch);
+        long gc2 = GC.GetAllocatedBytesForCurrentThread();
+
+        http.Response.Headers["Server-Timing"] = $"""
+            render;desc="Web4.Render {gc2-gc1}b allocated";dur={elapsed.TotalNanoseconds / 1_000_000d}
+            """;                    
+
+        await pipeWriter.FlushAsync(http.RequestAborted);
     }
 }
