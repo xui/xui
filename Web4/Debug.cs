@@ -52,7 +52,7 @@ public static class Debug
             switch (keyhole.Type)
             {
                 case FormatType.StringLiteral:
-                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String) ?? ""}`", CSS_VARIABLE, CSS_LITERAL);
+                    writer.WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL);
                     writer.WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
                     writer.WriteRpc("console.groupEnd");
                     break;
@@ -105,26 +105,32 @@ public static class Debug
         return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancellationToken);
     }
 
-    private static string? InlineString(string? value)
+    private static string InlineString(string? value)
     {
+        if (value is null)
+            return "";
+
         int maxLength = 100;
-        var inlined = value
-            ?.Replace("\n", "")
-            ?.Replace("\r", "") 
-            ?.Replace("  ", "")
-            ?? "";
+        var inlined = new StringBuilder(value)
+            .Replace("\n", "")
+            .Replace("\r", "") 
+            .Replace("  ", "")
+            .ToString();
         return (inlined.Length > maxLength)
             ? inlined[..(maxLength-3)] + "..."
             : inlined;
     }
 
-    private static string? EscapeString(string? value)
+    private static string EscapeString(string? value)
     {
-        return value
-            ?.Replace("\"", "\\\"")
-            ?.Replace("\n", "\\n")
-            ?.Replace("\r", "")
-            ?? "";
+        if (value is null)
+            return "";
+
+        return new StringBuilder(value)
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "")
+            .ToString();
     }
 
     public static IDisposable PerfCheck(string name = "unnamed") => new Perf(name);
