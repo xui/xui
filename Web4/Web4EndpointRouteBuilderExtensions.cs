@@ -79,22 +79,22 @@ public static class Web4EndpointRouteBuilderExtensions
         var window = new WindowBuilder(group, html);
         group.Map(
             "/",
-            async httpContext =>
+            async http =>
             {
-                if (httpContext.WebSockets.IsWebSocketRequest)
+                if (http.WebSockets.IsWebSocketRequest)
                 {
                     // --- ws:// ---
                     // Here is the request for upgrading to a websocket connection.  
                     // Switch protocols and await the pipe reader which receives
                     // DOM events that have been bubbled up beyond the browser.
 
-                    using (var httpxContext = await HttpXContext.Upgrade(httpContext))
+                    using (var httpxContext = await HttpXContext.Upgrade(http))
                     {
-                        await httpxContext.ListenForEvents(window, httpContext.RequestAborted);
+                        await httpxContext.ListenForEvents(window, http.RequestAborted);
                     }
                 }
                 else if (
-                    HttpXContext.TryGet(httpContext, out var httpxContext) && 
+                    HttpXContext.TryGet(http, out var httpxContext) && 
                     httpxContext.IsWebSocketOpen)
                 {
                     // --- 204 ---
@@ -104,9 +104,9 @@ public static class Web4EndpointRouteBuilderExtensions
                     // execute this route's code (which contains no output, only state changes)
                     // This may or may not trigger mutations to be pushed to the browser.
 
-                    httpContext.Response.StatusCode = 204; // No Content
-                    await httpContext.Response.CompleteAsync();
-                    await httpxContext.UpdatePath(httpContext.Request.Path);
+                    http.Response.StatusCode = 204; // No Content
+                    await http.Response.CompleteAsync();
+                    await httpxContext.UpdatePath(http.Request.Path);
                 }
                 else
                 {
@@ -122,10 +122,10 @@ public static class Web4EndpointRouteBuilderExtensions
                     // by pushing DOM mutation instructions to the browser.
 
                     #if DEBUG
-                    await DebugResponse(httpContext, html, window);
+                    await DebugResponse(http, html, window);
                     #else
-                    var pipeWriter = httpContext.Response.BodyWriter;
-                    var cancellationToken = httpContext.RequestAborted;
+                    var pipeWriter = http.Response.BodyWriter;
+                    var cancellationToken = http.RequestAborted;
                     var composer = new HttpXComposer(pipeWriter, window);
                     await pipeWriter.WriteAsync(composer, $"{html()}", cancellationToken);
                     #endif

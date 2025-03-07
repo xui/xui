@@ -21,20 +21,20 @@ public struct HttpXContext: IDisposable
 
     public readonly bool IsWebSocketOpen => webSocket.State == WebSocketState.Open;
 
-    public static bool TryGet(HttpContext httpContext, out HttpXContext httpxContext)
+    public static bool TryGet(HttpContext http, out HttpXContext httpxContext)
     {
         // TODO: Move to header approach?
-        var key = httpContext.Connection.Id;
+        var key = http.Connection.Id;
         return contextLookup.TryGetValue(key, out httpxContext);
     }
 
-    public static async Task<HttpXContext> Upgrade(HttpContext httpContext)
+    public static async Task<HttpXContext> Upgrade(HttpContext http)
     {
-        var webSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
+        var webSocket = await http.WebSockets.AcceptWebSocketAsync();
         var context = new HttpXContext(webSocket);
 
         // TODO: Switch to header.
-        var key = httpContext.Connection.Id;
+        var key = http.Connection.Id;
         contextLookup[key] = context;
 
         return context;
