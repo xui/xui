@@ -76,7 +76,7 @@ public static class Debug
         await http.Response.Body.FlushAsync(http.RequestAborted);
     }
 
-    private static async Task Log(params JsonRpc[] messages)
+    private static async Task Log(params IEnumerable<JsonRpc> messages)
     {
         await http.Response.WriteAsync("data: ");
         await http.Response.WriteAsync(JsonSerializer.Serialize(messages));
@@ -96,97 +96,76 @@ public static class Debug
 
         debounceUntil = DateTime.Now.AddSeconds(DEBOUNCE_SECONDS);
 
-        await http.Response.WriteAsync("data: [");
-
-        await http.Response.WriteAsync("""
-            {"jsonrpc":"2.0","method":"console.groupCollapsed","params":["Server diff (2)"]}
-            """);
-        await WriteRpc("console.log", "%cDEBUG output is default-enabled for localhost\\nManually configure using server.debug = [true | false]", CSS_NOTES);
+        var messages = new List<JsonRpc>
+        {
+            new("console.groupCollapsed", ["Server diff (2)"]),
+            new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
+        };
 
         for (int index = 0; index < after.Root.Length; index++)
         {
             ref Keyhole keyhole = ref after.Buffer[index];
-            await Write(index, keyhole, before, after);
+            messages.AddRange(Write(index, keyhole, before, after));
         }
 
-        await WriteRpc("console.log", "\\n%cBenchmark this shell:\\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT);
-        await WriteRpc("console.groupEnd");
+        messages.Add(new("console.log", ["\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT]));
+        messages.Add(new("console.groupEnd", []));
 
-        await http.Response.WriteAsync("]\n\n");
-        await http.Response.Body.FlushAsync(cancel);
+        await Log(messages);
     }
     
-    private static async Task Write(int index, Keyhole keyhole, Snapshot before, Snapshot after)
+    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Snapshot before, Snapshot after)
     {
         switch (keyhole.Type)
         {
             case FormatType.StringLiteral:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL);
-                await WriteRpc("console.log", $"\\n{EscapeString(keyhole.String)}\\n\\n");
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL]);
+                yield return new("console.log", [$"\n{keyhole.String}\n\n"]);
+                yield return new("console.groupEnd", []);
                 break;
             case FormatType.String:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING);
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING]);
+                yield return new("console.groupEnd", []);
                 break;
             case FormatType.Integer:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
+                yield return new("console.groupEnd", []);
                 break;
             // TODO: Support the other FormatTypes too
             case FormatType.EventListener:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
+                yield return new("console.groupEnd", []);
                 break;
             case FormatType.Attribute:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
+                yield return new("console.groupEnd", []);
                 break;
             case FormatType.Html:
                 int start = keyhole.Integer;
                 int length = (int)keyhole.Length;
                 if (keyhole.Key != string.Empty)
                 {
-                    await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
                 }
                 else
                 {
-                    await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{EscapeString(keyhole.String)} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
                 }
 
                 for (int i = start; i < start + length; i++)
                 {
                     var keyholes = after.Buffer;
                     ref var k = ref keyholes[i];
-                    await Write(i, k, before, after);
+                    foreach (var m in Write(i, k, before, after))
+                        yield return m;
                 }
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupEnd", []);
                 break;
             default:
-                await WriteRpc("console.groupCollapsed", $"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
-                await WriteRpc("console.groupEnd");
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
+                yield return new("console.groupEnd", []);
                 break;
         }
-    }
-
-    public static async Task WriteRpc(string method, params string[] args)
-    {
-        await http.Response.WriteAsync(",");
-
-        await http.Response.WriteAsync("""
-            {"jsonrpc":"2.0","method":"
-            """);
-        await http.Response.WriteAsync(method);
-        await http.Response.WriteAsync("""
-            ","params":[
-            """);
-        for (int i = 0; i < args.Length; i++)
-        {
-            await http.Response.WriteAsync(i == 0 ? "\"" : ",\"");
-            await http.Response.WriteAsync(args[i]);
-            await http.Response.WriteAsync("\"");
-        }
-        await http.Response.WriteAsync("]}");
     }
 
     private static string InlineString(string? value)
@@ -196,7 +175,6 @@ public static class Debug
 
         int maxLength = 100;
         var inlined = new StringBuilder(value)
-            .Replace("\"", "\\\"")
             .Replace("\n", "")
             .Replace("\r", "") 
             .Replace("  ", "")
@@ -204,18 +182,6 @@ public static class Debug
         return (inlined.Length > maxLength)
             ? inlined[..(maxLength-3)] + "..."
             : inlined;
-    }
-
-    private static string EscapeString(string? value)
-    {
-        if (value is null)
-            return "";
-
-        return new StringBuilder(value)
-            .Replace("\"", "\\\"")
-            .Replace("\n", "\\n")
-            .Replace("\r", "")
-            .ToString();
     }
     
     #endif
