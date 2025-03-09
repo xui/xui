@@ -49,7 +49,7 @@ public static class Debug
     private const string CSS_LINK = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
     private const string CSS_BRACE = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
-    private const int DEBOUNCE_SECONDS = 5;
+    private const int DEBOUNCE_SECONDS = 1;
     private static DateTime debounceUntil = DateTime.Now;
     private static HttpContext http;
 
@@ -90,7 +90,7 @@ public static class Debug
 
         if (debounceUntil > DateTime.Now)
         {
-            await Log(new JsonRpc("console.log", ["Server diff output is debounced for 5 second(s)..."]));
+            await Log(new JsonRpc("console.log", [$"Server diff output is debounced for {DEBOUNCE_SECONDS} second(s)..."]));
             return;
         }
 
