@@ -132,6 +132,9 @@ public static class Web4EndpointRouteBuilderExtensions
                 }
             }
         );
+
+        Web4.Debug.MapOutput(group);
+
         return window;
     }
 

@@ -73,6 +73,14 @@ function findRpcFunction(name) {
   return f;
 }
 
+function clientRpc(message) {
+  let json = JSON.parse(message);
+  if (!Array.isArray(json)) json = [json];
+  json.forEach((message) =>
+    findRpcFunction(message.method).apply(window, message.params)
+  );
+}
+
 function bootstrap() {
   const l = location;
   const p = l.protocol.replace("http", "ws");
@@ -81,13 +89,7 @@ function bootstrap() {
   ws.onopen = console.debug;
   ws.onclose = console.debug;
   ws.onerror = console.error;
-  ws.onmessage = (e) => {
-    let json = JSON.parse(e.data);
-    if (!Array.isArray(json)) json = [json];
-    json.forEach((message) =>
-      findRpcFunction(message.method).apply(window, message.params)
-    );
-  };
+  ws.onmessage = (e) => clientRpc(e.data);
 
   var ui = ui ?? {};
   for (let k in ui) {

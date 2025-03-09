@@ -93,8 +93,6 @@ public struct HttpXContext: IDisposable
                 await DiffAndSendMutations(before, after, cancel);
                 perf.Dispose();
 
-                perf = Debug.PerfCheck("Debug");
-                await Debug.Write(webSocket, before, after, cancel);
                 perf.Dispose();
 
                 before.Dispose();
