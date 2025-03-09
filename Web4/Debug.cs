@@ -53,22 +53,35 @@ public static class Debug
     private static DateTime debounceUntil = DateTime.Now;
     private static HttpContext http;
 
+    private record JsonRpc(string method, string[] @params, string jsonrpc = "2.0");
+
     internal static void MapOutput(RouteGroupBuilder group)
     {
         group.MapGet("__debug", async http =>
         {
-            http.Response.Headers.ContentType = "text/event-stream";
             Debug.http = http;
+            http.Response.Headers.ContentType = "text/event-stream";
             
-            await http.Response.WriteAsync("data: ");
-            await http.Response.WriteAsync("""
-            {"jsonrpc":"2.0", "method":"console.log", "params":["Server diff output established"]}
-            """);
-            await http.Response.WriteAsync("\n\n");
-            await http.Response.Body.FlushAsync(http.RequestAborted);
+            await Log(new JsonRpc("console.log", ["Server diff output established"]));
 
             await Task.Delay(Timeout.Infinite, http.RequestAborted);
         });
+    }
+
+    private static async Task Log(JsonRpc message)
+    {
+        await http.Response.WriteAsync("data: ");
+        await http.Response.WriteAsync(JsonSerializer.Serialize(message));
+        await http.Response.WriteAsync("\n\n");
+        await http.Response.Body.FlushAsync(http.RequestAborted);
+    }
+
+    private static async Task Log(params JsonRpc[] messages)
+    {
+        await http.Response.WriteAsync("data: ");
+        await http.Response.WriteAsync(JsonSerializer.Serialize(messages));
+        await http.Response.WriteAsync("\n\n");
+        await http.Response.Body.FlushAsync(http.RequestAborted);
     }
 
     internal static async ValueTask Log(Snapshot before, Snapshot after)
@@ -77,12 +90,7 @@ public static class Debug
 
         if (debounceUntil > DateTime.Now)
         {
-            await http.Response.WriteAsync("data: ");
-            await http.Response.WriteAsync("""
-                {"jsonrpc":"2.0","method":"console.log","params":["Server diff output is debounced for 5 second(s)..."]}
-                """);
-            await http.Response.WriteAsync("\n\n");
-            await http.Response.Body.FlushAsync(cancel);
+            await Log(new JsonRpc("console.log", ["Server diff output is debounced for 5 second(s)..."]));
             return;
         }
 
