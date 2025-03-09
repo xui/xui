@@ -57,9 +57,9 @@ public struct HttpXContext: IDisposable
         }
     }
 
-    public async readonly Task ListenForEvents(WindowBuilder window, CancellationToken cancellationToken)
+    public async readonly Task ListenForEvents(WindowBuilder window, CancellationToken cancel)
     {
-        await foreach (var message in GetNextMessage(cancellationToken))
+        await foreach (var message in GetNextMessage(cancel))
         {
             var perf = Debug.PerfCheck("ParseMethod");
             var method = ParseMethod(message);
@@ -90,11 +90,11 @@ public struct HttpXContext: IDisposable
 
                 // TODO: State invalidations will not live here
                 perf = Debug.PerfCheck("DiffAndSendMutations");
-                await DiffAndSendMutations(before, after, cancellationToken);
+                await DiffAndSendMutations(before, after, cancel);
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("Debug");
-                await Debug.Write(webSocket, before, after, cancellationToken);
+                await Debug.Write(webSocket, before, after, cancel);
                 perf.Dispose();
 
                 before.Dispose();
