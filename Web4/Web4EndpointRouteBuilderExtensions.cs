@@ -149,7 +149,7 @@ public static class Web4EndpointRouteBuilderExtensions
         long gc2 = GC.GetAllocatedBytesForCurrentThread();
 
         http.Response.Headers["Server-Timing"] = $"""
-            render;desc="Web4.Render {gc2-gc1}b allocated";dur={elapsed.TotalNanoseconds / 1_000_000d}
+            allocations;desc="Allocations: {gc2-gc1}b", render;desc="Web4.Render";dur={elapsed.TotalNanoseconds / 1_000_000d}
             """;                    
 
         await pipeWriter.FlushAsync(http.RequestAborted);
