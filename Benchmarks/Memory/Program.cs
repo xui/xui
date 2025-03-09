@@ -14,6 +14,7 @@ public class Tests
     Pipe pipe = new();
     NoOpComposer noOpComposer = new(null);
     DefaultComposer defaultComposer = new(null);
+    HttpXComposer httpXComposer = new(null, new(null, null));
     DiffComposer diffComposer = new();
     string name = "Rylan";
     int c = 3;
@@ -95,6 +96,44 @@ public class Tests
     public async Task DefaultComposerWithState()
     {
         pipe.Writer.Write(defaultComposer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {cState}
+                    </button>
+                </body>
+            </html>
+            """);
+
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public async Task HttpXComposer()
+    {
+        pipe.Writer.Write(httpXComposer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
+    }
+
+    [Benchmark]
+    public async Task HttpXComposerWithState()
+    {
+        pipe.Writer.Write(httpXComposer, $"""
             <html>
                 <body>
                     Hello {name}
