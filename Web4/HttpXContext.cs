@@ -256,78 +256,68 @@ public struct HttpXContext: IDisposable
         }
     }
 
-    private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancellationToken)
+    private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
     {
         var batchCount = 0;
-        try
+        for (int i = 0; i < after.RootLength; i++)
         {
-            for (int i = 0; i < after.RootLength; i++)
-            {
-                ref var keyholeBefore = ref before.Buffer[i];
-                ref var keyholeAfter = ref after.Buffer[i];
+            ref var keyholeBefore = ref before.Buffer[i];
+            ref var keyholeAfter = ref after.Buffer[i];
 
-                switch (keyholeBefore.Type)
+            switch (keyholeBefore.Type)
+            {
+                case FormatType.Html:
+                case FormatType.View:
+                case FormatType.Attribute:
+                case FormatType.EventListener:
+                    continue;
+            }
+
+            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+            {
+                var key = keyholeAfter.Key;
+                var type = keyholeAfter.Type;
+                var iValue = keyholeAfter.Integer;
+                var dValue = keyholeAfter.Double;
+                var format = keyholeAfter.Format;
+
+                if (batchCount++ == 0)
+                    await writer.Write("[");
+                else
+                    await writer.Write(",");
+                
+                await writer.Write($$"""
+                    {"jsonrpc":"2.0","method":"mutate","params":["
+                    """);
+
+                await writer.Write(key);
+
+                await writer.Write($$"""
+                    ","
+                    """);
+
+                switch (type)
                 {
-                    case FormatType.Html:
-                    case FormatType.View:
-                    case FormatType.Attribute:
-                    case FormatType.EventListener:
-                        continue;
+                    case FormatType.Integer:
+                        await writer.Write(iValue, format);
+                        break;
+                    case FormatType.Double:
+                        await writer.Write(dValue, format);
+                        break;
+                    default:
+                        await writer.Write($"I am not an integer: {type}");
+                        break;
                 }
 
-                if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
-                {
-                    var key = keyholeAfter.Key;
-                    var type = keyholeAfter.Type;
-                    var iValue = keyholeAfter.Integer;
-                    var dValue = keyholeAfter.Double;
-                    var format = keyholeAfter.Format;
-
-                    if (batchCount++ == 0)
-                        await writer.Write("[");
-                    else
-                        await writer.Write(",");
-                    
-                    await writer.Write($$"""
-                        {"jsonrpc":"2.0","method":"mutate","params":["
-                        """);
-
-                    await writer.Write(key);
-
-                    await writer.Write($$"""
-                        ","
-                        """);
-
-                    switch (type)
-                    {
-                        case FormatType.Integer:
-                            await writer.Write(iValue, format);
-                            break;
-                        case FormatType.Double:
-                            await writer.Write(dValue, format);
-                            break;
-                        default:
-                            await writer.Write($"I am not an integer: {type}");
-                            break;
-                    }
-
-                    await writer.Write($$"""
-                        "]}
-                        """);
-                }
+                await writer.Write($$"""
+                    "]}
+                    """);
             }
         }
-        catch (Exception e)
+        if (batchCount > 0)
         {
-            Console.WriteLine(e);
-        }
-        finally
-        {
-            if (batchCount > 0)
-            {
-                await writer.Write("]");
-                await writer.Flush(cancellationToken);
-            }
+            await writer.Write("]");
+            await writer.Flush(cancel);
         }
     }
 
