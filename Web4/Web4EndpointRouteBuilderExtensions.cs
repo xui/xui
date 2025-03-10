@@ -81,6 +81,7 @@ public static class Web4EndpointRouteBuilderExtensions
             "/",
             async http =>
             {
+                var cancel = http.RequestAborted;
                 if (http.WebSockets.IsWebSocketRequest)
                 {
                     // --- ws:// ---
@@ -90,7 +91,7 @@ public static class Web4EndpointRouteBuilderExtensions
 
                     using (var httpxContext = await HttpXContext.Upgrade(http))
                     {
-                        await httpxContext.ListenForEvents(window, http.RequestAborted);
+                        await httpxContext.ListenForEvents(window, cancel);
                     }
                 }
                 else if (
@@ -125,9 +126,8 @@ public static class Web4EndpointRouteBuilderExtensions
                     await DebugResponse(http, html, window);
                     #else
                     var pipeWriter = http.Response.BodyWriter;
-                    var cancellationToken = http.RequestAborted;
                     var composer = new HttpXComposer(pipeWriter, window);
-                    await pipeWriter.WriteAsync(composer, $"{html()}", cancellationToken);
+                    await pipeWriter.WriteAsync(composer, $"{html()}", cancel);
                     #endif
                 }
             }
