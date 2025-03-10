@@ -265,14 +265,14 @@ public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : D
 
             if (window.Listeners.Count > 0)
             {
-                Writer.Inject($"{beforeBody}\n<script>");
+                Writer.Inject($"{beforeBody}\n<!-- Web4 kernel injected -->\n<script>");
                 foreach (var listener in window.Listeners)
                     Writer.Inject($"\n{listener.Html}");
                 Writer.Inject($"\n\n{KERNEL_JS}{Debug.JS}</script>\n{afterBody}");
             }
             else
             {
-                Writer.Inject($"{beforeBody}\n<script>\n{KERNEL_JS}{Debug.JS}</script>\n{afterBody}");
+                Writer.Inject($"{beforeBody}\n<!-- Web4 kernel injected -->\n<script>\n{KERNEL_JS}{Debug.JS}</script>\n{afterBody}");
             }
 
 
