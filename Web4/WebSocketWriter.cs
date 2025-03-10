@@ -91,10 +91,10 @@ internal class WebSocketWriter(WebSocket webSocket, int bufferSize = 1024)
         ArrayPool<byte>.Shared.Return(oldBuffer);
     }
 
-    public ValueTask Flush(CancellationToken cancellationToken = default) 
-        => Flush(true, cancellationToken);
+    public ValueTask Flush(CancellationToken cancel = default) 
+        => Flush(true, cancel);
 
-    private async ValueTask Flush(bool endOfMessage = true, CancellationToken cancellationToken = default)
+    private async ValueTask Flush(bool endOfMessage = true, CancellationToken cancel = default)
     {
         if (!pendingFlush)
             return;
@@ -105,7 +105,7 @@ internal class WebSocketWriter(WebSocket webSocket, int bufferSize = 1024)
             buffer.AsMemory(..cursor), 
             WebSocketMessageType.Text, 
             endOfMessage, 
-            cancellationToken
+            cancel
         );
 
         cursor = 0;

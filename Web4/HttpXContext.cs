@@ -110,7 +110,7 @@ public struct HttpXContext: IDisposable
 
     private async readonly IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage(
         [EnumeratorCancellation] 
-        CancellationToken cancellationToken = default)
+        CancellationToken cancel = default)
     {
         ReadOnlySequence<byte> sequence;
         var owner = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH);
@@ -119,7 +119,7 @@ public struct HttpXContext: IDisposable
         {
             try
             {
-                var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                var result = await webSocket.ReceiveAsync(buffer, cancel);
                 var perf = Debug.PerfCheck("GetNextMessage");
                 if (result.MessageType == WebSocketMessageType.Close)
                     break; // TODO: Memory leak?
@@ -135,7 +135,7 @@ public struct HttpXContext: IDisposable
                         buffer = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH).Memory;
                         // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                        result = await webSocket.ReceiveAsync(buffer, cancellationToken);
+                        result = await webSocket.ReceiveAsync(buffer, cancel);
                         if (result.MessageType == WebSocketMessageType.Close)
                             break; // TODO: Memory leak?
 
