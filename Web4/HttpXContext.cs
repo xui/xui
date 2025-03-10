@@ -185,7 +185,7 @@ public struct HttpXContext: IDisposable
     }
 
     // TODO: Ack!  You forgot to move composers to structs.
-    static FindKeyholeComposer? composer = null;
+    // static FindKeyholeComposer? composer = null;
     private static EventListener? GetKeyhole(string? key, WindowBuilder window)
     {
         switch (key)
@@ -199,8 +199,8 @@ public struct HttpXContext: IDisposable
                 else
                     return null;
             default:
-                // var composer = new FindKeyholeComposer(key);
-                composer ??= new FindKeyholeComposer(key);
+                var composer = new FindKeyholeComposer(key);
+                // composer ??= new FindKeyholeComposer(key);
                 composer.Compose($"{window.Html()}");
                 return composer.Listener;
         }
