@@ -94,21 +94,21 @@ public static class Web4EndpointRouteBuilderExtensions
                         await httpxContext.ListenForEvents(window, cancel);
                     }
                 }
-                else if (
-                    HttpXContext.TryGet(http, out var httpxContext) && 
-                    httpxContext.IsWebSocketOpen)
-                {
-                    // --- 204 ---
-                    // Looks like the browser already has the page AND a websocket.
-                    // Respond with a 204 - No Content which will not alter the page.
-                    // Then update the browser's route using window.history.pushState. After that, 
-                    // execute this route's code (which contains no output, only state changes)
-                    // This may or may not trigger mutations to be pushed to the browser.
+                // else if (
+                //     HttpXContext.TryGet(http, out var httpxContext) && 
+                //     httpxContext.IsWebSocketOpen)
+                // {
+                //     // --- 204 ---
+                //     // Looks like the browser already has the page AND a websocket.
+                //     // Respond with a 204 - No Content which will not alter the page.
+                //     // Then update the browser's route using window.history.pushState. After that, 
+                //     // execute this route's code (which contains no output, only state changes)
+                //     // This may or may not trigger mutations to be pushed to the browser.
 
-                    http.Response.StatusCode = 204; // No Content
-                    await http.Response.CompleteAsync();
-                    await httpxContext.UpdatePath(http.Request.Path);
-                }
+                //     http.Response.StatusCode = 204; // No Content
+                //     await http.Response.CompleteAsync();
+                //     await httpxContext.UpdatePath(http.Request.Path);
+                // }
                 else
                 {
                     // --- 200 ---
