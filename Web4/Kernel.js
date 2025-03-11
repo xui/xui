@@ -68,7 +68,7 @@ function reRegister(node) {
 }
 
 function findRpcFunction(name) {
-  let f = window;
+  let f = globalThis;
   name.split(".").forEach((s) => (f = f[s]));
   return f;
 }
@@ -77,7 +77,7 @@ function clientRpc(message) {
   let json = JSON.parse(message);
   if (!Array.isArray(json)) json = [json];
   json.forEach((message) =>
-    findRpcFunction(message.method).apply(window, message.params)
+    findRpcFunction(message.method).apply(globalThis, message.params)
   );
 }
 
@@ -85,7 +85,7 @@ function bootstrap() {
   const l = location;
   const p = l.protocol.replace("http", "ws");
   const ws = new WebSocket(`${p}//${l.host}${l.pathname}`);
-  window["ws"] = ws;
+  globalThis["ws"] = ws;
   ws.onopen = console.debug;
   ws.onclose = console.debug;
   ws.onerror = console.error;
