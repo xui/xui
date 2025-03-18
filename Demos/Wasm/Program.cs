@@ -1,17 +1,14 @@
-using Web4;
+using System.Runtime.InteropServices.JavaScript;
 
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-int c = 0;
+// Create a "Main" method. This is required by the tooling.
+return;
 
-app.Map("/", () => $"""
-    <html>
-        <body>
-            <button onclick={() => c++}>
-                Clicks: {c}
-            </button>
-        </body>
-    </html>
-    """);
-
-app.Run();
+public partial class Sample
+{
+    // Make the method accessible from JS
+    [JSExport]
+    internal static int Add(int a, int b)
+    {
+        return a + b;
+    }
+}

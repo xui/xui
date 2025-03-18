@@ -1,12 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Web4\Web4.csproj" />
-    <!-- TODO: Why do I have to reference ...Generators.csproj AGAIN when .csproj (above) already does that. -->
-    <ProjectReference 
-      Include="..\..\ZeroScript\ZeroScript.csproj" 
-      OutputItemType="Analyzer" 
-    />
+    <ProjectReference Include="..\..\Web4.Core\Web4.Core.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -15,8 +10,18 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <WasmMainJSPath>main.js</WasmMainJSPath>
+    <!-- JSExport requires unsafe code -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Reduce output size -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <WasmEmitSymbolMap>false</WasmEmitSymbolMap>
   </PropertyGroup>
 
+  <!-- Copy extra files when publishing the app -->
+  <ItemGroup>
+    <WasmExtraFilesToDeploy Include="index.html" />
+  </ItemGroup>
 </Project>
