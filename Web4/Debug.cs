@@ -31,7 +31,9 @@ public static class Debug
     // TODO: This does not consider subroutes that might exist
     public const string JS = """
 
-        const eventSource = new EventSource(window.location.pathname + "/__debug");
+        let path = window.location.pathname;
+        if (path.endsWith('/')) path = path.substring(0, path.length - 1);
+        const eventSource = new EventSource(path + "/__debug");
         eventSource.onmessage = (e) => clientRpc(e.data);
         eventSource.onerror = () => eventSource.close();
         """;
