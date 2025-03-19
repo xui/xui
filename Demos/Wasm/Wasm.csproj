@@ -1,27 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Web4.Core\Web4.Core.csproj" />
-  </ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <LangVersion>13.0</LangVersion>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <WasmMainJSPath>main.js</WasmMainJSPath>
-    <!-- JSExport requires unsafe code -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-    <!-- Reduce output size -->
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <WasmEmitSymbolMap>false</WasmEmitSymbolMap>
   </PropertyGroup>
-
-  <!-- Copy extra files when publishing the app -->
-  <ItemGroup>
-    <WasmExtraFilesToDeploy Include="index.html" />
-  </ItemGroup>
 </Project>
