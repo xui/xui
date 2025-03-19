@@ -11,7 +11,7 @@ if (args.Length == 1 && args[0] == "start")
 while(true)
 {
     StopwatchSample.Render();
-    await Task.Delay(20);
+    await Task.Delay(10);
 }
 
 partial class StopwatchSample
