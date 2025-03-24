@@ -13,7 +13,7 @@ namespace Web4;
 
 public struct Window: IDisposable
 {
-    private static readonly ConcurrentDictionary<string, Window> contextLookup = [];
+    private static readonly ConcurrentDictionary<string, Window> windowLookup = [];
     private static readonly ObjectPool<DefaultEvent> eventPool = ObjectPool.Create<DefaultEvent>();
     const int BUFFER_LENGTH = 1024;
 
@@ -24,19 +24,19 @@ public struct Window: IDisposable
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
-        return contextLookup.TryGetValue(key, out httpxContext);
+        return windowLookup.TryGetValue(key, out httpxContext);
     }
 
     public static async Task<Window> Upgrade(HttpContext http)
     {
         var webSocket = await http.WebSockets.AcceptWebSocketAsync();
-        var context = new Window(webSocket);
+        var window = new Window(webSocket);
 
         // TODO: Switch to header.
         var key = http.Connection.Id;
-        contextLookup[key] = context;
+        windowLookup[key] = window;
 
-        return context;
+        return window;
     }
 
     private Window(WebSocket webSocket)
