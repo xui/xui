@@ -17,8 +17,8 @@ public struct Window: IDisposable
     private static readonly ObjectPool<DefaultEvent> eventPool = ObjectPool.Create<DefaultEvent>();
     const int BUFFER_LENGTH = 1024;
 
+    private readonly ITransport transport;
     private readonly WebSocket webSocket;
-    private readonly WebSocketWriter writer;
 
     public static bool TryGet(HttpContext http, out Window httpxContext)
     {
@@ -42,7 +42,6 @@ public struct Window: IDisposable
     private Window(WebSocket webSocket)
     {
         this.webSocket = webSocket;
-        this.writer = new WebSocketWriter(webSocket, BUFFER_LENGTH);
     }
 
     public async readonly Task UpdatePath(PathString path)
@@ -278,9 +277,9 @@ public struct Window: IDisposable
         }
     }
 
-    private readonly async ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
+    private readonly ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
     {
-        var batchCount = 0;
+        using var writer = new JsonRpcWriter();
         for (int i = 0; i < after.RootLength; i++)
         {
             ref var keyholeBefore = ref before.Buffer[i];
@@ -288,6 +287,7 @@ public struct Window: IDisposable
 
             switch (keyholeBefore.Type)
             {
+                // TODO: Implement
                 case FormatType.Html:
                 case FormatType.View:
                 case FormatType.Attribute:
@@ -297,50 +297,20 @@ public struct Window: IDisposable
 
             if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
             {
-                var key = keyholeAfter.Key;
-                var type = keyholeAfter.Type;
-                var iValue = keyholeAfter.Integer;
-                var dValue = keyholeAfter.Double;
-                var format = keyholeAfter.Format;
-
-                if (batchCount++ == 0)
-                    await writer.Write("[");
-                else
-                    await writer.Write(",");
+                if (writer.BatchCount == 0)
+                    writer.BeginBatch();
                 
-                await writer.Write($$"""
-                    {"jsonrpc":"2.0","method":"mutate","params":["
-                    """);
-
-                await writer.Write(key);
-
-                await writer.Write($$"""
-                    ","
-                    """);
-
-                switch (type)
-                {
-                    case FormatType.Integer:
-                        await writer.Write(iValue, format);
-                        break;
-                    case FormatType.Double:
-                        await writer.Write(dValue, format);
-                        break;
-                    default:
-                        await writer.Write($"I am not an integer: {type}");
-                        break;
-                }
-
-                await writer.Write($$"""
-                    "]}
-                    """);
+                writer.WriteRpc("mutate", ref keyholeAfter);
             }
         }
-        if (batchCount > 0)
+
+        if (writer.BatchCount > 0)
         {
-            await writer.Write("]");
-            await writer.Flush(cancel);
+            writer.EndBatch();
+            return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancel);
         }
+
+        return ValueTask.CompletedTask;
     }
 
     public void Dispose()
