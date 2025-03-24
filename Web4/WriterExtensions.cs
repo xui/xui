@@ -1,6 +1,8 @@
 using System.Buffers;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Http;
 using Web4.Composers;
 
 namespace Web4;
@@ -38,6 +40,28 @@ public static class WriterExtensions
         return writer.FlushAsync(cancel);
     }
 
+    public static ValueTask<FlushResult> WriteWithServerTimingAsync(
+        this PipeWriter writer,
+        HttpXComposer composer,
+        HttpContext http, 
+        Func<Html> html, 
+        CancellationToken cancel = default)
+    {
+        long gc1 = GC.GetAllocatedBytesForCurrentThread();
+        long stopwatch = Stopwatch.GetTimestamp();
+
+        writer.Write(composer, $"{html()}");
+
+        var elapsed = Stopwatch.GetElapsedTime(stopwatch);
+        long gc2 = GC.GetAllocatedBytesForCurrentThread();
+
+        // Ironically this allocates.  But it occurs after measurement and only in DEBUG.
+        http.Response.Headers["Server-Timing"] = $"""
+            allocations;desc="Allocations: {gc2-gc1}b", render;desc="Web4.Render";dur={elapsed.TotalNanoseconds / 1_000_000d}
+            """;                    
+
+        return writer.FlushAsync(cancel);
+    }
     public static void Compose(
         this BaseComposer composer, 
         [InterpolatedStringHandlerArgument("composer")] Html html)

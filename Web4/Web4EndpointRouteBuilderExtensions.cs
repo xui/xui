@@ -107,11 +107,12 @@ public static class Web4EndpointRouteBuilderExtensions
                     // ready to fetch external data, mutate its UI state, and react to it
                     // by pushing DOM mutation instructions to the browser.
 
-                    #if DEBUG
-                    await DebugResponse(http, html, windowBuilder);
-                    #else
                     var pipeWriter = http.Response.BodyWriter;
-                    var composer = new HttpXComposer(pipeWriter, window);
+                    var composer = new HttpXComposer(pipeWriter, windowBuilder);
+
+                    #if DEBUG
+                    await pipeWriter.WriteWithServerTimingAsync(composer, http, html, cancel);
+                    #else
                     await pipeWriter.WriteAsync(composer, $"{html()}", cancel);
                     #endif
                 }
@@ -121,25 +122,5 @@ public static class Web4EndpointRouteBuilderExtensions
         Web4.Debug.MapOutput(group);
 
         return windowBuilder;
-    }
-
-    private static async Task DebugResponse(HttpContext http, Func<Html> html, WindowBuilder window)
-    {
-        var pipeWriter = http.Response.BodyWriter;
-
-        var composer = new HttpXComposer(pipeWriter, window);
-        long gc1 = GC.GetAllocatedBytesForCurrentThread();
-        long stopwatch = Stopwatch.GetTimestamp();
-
-        pipeWriter.Write(composer, $"{html()}");
-
-        var elapsed = Stopwatch.GetElapsedTime(stopwatch);
-        long gc2 = GC.GetAllocatedBytesForCurrentThread();
-
-        http.Response.Headers["Server-Timing"] = $"""
-            allocations;desc="Allocations: {gc2-gc1}b", render;desc="Web4.Render";dur={elapsed.TotalNanoseconds / 1_000_000d}
-            """;                    
-
-        await pipeWriter.FlushAsync(http.RequestAborted);
     }
 }
