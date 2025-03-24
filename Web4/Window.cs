@@ -44,17 +44,6 @@ public struct Window: IDisposable
         this.webSocket = webSocket;
     }
 
-    public async readonly Task UpdatePath(PathString path)
-    {
-        if (webSocket.State == WebSocketState.Open)
-        {
-            // var writer = Pipe.Output;
-            // writer.Inject($"window.history.pushState({{}},'', '{ path.ToUriComponent() }')");
-            // await writer.FlushAsync();
-            await Task.Delay(0);
-        }
-    }
-
     public async readonly Task ListenForEvents(WindowBuilder window, CancellationToken cancel)
     {
         await foreach (var message in GetNextMessage(cancel))
