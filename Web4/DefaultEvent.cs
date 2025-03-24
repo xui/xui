@@ -11,6 +11,8 @@ namespace Web4;
 
 internal record class DefaultEvent : Event, IResettable
 {
+    public static ObjectPool<DefaultEvent> Pool { get; } = ObjectPool.Create<DefaultEvent>();
+
     private ReadOnlySequence<byte>? message = null;
     private readonly Dictionary<string, long> values = []; // 64 bit placeholders
     private readonly Dictionary<string, object> references = [];

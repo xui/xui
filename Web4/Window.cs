@@ -215,9 +215,9 @@ public struct Window: IDisposable
                 }
                 else if (listener.ActionEvent is not null)
                 {
-                    var e = eventPool.Get().Init(message);
+                    var e = DefaultEvent.Pool.Get().Init(message);
                     listener.ActionEvent(e);
-                    eventPool.Return(e);
+                    DefaultEvent.Pool.Return(e);
                 }
                 else if (listener.Func is not null)
                 {
@@ -225,10 +225,10 @@ public struct Window: IDisposable
                 }
                 else if (listener.FuncEvent is not null)
                 {
-                    var e = eventPool.Get().Init(message);
+                    var e = DefaultEvent.Pool.Get().Init(message);
                     _ = listener
                         .FuncEvent(e)
-                        .ContinueWith(t => eventPool.Return(e));
+                        .ContinueWith(t => DefaultEvent.Pool.Return(e));
                         // TODO: Allocation!  Learn how to Return(e) without capturing.
                 }
                 else
