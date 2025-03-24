@@ -20,11 +20,11 @@ public struct Window: IDisposable
     private readonly ITransport transport;
     private readonly WebSocket webSocket;
 
-    public static bool TryGet(HttpContext http, out Window httpxContext)
+    public static bool TryGet(HttpContext http, out Window window)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
-        return windowLookup.TryGetValue(key, out httpxContext);
+        return windowLookup.TryGetValue(key, out window);
     }
 
     public static async Task<Window> Upgrade(HttpContext http)
