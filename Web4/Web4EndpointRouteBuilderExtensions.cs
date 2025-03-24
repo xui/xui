@@ -76,7 +76,7 @@ public static class Web4EndpointRouteBuilderExtensions
         app.UseWebSockets();
 
         var group = app.MapGroup(pattern);
-        var window = new WindowBuilder(group, html);
+        var windowBuilder = new WindowBuilder(group, html);
         group.Map(
             "/",
             async http =>
@@ -89,9 +89,9 @@ public static class Web4EndpointRouteBuilderExtensions
                     // Switch protocols and await the pipe reader which receives
                     // DOM events that have been bubbled up beyond the browser.
 
-                    using (var httpxContext = await HttpXContext.Upgrade(http))
+                    using (var window = await Window.Upgrade(http))
                     {
-                        await httpxContext.ListenForEvents(window, cancel);
+                        await window.ListenForEvents(windowBuilder, cancel);
                     }
                 }
                 else
@@ -108,7 +108,7 @@ public static class Web4EndpointRouteBuilderExtensions
                     // by pushing DOM mutation instructions to the browser.
 
                     #if DEBUG
-                    await DebugResponse(http, html, window);
+                    await DebugResponse(http, html, windowBuilder);
                     #else
                     var pipeWriter = http.Response.BodyWriter;
                     var composer = new HttpXComposer(pipeWriter, window);
@@ -120,7 +120,7 @@ public static class Web4EndpointRouteBuilderExtensions
 
         Web4.Debug.MapOutput(group);
 
-        return window;
+        return windowBuilder;
     }
 
     private static async Task DebugResponse(HttpContext http, Func<Html> html, WindowBuilder window)

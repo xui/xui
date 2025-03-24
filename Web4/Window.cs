@@ -7,31 +7,30 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.ObjectPool;
 using Web4.Composers;
+using Web4.Transports;
 
 namespace Web4;
 
-public struct HttpXContext: IDisposable
+public struct Window: IDisposable
 {
-    private static readonly ConcurrentDictionary<string, HttpXContext> contextLookup = [];
+    private static readonly ConcurrentDictionary<string, Window> contextLookup = [];
     private static readonly ObjectPool<DefaultEvent> eventPool = ObjectPool.Create<DefaultEvent>();
     const int BUFFER_LENGTH = 1024;
 
     private readonly WebSocket webSocket;
     private readonly WebSocketWriter writer;
 
-    public readonly bool IsWebSocketOpen => webSocket.State == WebSocketState.Open;
-
-    public static bool TryGet(HttpContext http, out HttpXContext httpxContext)
+    public static bool TryGet(HttpContext http, out Window httpxContext)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
         return contextLookup.TryGetValue(key, out httpxContext);
     }
 
-    public static async Task<HttpXContext> Upgrade(HttpContext http)
+    public static async Task<Window> Upgrade(HttpContext http)
     {
         var webSocket = await http.WebSockets.AcceptWebSocketAsync();
-        var context = new HttpXContext(webSocket);
+        var context = new Window(webSocket);
 
         // TODO: Switch to header.
         var key = http.Connection.Id;
@@ -40,7 +39,7 @@ public struct HttpXContext: IDisposable
         return context;
     }
 
-    private HttpXContext(WebSocket webSocket)
+    private Window(WebSocket webSocket)
     {
         this.webSocket = webSocket;
         this.writer = new WebSocketWriter(webSocket, BUFFER_LENGTH);
@@ -252,6 +251,29 @@ public struct HttpXContext: IDisposable
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+            }
+        }
+    }
+
+    private static IEnumerable<(Keyhole, Keyhole)> GetDiffs(Snapshot before, Snapshot after)
+    {
+        for (int i = 0; i < after.RootLength; i++)
+        {
+            ref var keyholeBefore = ref before.Buffer[i];
+            ref var keyholeAfter = ref after.Buffer[i];
+
+            switch (keyholeBefore.Type)
+            {
+                case FormatType.Html:
+                case FormatType.View:
+                case FormatType.Attribute:
+                case FormatType.EventListener:
+                    continue;
+            }
+
+            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+            {
+                yield return (keyholeBefore, keyholeAfter);
             }
         }
     }
