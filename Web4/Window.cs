@@ -243,29 +243,6 @@ public struct Window: IDisposable
         }
     }
 
-    private static IEnumerable<(Keyhole, Keyhole)> GetDiffs(Snapshot before, Snapshot after)
-    {
-        for (int i = 0; i < after.RootLength; i++)
-        {
-            ref var keyholeBefore = ref before.Buffer[i];
-            ref var keyholeAfter = ref after.Buffer[i];
-
-            switch (keyholeBefore.Type)
-            {
-                case FormatType.Html:
-                case FormatType.View:
-                case FormatType.Attribute:
-                case FormatType.EventListener:
-                    continue;
-            }
-
-            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
-            {
-                yield return (keyholeBefore, keyholeAfter);
-            }
-        }
-    }
-
     private readonly ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
     {
         using var writer = new JsonRpcWriter();
