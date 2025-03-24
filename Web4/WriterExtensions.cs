@@ -42,7 +42,7 @@ public static class WriterExtensions
 
     public static ValueTask<FlushResult> WriteWithServerTimingAsync(
         this PipeWriter writer,
-        HttpXComposer composer,
+        StreamingComposer composer,
         HttpContext http, 
         Func<Html> html, 
         CancellationToken cancel = default)
