@@ -9,7 +9,7 @@ using Web4.Transports;
 
 namespace Web4;
 
-public struct Window: IDisposable
+public class Window: IDisposable
 {
     private static readonly ConcurrentDictionary<string, Window> windows = [];
 
@@ -18,7 +18,7 @@ public struct Window: IDisposable
     private readonly Func<Html> html;
     private readonly List<EventListener> listeners;
 
-    public static bool TryGet(HttpContext http, out Window window)
+    public static bool TryGet(HttpContext http, out Window? window)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
