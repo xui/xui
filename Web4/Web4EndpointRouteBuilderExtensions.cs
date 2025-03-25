@@ -38,28 +38,25 @@ public static class Web4EndpointRouteBuilderExtensions
         [StringSyntax("Route")] string pattern, 
         Func<HttpContext, Html> requestDelegate)
     {
-        return endpoints.Map(
-            pattern,
-            async context =>
+        return endpoints.Map(pattern, async http =>
+        {
+            var response = http.Response;
+            if (!response.HasStarted)
             {
-                var response = context.Response;
-                if (!response.HasStarted)
+                response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
+                var startAsyncTask = response.StartAsync();
+                if (!startAsyncTask.IsCompletedSuccessfully)
                 {
-                    response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
-                    var startAsyncTask = response.StartAsync();
-                    if (!startAsyncTask.IsCompletedSuccessfully)
-                    {
-                        await startAsyncTask;
-                    }
+                    await startAsyncTask;
                 }
-
-                var pipeWriter = response.BodyWriter;
-                var composer = new DefaultComposer(pipeWriter);
-                await pipeWriter.WriteAsync(composer, $"{requestDelegate(context)}");
-
-                HotSpot.Track(pattern, composer);
             }
-        );
+
+            var pipeWriter = response.BodyWriter;
+            var composer = new DefaultComposer(pipeWriter);
+            await pipeWriter.WriteAsync(composer, $"{requestDelegate(http)}");
+
+            HotSpot.Track(pattern, composer);
+        });
     }
 
     public static WindowBuilder Map(
@@ -78,29 +75,26 @@ public static class Web4EndpointRouteBuilderExtensions
         var group = app.MapGroup(pattern);
         var windowBuilder = new WindowBuilder(group);
         
-        group.Map(
-            "/",
-            async http =>
+        group.Map("/", async http =>
+        {
+            var cancel = http.RequestAborted;
+            if (http.WebSockets.IsWebSocketRequest)
             {
-                var cancel = http.RequestAborted;
-                if (http.WebSockets.IsWebSocketRequest)
-                {
-                    using var window = await Window.Upgrade(http, html, windowBuilder.Listeners);
-                    await window.ListenForEvents(cancel);
-                }
-                else
-                {
-                    var pipeWriter = http.Response.BodyWriter;
-                    var composer = new HttpXComposer(pipeWriter, windowBuilder);
-
-                    #if DEBUG
-                    await pipeWriter.WriteWithServerTimingAsync(composer, http, html, cancel);
-                    #else
-                    await pipeWriter.WriteAsync(composer, $"{html()}", cancel);
-                    #endif
-                }
+                using var window = await Window.Upgrade(http, html, windowBuilder.Listeners);
+                await window.ListenForEvents(cancel);
             }
-        );
+            else
+            {
+                var pipeWriter = http.Response.BodyWriter;
+                var composer = new HttpXComposer(pipeWriter, windowBuilder);
+
+                #if DEBUG
+                await pipeWriter.WriteWithServerTimingAsync(composer, http, html, cancel);
+                #else
+                await pipeWriter.WriteAsync(composer, $"{html()}", cancel);
+                #endif
+            }
+        });
 
         Web4.Debug.MapOutput(group);
 
