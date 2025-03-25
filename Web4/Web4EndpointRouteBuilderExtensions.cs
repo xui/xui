@@ -85,29 +85,11 @@ public static class Web4EndpointRouteBuilderExtensions
                 var cancel = http.RequestAborted;
                 if (http.WebSockets.IsWebSocketRequest)
                 {
-                    // --- ws:// ---
-                    // Here is the request for upgrading to a websocket connection.  
-                    // Switch protocols and await the pipe reader which receives
-                    // DOM events that have been bubbled up beyond the browser.
-
-                    using (var window = await Window.Upgrade(http, html, windowBuilder.Listeners))
-                    {
-                        await window.ListenForEvents(cancel);
-                    }
+                    using var window = await Window.Upgrade(http, html, windowBuilder.Listeners);
+                    await window.ListenForEvents(cancel);
                 }
                 else
                 {
-                    // --- 200 ---
-                    // If in here, this is a "normal" GET request.
-                    // There is no websocket yet so we cannot push mutations.
-                    // Respond with an old fashioned 200 response with HTML.
-                    // Note! 200/GETs never await for external data (e.g. from a DB).
-                    // Instead, they render immediately with whatever state they have in RAM.  
-                    // Once the browser receives this HTML it will upgrade to 
-                    // bidirectional communication via websocket.  Then it will be
-                    // ready to fetch external data, mutate its UI state, and react to it
-                    // by pushing DOM mutation instructions to the browser.
-
                     var pipeWriter = http.Response.BodyWriter;
                     var composer = new HttpXComposer(pipeWriter, windowBuilder);
 
