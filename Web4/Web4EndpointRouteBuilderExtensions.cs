@@ -76,7 +76,8 @@ public static class Web4EndpointRouteBuilderExtensions
         app.UseWebSockets();
 
         var group = app.MapGroup(pattern);
-        var windowBuilder = new WindowBuilder(group, html);
+        var windowBuilder = new WindowBuilder(group);
+        
         group.Map(
             "/",
             async http =>
@@ -89,9 +90,9 @@ public static class Web4EndpointRouteBuilderExtensions
                     // Switch protocols and await the pipe reader which receives
                     // DOM events that have been bubbled up beyond the browser.
 
-                    using (var window = await Window.Upgrade(http))
+                    using (var window = await Window.Upgrade(http, html, windowBuilder.Listeners))
                     {
-                        await window.ListenForEvents(windowBuilder, cancel);
+                        await window.ListenForEvents(cancel);
                     }
                 }
                 else

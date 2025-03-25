@@ -2,10 +2,8 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.ObjectPool;
 using Web4.Composers;
 using Web4.Transports;
 
@@ -13,38 +11,41 @@ namespace Web4;
 
 public struct Window: IDisposable
 {
-    private static readonly ConcurrentDictionary<string, Window> windowLookup = [];
-    private static readonly ObjectPool<DefaultEvent> eventPool = ObjectPool.Create<DefaultEvent>();
-    const int BUFFER_LENGTH = 1024;
+    private static readonly ConcurrentDictionary<string, Window> windows = [];
 
     private readonly ITransport transport;
     private readonly WebSocket webSocket;
+    private readonly Func<Html> html;
+    private readonly List<EventListener> listeners;
 
     public static bool TryGet(HttpContext http, out Window window)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
-        return windowLookup.TryGetValue(key, out window);
+        return windows.TryGetValue(key, out window);
     }
 
-    public static async Task<Window> Upgrade(HttpContext http)
+    public static async Task<Window> Upgrade(HttpContext http, Func<Html> html, List<EventListener> listeners)
     {
         var webSocket = await http.WebSockets.AcceptWebSocketAsync();
         var window = new Window(webSocket);
 
-        // TODO: Switch to header.
+        // TODO: Move to header approach?
         var key = http.Connection.Id;
-        windowLookup[key] = window;
+        windows[key] = window;
 
         return window;
     }
 
-    private Window(WebSocket webSocket)
+    private Window(ITransport transport, Func<Html> html, List<EventListener> listeners)
     {
         this.webSocket = webSocket;
+        this.transport = transport;
+        this.html = html;
+        this.listeners = listeners;
     }
 
-    public async readonly Task ListenForEvents(WindowBuilder window, CancellationToken cancel)
+    public async readonly Task ListenForEvents(CancellationToken cancel)
     {
         await foreach (var message in GetNextMessage(cancel))
         {
@@ -58,13 +59,13 @@ public struct Window: IDisposable
             }
 
             perf = Debug.PerfCheck("GetKeyhole");
-            var keyhole = GetKeyhole(method, window);
+            var keyhole = GetKeyhole(method);
             perf.Dispose();
 
             if (keyhole is EventListener listener)
             {
                 perf = Debug.PerfCheck("CaptureSnapshot (before)");
-                var before = CaptureSnapshot(window);
+                var before = CaptureSnapshot();
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("HandleEvent");
@@ -72,7 +73,7 @@ public struct Window: IDisposable
                 perf.Dispose();
 
                 perf = Debug.PerfCheck("CaptureSnapshot (after)");
-                var after = CaptureSnapshot(window);
+                var after = CaptureSnapshot();
                 perf.Dispose();
 
                 // TODO: State invalidations will not live here
@@ -99,6 +100,7 @@ public struct Window: IDisposable
         [EnumeratorCancellation] 
         CancellationToken cancel = default)
     {
+        const int BUFFER_LENGTH = 1024;
         ReadOnlySequence<byte> sequence;
         var owner = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH);
         var buffer = owner.Memory;
@@ -173,7 +175,7 @@ public struct Window: IDisposable
 
     // TODO: Ack!  You forgot to move composers to structs.
     // static FindKeyholeComposer? composer = null;
-    private static EventListener? GetKeyhole(string? key, WindowBuilder window)
+    private readonly EventListener? GetKeyhole(string? key)
     {
         switch (key)
         {
@@ -182,24 +184,24 @@ public struct Window: IDisposable
             case string s1 when s1.StartsWith("win"):
             case string s2 when s2.StartsWith("doc"):
                 if (int.TryParse(key.AsSpan()[3..], out var index))
-                    return window.Listeners[index];
+                    return listeners[index];
                 else
                     return null;
             default:
                 var composer = new FindKeyholeComposer(key);
                 // composer ??= new FindKeyholeComposer(key);
-                composer.Compose($"{window.Html()}");
+                composer.Compose($"{html()}");
                 return composer.Listener;
         }
     }
 
     // TODO: Ack!  You forgot to move composers to structs.
     // static DiffComposer? diffComposer = null;
-    private static Snapshot CaptureSnapshot(WindowBuilder window)
+    private readonly Snapshot CaptureSnapshot()
     {
         // diffComposer ??= new DiffComposer();
         var diffComposer = new DiffComposer();
-        diffComposer.Compose($"{window.Html()}");
+        diffComposer.Compose($"{html()}");
         return diffComposer.Snapshot;
     }
     
