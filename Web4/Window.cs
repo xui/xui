@@ -45,7 +45,7 @@ public class Window: IDisposable
         this.listeners = listeners;
     }
 
-    public async readonly Task ListenForEvents(CancellationToken cancel)
+    public async Task ListenForEvents(CancellationToken cancel)
     {
         await foreach (var message in GetNextMessage(cancel))
         {
@@ -96,7 +96,7 @@ public class Window: IDisposable
         }
     }
 
-    private async readonly IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage(
+    private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage(
         [EnumeratorCancellation] 
         CancellationToken cancel = default)
     {
@@ -175,7 +175,7 @@ public class Window: IDisposable
 
     // TODO: Ack!  You forgot to move composers to structs.
     // static FindKeyholeComposer? composer = null;
-    private readonly EventListener? GetKeyhole(string? key)
+    private EventListener? GetKeyhole(string? key)
     {
         switch (key)
         {
@@ -197,7 +197,7 @@ public class Window: IDisposable
 
     // TODO: Ack!  You forgot to move composers to structs.
     // static DiffComposer? diffComposer = null;
-    private readonly Snapshot CaptureSnapshot()
+    private Snapshot CaptureSnapshot()
     {
         // diffComposer ??= new DiffComposer();
         var diffComposer = new DiffComposer();
@@ -245,7 +245,7 @@ public class Window: IDisposable
         }
     }
 
-    private readonly ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
+    private ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
     {
         using var writer = new JsonRpcWriter();
         for (int i = 0; i < after.RootLength; i++)
