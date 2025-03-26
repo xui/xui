@@ -13,7 +13,6 @@ public class Window: IDisposable
 {
     private static readonly ConcurrentDictionary<string, Window> windows = [];
 
-    private readonly ITransport transport;
     private readonly WebSocket webSocket;
     private readonly Func<Html> html;
     private readonly List<EventListener> listeners;
@@ -28,7 +27,7 @@ public class Window: IDisposable
     public static async Task<Window> Upgrade(HttpContext http, Func<Html> html, List<EventListener> listeners)
     {
         var webSocket = await http.WebSockets.AcceptWebSocketAsync();
-        var window = new Window(webSocket);
+        var window = new Window(webSocket, html, listeners);
 
         // TODO: Move to header approach?
         var key = http.Connection.Id;
@@ -37,10 +36,9 @@ public class Window: IDisposable
         return window;
     }
 
-    private Window(ITransport transport, Func<Html> html, List<EventListener> listeners)
+    private Window(WebSocket webSocket, Func<Html> html, List<EventListener> listeners)
     {
         this.webSocket = webSocket;
-        this.transport = transport;
         this.html = html;
         this.listeners = listeners;
     }
