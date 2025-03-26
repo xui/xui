@@ -274,6 +274,7 @@ internal record class DefaultEvent : Event, IResettable
                     stringBuilder.Append($"{pair.Key}: {GetLong(pair.Key)}");
                 else if (type == typeof(double))
                     stringBuilder.Append($"{pair.Key}: {GetDouble(pair.Key)}");
+                // TODO: Implement others
             }
         }
         foreach (var pair in references)
@@ -287,6 +288,7 @@ internal record class DefaultEvent : Event, IResettable
             {
                 if (type == typeof(string))
                     stringBuilder.Append($"{pair.Key}: \"{GetReference(pair.Key)}\"");
+                // TODO: Implement others
             }
         }
         return true;
