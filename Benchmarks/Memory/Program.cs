@@ -14,7 +14,7 @@ public class Tests
     Pipe pipe = new();
     NoOpComposer noOpComposer = new(null);
     HtmlComposer htmlComposer = new(null);
-    XtmlComposer xtmlComposer = new(null, new(null, null));
+    XtmlComposer xtmlComposer = new(null, new(null));
     DiffComposer diffComposer = new();
     string name = "Rylan";
     int c = 3;
