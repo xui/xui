@@ -9,8 +9,9 @@ using Web4.Transports;
 
 namespace Web4;
 
-public class Window: IDisposable
+public class Window : IDisposable
 {
+    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Recapture;
     private static readonly ConcurrentDictionary<string, Window> windows = [];
 
     private readonly WebSocket webSocket;
