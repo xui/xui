@@ -34,7 +34,7 @@ public ref partial struct Html
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
     {
         Length = 2 * formattedCount + 1;
-        this.composer = BaseComposer.Current ??= new DefaultComposer(writer).Init();
+        this.composer = BaseComposer.Current ??= new HtmlComposer(writer).Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
     }
 

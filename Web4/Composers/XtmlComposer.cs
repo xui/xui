@@ -7,7 +7,7 @@ using Web4.Composers;
 
 namespace Web4.Composers;
 
-public class HttpXComposer(IBufferWriter<byte> writer, WindowBuilder window) : DefaultComposer(writer)
+public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;

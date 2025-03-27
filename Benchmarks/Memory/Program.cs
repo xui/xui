@@ -13,8 +13,8 @@ public class Tests
 {
     Pipe pipe = new();
     NoOpComposer noOpComposer = new(null);
-    DefaultComposer defaultComposer = new(null);
-    HttpXComposer httpXComposer = new(null, new(null, null));
+    HtmlComposer htmlComposer = new(null);
+    XtmlComposer xtmlComposer = new(null, new(null, null));
     DiffComposer diffComposer = new();
     string name = "Rylan";
     int c = 3;
@@ -74,9 +74,9 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task DefaultComposer()
+    public async Task HtmlComposer()
     {
-        pipe.Writer.Write(defaultComposer, $"""
+        pipe.Writer.Write(htmlComposer, $"""
             <html>
                 <body>
                     Hello {name}
@@ -93,9 +93,9 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task DefaultComposerWithState()
+    public async Task HtmlComposerWithState()
     {
-        pipe.Writer.Write(defaultComposer, $"""
+        pipe.Writer.Write(htmlComposer, $"""
             <html>
                 <body>
                     Hello {name}
@@ -112,9 +112,9 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task HttpXComposer()
+    public async Task XtmlComposer()
     {
-        pipe.Writer.Write(httpXComposer, $"""
+        pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
                     Hello {name}
@@ -131,9 +131,9 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task HttpXComposerWithState()
+    public async Task XtmlComposerWithState()
     {
-        pipe.Writer.Write(httpXComposer, $"""
+        pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
                     Hello {name}

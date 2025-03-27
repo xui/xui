@@ -52,7 +52,7 @@ public static class Web4EndpointRouteBuilderExtensions
             }
 
             var pipeWriter = response.BodyWriter;
-            var composer = new DefaultComposer(pipeWriter);
+            var composer = new HtmlComposer(pipeWriter);
             await pipeWriter.WriteAsync(composer, $"{requestDelegate(http)}");
 
             HotSpot.Track(pattern, composer);
@@ -86,7 +86,7 @@ public static class Web4EndpointRouteBuilderExtensions
             else
             {
                 var pipeWriter = http.Response.BodyWriter;
-                var composer = new HttpXComposer(pipeWriter, windowBuilder);
+                var composer = new XtmlComposer(pipeWriter, windowBuilder);
 
                 #if DEBUG
                 await pipeWriter.WriteWithServerTimingAsync(composer, http, html, cancel);
