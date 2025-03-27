@@ -1,13 +1,13 @@
 // static class Threads
 // {
-//     public static void Test(int threadCount, bool placebo = false)
+//     public static void Test(int threadCount, bool noop = false)
 //     {
 //         var counters = new int[threadCount];
 //         for (int i = 0; i < counters.Length; i++)
 //         {
 //             int index = i;
 //             Console.WriteLine("thread" + index);
-//             if (placebo)
+//             if (noop)
 //             {
 //                 new Thread(() =>
 //                 {
@@ -16,7 +16,7 @@
 
 //                     while (true)
 //                     {
-//                         test.Placebo();
+//                         test.NoOp();
 //                         counters[index]++;
 //                     }
 //                 }).Start();

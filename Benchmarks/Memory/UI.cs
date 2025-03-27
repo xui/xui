@@ -41,18 +41,18 @@
 
 //     [Benchmark]
 //     [IterationCount(10)]
-//     public Placebo Placebo()
+//     public NoOp NoOp()
 //     {
 //         return $"""
 //             123{c}456{dt}789{c}0123
 
-//             {GetPlaceboComponent(s)}
+//             {GetNoOpComponent(s)}
 
 //             {dt:O} {c} {c:x} {c} {c} {c} {c}
 //         """;
 //     }
 
-//     Placebo GetPlaceboComponent(string name)
+//     NoOp GetNoOpComponent(string name)
 //     {
 //         return $"<p>I am {s} a component</p>";
 //     }

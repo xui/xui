@@ -23,7 +23,7 @@ public class Tests
     [Benchmark]
     public void Baseline()
     {
-        Placebo placebo = $"""
+        NoOpString noOpString = $"""
         <html>
             <body>
                 Hello {name}
@@ -395,13 +395,13 @@ public class Tests
 //         break;
 //     case "threads":
 //         int threads = 1;
-//         bool placebo = false;
+//         bool noop = false;
 //         if (args.Length > 1)
 //         {
 //             threads = int.Parse(args[1]);
-//             placebo = args[^1] == "placebo";
+//             noop = args[^1] == "noop";
 //         }
-//         Threads.Test(threads, placebo);
+//         Threads.Test(threads, noop);
 //         break;
 //     default:
 //         throw new NotSupportedException("");

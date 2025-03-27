@@ -2,9 +2,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 [InterpolatedStringHandler]
-public struct Placebo
+public struct NoOpString
 {
-    public Placebo(int literalLength, int formattedCount)
+    public NoOpString(int literalLength, int formattedCount)
     {
     }
 
@@ -28,7 +28,7 @@ public struct Placebo
     {
     }
 
-    public readonly void AppendFormatted(Placebo s)
+    public readonly void AppendFormatted(NoOpString s)
     {
     }
 }
