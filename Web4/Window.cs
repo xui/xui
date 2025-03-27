@@ -194,13 +194,13 @@ public class Window: IDisposable
     }
 
     // TODO: Ack!  You forgot to move composers to structs.
-    // static DiffComposer? diffComposer = null;
+    // static SnapshotComposer? snapshotComposer = null;
     private Snapshot CaptureSnapshot()
     {
-        // diffComposer ??= new DiffComposer();
-        var diffComposer = new DiffComposer();
-        diffComposer.Compose($"{html()}");
-        return diffComposer.Snapshot;
+        // snapshotComposer ??= new SnapshotComposer();
+        var snapshotComposer = new SnapshotComposer();
+        snapshotComposer.Compose($"{html()}");
+        return snapshotComposer.Snapshot;
     }
     
     private static void HandleEvent(EventListener listener, ReadOnlySequence<byte> message)

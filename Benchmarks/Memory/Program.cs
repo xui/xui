@@ -15,7 +15,7 @@ public class Tests
     NoOpComposer noOpComposer = new(null);
     HtmlComposer htmlComposer = new(null);
     XtmlComposer xtmlComposer = new(null, new(null));
-    DiffComposer diffComposer = new();
+    SnapshotComposer snapshotComposer = new();
     string name = "Rylan";
     int c = 3;
     State<int> cState = 3.AsState();
@@ -165,9 +165,9 @@ public class Tests
 
 
     [Benchmark]
-    public void DiffComposerInt()
+    public void SnapshotComposerInt()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -179,9 +179,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerLong()
+    public void SnapshotComposerLong()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -193,9 +193,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerFloat()
+    public void SnapshotComposerFloat()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -207,9 +207,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerDouble()
+    public void SnapshotComposerDouble()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -221,9 +221,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerDecimal()
+    public void SnapshotComposerDecimal()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -235,9 +235,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerDateTime()
+    public void SnapshotComposerDateTime()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -249,9 +249,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerDateOnly()
+    public void SnapshotComposerDateOnly()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -263,9 +263,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerTimeSpan()
+    public void SnapshotComposerTimeSpan()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -277,9 +277,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerTimeOnly()
+    public void SnapshotComposerTimeOnly()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -291,9 +291,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerBool()
+    public void SnapshotComposerBool()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -305,9 +305,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerColor()
+    public void SnapshotComposerColor()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -319,9 +319,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerString()
+    public void SnapshotComposerString()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -333,9 +333,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerUri()
+    public void SnapshotComposerUri()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -347,9 +347,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerFormatString()
+    public void SnapshotComposerFormatString()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>
@@ -361,9 +361,9 @@ public class Tests
     }
 
     [Benchmark]
-    public void DiffComposerWithState()
+    public void SnapshotComposerWithState()
     {
-        diffComposer.Compose($"""
+        snapshotComposer.Compose($"""
             <html>
                 <body>
                     <button>

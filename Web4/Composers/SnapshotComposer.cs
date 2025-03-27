@@ -9,7 +9,7 @@ using Web4.Composers;
 
 namespace Web4.Composers;
 
-public class DiffComposer : BaseComposer
+public class SnapshotComposer : BaseComposer
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;
