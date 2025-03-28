@@ -10,9 +10,9 @@ public struct Keyhole
     private long value; // 64 bits
     private object? reference; // 64 bits
     public string Key { get; set; } // 64 bits
-    public FormatType Type { get; set; } // 8 bits
+    public FormatType Type { get; set; } // 8 bits?
     public string? Format { get; set; } // 64 bits
-    public int Length { get; set; }
+    public int Length { get; set; } // 32 bits?
 
     public string? String { readonly get => reference as string; set => this.reference = value; }
     public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
