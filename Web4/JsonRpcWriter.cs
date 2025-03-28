@@ -10,7 +10,7 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
     private int cursor = 0;
 
     public int BatchCount { get; private set; } = 0;
-    public readonly Memory<byte> Memory => buffer.AsMemory(..cursor);
+    public readonly ReadOnlyMemory<byte> Memory => buffer.AsMemory(..cursor);
 
     public void BeginBatch() => Write("[");
     public void EndBatch() => Write("]");
