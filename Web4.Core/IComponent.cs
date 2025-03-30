@@ -1,6 +1,6 @@
 namespace Web4;
 
-public interface IView
+public interface IComponent
 {
     Html Render();
 }

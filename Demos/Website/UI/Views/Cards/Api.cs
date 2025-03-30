@@ -1,4 +1,4 @@
-readonly record struct Api() : IView
+readonly record struct Api() : IComponent
 {
     public Html Render() => $"""
         <section id="zero-api">

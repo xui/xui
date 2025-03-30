@@ -1,4 +1,4 @@
-readonly record struct Seo() : IView
+readonly record struct Seo() : IComponent
 {
     public Html Render() => $"""
         <section>

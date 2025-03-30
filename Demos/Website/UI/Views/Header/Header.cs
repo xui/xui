@@ -1,4 +1,4 @@
-readonly record struct Header() : IView
+readonly record struct Header() : IComponent
 {
     public Html Render() => $"""
         <section id="header" class="hstack">

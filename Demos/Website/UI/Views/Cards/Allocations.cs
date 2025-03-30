@@ -1,4 +1,4 @@
-readonly record struct Allocations() : IView
+readonly record struct Allocations() : IComponent
 {
     public Html Render() => $"""
         <section id="zero-allocations">

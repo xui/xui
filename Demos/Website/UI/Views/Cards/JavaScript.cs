@@ -1,6 +1,6 @@
 readonly record struct JavaScript(
     ViewModel ViewModel
-) : IView
+) : IComponent
 {
     public Html Render() => $"""
         <section id="zero-javascript">

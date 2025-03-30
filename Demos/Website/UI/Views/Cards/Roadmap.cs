@@ -1,4 +1,4 @@
-readonly record struct Roadmap() : IView
+readonly record struct Roadmap() : IComponent
 {
     public Html Render() => $"""
         <section id="roadmap">

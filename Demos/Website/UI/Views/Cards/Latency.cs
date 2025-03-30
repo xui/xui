@@ -1,4 +1,4 @@
-readonly record struct Latency() : IView
+readonly record struct Latency() : IComponent
 {
     public Html Render() => $"""
         <section id="zero-latency">

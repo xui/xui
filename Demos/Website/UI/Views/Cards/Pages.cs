@@ -1,4 +1,4 @@
-readonly record struct Pages() : IView
+readonly record struct Pages() : IComponent
 {
     public Html Render() => $"""
         <section id="zero-pages">

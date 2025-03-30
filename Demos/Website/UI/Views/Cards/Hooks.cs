@@ -1,4 +1,4 @@
-readonly record struct Hooks() : IView
+readonly record struct Hooks() : IComponent
 {
     public Html Render() => $$"""
         <section id="zero-hooks">
