@@ -168,8 +168,8 @@ public ref partial struct Html
     // MUTABLE ELEMENTS
 
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public bool AppendFormatted<TComponent>(TComponent view, string? format = null) where TComponent : struct, IComponent
-        => AppendFormatted(view.Render(), format);
+    public bool AppendFormatted<TComponent>(TComponent component, string? format = null) where TComponent : IComponent
+        => AppendFormatted(component.Render(), format);
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public bool AppendFormatted(Html html, [CallerArgumentExpression(nameof(html))] string? expression = null, string? format = null) 
