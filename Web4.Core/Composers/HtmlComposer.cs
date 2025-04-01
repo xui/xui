@@ -129,6 +129,35 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
+    {
+        Encoding.UTF8.GetBytes(attrName, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
+
+        // TODO: Write color without allocating and with custom string formatters.
+        var value = attrValue(null!).ToString();
+        Encoding.UTF8.GetBytes(value, Writer);
+
+        Encoding.UTF8.GetBytes("\"", Writer);
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
+    {
+        Encoding.UTF8.GetBytes(attrName, Writer);
+        Encoding.UTF8.GetBytes("=\"", Writer);
+
+        // TODO: Write Uri without allocating and with custom string formatters?
+        var value = attrValue(null!).ToString();
+        Encoding.UTF8.GetBytes(value, Writer);
+
+        Encoding.UTF8.GetBytes("\"", Writer);
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
+
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
@@ -149,15 +178,18 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
+    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
+    {
+        return base.WriteMutableElement(ref parent, component.Render(), format, expression);
+    }
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.
         // (see: InterpolatedStringHandler 
         // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         
-        return base.WriteMutableElement(ref parent, partial, expression, format);
+        return base.WriteMutableElement(ref parent, partial, format, expression);
     }
 }

@@ -221,6 +221,28 @@ public class SnapshotComposer : BaseComposer
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
 
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot.Buffer[index];
+        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot.Buffer[index];
+        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Type = FormatType.Attribute;
+        keyhole.String = expression;
+
+        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
+    }
+
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
@@ -237,8 +259,12 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null)
+    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
+    {
+        return WriteMutableElement(ref parent, component.Render(), format, expression);
+    }
+
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
         if (index >= 0)
@@ -254,7 +280,7 @@ public class SnapshotComposer : BaseComposer
             keyhole.Length = partial.Cursor;
         }
 
-        return base.WriteMutableElement(ref parent, partial, expression, format);
+        return base.WriteMutableElement(ref parent, partial, format, expression);
     }
 
     public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)

@@ -19,15 +19,18 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => true;
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => true; // where T : struct, IUtf8SpanFormattable
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => true;
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null) => true;
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => true;
 
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => HandleNotSupported();
 
     private bool HandleNotSupported() => true;
     private bool HandleNotSupported(ReadOnlySpan<char> attributeName) => true;
 
-    public override bool WriteMutableElement<TView>(ref Html parent, TView view, string? format = null) => WriteMutableElement(ref parent, view.Render(), format);
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? expression = null, string? format = null) => true;
+    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => WriteMutableElement(ref parent, component.Render(), format, expression);
+    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null) => true;
 }
