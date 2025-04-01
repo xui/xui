@@ -11,14 +11,14 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 [MemoryDiagnoser]
 public class Tests
 {
-    Pipe pipe = new();
-    NoOpComposer noOpComposer = new(null);
-    HtmlComposer htmlComposer = new(null);
-    XtmlComposer xtmlComposer = new(null, new(null));
-    SnapshotComposer snapshotComposer = new();
-    string name = "Rylan";
-    int c = 3;
-    State<int> cState = 3.AsState();
+    readonly Pipe pipe = new();
+    readonly NoOpComposer noOpComposer = new(null);
+    readonly HtmlComposer htmlComposer = new(null);
+    readonly XtmlComposer xtmlComposer = new(null, new(null));
+    readonly SnapshotComposer snapshotComposer = new();
+    readonly string name = "Rylan";
+    readonly int c = 3;
+    readonly State<int> cState = 3.AsState();
 
     [Benchmark]
     public void Baseline()
