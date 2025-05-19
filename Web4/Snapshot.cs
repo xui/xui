@@ -19,6 +19,35 @@ public class Snapshot : IDisposable
         Buffer = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
     }
 
+    public IEnumerable<int> Diff(Snapshot compare)
+    {
+        // using var perf = Debug.PerfCheck("Diff"); // TODO: Remove PerfCheck
+
+        var before = this;
+        var after = compare;
+
+        for (int i = 0; i < after.RootLength; i++)
+        {
+            ref var keyholeBefore = ref before.Buffer[i];
+            ref var keyholeAfter = ref after.Buffer[i];
+
+            switch (keyholeBefore.Type)
+            {
+                // TODO: Implement
+                case FormatType.Html:
+                case FormatType.View:
+                case FormatType.Attribute:
+                case FormatType.EventListener:
+                    continue;
+            }
+
+            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+            {
+                yield return i;
+            }
+        }
+    }
+
     public void Dispose()
     {
         ArrayPool<Keyhole>.Shared.Return(Buffer);
