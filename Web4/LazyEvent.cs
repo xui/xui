@@ -9,9 +9,9 @@ using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal record class DefaultEvent : Event, IResettable
+internal record class LazyEvent : Event, IResettable
 {
-    public static ObjectPool<DefaultEvent> Pool { get; } = ObjectPool.Create<DefaultEvent>();
+    public static ObjectPool<LazyEvent> Pool { get; } = ObjectPool.Create<LazyEvent>();
 
     private ReadOnlySequence<byte>? message = null;
     private readonly Dictionary<string, long> values = []; // 64 bit placeholders
@@ -19,7 +19,7 @@ internal record class DefaultEvent : Event, IResettable
     private bool areValuesParsed = false;
     private bool areReferencesParsed = false;
 
-    public DefaultEvent Init(ReadOnlySequence<byte> message)
+    public LazyEvent Init(ReadOnlySequence<byte> message)
     {
         this.message = message;
         return this;
@@ -248,7 +248,7 @@ internal record class DefaultEvent : Event, IResettable
         ["_id"] = typeof(int)
     };
 
-    static DefaultEvent()
+    static LazyEvent()
     {
         foreach (var key in types.Keys)
             Keymaker.CacheKey(key);
