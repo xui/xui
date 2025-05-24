@@ -57,7 +57,7 @@ public static class Debug
 
     private record JsonRpc(string method, string[] @params, string jsonrpc = "2.0");
 
-    internal static void MapOutput(RouteGroupBuilder group)
+    internal static void MapDebugOutput(this RouteGroupBuilder group)
     {
         group.MapGet("__debug", async http =>
         {
