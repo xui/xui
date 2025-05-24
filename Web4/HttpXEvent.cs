@@ -213,4 +213,8 @@ internal partial record class HttpXEvent(
     int IWidthHeight.Width => Width ?? default;
     double IXY.X => X ?? default;
     double IXY.Y => Y ?? default;
+
+    public void Dispose()
+    {
+    }
 }

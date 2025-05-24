@@ -9,7 +9,7 @@ namespace Web4;
 /// <summary>
 /// A DOM event
 /// </summary>
-public partial interface Event :
+public partial interface Event : IDisposable,
     Aliases,
     Aliases.Animation,
     Aliases.BeforeUnload,
