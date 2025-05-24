@@ -11,6 +11,7 @@ using Web4;
 using Microsoft.AspNetCore.WebSockets;
 using Html = Web4.Html;
 using System.Diagnostics;
+using Web4.Transports;
 
 // TODO: Html namespace collision problem?
 //namespace Microsoft.AspNetCore.Builder;
@@ -66,37 +67,38 @@ public static class Web4EndpointRouteBuilderExtensions
         => MapWeb4(app, pattern, html);
 
     public static WindowBuilder MapWeb4(
-        this WebApplication app, 
-        [StringSyntax("Route")] string pattern, 
+        this WebApplication app,
+        [StringSyntax("Route")] string pattern,
         Func<Html> html)
     {
-        app.UseWebSockets();
+#if DEBUG
+        bool includeServerTiming = true;
+#else
+        bool includeServerTiming = false;
+#endif
 
+        app.UseWebSockets();
         var group = app.MapGroup(pattern);
-        var windowBuilder = new WindowBuilder(group);
-        
+        var windowBuilder = new WindowBuilder(group, html);
+
+        group.MapDebugOutput();
+
         group.Map("/", async http =>
         {
-            var cancel = http.RequestAborted;
             if (http.WebSockets.IsWebSocketRequest)
             {
-                using var window = await Window.Upgrade(http, html, windowBuilder.Listeners);
-                await window.ListenForEvents(cancel);
+                var transport = await WebSocketTransport.Create(http);
+                var window = transport.GetOrCreateWindow(windowBuilder);
+                await transport.ListenForRpcMessages(window);
             }
             else
             {
+                var cancel = http.RequestAborted;
                 var pipeWriter = http.Response.BodyWriter;
                 var composer = new XtmlComposer(pipeWriter, windowBuilder);
-
-#if DEBUG
-                await pipeWriter.WriteWithServerTimingAsync(composer, http, html, cancel);
-#else
-                await pipeWriter.WriteAsync(composer, $"{html()}", cancel);
-#endif
+                await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, cancel);
             }
         });
-
-        Web4.Debug.MapOutput(group);
 
         return windowBuilder;
     }
