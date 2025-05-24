@@ -298,7 +298,7 @@ DateOnly dO = DateOnly.FromDateTime(DateTime.Now);
 TimeOnly tO = TimeOnly.FromDateTime(DateTime.Now);
 Color color = Color.Red;
 Uri u = new("http://Itcanbeanything");
-app.Map("/signatures", () => $"""
+app.MapWeb4("/signatures", () => $"""
     <!doctype html>
     <html>
         <body>

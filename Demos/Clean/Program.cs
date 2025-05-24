@@ -6,7 +6,7 @@ var app = builder.Build();
 string name = "World";
 int c = 0;
 
-var window = app.Map("/app", () => $"""
+var window = app.MapWeb4("/app", () => $"""
     <html>
         <body>
             <button onclick={() => c++}>
