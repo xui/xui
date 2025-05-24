@@ -30,12 +30,14 @@ public class WindowBuilder :
 {
     private readonly RouteGroupBuilder routeGroupBuilder;
 
+    public Func<Html> Html { get; init; }
     public DocumentBuilder Document { get; init; }
     public List<EventListener> Listeners { get; } = [];
 
-    public WindowBuilder(RouteGroupBuilder routeGroupBuilder)
+    public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> html)
     {
         this.routeGroupBuilder = routeGroupBuilder;
+        Html = html;
         Document = new(this);
     }
 
