@@ -10,13 +10,13 @@ namespace Web4;
 public static class WriterExtensions
 {
     public static void Inject(
-        this IBufferWriter<byte> writer, 
+        this IBufferWriter<byte> writer,
         [InterpolatedStringHandlerArgument("writer")] ref RawText text)
     {
     }
 
     public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
+        this PipeWriter writer,
         [InterpolatedStringHandlerArgument("writer")] ref Html html,
         CancellationToken cancel = default)
     {
@@ -28,7 +28,7 @@ public static class WriterExtensions
     }
 
     public static ValueTask<FlushResult> WriteAsync(
-        this PipeWriter writer, 
+        this PipeWriter writer,
         StreamingComposer composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
         CancellationToken cancel = default)
@@ -40,11 +40,22 @@ public static class WriterExtensions
         return writer.FlushAsync(cancel);
     }
 
+    public static ValueTask<FlushResult> WriteAsync(
+        this PipeWriter writer,
+        StreamingComposer composer,
+        Func<Html> html,
+        HttpContext http,
+        bool includeServerTiming = false,
+        CancellationToken cancel = default)
+            => includeServerTiming
+                ? writer.WriteWithServerTimingAsync(composer, html, http, cancel)
+                : writer.WriteAsync(composer, $"{html()}", cancel);
+
     public static ValueTask<FlushResult> WriteWithServerTimingAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        HttpContext http, 
         Func<Html> html, 
+        HttpContext http, 
         CancellationToken cancel = default)
     {
         long gc1 = GC.GetAllocatedBytesForCurrentThread();
