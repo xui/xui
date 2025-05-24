@@ -1,305 +1,175 @@
-using System.Buffers;
-using System.Collections.Concurrent;
-using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
+using System.Threading.Channels;
 using Web4.Composers;
 using Web4.Transports;
 
 namespace Web4;
 
-public class Window : IDisposable
+public class Window
 {
-    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Recapture;
-    private static readonly ConcurrentDictionary<string, Window> windows = [];
+    private readonly IWeb4Transport transport;
+    private readonly WindowBuilder windowBuilder;
+    private readonly Channel<int> updateDebouncer;
+    private Snapshot? snapshot = null;
 
-    private readonly WebSocket webSocket;
-    private readonly Func<Html> html;
-    private readonly List<EventListener> listeners;
+    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
+    public bool IsInvalidated { get; private set; } = false;
+    public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
 
-    public static bool TryGet(HttpContext http, out Window? window)
+    public Window(IWeb4Transport transport, WindowBuilder windowBuilder, CancellationToken cancel)
     {
-        // TODO: Move to header approach?
-        var key = http.Connection.Id;
-        return windows.TryGetValue(key, out window);
-    }
+        this.transport = transport;
+        this.windowBuilder = windowBuilder;
 
-    public static async Task<Window> Upgrade(HttpContext http, Func<Html> html, List<EventListener> listeners)
-    {
-        var webSocket = await http.WebSockets.AcceptWebSocketAsync();
-        var window = new Window(webSocket, html, listeners);
-
-        // TODO: Move to header approach?
-        var key = http.Connection.Id;
-        windows[key] = window;
-
-        return window;
-    }
-
-    private Window(WebSocket webSocket, Func<Html> html, List<EventListener> listeners)
-    {
-        this.webSocket = webSocket;
-        this.html = html;
-        this.listeners = listeners;
-    }
-
-    public async Task ListenForEvents(CancellationToken cancel)
-    {
-        await foreach (var message in GetNextMessage(cancel))
+        // This channel has a max capacity of 1 and is configured to 
+        // drop subsequent update-requests when it is full.
+        // This allows it to support debouncing, prevent concurrent mutations, and 
+        // will not forget update-requests made within the debouncing window.
+        updateDebouncer = Channel.CreateBounded<int>(new BoundedChannelOptions(1)
         {
-            var perf = Debug.PerfCheck("ParseMethod");
-            var method = ParseMethod(message);
-            perf.Dispose();
-            if (method is null)
+            AllowSynchronousContinuations = true,
+            SingleReader = true,
+            SingleWriter = false,
+            FullMode = BoundedChannelFullMode.DropWrite
+        });
+        ReadFromUpdateDebouncer(cancel);
+    }
+
+    public void Invalidate()
+    {
+        if (IsInvalidated)
+            return;
+
+        IsInvalidated = true;
+
+        // This only does work when SnapshotStrategy is in "Recapture" mode
+        // since snapshot is never set to null while operating in "Retain" mode.
+        snapshot ??= CaptureSnapshot();
+    }
+
+    public void RequestUpdate()
+    {
+        if (!IsInvalidated)
+            return;
+
+        while (!updateDebouncer.Writer.TryWrite(0)) ;
+    }
+
+    private void ReadFromUpdateDebouncer(CancellationToken cancel)
+    {
+        Task.Run(async () =>
+        {
+            // TODO: I don't like how it awaits Task.Delay on the first run.
+
+            var lastUpdate = Stopwatch.StartNew();
+            while (!cancel.IsCancellationRequested)
             {
-                Console.WriteLine($"🔴 Could not parse the method from the message.");
-                continue;
+                // Debounce!  If the last update was less than 16 ms ago (60 fps),
+                // then wait until the "next frame" before updating again
+                // (i.e. no need to run Update() more frequently than the screen's refresh rate).
+                // There could be (potentially) millions of state changes every 16 ms
+                // and it'd be wasteful to run diffs or send mutations for each
+                // when most screens can only handle 60 Hz.
+                var timeUntilNextUpdate = UpdateInterval.Subtract(lastUpdate.Elapsed);
+                if (timeUntilNextUpdate > TimeSpan.Zero)
+                    await Task.Delay(timeUntilNextUpdate, cancel);
+                lastUpdate.Restart();
+
+                // If here, this window has a green light to do work again 
+                // so await until an update is requested.  
+                _ = await updateDebouncer.Reader.ReadAsync(cancel);
+                await Update();
             }
+        }, cancel);
+    }
 
-            perf = Debug.PerfCheck("GetKeyhole");
-            var keyhole = GetKeyhole(method);
-            perf.Dispose();
+    private async ValueTask Update()
+    {
+        if (!IsInvalidated)
+        {
+            Console.WriteLine($"Cancelling Update() this window has not been invalidated.");
+            return;
+        }
 
-            if (keyhole is EventListener listener)
-            {
-                perf = Debug.PerfCheck("CaptureSnapshot (before)");
-                var before = CaptureSnapshot();
-                perf.Dispose();
+        if (snapshot is null)
+        {
+            Console.WriteLine($"Cancelling Update() because snapshot is null (which is unexpected and should be investigated).");
+            return;
+        }
 
-                perf = Debug.PerfCheck("HandleEvent");
-                HandleEvent(listener, message);
-                perf.Dispose();
+        var before = snapshot;
+        var after = CaptureSnapshot();
 
-                perf = Debug.PerfCheck("CaptureSnapshot (after)");
-                var after = CaptureSnapshot();
-                perf.Dispose();
+        // TODO: Move your debugger to be part of the service config.
+        await Debug.Log(before, after);
 
-                // TODO: State invalidations will not live here
-                perf = Debug.PerfCheck("DiffAndSendMutations");
-                await DiffAndSendMutations(before, after, cancel);
-                perf.Dispose();
+        var diffs = before.Diff(after);
+        await transport.Mutate(diffs, before, after);
 
-                await Debug.Log(before, after);
-
+        switch (SnapshotStrategy)
+        {
+            case SnapshotStrategy.Recapture:
+                // Do not keep this snapshot buffer for later.
+                snapshot = null;
                 before.Dispose();
                 after.Dispose();
-            }
-            else
-            {
-                // TODO: Possible race condition: as a component gets unloaded
-                // messages might pass each other across the network.
-                Console.WriteLine($"🔴 Event handler not found for key:{method}");
-            }
-            Console.WriteLine();
-        }
-    }
-
-    private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage(
-        [EnumeratorCancellation] 
-        CancellationToken cancel = default)
-    {
-        const int BUFFER_LENGTH = 1024;
-        ReadOnlySequence<byte> sequence;
-        var owner = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH);
-        var buffer = owner.Memory;
-        while (true)
-        {
-            try
-            {
-                var result = await webSocket.ReceiveAsync(buffer, cancel);
-                var perf = Debug.PerfCheck("GetNextMessage");
-                if (result.MessageType == WebSocketMessageType.Close)
-                    break; // TODO: Memory leak?
-
-                sequence = new ReadOnlySequence<byte>(buffer[..result.Count]);
-
-                if (!result.EndOfMessage)
-                {
-                    var segmentStart = new WebSocketSegment(buffer[..result.Count]);
-                    var segmentEnd = segmentStart;
-                    while (!result.EndOfMessage)
-                    {
-                        buffer = MemoryPool<byte>.Shared.Rent(BUFFER_LENGTH).Memory;
-                        // TODO: ^ Memory owners in two places need to be disposed at the proper time (outide this method... so who's the owner?)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                        result = await webSocket.ReceiveAsync(buffer, cancel);
-                        if (result.MessageType == WebSocketMessageType.Close)
-                            break; // TODO: Memory leak?
-
-                        segmentEnd = segmentEnd.Append(buffer[..result.Count]);
-                        continue;
-                    }
-                    sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
-                }
-                perf.Dispose();
-            }
-            catch (WebSocketException ex)
-            {
-                Console.WriteLine(ex);
                 break;
-            }
-
-            yield return sequence;
+            case SnapshotStrategy.Retain:
+                // Keep this snapshot buffer around to use as the "before" next time.
+                snapshot = after;
+                before.Dispose();
+                break;
         }
+
+        IsInvalidated = false;
     }
 
-    private static string? ParseMethod(ReadOnlySequence<byte> sequence)
+    private Snapshot CaptureSnapshot()
     {
-        string? key = null;
+        using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
+
+        // TODO: Ack!  You forgot to move composers to structs.
+        var snapshotComposer = new SnapshotComposer();
+        snapshotComposer.Compose($"{windowBuilder.Html()}");
+        return snapshotComposer.Snapshot;
+    }
+
+    internal void HandleEvent<T>(string key, ref T @event) where T : struct, Event
+    {
         try
         {
-            var reader = new Utf8JsonReader(sequence);
+            var listener = FindListener(key);
 
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
-                {
-                    reader.Read();
-                    ReadOnlySpan<byte> value = reader.HasValueSequence
-                        ? reader.ValueSequence.ToArray()
-                        : reader.ValueSpan;
-                    key = Keymaker.GetKeyIfCached(value);
-                    break;
-                }
-            }
+            // Invoke the proper method signature
+            // - it might not pass in the event, e.g. `void OnClick()`
+            // - it may or may not be async but clearly does not await here
+            // - it disposes the event after the method completes
+            listener.Invoke(@event);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
-
-        return key;
     }
 
-    // TODO: Ack!  You forgot to move composers to structs.
-    // static FindKeyholeComposer? composer = null;
-    private EventListener? GetKeyhole(string? key)
+    private EventListener FindListener(string? key)
     {
+        using var perf = Debug.PerfCheck("FindListener"); // TODO: Remove PerfCheck
+
         switch (key)
         {
             case null:
-                return null;
+                return default;
             case string s1 when s1.StartsWith("win"):
             case string s2 when s2.StartsWith("doc"):
-                if (int.TryParse(key.AsSpan()[3..], out var index))
-                    return listeners[index];
-                else
-                    return null;
+                return int.TryParse(key.AsSpan()[3..], out var index) && index < windowBuilder.Listeners.Count
+                    ? windowBuilder.Listeners[index]
+                    : default;
             default:
+                // TODO: Ack!  You forgot to move composers to structs.
                 var composer = new FindKeyholeComposer(key);
-                // composer ??= new FindKeyholeComposer(key);
-                composer.Compose($"{html()}");
+                composer.Compose($"{windowBuilder.Html()}");
                 return composer.Listener;
-        }
-    }
-
-    // TODO: Ack!  You forgot to move composers to structs.
-    // static SnapshotComposer? snapshotComposer = null;
-    private Snapshot CaptureSnapshot()
-    {
-        // snapshotComposer ??= new SnapshotComposer();
-        var snapshotComposer = new SnapshotComposer();
-        snapshotComposer.Compose($"{html()}");
-        return snapshotComposer.Snapshot;
-    }
-    
-    private static void HandleEvent(EventListener listener, ReadOnlySequence<byte> message)
-    {
-        // TODO: Surround with "batch" concept.
-        {
-            try
-            {
-                if (listener.Action is not null)
-                {
-                    listener.Action();
-                }
-                else if (listener.ActionEvent is not null)
-                {
-                    var e = DefaultEvent.Pool.Get().Init(message);
-                    listener.ActionEvent(e);
-                    DefaultEvent.Pool.Return(e);
-                }
-                else if (listener.Func is not null)
-                {
-                    _ = listener.Func();
-                }
-                else if (listener.FuncEvent is not null)
-                {
-                    var e = DefaultEvent.Pool.Get().Init(message);
-                    _ = listener
-                        .FuncEvent(e)
-                        .ContinueWith(t => DefaultEvent.Pool.Return(e));
-                        // TODO: Allocation!  Learn how to Return(e) without capturing.
-                }
-                else
-                {
-                    Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-    }
-
-    private ValueTask DiffAndSendMutations(Snapshot before, Snapshot after, CancellationToken cancel)
-    {
-        using var writer = new JsonRpcWriter();
-        for (int i = 0; i < after.RootLength; i++)
-        {
-            ref var keyholeBefore = ref before.Buffer[i];
-            ref var keyholeAfter = ref after.Buffer[i];
-
-            switch (keyholeBefore.Type)
-            {
-                // TODO: Implement
-                case FormatType.Html:
-                case FormatType.View:
-                case FormatType.Attribute:
-                case FormatType.EventListener:
-                    continue;
-            }
-
-            if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
-            {
-                if (writer.BatchCount == 0)
-                    writer.BeginBatch();
-                
-                writer.WriteRpc("mutate", ref keyholeAfter);
-            }
-        }
-
-        if (writer.BatchCount > 0)
-        {
-            writer.EndBatch();
-            return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, cancel);
-        }
-
-        return ValueTask.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        // TODO: Implement cleanup?  Delayed cleanup?
-    }
-
-    internal class WebSocketSegment : ReadOnlySequenceSegment<byte>
-    {
-        public WebSocketSegment(ReadOnlyMemory<byte> memory)
-        {
-            Memory = memory;
-        }
-
-        public WebSocketSegment Append(ReadOnlyMemory<byte> memory)
-        {
-            var segment = new WebSocketSegment(memory)
-            {
-                RunningIndex = RunningIndex + Memory.Length
-            };
-            Next = segment;
-            return segment;
         }
     }
 }
