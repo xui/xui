@@ -65,14 +65,6 @@ public static class Web4EndpointRouteBuilderExtensions
         Func<Html> html) 
         => MapWeb4(app, pattern, html);
 
-    // TODO: Rename MapWeb4 to
-    // MapListen
-    // MapSubscribe
-    // MapSend
-    // MapPush
-    // MapObserve
-    // MapMutate
-    // ...so it feels like a new HTTP verb?
     public static WindowBuilder MapWeb4(
         this WebApplication app, 
         [StringSyntax("Route")] string pattern, 
