@@ -73,8 +73,9 @@ public static class WriterExtensions
 
         return writer.FlushAsync(cancel);
     }
+    
     public static void Compose(
-        this BaseComposer composer, 
+        this BaseComposer composer,
         [InterpolatedStringHandlerArgument("composer")] Html html)
     {
         // This strange gymnastics is required because InterpolatedStringHandlerArgument
