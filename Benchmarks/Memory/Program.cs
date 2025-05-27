@@ -14,7 +14,7 @@ public class Tests
     readonly Pipe pipe = new();
     readonly NoOpComposer noOpComposer = new(null);
     readonly HtmlComposer htmlComposer = new(null);
-    readonly XtmlComposer xtmlComposer = new(null, new(null));
+    readonly XtmlComposer xtmlComposer = new(null, new(null, null));
     readonly SnapshotComposer snapshotComposer = new();
     readonly string name = "Rylan";
     readonly int c = 3;
