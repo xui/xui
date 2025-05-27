@@ -77,50 +77,57 @@ internal record struct WebSocketEvent : Event, IDisposable
                         reader.Read();
                         if (types.TryGetValue(propertyName, out var type))
                         {
-                            if (values is null)
+                            long? value = type switch
                             {
-                                values = valueDictionaryPool.Get();
-                                values[propertyName] = type switch
-                                {
-                                    _ when type == typeof(bool) => reader.GetBoolean() ? 1 : 0,
-                                    _ when type == typeof(int) => reader.GetInt32(),
-                                    _ when type == typeof(long) => reader.GetInt64(),
-                                    _ when type == typeof(double) => BitConverter.DoubleToInt64Bits(reader.GetDouble()),
-                                    _ => 0,
-                                };
+                                _ when type == typeof(bool) => reader.GetBoolean() ? 1 : 0,
+                                _ when type == typeof(int) => reader.GetInt32(),
+                                _ when type == typeof(long) => reader.GetInt64(),
+                                _ when type == typeof(double) => BitConverter.DoubleToInt64Bits(reader.GetDouble()),
+                                _ => null,
+                            };
+                            if (value is long l)
+                            {
+                                values ??= valueDictionaryPool.Get();
+                                values[propertyName] = l;
                             }
 
-                            if (!canIgnoreRefTypes && references is null)
+                            if (!canIgnoreRefTypes)
                             {
-                                references = [];
                                 if (type == typeof(string))
                                 {
+                                    references ??= [];
                                     var str = reader.GetString();
                                     if (str is not null)
                                         references[propertyName] = str;
                                 }
                                 else if (type == typeof(ABG))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                                 else if (type == typeof(DataTransferContainer))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                                 else if (type == typeof(DOMException))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                                 else if (type == typeof(EventTarget))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                                 else if (type == typeof(TouchPoint[]))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                                 else if (type == typeof(XYZ))
                                 {
+                                    references ??= [];
                                     // TODO: Implement
                                 }
                             }
@@ -285,7 +292,6 @@ internal record struct WebSocketEvent : Event, IDisposable
                         stringBuilder.Append($"{pair.Key}: {GetLong(pair.Key)}");
                     else if (type == typeof(double))
                         stringBuilder.Append($"{pair.Key}: {GetDouble(pair.Key)}");
-                    // TODO: Implement others
                 }
             }
         }
