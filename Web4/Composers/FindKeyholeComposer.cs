@@ -7,25 +7,41 @@ using Web4.Composers;
 
 namespace Web4.Composers;
 
-public class FindKeyholeComposer(string key) : BaseComposer
+public class FindKeyholeComposer : BaseComposer
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;
     private int cursor = 0;
+
+    private string? key = null;
     private Action? action = null;
     private Action<Event>? actionEvent = null;
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    public string Key { get; init; } = key;
-
-    public EventListener Listener { get => new()
+    public EventListener ToEventListenerAndClear(string key, Func<Html> html)
     {
-        Action = action, 
-        ActionEvent = actionEvent, 
-        Func = func, 
-        FuncEvent = funcEvent,
-    };}
+        this.key = key;
+        return ToEventListenerAndClear($"{html()}");
+    }
+    private EventListener ToEventListenerAndClear([InterpolatedStringHandlerArgument("")] Html html)
+    {
+        var result = new EventListener()
+        {
+            Action = action,
+            ActionEvent = actionEvent,
+            Func = func,
+            FuncEvent = funcEvent,
+        };
+
+        key = null;
+        action = null;
+        actionEvent = null;
+        func = null;
+        funcEvent = null;
+
+        return result;
+    }
 
     protected override void Clear()
     {
@@ -57,8 +73,7 @@ public class FindKeyholeComposer(string key) : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
-        var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
-        if (key != Key)
+        if (key != Keymaker.GetKey(parentKey, cursor++, parent.Length))
         {
             return base.CompleteFormattedValue();
         }

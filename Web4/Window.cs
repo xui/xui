@@ -9,6 +9,7 @@ public class Window
 {
     private readonly IWeb4Transport transport;
     private readonly WindowBuilder windowBuilder;
+    private readonly FindKeyholeComposer findKeyholeComposer;
     private readonly Channel<int> updateDebouncer;
     private Snapshot? snapshot = null;
 
@@ -20,6 +21,7 @@ public class Window
     {
         this.transport = transport;
         this.windowBuilder = windowBuilder;
+        this.findKeyholeComposer = new();
 
         // This channel has a max capacity of 1 and is configured to 
         // drop subsequent update-requests when it is full.
@@ -166,10 +168,7 @@ public class Window
                     ? windowBuilder.Listeners[index]
                     : default;
             default:
-                // TODO: Ack!  You forgot to move composers to structs.
-                var composer = new FindKeyholeComposer(key);
-                composer.Compose($"{windowBuilder.Html()}");
-                return composer.Listener;
+                return findKeyholeComposer.ToEventListenerAndClear(key, windowBuilder.Html);
         }
     }
 }
