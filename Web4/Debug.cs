@@ -104,7 +104,7 @@ public static class Debug
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
-        for (int index = 0; index < after.Root.Length; index++)
+        for (int index = 0; index < after.RootLength; index++)
         {
             ref Keyhole keyhole = ref after.Buffer[index];
             messages.AddRange(Write(index, keyhole, before, after));
