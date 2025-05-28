@@ -17,7 +17,9 @@ public class SnapshotComposer : BaseComposer
         parentLength = 0;
         cursor = 0;
 
-        Snapshot.BufferLength = writeHead;
+        // The root keyhole uses its Integer property to denote the 
+        // full buffer length, not just the root-level Html length.
+        Snapshot.Buffer[0].Integer = writeHead;
         writeHead = -3;
 
         base.Clear();
@@ -28,7 +30,7 @@ public class SnapshotComposer : BaseComposer
         if (IsInitialAppend())
         {
             html.Key = string.Empty;
-            Snapshot.RootLength = html.Length;
+            Snapshot.Buffer[0].Length = html.Length;
         }
         else
         {

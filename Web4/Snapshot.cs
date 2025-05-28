@@ -8,11 +8,6 @@ public class Snapshot : IDisposable
     private static int highWaterMark = 2048;
     
     public Keyhole[] Buffer { get; private set; }
-    public Span<Keyhole> Root { get => Buffer.AsSpan()[..RootLength]; }
-    
-    public int BufferLength { get; internal set; } = 0;
-    public int RootLength { get; internal set; } = 0;
-    public Span<Keyhole> Keyholes { get => Buffer.AsSpan()[..BufferLength]; }
 
     public Snapshot()
     {
@@ -25,8 +20,9 @@ public class Snapshot : IDisposable
 
         var before = this;
         var after = compare;
+        var length = after.Buffer[0].Length;
 
-        for (int i = 0; i < after.RootLength; i++)
+        for (int i = 0; i < length; i++)
         {
             ref var keyholeBefore = ref before.Buffer[i];
             ref var keyholeAfter = ref after.Buffer[i];
