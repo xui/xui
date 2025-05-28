@@ -283,22 +283,22 @@ public class SnapshotComposer : BaseComposer
         return base.WriteMutableElement(ref parent, partial, format, expression);
     }
 
-    public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)
-    {
-        var start = keyhole.Integer;
-        var end = start + keyhole.Long - 1;
-        for (int i = start; i <= end; i++)
-        {
-            var k = Snapshot.Buffer[i];
-            yield return k;
+    // public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)
+    // {
+    //     var start = keyhole.Integer;
+    //     var end = start + keyhole.Long - 1;
+    //     for (int i = start; i <= end; i++)
+    //     {
+    //         var k = Snapshot.Buffer[i];
+    //         yield return k;
             
-            if (k.Type == FormatType.Html)
-            {
-                foreach (var item in EnumerateDepthFirst(k))
-                {
-                    yield return item;
-                }
-            }
-        }
-    }
+    //         if (k.Type == FormatType.Html)
+    //         {
+    //             foreach (var item in EnumerateDepthFirst(k))
+    //             {
+    //                 yield return item;
+    //             }
+    //         }
+    //     }
+    // }
 }
