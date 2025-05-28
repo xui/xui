@@ -23,7 +23,7 @@ public static class Debug
 
     public const string JS = "";
     internal static void MapOutput(RouteGroupBuilder group) { }
-    internal static async ValueTask Log(Snapshot before, Snapshot after) { }
+    internal static async ValueTask Log(Keyhole[] before, Keyhole[] after) { }
     // TODO: ^ Empty body still has perf cost.  Make this a zero-cost abstraction.
 
     #else
@@ -86,7 +86,7 @@ public static class Debug
         await http.Response.Body.FlushAsync(http.RequestAborted);
     }
 
-    internal static async ValueTask Log(Snapshot before, Snapshot after)
+    internal static async ValueTask Log(Keyhole[] before, Keyhole[] after)
     {
         var cancel = http.RequestAborted;
 
@@ -104,10 +104,10 @@ public static class Debug
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
-        var rootLength = after.Buffer[0].Length;
+        var rootLength = after[0].Length;
         for (int index = 0; index < rootLength; index++)
         {
-            ref Keyhole keyhole = ref after.Buffer[index];
+            ref Keyhole keyhole = ref after[index];
             messages.AddRange(Write(index, keyhole, before, after));
         }
 
@@ -117,7 +117,7 @@ public static class Debug
         await Log(messages);
     }
     
-    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Snapshot before, Snapshot after)
+    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Keyhole[] before, Keyhole[] after)
     {
         switch (keyhole.Type)
         {
@@ -157,8 +157,7 @@ public static class Debug
 
                 for (int i = start; i < start + length; i++)
                 {
-                    var keyholes = after.Buffer;
-                    ref var k = ref keyholes[i];
+                    ref var k = ref after[i];
                     foreach (var m in Write(i, k, before, after))
                         yield return m;
                 }

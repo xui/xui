@@ -1,6 +1,19 @@
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
+
+public static class SnapshotComposerExtension
+{
+    [ThreadStatic]
+    static SnapshotComposer? current;
+
+    public static Keyhole[] CreateSnapshot(this Func<Html> html)
+    {
+        current ??= new SnapshotComposer();
+        return current.CreateSnapshotAndClear(html);
+    }
+}
 
 public class SnapshotComposer : BaseComposer
 {
@@ -8,8 +21,21 @@ public class SnapshotComposer : BaseComposer
     private int parentLength = 0;
     private int cursor = 0;
     private int writeHead = -3; // Offset by -3 to skip the initial $"{html()}
+
+    public Keyhole[] Snapshot { get; private set; } = [];
+
+    public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
+    {
+        Snapshot = Web4.Snapshot.Rent();
+        return CreateSnapshotAndClear($"{html()}");
+    }
     
-    public Snapshot Snapshot { get; init; } = new();
+    private Keyhole[] CreateSnapshotAndClear([InterpolatedStringHandlerArgument("")] Html html)
+    {
+        var result = Snapshot;
+        Snapshot = [];
+        return result;
+    }
 
     protected override void Clear()
     {
@@ -19,7 +45,7 @@ public class SnapshotComposer : BaseComposer
 
         // The first keyhole uses its Integer property to denote the 
         // full buffer length, not just the root-level Html length.
-        Snapshot.Buffer[0].Integer = writeHead;
+        Snapshot[0].Integer = writeHead;
         writeHead = -3;
 
         base.Clear();
@@ -30,7 +56,7 @@ public class SnapshotComposer : BaseComposer
         if (IsInitialAppend())
         {
             html.Key = string.Empty;
-            Snapshot.Buffer[0].Length = html.Length;
+            Snapshot[0].Length = html.Length;
         }
         else
         {
@@ -52,7 +78,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         if (index >= 0)
         {
-            ref var keyhole = ref Snapshot.Buffer[index];
+            ref var keyhole = ref Snapshot[index];
             keyhole.String = literal;
             keyhole.Type = FormatType.StringLiteral;
         }
@@ -63,7 +89,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, string value)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.String = value;
         keyhole.Type = FormatType.String;
@@ -75,7 +101,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, bool value)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
@@ -87,7 +113,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Color = value;
         keyhole.Type = FormatType.Color;
@@ -99,7 +125,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Uri = value;
         keyhole.Type = FormatType.Uri;
@@ -109,10 +135,10 @@ public class SnapshotComposer : BaseComposer
     }
 
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
+    // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Format = format;
 
@@ -159,7 +185,7 @@ public class SnapshotComposer : BaseComposer
                 // This may require much boxing/unboxing.
                 // Currently Html.cs is a gatekeeper for these types.
                 // So this is currently technically a dead code path.
-                throw new NotSupportedException($"Type {typeof(T)} not supported");            
+                throw new NotSupportedException($"Type {typeof(T)} not supported");
         }
 
         return base.WriteMutableValue(ref parent, value, format);
@@ -168,7 +194,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -179,7 +205,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -188,10 +214,10 @@ public class SnapshotComposer : BaseComposer
     }
 
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
+    // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -202,7 +228,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -219,7 +245,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -230,7 +256,7 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
@@ -246,7 +272,7 @@ public class SnapshotComposer : BaseComposer
     private bool WriteEventListener(ref Html parent, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot.Buffer[index];
+        ref var keyhole = ref Snapshot[index];
         keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
         keyhole.Type = FormatType.EventListener;
         keyhole.String = expression;
@@ -264,7 +290,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         if (index >= 0)
         {
-            ref var keyhole = ref Snapshot.Buffer[index];
+            ref var keyhole = ref Snapshot[index];
             keyhole.Key = partial.Key;
             parentKey = parent.Key;
             parentLength = parent.Length;
@@ -284,9 +310,9 @@ public class SnapshotComposer : BaseComposer
     //     var end = start + keyhole.Long - 1;
     //     for (int i = start; i <= end; i++)
     //     {
-    //         var k = Snapshot.Buffer[i];
+    //         var k = Snapshot[i];
     //         yield return k;
-            
+
     //         if (k.Type == FormatType.Html)
     //         {
     //             foreach (var item in EnumerateDepthFirst(k))

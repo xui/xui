@@ -18,7 +18,7 @@ public class WebAssemblyTransport : IWeb4Transport, IDisposable
         throw new NotImplementedException();
     }
 
-    public ValueTask Mutate(IEnumerable<int> indexes, Snapshot before, Snapshot after)
+    public ValueTask Mutate(IEnumerable<int> indexes, Keyhole[] before, Keyhole[] after)
     {
         throw new NotImplementedException();
     }

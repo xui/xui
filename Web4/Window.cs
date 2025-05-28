@@ -11,7 +11,7 @@ public class Window
     private readonly WindowBuilder windowBuilder;
     private readonly FindKeyholeComposer findKeyholeComposer;
     private readonly Channel<int> updateDebouncer;
-    private Snapshot? snapshot = null;
+    private Keyhole[]? snapshot = null;
 
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
     public bool IsInvalidated { get; private set; } = false;
@@ -113,27 +113,24 @@ public class Window
             case SnapshotStrategy.Recapture:
                 // Do not keep this snapshot buffer for later.
                 snapshot = null;
-                before.Dispose();
-                after.Dispose();
+                before.Return();
+                after.Return();
                 break;
             case SnapshotStrategy.Retain:
                 // Keep this snapshot buffer around to use as the "before" next time.
                 snapshot = after;
-                before.Dispose();
+                before.Return();
                 break;
         }
 
         IsInvalidated = false;
     }
 
-    private Snapshot CaptureSnapshot()
+    private Keyhole[] CaptureSnapshot()
     {
         using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
 
-        // TODO: Ack!  You forgot to move composers to structs.
-        var snapshotComposer = new SnapshotComposer();
-        snapshotComposer.Compose($"{windowBuilder.Html()}");
-        return snapshotComposer.Snapshot;
+        return windowBuilder.Html.CreateSnapshot();
     }
 
     internal void HandleEvent<T>(string key, ref T @event) where T : struct, Event

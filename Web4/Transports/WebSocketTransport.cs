@@ -49,15 +49,15 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask Mutate(IEnumerable<int> indexes, Snapshot before, Snapshot after)
+    public ValueTask Mutate(IEnumerable<int> indexes, Keyhole[] before, Keyhole[] after)
     {
         using var perf = Debug.PerfCheck("Mutate"); // TODO: Remove PerfCheck
 
         using var writer = new JsonRpcWriter();
         foreach (var index in indexes)
         {
-            //ref var keyholeBefore = ref before.Buffer[index];
-            ref var keyholeAfter = ref after.Buffer[index];
+            //ref var keyholeBefore = ref before[index];
+            ref var keyholeAfter = ref after[index];
 
             if (writer.BatchCount == 0)
                 writer.BeginBatch();
