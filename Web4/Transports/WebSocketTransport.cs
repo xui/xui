@@ -135,9 +135,8 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                     sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
                 }
             }
-            catch (WebSocketException ex)
+            catch (WebSocketException)
             {
-                Console.WriteLine(ex);
                 break;
             }
 
