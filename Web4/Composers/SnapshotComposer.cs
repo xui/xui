@@ -17,7 +17,7 @@ public class SnapshotComposer : BaseComposer
         parentLength = 0;
         cursor = 0;
 
-        // The root keyhole uses its Integer property to denote the 
+        // The first keyhole uses its Integer property to denote the 
         // full buffer length, not just the root-level Html length.
         Snapshot.Buffer[0].Integer = writeHead;
         writeHead = -3;
