@@ -36,6 +36,7 @@ public class FindKeyholeComposer : BaseComposer
         this.key = key;
         return ToEventListenerAndClear($"{html()}");
     }
+    
     private EventListener ToEventListenerAndClear([InterpolatedStringHandlerArgument("")] Html html)
     {
         var result = new EventListener()
