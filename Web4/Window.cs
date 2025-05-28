@@ -168,7 +168,7 @@ public class Window
                     ? windowBuilder.Listeners[index]
                     : default;
             default:
-                return findKeyholeComposer.ToEventListenerAndClear(key, windowBuilder.Html);
+                return windowBuilder.Html.FindEventListener(key);
         }
     }
 }

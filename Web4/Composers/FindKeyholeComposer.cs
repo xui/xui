@@ -7,6 +7,18 @@ using Web4.Composers;
 
 namespace Web4.Composers;
 
+public static class FindKeyholeComposerExtension
+{
+    [ThreadStatic]
+    static FindKeyholeComposer? current;
+
+    public static EventListener FindEventListener(this Func<Html> html, string key)
+    {
+        current ??= new FindKeyholeComposer();
+        return current.ToEventListenerAndClear(key, html);
+    }
+}
+
 public class FindKeyholeComposer : BaseComposer
 {
     private string parentKey = string.Empty;
