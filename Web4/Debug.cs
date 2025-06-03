@@ -25,6 +25,7 @@ public static class Debug
     internal static void MapOutput(RouteGroupBuilder group) { }
     internal static async ValueTask Log(Keyhole[] before, Keyhole[] after) { }
     // TODO: ^ Empty body still has perf cost.  Make this a zero-cost abstraction.
+    internal static void MapDebugOutput(this RouteGroupBuilder group) { }
 
     #else
 
