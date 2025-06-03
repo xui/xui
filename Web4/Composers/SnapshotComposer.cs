@@ -19,7 +19,7 @@ public class SnapshotComposer : BaseComposer
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;
-    private int cursor = 0;
+    private int keyCursor = 0;
     private int writeHead = -3; // Offset by -3 to skip the initial $"{html()}
 
     public Keyhole[] Snapshot { get; private set; } = [];
@@ -41,7 +41,7 @@ public class SnapshotComposer : BaseComposer
     {
         parentKey = string.Empty;
         parentLength = 0;
-        cursor = 0;
+        keyCursor = 0;
 
         // The first keyhole uses its Integer property to denote the 
         // full buffer length, not just the root-level Html length.
@@ -60,12 +60,12 @@ public class SnapshotComposer : BaseComposer
         }
         else
         {
-            html.Key = Keymaker.GetKey(parentKey, cursor++, parentLength);
+            html.Key = Keymaker.GetKey(parentKey, keyCursor++, parentLength);
         }
 
         parentKey = html.Key;
         parentLength = html.Length;
-        cursor = 0;
+        keyCursor = 0;
 
         html.Index = writeHead;
         writeHead += html.Length;
@@ -90,7 +90,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.String = value;
         keyhole.Type = FormatType.String;
         keyhole.Format = null;
@@ -102,7 +102,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
         keyhole.Format = null;
@@ -114,7 +114,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Color = value;
         keyhole.Type = FormatType.Color;
         keyhole.Format = format;
@@ -126,7 +126,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Uri = value;
         keyhole.Type = FormatType.Uri;
         keyhole.Format = format;
@@ -139,7 +139,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Format = format;
 
         switch (value)
@@ -195,7 +195,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -206,7 +206,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -218,7 +218,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -229,7 +229,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -237,7 +237,7 @@ public class SnapshotComposer : BaseComposer
         _ = attrValue(null!);
         parentKey = parent.Key;
         parentLength = parent.Length;
-        cursor = parent.Cursor / 2 + 1;
+        keyCursor = parent.Cursor / 2 + 1;
 
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
@@ -246,7 +246,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -257,7 +257,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -273,7 +273,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
         keyhole.Type = FormatType.EventListener;
         keyhole.String = expression;
 
