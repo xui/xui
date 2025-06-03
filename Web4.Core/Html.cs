@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Collections;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -77,7 +78,7 @@ public ref partial struct Html
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
-        
+
         var @continue = value switch
         {
             string s => composer.WriteMutableValue(ref this, s),
@@ -114,22 +115,22 @@ public ref partial struct Html
 
     // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
     public bool AppendFormatted(
-        Func<Event, Html> attribute, 
+        Func<Event, Html> attribute,
         [CallerArgumentExpression(nameof(attribute))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
         var @continue = composer.WriteMutableAttribute(
-            ref this, 
-            GetArgName(expression), 
-            attribute, 
+            ref this,
+            GetArgName(expression),
+            attribute,
             expression);
 
         Cursor++;
         return @continue;
     }
-    
+
 
     // EVENT HANDLERS
 
@@ -159,12 +160,12 @@ public ref partial struct Html
             Func<Event, Task> eventArgAsync => composer.WriteEventListener(ref this, eventArgAsync, format, expression),
             _ => true,
         };
-        
+
         Cursor++;
         return @continue;
     }
 
-    
+
     // MUTABLE ELEMENTS
 
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
@@ -179,7 +180,7 @@ public ref partial struct Html
     }
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public bool AppendFormatted(Html html, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null) 
+    public bool AppendFormatted(Html html, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
@@ -191,9 +192,9 @@ public ref partial struct Html
 
 
     private bool AppendAmbiguous<T, Utf8>(
-        ReadOnlySpan<char> argName, 
-        Func<Event, T> func, 
-        Func<Event, Utf8>? funcUtf8 = null, 
+        ReadOnlySpan<char> argName,
+        Func<Event, T> func,
+        Func<Event, Utf8>? funcUtf8 = null,
         string? formatForAttribute = null,
         string? formatForListener = null,
         string? expression = null)
@@ -204,24 +205,24 @@ public ref partial struct Html
 
         var @continue = argName switch
         {
-            "e" or "ev" or "evnt" or "@event" or 
+            "e" or "ev" or "evnt" or "@event" or
             "(e)" or "(ev)" or "(evnt)" or "(@event)"
                 => composer.WriteEventListener(
-                        ref this, 
+                        ref this,
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
                         format: formatForListener,
                         expression: expression
                     ),
             _ when argName.StartsWith("(Event")
                 => composer.WriteEventListener(
-                        ref this, 
+                        ref this,
                         e => { func(e); }, // Convert signature.  Event handlers always return void.
                         format: formatForListener,
                         expression: expression
                     ),
             _ when argName.StartsWith("on")
                 => composer.WriteEventListener(
-                        ref this, 
+                        ref this,
                         argName,
                         e => { func(null!); }, // Convert signature.  Zero arguments here.  Event handlers always return void.
                         expression: expression
@@ -254,7 +255,7 @@ public ref partial struct Html
                         attrValue: funcUri, // returns Uri
                         expression: expression
                     ),
-            _ when funcUtf8 is not null 
+            _ when funcUtf8 is not null
                 => composer.WriteMutableAttribute(
                         ref this,
                         attrName: argName, // argName is guaranteed to never be empty
