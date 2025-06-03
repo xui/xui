@@ -23,7 +23,7 @@ public class FindKeyholeComposer : BaseComposer
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;
-    private int cursor = 0;
+    private int keyCursor = 0;
 
     private string? key = null;
     private Action? action = null;
@@ -60,7 +60,7 @@ public class FindKeyholeComposer : BaseComposer
     {
         parentKey = string.Empty;
         parentLength = 0;
-        cursor = 0;
+        keyCursor = 0;
 
         base.Clear();
     }
@@ -70,10 +70,10 @@ public class FindKeyholeComposer : BaseComposer
         // Skip the root.  It doesn't need a key.
         html.Key = IsInitialAppend()
             ? string.Empty
-            : Keymaker.GetKey(parentKey, cursor++, parentLength);
+            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
         parentKey = html.Key;
         parentLength = html.Length;
-        cursor = 0;
+        keyCursor = 0;
 
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
@@ -86,7 +86,7 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
-        if (key != Keymaker.GetKey(parentKey, cursor++, parent.Length))
+        if (key != Keymaker.GetKey(parentKey, keyCursor++, parent.Length))
         {
             return base.CompleteFormattedValue();
         }
@@ -146,7 +146,7 @@ public class FindKeyholeComposer : BaseComposer
     {
         parentKey = parent.Key;
         parentLength = parent.Length;
-        cursor = parent.Cursor / 2 + 1;
+        keyCursor = parent.Cursor / 2 + 1;
         return CompleteFormattedValue();
     }
 
@@ -156,7 +156,7 @@ public class FindKeyholeComposer : BaseComposer
 
     private FindKeyholeComposer IncrementCursor()
     {
-        cursor++;
+        keyCursor++;
         return this;
     }
 

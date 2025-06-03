@@ -11,7 +11,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 {
     private string parentKey = string.Empty;
     private int parentLength = 0;
-    private int cursor = 0;
+    private int keyCursor = 0;
     private bool isJsRegisterWritten = false;
     private bool suppressSentinels = false;
 
@@ -19,7 +19,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         parentKey = string.Empty;
         parentLength = 0;
-        cursor = 0;
+        keyCursor = 0;
         
         isJsRegisterWritten = false;
         suppressSentinels = false;
@@ -32,10 +32,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // Skip the root.  It doesn't need a key.
         html.Key = IsInitialAppend()
             ? string.Empty
-            : Keymaker.GetKey(parentKey, cursor++, parentLength);
+            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
         parentKey = html.Key;
         parentLength = html.Length;
-        cursor = 0;
+        keyCursor = 0;
         
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
@@ -73,14 +73,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
+        var key = Keymaker.GetKey(parentKey, keyCursor, parent.Length);
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
                 <script>key`{key.AsSpan()[3..]}`</script>
                 """);
         }
-        cursor++;
+        keyCursor++;
 
         return CompleteFormattedValue();
     }
@@ -96,12 +96,12 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             Encoding.UTF8.GetBytes(value, Writer);
         }
 
-        var key = Keymaker.GetKey(parentKey, cursor, parent.Length);
+        var key = Keymaker.GetKey(parentKey, keyCursor, parent.Length);
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""<script>key`{key.AsSpan()[3..]}`</script>""");
         }
-        cursor++;
+        keyCursor++;
 
         return CompleteFormattedValue();
     }
@@ -109,7 +109,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -117,7 +117,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -126,7 +126,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -142,14 +142,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         suppressSentinels = true;
 
-        var key = Keymaker.GetKey(parentKey, cursor++, parent.Length);
+        var key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
 
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
         Writer.Inject($" {key}=\"{attrName}\"");
 
         parentKey = parent.Key;
         parentLength = parent.Length;
-        cursor = parent.Cursor / 2 + 1;
+        keyCursor = parent.Cursor / 2 + 1;
 
         suppressSentinels = false;
 
@@ -159,7 +159,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -167,7 +167,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {Keymaker.GetKey(parentKey, cursor++, parent.Length)}=\"{attrName}\"");
+        Writer.Inject($" {Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}=\"{attrName}\"");
 
         return @continue;
     }
@@ -182,19 +182,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (includeEventArg && format != null)
         {
             Writer.Inject($"""
-                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event,'{format ?? ""}')"
+                "rpc('{Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}',event,'{format ?? ""}')"
                 """);
         }
         else if (includeEventArg && format == null)
         {
             Writer.Inject($"""
-                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}',event)"
+                "rpc('{Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
+                "rpc('{Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}')"
                 """);
         }
         return CompleteFormattedValue();
@@ -203,7 +203,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         Writer.Inject($"{includedAttributeName}=");
         Writer.Inject($"""
-            "rpc('{Keymaker.GetKey(parentKey, cursor++, parent.Length)}')"
+            "rpc('{Keymaker.GetKey(parentKey, keyCursor++, parent.Length)}')"
             """);
         // Note: When the attribute name is included as a part of the expression 
         // (e.g. $"<button { onclick => Onclick() }>Click me</button>")
@@ -233,7 +233,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         parentKey = parent.Key;
         parentLength = parent.Length;
-        cursor = parent.Cursor / 2 + 1;
+        keyCursor = parent.Cursor / 2 + 1;
 
         return CompleteFormattedValue();
     }
