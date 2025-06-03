@@ -296,3 +296,31 @@ public ref partial struct Html
         return string.Empty;
     }
 }
+
+public static class HtmlExtensions
+{
+    public static HtmlEnumerable<TSource> Select<TSource>(
+        this IEnumerable<TSource> source,
+        Func<TSource, Html> selector)
+            => new(source, selector);
+}
+
+public struct HtmlEnumerable<TSource>(
+    IEnumerable<TSource> source,
+    Func<TSource, Html> selector)
+        : IEnumerator<Html> 
+{
+    private IEnumerator<TSource> enumerator = null!;
+
+    public IEnumerator<Html> GetEnumerator()
+    {
+        enumerator = source.GetEnumerator();
+        return this;
+    }
+
+    readonly object IEnumerator.Current => throw new NotImplementedException();
+    public readonly Html Current => selector(enumerator.Current);
+    public readonly bool MoveNext() => enumerator.MoveNext();
+    public readonly void Reset() => enumerator.Reset();
+    public readonly void Dispose() { }
+}
