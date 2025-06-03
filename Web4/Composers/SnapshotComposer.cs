@@ -287,18 +287,30 @@ public class SnapshotComposer : BaseComposer
 
     public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
+        // By this point, the `Html partial` has already set its keyholes.
+        // They're just later in the buffer, starting at the "high water mark."
+
         var index = parent.Index + parent.Cursor;
         if (index >= 0)
         {
+            // Since the partial has been written, 
+            // return to where we left off (a little like recursion).
+            // so that we can set the partial's type, expression, key, and range.
             ref var keyhole = ref Snapshot[index];
-            keyhole.Key = partial.Key;
-            parentKey = parent.Key;
-            parentLength = parent.Length;
-            cursor = parent.Cursor / 2 + 1;
             keyhole.Type = FormatType.Html;
             keyhole.String = expression;
+
+            keyhole.Key = partial.Key;
             keyhole.Integer = partial.Index;
-            keyhole.Length = partial.Cursor;
+            keyhole.Length = partial.Length;
+
+            // Lastly, return the key's parent/cursor (again like recursion).
+            // Note: The only thing we use parentLength for is to make sure
+            // the key that gets generated has enough digits to support 
+            // all its children.
+            keyCursor = parent.Cursor / 2 + 1;
+            parentKey = parent.Key;
+            parentLength = parent.Length;
         }
 
         return base.WriteMutableElement(ref parent, partial, format, expression);
