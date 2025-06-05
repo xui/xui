@@ -18,7 +18,8 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    protected bool IsInitialAppend() => FormattedCount - formattedValuesRemaining == 0;
+    protected bool IsInitialHtml() => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
+    protected bool IsInitialAppend() => FormattedCount == formattedValuesRemaining;
     protected bool IsFinalAppend(string s) => literalLengthRemaining == s.Length;
 
     public BaseComposer Init()
@@ -28,7 +29,7 @@ public abstract class BaseComposer
         return this;
     }
 
-    public void Grow(ref Html parent, int literalLength, int formattedCount)
+    public void Grow(ref Html html, int literalLength, int formattedCount)
     {
         LiteralLength += literalLength;
         FormattedCount += formattedCount;
@@ -36,7 +37,12 @@ public abstract class BaseComposer
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
 
-        PrepareHtml(ref parent, literalLength, formattedCount);
+        PrepareHtml(ref html, literalLength, formattedCount);
+    }
+
+    public virtual void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
+    {
+
     }
 
     protected bool CompleteStringLiteral(int literalLength)
@@ -88,5 +94,4 @@ public abstract class BaseComposer
     
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent => CompleteFormattedValue();
     public virtual bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual void PrepareHtml(ref Html parent, int literalLength, int formattedCount) { }
 }
