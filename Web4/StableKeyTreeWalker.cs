@@ -1,0 +1,39 @@
+using System.Buffers;
+
+namespace Web4;
+
+internal struct StableKeyTreeWalker()
+{
+    private string parentKey = string.Empty;
+    private int parentLength = 0;
+    private int keyCursor = 0;
+    public int WriteHead { get; private set; } = 0;
+
+    public string GetNextKey()
+    {
+        return Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+    }
+
+    public void CreateNewGeneration(string key, int numberOfChildren)
+    {
+        parentKey = key;
+        keyCursor = 0;
+        parentLength = numberOfChildren;
+        WriteHead += numberOfChildren;
+    }
+
+    public void ReturnToParent(string key, int cursor, int numberOfChildren)
+    {
+        parentKey = key;
+        keyCursor = (cursor >> 1) + 1;
+        parentLength = numberOfChildren;
+    }
+
+    public void Reset()
+    {
+        parentKey = string.Empty;
+        keyCursor = 0;
+        parentLength = 0;
+        WriteHead = 0;
+    }
+}
