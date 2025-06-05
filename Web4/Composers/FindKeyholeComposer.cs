@@ -129,7 +129,7 @@ public class FindKeyholeComposer : BaseComposer
         // return false;
     }
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         parentKey = parent.Key;
         parentLength = parent.Length;

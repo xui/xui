@@ -201,7 +201,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
     {
-        return WriteMutableElement(ref parent, component.Render(), format, expression);
+        return OnPartialEnds(ref parent, component.Render(), format, expression);
     }
     
     public override void OnPartialBegins(ref Html html)
@@ -217,7 +217,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.OnPartialBegins(ref html);
     }
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
         // written to the stream due to the compiler's lowered code.

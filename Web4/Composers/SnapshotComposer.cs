@@ -253,7 +253,7 @@ public class SnapshotComposer : BaseComposer
 
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
     {
-        return WriteMutableElement(ref parent, component.Render(), format, expression);
+        return OnPartialEnds(ref parent, component.Render(), format, expression);
     }
 
     public override void OnPartialBegins(ref Html html)
@@ -281,7 +281,7 @@ public class SnapshotComposer : BaseComposer
         base.OnPartialBegins(ref html);
     }
 
-    public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
@@ -302,7 +302,7 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
 
-        return base.WriteMutableElement(ref parent, partial, format, expression);
+        return base.OnPartialEnds(ref parent, partial, format, expression);
     }
 
     public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
