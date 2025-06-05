@@ -66,6 +66,9 @@ public abstract class BaseComposer
         current = null;
     }
 
+    public virtual void OnPartialBegins(ref Html parent) { }
+    public virtual bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
+
     public virtual bool WriteImmutableMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);
 
     public virtual bool WriteMutableValue(ref Html parent, string value) => CompleteFormattedValue();
@@ -88,6 +91,4 @@ public abstract class BaseComposer
     public virtual bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => CompleteFormattedValue();
     
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent => CompleteFormattedValue();
-    public virtual void OnPartialBegins(ref Html parent) { }
-    public virtual bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
 }

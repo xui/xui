@@ -185,7 +185,7 @@ public ref partial struct Html
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableElement(ref this, html, format, expression);
+        var @continue = composer.OnPartialEnds(ref this, html, format, expression);
         Cursor++;
         return @continue;
     }

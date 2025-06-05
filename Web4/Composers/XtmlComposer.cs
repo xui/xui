@@ -27,6 +27,40 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Clear();
     }
 
+    public override void OnPartialBegins(ref Html html)
+    {
+        // Skip the root.  It doesn't need a key.
+        html.Key = IsBeforeAppend()
+            ? string.Empty
+            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+        parentKey = html.Key;
+        parentLength = html.Length;
+        keyCursor = 0;
+
+        base.OnPartialBegins(ref html);
+    }
+
+    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    {
+        // Instantiating an Html object causes its contents to be 
+        // written to the stream due to the compiler's lowered code.
+        // (see: InterpolatedStringHandler 
+        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
+        
+        if (!suppressSentinels)
+        {
+            Writer.Inject($"""
+                <script>key`{partial.Key.AsSpan()[3..]}`</script>
+                """);
+        }
+
+        parentKey = parent.Key;
+        parentLength = parent.Length;
+        keyCursor = parent.Cursor / 2 + 1;
+
+        return CompleteFormattedValue();
+    }
+
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
@@ -204,40 +238,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return OnPartialEnds(ref parent, component.Render(), format, expression);
     }
     
-    public override void OnPartialBegins(ref Html html)
-    {
-        // Skip the root.  It doesn't need a key.
-        html.Key = IsBeforeAppend()
-            ? string.Empty
-            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
-        parentKey = html.Key;
-        parentLength = html.Length;
-        keyCursor = 0;
-
-        base.OnPartialBegins(ref html);
-    }
-
-    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
-    {
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler 
-        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
-        
-        if (!suppressSentinels)
-        {
-            Writer.Inject($"""
-                <script>key`{partial.Key.AsSpan()[3..]}`</script>
-                """);
-        }
-
-        parentKey = parent.Key;
-        parentLength = parent.Length;
-        keyCursor = parent.Cursor / 2 + 1;
-
-        return CompleteFormattedValue();
-    }
-
     private bool EnsureJsRegisterIsWritten(string key)
     {
         if (!isJsRegisterWritten)

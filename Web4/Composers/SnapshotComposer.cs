@@ -45,6 +45,55 @@ public class SnapshotComposer : BaseComposer
         base.Clear();
     }
 
+    public override void OnPartialBegins(ref Html html)
+    {
+        if (IsInitialHtml())
+        {
+            html.Index = -1;
+        }
+        else if (IsBeforeAppend())
+        {
+            html.Key = string.Empty;
+            html.Index = 0;
+            Snapshot[0].Length = html.Length;
+            keyGenerator.Reset();
+            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
+        }
+        else
+        {
+            var key = keyGenerator.GetNextKey();
+            html.Key = key;
+            html.Index = keyGenerator.WriteHead;
+            keyGenerator.CreateNewGeneration(key, html.Length);
+        }
+
+        base.OnPartialBegins(ref html);
+    }
+
+    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    {
+        // By this point, the `Html partial` has already set its keyholes.
+        // They're just later in the buffer, starting at the "high water mark."
+
+        if (parent.Index >= 0)
+        {
+            // Since the partial has been written, 
+            // return to where we left off (a little like recursion).
+            // so that we can set the partial's type, expression, key, and range.
+            var index = parent.Index + parent.Cursor;
+            ref var keyhole = ref Snapshot[index];
+            keyhole.Key = partial.Key;
+            keyhole.Type = FormatType.Html;
+            keyhole.String = expression;
+            keyhole.Integer = partial.Index;
+            keyhole.Length = partial.Length;
+
+            keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        }
+
+        return base.OnPartialEnds(ref parent, partial, format, expression);
+    }
+
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         if (parent.Index >= 0)
@@ -254,55 +303,6 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
     {
         return OnPartialEnds(ref parent, component.Render(), format, expression);
-    }
-
-    public override void OnPartialBegins(ref Html html)
-    {
-        if (IsInitialHtml())
-        {
-            html.Index = -1;
-        }
-        else if (IsBeforeAppend())
-        {
-            html.Key = string.Empty;
-            html.Index = 0;
-            Snapshot[0].Length = html.Length;
-            keyGenerator.Reset();
-            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
-        }
-        else
-        {
-            var key = keyGenerator.GetNextKey();
-            html.Key = key;
-            html.Index = keyGenerator.WriteHead;
-            keyGenerator.CreateNewGeneration(key, html.Length);
-        }
-
-        base.OnPartialBegins(ref html);
-    }
-
-    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
-    {
-        // By this point, the `Html partial` has already set its keyholes.
-        // They're just later in the buffer, starting at the "high water mark."
-
-        if (parent.Index >= 0)
-        {
-            // Since the partial has been written, 
-            // return to where we left off (a little like recursion).
-            // so that we can set the partial's type, expression, key, and range.
-            var index = parent.Index + parent.Cursor;
-            ref var keyhole = ref Snapshot[index];
-            keyhole.Key = partial.Key;
-            keyhole.Type = FormatType.Html;
-            keyhole.String = expression;
-            keyhole.Integer = partial.Index;
-            keyhole.Length = partial.Length;
-
-            keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-        }
-
-        return base.OnPartialEnds(ref parent, partial, format, expression);
     }
 
     public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
