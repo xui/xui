@@ -65,7 +65,7 @@ public class FindKeyholeComposer : BaseComposer
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html html)
     {
         // Skip the root.  It doesn't need a key.
         html.Key = IsBeforeAppend()
@@ -75,7 +75,7 @@ public class FindKeyholeComposer : BaseComposer
         parentLength = html.Length;
         keyCursor = 0;
 
-        base.PrepareHtml(ref html, literalLength, formattedCount);
+        base.PrepareHtml(ref html);
     }
 
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);

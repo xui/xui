@@ -45,7 +45,7 @@ public class SnapshotComposer : BaseComposer
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html html)
     {
         if (IsInitialHtml())
         {
@@ -67,7 +67,7 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.PrepareHtml(ref html, literalLength, formattedCount);
+        base.PrepareHtml(ref html);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)

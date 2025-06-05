@@ -27,7 +27,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
+    public override void PrepareHtml(ref Html html)
     {
         // Skip the root.  It doesn't need a key.
         html.Key = IsBeforeAppend()
@@ -37,7 +37,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         parentLength = html.Length;
         keyCursor = 0;
 
-        base.PrepareHtml(ref html, literalLength, formattedCount);
+        base.PrepareHtml(ref html);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)

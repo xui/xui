@@ -37,10 +37,10 @@ public abstract class BaseComposer
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
 
-        PrepareHtml(ref html, literalLength, formattedCount);
+        PrepareHtml(ref html);
     }
 
-    public virtual void PrepareHtml(ref Html parent, int literalLength, int formattedCount)
+    public virtual void PrepareHtml(ref Html parent)
     {
 
     }
