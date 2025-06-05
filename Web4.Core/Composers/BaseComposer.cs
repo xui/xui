@@ -37,12 +37,7 @@ public abstract class BaseComposer
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
 
-        PrepareHtml(ref html);
-    }
-
-    public virtual void PrepareHtml(ref Html parent)
-    {
-
+        OnPartialBegins(ref html);
     }
 
     protected bool CompleteStringLiteral(int literalLength)
@@ -93,5 +88,6 @@ public abstract class BaseComposer
     public virtual bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => CompleteFormattedValue();
     
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent => CompleteFormattedValue();
+    public virtual void OnPartialBegins(ref Html parent) { }
     public virtual bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
 }

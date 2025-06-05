@@ -45,31 +45,6 @@ public class SnapshotComposer : BaseComposer
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html)
-    {
-        if (IsInitialHtml())
-        {
-            html.Index = -1;
-        }
-        else if (IsBeforeAppend())
-        {
-            html.Key = string.Empty;
-            html.Index = 0;
-            Snapshot[0].Length = html.Length;
-            keyGenerator.Reset();
-            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
-        }
-        else
-        {
-            var key = keyGenerator.GetNextKey();
-            html.Key = key;
-            html.Index = keyGenerator.WriteHead;
-            keyGenerator.CreateNewGeneration(key, html.Length);
-        }
-
-        base.PrepareHtml(ref html);
-    }
-
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         if (parent.Index >= 0)
@@ -279,6 +254,31 @@ public class SnapshotComposer : BaseComposer
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
     {
         return WriteMutableElement(ref parent, component.Render(), format, expression);
+    }
+
+    public override void OnPartialBegins(ref Html html)
+    {
+        if (IsInitialHtml())
+        {
+            html.Index = -1;
+        }
+        else if (IsBeforeAppend())
+        {
+            html.Key = string.Empty;
+            html.Index = 0;
+            Snapshot[0].Length = html.Length;
+            keyGenerator.Reset();
+            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
+        }
+        else
+        {
+            var key = keyGenerator.GetNextKey();
+            html.Key = key;
+            html.Index = keyGenerator.WriteHead;
+            keyGenerator.CreateNewGeneration(key, html.Length);
+        }
+
+        base.OnPartialBegins(ref html);
     }
 
     public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)

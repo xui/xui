@@ -65,19 +65,6 @@ public class FindKeyholeComposer : BaseComposer
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html)
-    {
-        // Skip the root.  It doesn't need a key.
-        html.Key = IsBeforeAppend()
-            ? string.Empty
-            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
-        parentKey = html.Key;
-        parentLength = html.Length;
-        keyCursor = 0;
-
-        base.PrepareHtml(ref html);
-    }
-
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
@@ -180,6 +167,19 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
+
+    public override void OnPartialBegins(ref Html html)
+    {
+        // Skip the root.  It doesn't need a key.
+        html.Key = IsBeforeAppend()
+            ? string.Empty
+            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+        parentKey = html.Key;
+        parentLength = html.Length;
+        keyCursor = 0;
+
+        base.OnPartialBegins(ref html);
+    }
 
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
 }

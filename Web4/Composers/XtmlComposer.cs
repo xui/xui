@@ -27,19 +27,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Clear();
     }
 
-    public override void PrepareHtml(ref Html html)
-    {
-        // Skip the root.  It doesn't need a key.
-        html.Key = IsBeforeAppend()
-            ? string.Empty
-            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
-        parentKey = html.Key;
-        parentLength = html.Length;
-        keyCursor = 0;
-
-        base.PrepareHtml(ref html);
-    }
-
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
@@ -217,6 +204,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return WriteMutableElement(ref parent, component.Render(), format, expression);
     }
     
+    public override void OnPartialBegins(ref Html html)
+    {
+        // Skip the root.  It doesn't need a key.
+        html.Key = IsBeforeAppend()
+            ? string.Empty
+            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+        parentKey = html.Key;
+        parentLength = html.Length;
+        keyCursor = 0;
+
+        base.OnPartialBegins(ref html);
+    }
+
     public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // Instantiating an Html object causes its contents to be 
