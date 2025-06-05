@@ -3,18 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public static class SnapshotComposerExtension
-{
-    [ThreadStatic]
-    static SnapshotComposer? current;
-
-    public static Keyhole[] CreateSnapshot(this Func<Html> html)
-    {
-        current ??= new SnapshotComposer();
-        return current.CreateSnapshotAndClear(html);
-    }
-}
-
 public class SnapshotComposer : BaseComposer
 {
     private StableKeyTreeWalker keyGenerator = new();
@@ -26,7 +14,7 @@ public class SnapshotComposer : BaseComposer
         Snapshot = Web4.Snapshot.Rent();
         return CreateSnapshotAndClear($"{html()}");
     }
-    
+
     private Keyhole[] CreateSnapshotAndClear([InterpolatedStringHandlerArgument("")] Html html)
     {
         var result = Snapshot;
@@ -336,4 +324,16 @@ public class SnapshotComposer : BaseComposer
     //         }
     //     }
     // }
+}
+
+public static class SnapshotComposerExtension
+{
+    [ThreadStatic]
+    static SnapshotComposer? current;
+
+    public static Keyhole[] CreateSnapshot(this Func<Html> html)
+    {
+        current ??= new SnapshotComposer();
+        return current.CreateSnapshotAndClear(html);
+    }
 }

@@ -7,18 +7,6 @@ using Web4.Composers;
 
 namespace Web4.Composers;
 
-public static class FindKeyholeComposerExtension
-{
-    [ThreadStatic]
-    static FindKeyholeComposer? current;
-
-    public static EventListener FindEventListener(this Func<Html> html, string key)
-    {
-        current ??= new FindKeyholeComposer();
-        return current.ToEventListenerAndClear(key, html);
-    }
-}
-
 public class FindKeyholeComposer : BaseComposer
 {
     private string parentKey = string.Empty;
@@ -36,7 +24,7 @@ public class FindKeyholeComposer : BaseComposer
         this.key = key;
         return ToEventListenerAndClear($"{html()}");
     }
-    
+
     private EventListener ToEventListenerAndClear([InterpolatedStringHandlerArgument("")] Html html)
     {
         var result = new EventListener()
@@ -117,7 +105,8 @@ public class FindKeyholeComposer : BaseComposer
             case Func<Event, Task> fe:
                 funcEvent = fe;
                 break;
-        };
+        }
+        ;
 
         // TODO: Shortcircuiting seems to leak memory.  But where?  For now, keep the full flow.
         // Test this by perf-surrounding `var keyhole = window.GetKeyhole(key);` in HttpXContext.ListenForEvents.
@@ -160,7 +149,7 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => IncrementCursor().CompleteFormattedValue();
-    
+
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
     public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
@@ -182,4 +171,16 @@ public class FindKeyholeComposer : BaseComposer
     }
 
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
+}
+
+public static class FindKeyholeComposerExtension
+{
+    [ThreadStatic]
+    static FindKeyholeComposer? current;
+
+    public static EventListener FindEventListener(this Func<Html> html, string key)
+    {
+        current ??= new FindKeyholeComposer();
+        return current.ToEventListenerAndClear(key, html);
+    }
 }
