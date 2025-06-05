@@ -67,7 +67,12 @@ public abstract class BaseComposer
     }
 
     public virtual void OnPartialBegins(ref Html parent) { }
-    public virtual bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    {
+        // When the compiler instantiates the Html partial (above), this causes its contents to be written to the stream due to the compiler's lowered code.
+        // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
+        return CompleteFormattedValue();
+    }
 
     public virtual bool WriteImmutableMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);
 

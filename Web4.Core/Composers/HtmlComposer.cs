@@ -182,14 +182,4 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     {
         return base.OnPartialEnds(ref parent, component.Render(), format, expression);
     }
-
-    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
-    {
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler 
-        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
-        
-        return base.OnPartialEnds(ref parent, partial, format, expression);
-    }
 }
