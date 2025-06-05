@@ -68,7 +68,7 @@ public class FindKeyholeComposer : BaseComposer
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
         // Skip the root.  It doesn't need a key.
-        html.Key = IsInitialAppend()
+        html.Key = IsBeforeAppend()
             ? string.Empty
             : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
         parentKey = html.Key;
@@ -143,6 +143,14 @@ public class FindKeyholeComposer : BaseComposer
     }
 
     public override bool WriteMutableElement(ref Html parent, Html partial, string? format = null, string? expression = null)
+    {
+        parentKey = parent.Key;
+        parentLength = parent.Length;
+        keyCursor = parent.Cursor / 2 + 1;
+        return CompleteFormattedValue();
+    }
+
+    public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
     {
         parentKey = parent.Key;
         parentLength = parent.Length;

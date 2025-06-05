@@ -19,7 +19,7 @@ public abstract class BaseComposer
     private int formattedValuesRemaining = 0;
 
     protected bool IsInitialHtml() => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
-    protected bool IsInitialAppend() => FormattedCount == formattedValuesRemaining;
+    protected bool IsBeforeAppend() => FormattedCount == formattedValuesRemaining;
     protected bool IsFinalAppend(string s) => literalLengthRemaining == s.Length;
 
     public BaseComposer Init()

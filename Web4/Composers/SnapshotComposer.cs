@@ -51,7 +51,7 @@ public class SnapshotComposer : BaseComposer
         {
             html.Index = -1;
         }
-        else if (IsInitialAppend())
+        else if (IsBeforeAppend())
         {
             html.Key = string.Empty;
             html.Index = 0;
@@ -303,6 +303,19 @@ public class SnapshotComposer : BaseComposer
         }
 
         return base.WriteMutableElement(ref parent, partial, format, expression);
+    }
+
+    public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref Snapshot[index];
+        keyhole.Key = keyGenerator.GetNextKey();
+        keyhole.Type = FormatType.Enumerable;
+        keyhole.String = expression;
+
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+
+        return base.WriteMutableElement(ref parent, partials, format, expression);
     }
 
     // public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)

@@ -30,13 +30,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
         // Skip the root.  It doesn't need a key.
-        html.Key = IsInitialAppend()
+        html.Key = IsBeforeAppend()
             ? string.Empty
             : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
         parentKey = html.Key;
         parentLength = html.Length;
         keyCursor = 0;
-        
+
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
