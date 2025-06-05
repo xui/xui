@@ -17,10 +17,7 @@ public static class SnapshotComposerExtension
 
 public class SnapshotComposer : BaseComposer
 {
-    private string parentKey = string.Empty;
-    private int parentLength = 0;
-    private int keyCursor = 0;
-    private int writeHead = -3; // Offset by -3 to skip the initial $"{html()}
+    private StableKeyTreeWalker keyGenerator = new();
 
     public Keyhole[] Snapshot { get; private set; } = [];
 
@@ -39,45 +36,45 @@ public class SnapshotComposer : BaseComposer
 
     protected override void Clear()
     {
-        parentKey = string.Empty;
-        parentLength = 0;
-        keyCursor = 0;
+        keyGenerator.Reset();
 
         // The first keyhole uses its Integer property to denote the 
         // full buffer length, not just the root-level Html length.
-        Snapshot[0].Integer = writeHead;
-        writeHead = -3;
+        Snapshot[0].Integer = keyGenerator.WriteHead;
 
         base.Clear();
     }
 
     public override void PrepareHtml(ref Html html, int literalLength, int formattedCount)
     {
-        if (IsInitialAppend())
+        if (IsInitialHtml())
+        {
+            html.Index = -1;
+        }
+        else if (IsInitialAppend())
         {
             html.Key = string.Empty;
+            html.Index = 0;
             Snapshot[0].Length = html.Length;
+            keyGenerator.Reset();
+            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
         else
         {
-            html.Key = Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+            var key = keyGenerator.GetNextKey();
+            html.Key = key;
+            html.Index = keyGenerator.WriteHead;
+            keyGenerator.CreateNewGeneration(key, html.Length);
         }
-
-        parentKey = html.Key;
-        parentLength = html.Length;
-        keyCursor = 0;
-
-        html.Index = writeHead;
-        writeHead += html.Length;
 
         base.PrepareHtml(ref html, literalLength, formattedCount);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        var index = parent.Index + parent.Cursor;
-        if (index >= 0)
+        if (parent.Index >= 0)
         {
+            var index = parent.Index + parent.Cursor;
             ref var keyhole = ref Snapshot[index];
             keyhole.String = literal;
             keyhole.Type = FormatType.StringLiteral;
@@ -90,7 +87,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.String = value;
         keyhole.Type = FormatType.String;
         keyhole.Format = null;
@@ -102,7 +99,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
         keyhole.Format = null;
@@ -114,7 +111,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Color = value;
         keyhole.Type = FormatType.Color;
         keyhole.Format = format;
@@ -126,7 +123,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Uri = value;
         keyhole.Type = FormatType.Uri;
         keyhole.Format = format;
@@ -139,7 +136,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Format = format;
 
         switch (value)
@@ -195,7 +192,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -206,7 +203,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -218,7 +215,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -229,15 +226,14 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
         // Must trigger Html to append its splits.  Then reset the parent.
         _ = attrValue(null!);
-        parentKey = parent.Key;
-        parentLength = parent.Length;
-        keyCursor = parent.Cursor / 2 + 1;
+
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
 
         return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
     }
@@ -246,7 +242,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -257,7 +253,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.Attribute;
         keyhole.String = expression;
 
@@ -273,7 +269,7 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = Keymaker.GetKey(parentKey, keyCursor++, parent.Length);
+        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = FormatType.EventListener;
         keyhole.String = expression;
 
@@ -290,27 +286,20 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
-        var index = parent.Index + parent.Cursor;
-        if (index >= 0)
+        if (parent.Index >= 0)
         {
             // Since the partial has been written, 
             // return to where we left off (a little like recursion).
             // so that we can set the partial's type, expression, key, and range.
+            var index = parent.Index + parent.Cursor;
             ref var keyhole = ref Snapshot[index];
+            keyhole.Key = partial.Key;
             keyhole.Type = FormatType.Html;
             keyhole.String = expression;
-
-            keyhole.Key = partial.Key;
             keyhole.Integer = partial.Index;
             keyhole.Length = partial.Length;
 
-            // Lastly, return the key's parent/cursor (again like recursion).
-            // Note: The only thing we use parentLength for is to make sure
-            // the key that gets generated has enough digits to support 
-            // all its children.
-            keyCursor = parent.Cursor / 2 + 1;
-            parentKey = parent.Key;
-            parentLength = parent.Length;
+            keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
 
         return base.WriteMutableElement(ref parent, partial, format, expression);
