@@ -27,7 +27,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Clear();
     }
 
-    public override void OnPartialBegins(ref Html html)
+    public override void OnHtmlPartialBegins(ref Html html)
     {
         // Skip the root.  It doesn't need a key.
         html.Key = IsBeforeAppend()
@@ -38,7 +38,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         keyCursor = 0;
     }
 
-    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         if (!suppressSentinels)
         {

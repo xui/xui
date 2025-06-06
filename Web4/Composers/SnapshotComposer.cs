@@ -33,7 +33,7 @@ public class SnapshotComposer : BaseComposer
         base.Clear();
     }
 
-    public override void OnPartialBegins(ref Html html)
+    public override void OnHtmlPartialBegins(ref Html html)
     {
         if (IsInitialHtml())
         {
@@ -55,10 +55,10 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.OnPartialBegins(ref html);
+        base.OnHtmlPartialBegins(ref html);
     }
 
-    public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
@@ -79,7 +79,7 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
 
-        return base.OnPartialEnds(ref parent, partial, format, expression);
+        return base.OnHtmlPartialEnds(ref parent, partial, format, expression);
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)

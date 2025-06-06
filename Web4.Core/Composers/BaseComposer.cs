@@ -37,7 +37,7 @@ public abstract class BaseComposer
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
 
-        OnPartialBegins(ref html);
+        OnHtmlPartialBegins(ref html);
     }
 
     protected bool CompleteStringLiteral(int literalLength)
@@ -66,8 +66,8 @@ public abstract class BaseComposer
         current = null;
     }
 
-    public virtual void OnPartialBegins(ref Html parent) { }
-    public virtual bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public virtual void OnHtmlPartialBegins(ref Html parent) { }
+    public virtual bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
         // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
         // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
@@ -96,6 +96,6 @@ public abstract class BaseComposer
     public virtual bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => CompleteFormattedValue();
     
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent
-        => OnPartialEnds(ref parent, component.Render(), format, expression);
         
+        => OnHtmlPartialEnds(ref parent, component.Render(), format, expression);
 }
