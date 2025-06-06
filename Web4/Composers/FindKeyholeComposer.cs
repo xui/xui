@@ -131,7 +131,7 @@ public class FindKeyholeComposer : BaseComposer
         parentKey = parent.Key;
         parentLength = parent.Length;
         keyCursor = parent.Cursor / 2 + 1;
-        return CompleteFormattedValue();
+        return base.WriteMutableElement(ref parent, partials, format, expression);
     }
 
 

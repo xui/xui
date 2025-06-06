@@ -233,11 +233,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
-    {
-        return OnPartialEnds(ref parent, component.Render(), format, expression);
-    }
-    
     private bool EnsureJsRegisterIsWritten(string key)
     {
         if (!isJsRegisterWritten)

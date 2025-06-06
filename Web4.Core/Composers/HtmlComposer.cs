@@ -177,9 +177,4 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         Encoding.UTF8.GetBytes("=\"\"", Writer);
         return CompleteFormattedValue();
     }
-
-    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
-    {
-        return base.OnPartialEnds(ref parent, component.Render(), format, expression);
-    }
 }

@@ -288,11 +288,6 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null)
-    {
-        return OnPartialEnds(ref parent, component.Render(), format, expression);
-    }
-
     public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
