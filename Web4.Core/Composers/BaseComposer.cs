@@ -69,7 +69,7 @@ public abstract class BaseComposer
     public virtual void OnPartialBegins(ref Html parent) { }
     public virtual bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
-        // When the compiler instantiates the Html partial (above), this causes its contents to be written to the stream due to the compiler's lowered code.
+        // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
         // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         return CompleteFormattedValue();
     }
