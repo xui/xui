@@ -9,10 +9,8 @@ internal struct StableKeyTreeWalker()
     private int keyCursor = 0;
     public int WriteHead { get; private set; } = 0;
 
-    public string GetNextKey()
-    {
-        return Keymaker.GetKey(parentKey, keyCursor++, parentLength);
-    }
+    public void MoveNextKey() => keyCursor++;
+    public string GetNextKey() => Keymaker.GetKey(parentKey, keyCursor++, parentLength);
 
     public void CreateNewGeneration(string key, int numberOfChildren)
     {

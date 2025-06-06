@@ -9,10 +9,7 @@ namespace Web4.Composers;
 
 public class FindKeyholeComposer : BaseComposer
 {
-    private string parentKey = string.Empty;
-    private int parentLength = 0;
-    private int keyCursor = 0;
-
+    private StableKeyTreeWalker keyGenerator = new();
     private string? key = null;
     private Action? action = null;
     private Action<Event>? actionEvent = null;
@@ -46,31 +43,31 @@ public class FindKeyholeComposer : BaseComposer
 
     protected override void Clear()
     {
-        parentKey = string.Empty;
-        parentLength = 0;
-        keyCursor = 0;
-
+        keyGenerator.Reset();
         base.Clear();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        // Skip the root.  It doesn't need a key.
-        html.Key = IsBeforeAppend()
-            ? string.Empty
-            : Keymaker.GetKey(parentKey, keyCursor++, parentLength);
-        parentKey = html.Key;
-        parentLength = html.Length;
-        keyCursor = 0;
+        if (IsBeforeAppend())
+        {
+            html.Key = string.Empty;
+            keyGenerator.Reset();
+            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
+        }
+        else
+        {
+            var key = keyGenerator.GetNextKey();
+            html.Key = key;
+            keyGenerator.CreateNewGeneration(key, html.Length);
+        }
 
         base.OnHtmlPartialBegins(ref html);
     }
 
     public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
-        parentKey = parent.Key;
-        parentLength = parent.Length;
-        keyCursor = parent.Cursor / 2 + 1;
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
     }
 
@@ -82,7 +79,7 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
-        if (key != Keymaker.GetKey(parentKey, keyCursor++, parent.Length))
+        if (key != keyGenerator.GetNextKey())
         {
             return base.CompleteFormattedValue();
         }
@@ -139,38 +136,31 @@ public class FindKeyholeComposer : BaseComposer
         // return false;
     }
 
+    public override bool WriteMutableValue(ref Html parent, string value) => MoveNextKeyAndComplete();
+    public override bool WriteMutableValue(ref Html parent, bool value) => MoveNextKeyAndComplete();
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
+
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null) => MoveNextKeyAndComplete();
+    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => MoveNextKeyAndComplete();
+
+    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => MoveNextKeyAndComplete();
     public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
     {
-        parentKey = parent.Key;
-        parentLength = parent.Length;
-        keyCursor = parent.Cursor / 2 + 1;
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return base.WriteMutableElement(ref parent, partials, format, expression);
     }
 
-
-
-    // TODO: TEMPORARY!!!!!!!  Perhaps the cursor should always move itself at the base level?
-
-    private FindKeyholeComposer IncrementCursor()
+    private bool MoveNextKeyAndComplete()
     {
-        keyCursor++;
-        return this;
+        keyGenerator.MoveNextKey();
+        return base.CompleteFormattedValue();
     }
-
-    public override bool WriteMutableValue(ref Html parent, string value) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableValue(ref Html parent, bool value) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => IncrementCursor().CompleteFormattedValue();
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => IncrementCursor().CompleteFormattedValue();
-
-    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => IncrementCursor().CompleteFormattedValue();
 }
 
 public static class FindKeyholeComposerExtension
