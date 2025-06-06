@@ -36,8 +36,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         parentKey = html.Key;
         parentLength = html.Length;
         keyCursor = 0;
-
-        base.OnPartialBegins(ref html);
     }
 
     public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
