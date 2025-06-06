@@ -119,9 +119,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
 
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler)
         attrValue(null!);
 
         Encoding.UTF8.GetBytes("\"", Writer);

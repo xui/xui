@@ -40,11 +40,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
-        // Instantiating an Html object causes its contents to be 
-        // written to the stream due to the compiler's lowered code.
-        // (see: InterpolatedStringHandler 
-        // https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
-        
         if (!suppressSentinels)
         {
             Writer.Inject($"""
