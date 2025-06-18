@@ -54,7 +54,8 @@ public struct Keyhole
             FormatType.Attribute or
             FormatType.EventListener or
             FormatType.View or
-            FormatType.Html
+            FormatType.Html or
+            FormatType.Enumerable
                 => false,
             _ => throw new NotImplementedException()
         };

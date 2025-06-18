@@ -35,6 +35,7 @@ public static class Snapshot
                 case FormatType.View:
                 case FormatType.Attribute:
                 case FormatType.EventListener:
+                case FormatType.Enumerable:
                     continue;
             }
 

@@ -20,4 +20,5 @@ public enum FormatType
     EventListener,
     View,
     Html,
+    Enumerable,
 }

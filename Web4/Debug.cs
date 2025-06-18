@@ -145,6 +145,7 @@ public static class Debug
                 yield return new("console.groupEnd", []);
                 break;
             case FormatType.Html:
+            case FormatType.Enumerable:
                 int start = keyhole.Integer;
                 int length = (int)keyhole.Length;
                 if (keyhole.Key != string.Empty)
