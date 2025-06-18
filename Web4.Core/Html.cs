@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Collections;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -295,32 +294,28 @@ public ref partial struct Html
         }
         return string.Empty;
     }
-}
 
-public static class HtmlExtensions
-{
-    public static HtmlEnumerable<TSource> Select<TSource>(
-        this IEnumerable<TSource> source,
-        Func<TSource, Html> selector)
-            => new(source, selector);
-}
-
-public struct HtmlEnumerable<TSource>(
-    IEnumerable<TSource> source,
-    Func<TSource, Html> selector)
-        : IEnumerator<Html> 
-{
-    private IEnumerator<TSource> enumerator = null!;
-
-    public IEnumerator<Html> GetEnumerator()
+    public struct Enumerable<T>(IEnumerable<T> source, Func<T, Html> selector)
     {
-        enumerator = source.GetEnumerator();
-        return this;
+        public readonly int Count => source.Count();
+        public readonly Enumerator<T> GetEnumerator() => new(source, selector);
     }
 
-    readonly object IEnumerator.Current => throw new NotImplementedException();
-    public readonly Html Current => selector(enumerator.Current);
-    public readonly bool MoveNext() => enumerator.MoveNext();
-    public readonly void Reset() => enumerator.Reset();
-    public readonly void Dispose() { }
+    public struct Enumerator<T>(IEnumerable<T> source, Func<T, Html> selector)
+    {
+        int index = -1;
+        readonly IEnumerator<T>? enumerator = source is not IList<T> ? source.GetEnumerator() : null;
+
+        public readonly Html Current => source switch
+        {
+            IList<T> list => selector(list[index]),
+            _ => selector(enumerator!.Current),
+        };
+
+        public bool MoveNext() => source switch
+        {
+            IList<T> list => ++index < list.Count,
+            _ => enumerator!.MoveNext(),
+        };
+    }
 }
