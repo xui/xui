@@ -189,6 +189,18 @@ public ref partial struct Html
         return @continue;
     }
 
+    // EX: { names.Select(n => new MyComponent(name: n)) }
+    public bool AppendFormatted<T>(Html.Enumerable<T> htmls, string? format = null, [CallerArgumentExpression(nameof(htmls))] string? expression = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableElement(ref this, htmls, format, expression);
+        Cursor++;
+
+        return @continue;
+    }
+
 
     private bool AppendAmbiguous<T, Utf8>(
         ReadOnlySpan<char> argName,

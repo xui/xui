@@ -97,4 +97,10 @@ public abstract class BaseComposer
     
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent
         => OnHtmlPartialEnds(ref parent, component.Render(), format, expression);
+
+    public virtual bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    {
+        foreach (var partial in partials) { }
+        return CompleteFormattedValue();
+    }
 }

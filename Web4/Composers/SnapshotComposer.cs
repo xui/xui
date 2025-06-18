@@ -288,17 +288,43 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
+    public override bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Enumerable;
-        keyhole.String = expression;
+        // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
+        // also implement ICollection then it will iterate in order to find the count
+        // which will instantiate Html values too early thus breaking all the things.
+        var itemCount = partials.Count;
+
+        // Reserve a keyhole to represent the loop itself
+        var key = keyGenerator.GetNextKey();
+        ref var enumerableKeyhole = ref Snapshot[parent.Index + parent.Cursor];
+        enumerableKeyhole.Key = key;
+        enumerableKeyhole.Type = FormatType.Enumerable;
+        enumerableKeyhole.String = expression;
+        enumerableKeyhole.Integer = keyGenerator.WriteHead;
+        enumerableKeyhole.Length = itemCount;
+
+        int i = 0, index = keyGenerator.WriteHead;
+        keyGenerator.CreateNewGeneration(key, itemCount);
+
+        // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
+        // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
+        foreach (var partial in partials)
+        {
+            keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
+
+            ref var itemKeyhole = ref Snapshot[index + i];
+            itemKeyhole.Key = keyGenerator.GetNextKey();
+            itemKeyhole.Type = FormatType.Html;
+            itemKeyhole.String = expression;
+            itemKeyhole.Integer = partial.Index;
+            itemKeyhole.Length = partial.Length;
+
+            i++;
+        }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-
-        return base.WriteMutableElement(ref parent, partials, format, expression);
+        return CompleteFormattedValue();
     }
 
     // public IEnumerable<Keyhole> EnumerateDepthFirst(Keyhole keyhole)

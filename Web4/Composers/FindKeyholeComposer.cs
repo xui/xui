@@ -150,7 +150,7 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => MoveNextKeyAndComplete();
 
     public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableElement<T>(ref Html parent, HtmlEnumerable<T> partials, string? format = null, string? expression = null)
+    public override bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return base.WriteMutableElement(ref parent, partials, format, expression);
