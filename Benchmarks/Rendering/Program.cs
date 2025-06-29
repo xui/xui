@@ -15,21 +15,40 @@ var radius = 0d;
 var tiles = new List<Point>();
 var step = cellSize;
 
+// Guids
+string web4Assets = ".";
+string web4Head = "";
+List<EntryRecord> entries;
+// Guids
+
 while (radius < Math.Min(wrapperWidth, wrapperHeight) / 2d)
 {
-    var x = centerX + Math.Cos(angle) * radius;
-    var y = centerY + Math.Sin(angle) * radius;
+  var x = centerX + Math.Cos(angle) * radius;
+  var y = centerY + Math.Sin(angle) * radius;
 
-    if (x >= 0 && x <= wrapperWidth - cellSize && y >= 0 && y <= wrapperHeight - cellSize)
-    {
-        tiles.Add(new(x, y));
-    }
+  if (x >= 0 && x <= wrapperWidth - cellSize && y >= 0 && y <= wrapperHeight - cellSize)
+  {
+    tiles.Add(new(x, y));
+  }
 
-    angle += 0.2;
-    radius += step * 0.015;
+  angle += 0.2;
+  radius += step * 0.015;
 }
 
-app.MapGet("/", ctx => $$"""
+entries = [.. Enumerable
+    .Range(0, 1000)
+    .Select(i => new EntryRecord(
+        ID: Guid.NewGuid().ToString(),
+        Name: Guid.NewGuid().ToString()
+    ))
+];
+
+
+
+
+
+
+app.MapGet("/spiral", ctx => $$"""
   <!DOCTYPE html>
   <html>
     <head>
@@ -66,13 +85,47 @@ app.MapGet("/", ctx => $$"""
   </html>
   """);
 
+app.MapGet("/guids", ctx => $"""
+  <!doctype html>
+  <html lang="en">
+      <head>
+          <meta charset="utf-8" />
+          <link rel="icon" href="{web4Assets}/favicon.png" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          {web4Head}
+      </head>
+      <body data-sveltekit-preload-data="hover">
+          <div style="display: contents">{GuidTableBody()}</div>
+      </body>
+  </html>
+  """);
+
 app.Run();
 
-Html Tile(double x, double y) => $"""
+static Html Tile(double x, double y) => $"""
   <div 
     class="tile"
-    style="left: {x:F2}px; top: {y:F2}px;">
+    style="left: {x:0.00}px; top: {y:0.00}px;">
   </div>
   """;
 
+
+Html GuidTableBody() => $"""
+    <main>
+      <table>
+        {from entry in entries
+          select Entry(entry)}
+      </table>
+    </main>
+""";
+
+static Html Entry(EntryRecord entry) => $"""
+<tr>
+  <td>{entry.ID}</td>
+  <td>{entry.Name}</td>
+</tr>
+""";
+
 record Point(double X, double Y);
+
+record class EntryRecord(string ID, string Name);
