@@ -33,6 +33,14 @@ var window = app.MapWeb4("/app", () => $"""
             
             { names.Where(n => n[0] != 't').Select(n => NoCButton(text: n)) }
 
+            ...lastly...
+            
+            {
+                from n in names
+                where n[0] == 't'
+                select NoCButton(text: n)
+            }
+
             <h2>Click on the buttons</h2>
             <div>
             outer div<br />
