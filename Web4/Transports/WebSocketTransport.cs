@@ -196,6 +196,10 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
         public static void Return(ReadOnlySequence<byte> sequence)
         {
+            // TODO: I've never verified with my own eyes that this works as expected.
+            // So create both types here, verify they don't allocate, don't leak, and
+            // verify they are of the type you are expecting such that they Return().
+
             if (sequence.IsSingleSegment)
             {
                 if (sequence.Start.GetObject() is byte[] buffer)
