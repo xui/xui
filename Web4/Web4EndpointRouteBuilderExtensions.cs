@@ -93,10 +93,9 @@ public static class Web4EndpointRouteBuilderExtensions
             }
             else
             {
-                var cancel = http.RequestAborted;
                 var pipeWriter = http.Response.BodyWriter;
                 var composer = new XtmlComposer(pipeWriter, windowBuilder);
-                await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, cancel);
+                await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, http.RequestAborted);
             }
         });
 
