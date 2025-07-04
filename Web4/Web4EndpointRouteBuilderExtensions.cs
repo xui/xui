@@ -71,6 +71,7 @@ public static class Web4EndpointRouteBuilderExtensions
         [StringSyntax("Route")] string pattern,
         Func<Html> html)
     {
+// TODO: Move to config, then simplify your pipeWriter.WriteAsync(...).
 #if DEBUG
         bool includeServerTiming = true;
 #else
