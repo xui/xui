@@ -97,9 +97,12 @@ public ref struct DiffUtil<T>(
                     DiffPartials(ref mutationBatch, keyholeAfter.Key, childBefore, childAfter);
                     break;
                 case FormatType.Attribute:
-                case FormatType.EventListener:
                 case FormatType.Enumerable:
                     // TODO: Implement
+                    break;
+                case FormatType.EventListener:
+                    // Event listeners never need to be diff'd.  
+                    // Their only purpose is for lookup.
                     break;
                 case FormatType.StringLiteral:
                     throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index");
