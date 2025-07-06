@@ -188,7 +188,6 @@ public readonly partial struct Diff(Keyhole[] snapshotBefore, Keyhole[] snapshot
                         yield return item;
                     continue;
                 // TODO: Implement
-                case FormatType.View:
                 case FormatType.Attribute:
                 case FormatType.EventListener:
                 case FormatType.Enumerable:
