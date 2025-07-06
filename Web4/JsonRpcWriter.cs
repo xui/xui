@@ -64,7 +64,6 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             // TODO: Implement
             FormatType.Attribute => throw new NotImplementedException(),
             FormatType.EventListener => throw new NotImplementedException(),
-            FormatType.View => throw new NotImplementedException(),
             FormatType.Html => throw new NotImplementedException(),
             FormatType.Enumerable => throw new NotImplementedException(),
             _ => throw new NotImplementedException()

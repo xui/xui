@@ -18,7 +18,6 @@ public enum FormatType
     TimeOnly,
     Attribute,
     EventListener,
-    View,
     Html,
     Enumerable,
 }

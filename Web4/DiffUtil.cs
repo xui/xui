@@ -96,7 +96,6 @@ public ref struct DiffUtil<T>(
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffPartials(ref mutationBatch, keyholeAfter.Key, childBefore, childAfter);
                     break;
-                case FormatType.View:
                 case FormatType.Attribute:
                 case FormatType.EventListener:
                 case FormatType.Enumerable:

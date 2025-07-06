@@ -63,7 +63,6 @@ public struct Keyhole
                 => left.value == right.value && left.Format == right.Format,
             FormatType.Attribute or
             FormatType.EventListener or
-            FormatType.View or
             FormatType.Html or
             FormatType.Enumerable
                 => false,
