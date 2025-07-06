@@ -9,7 +9,7 @@ namespace Web4.Transports;
 
 public class WebSocketTransport : IWeb4Transport, IDisposable
 {
-    private const int BUFFER_LENGTH = 1024;
+    private const int RECEIVE_BUFFER_LENGTH = 1024;
     private static readonly ConcurrentDictionary<string, Window> windows = [];
 
     private readonly HttpContext http;
@@ -27,11 +27,6 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         return new WebSocketTransport(http, webSocket);
     }
 
-    public void Dispose()
-    {
-        webSocket.Dispose();
-    }
-
     public Window GetOrCreateWindow(WindowBuilder builder)
     {
         // TODO: Move to header approach?
@@ -44,39 +39,24 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         return window;
     }
 
-    public ValueTask BeginMutations()
+    public async ValueTask ApplyMutations(Keyhole[] before, Keyhole[] after)
     {
-        return ValueTask.CompletedTask;
-    }
+        var mutationBatch = new WebSocketMutationBatch();
 
-    public ValueTask Mutate(IEnumerable<int> indexes, Keyhole[] before, Keyhole[] after)
-    {
-        using var perf = Debug.PerfCheck("Mutate"); // TODO: Remove PerfCheck
+        new DiffUtil<WebSocketMutationBatch>(before, after)
+            .Run(ref mutationBatch);
 
-        using var writer = new JsonRpcWriter();
-        foreach (var index in indexes)
+        using var writer = mutationBatch.Writer;
+
+        using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
+        if (writer.Memory is ReadOnlyMemory<byte> batch)
         {
-            //ref var keyholeBefore = ref before[index];
-            ref var keyholeAfter = ref after[index];
-
-            if (writer.BatchCount == 0)
-                writer.BeginBatch();
-
-            writer.WriteRpc("mutate", ref keyholeAfter);
+            await webSocket.SendAsync(
+                buffer: batch,
+                messageType: WebSocketMessageType.Text,
+                endOfMessage: true,
+                cancellationToken: http.RequestAborted);
         }
-
-        if (writer.BatchCount > 0)
-        {
-            writer.EndBatch();
-            return webSocket.SendAsync(writer.Memory, WebSocketMessageType.Text, true, http.RequestAborted);
-        }
-
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask EndMutations(CancellationToken cancel)
-    {
-        return ValueTask.CompletedTask;
     }
 
     public async Task ListenForRpcMessages(Window window)
@@ -104,7 +84,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         {
             try
             {
-                var buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
+                var buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
                 var result = await webSocket.ReceiveAsync(buffer, http.RequestAborted);
 
                 Console.WriteLine();
@@ -128,7 +108,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                     var segmentEnd = segmentStart;
                     while (!result.EndOfMessage)
                     {
-                        buffer = ArrayPool<byte>.Shared.Rent(BUFFER_LENGTH);
+                        buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
                         result = await webSocket.ReceiveAsync(buffer, http.RequestAborted);
                         segmentEnd = segmentEnd.Append(buffer, 0..result.Count);
                     }
@@ -215,5 +195,10 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 } while (sequence.TryGet(ref position, out var memory, advance: true));
             }
         }
+    }
+    
+    public void Dispose()
+    {
+        webSocket.Dispose();
     }
 }

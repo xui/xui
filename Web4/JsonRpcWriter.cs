@@ -1,30 +1,18 @@
 using System.Buffers;
-using System.Net.WebSockets;
 using System.Text;
 
 namespace Web4;
 
-internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
+public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
 {
     private byte[]? buffer = null;
     private int cursor = 0;
 
-    public int BatchCount { get; private set; } = 0;
-    public readonly ReadOnlyMemory<byte> Memory => buffer.AsMemory(..cursor);
-
-    public void BeginBatch() => Write("[");
-    public void EndBatch() => Write("]");
-
-    public void Reset()
-    {
-        cursor = 0;
-        BatchCount = 0;
-    }
+    public readonly ReadOnlyMemory<byte>? Memory => buffer?.AsMemory(..cursor);
 
     public void WriteRpc(string method, params ReadOnlySpan<string> args)
     {
-        if (BatchCount++ > 0)
-            Write(",");
+        Write(cursor == 0 ? "[" : ",");
 
         Write("""
             {"jsonrpc":"2.0","method":"
@@ -44,8 +32,7 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
 
     public void WriteRpc(string method, ref Keyhole keyhole)
     {
-        if (BatchCount++ > 0)
-            Write(",");
+        Write(cursor == 0 ? "[" : ",");
 
         Write("""
             {"jsonrpc":"2.0","method":"
@@ -74,6 +61,7 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             FormatType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
             FormatType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
             FormatType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
+            // TODO: Implement
             FormatType.Attribute => throw new NotImplementedException(),
             FormatType.EventListener => throw new NotImplementedException(),
             FormatType.View => throw new NotImplementedException(),
@@ -119,6 +107,12 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
         }
     }
 
+    public void End()
+    {
+        if (cursor > 0)
+            Write("]");
+    }
+
     private void GrowBuffer(int sizeHint)
     {
         ArgumentNullException.ThrowIfNull(buffer);
@@ -140,9 +134,7 @@ internal struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
 
     public void Dispose()
     {
-        cursor = 0;
         if (buffer is not null)
             ArrayPool<byte>.Shared.Return(buffer);
-        buffer = null;
     }
 }

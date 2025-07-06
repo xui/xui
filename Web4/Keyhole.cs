@@ -14,6 +14,16 @@ public struct Keyhole
     public string? Format { get; set; } // 64 bits
     public int Length { get; set; } // 32 bits?
 
+    /// <summary>
+    /// Helper property to make the code in DiffUtil read easier.
+    /// </summary>
+    public readonly string? StringLiteral => String;
+
+    /// <summary>
+    /// Helper property to make the code in DiffUtil read easier.
+    /// </summary>
+    public readonly Range ChildIndices => Integer..(Integer + Length);
+
     public string? String { readonly get => reference as string; set => this.reference = value; }
     public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
     public Color Color { readonly get => Color.FromArgb((int)value); set => this.value = value.ToArgb(); }

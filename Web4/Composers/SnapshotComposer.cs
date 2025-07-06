@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 
@@ -5,13 +6,16 @@ namespace Web4.Composers;
 
 public class SnapshotComposer : BaseComposer
 {
+    // TODO: Don't forget to implement the high watermark logic.
+    private static int highWaterMark = 2048;
+    
     private StableKeyTreeWalker keyGenerator = new();
 
     public Keyhole[] Snapshot { get; private set; } = [];
 
     public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
     {
-        Snapshot = Web4.Snapshot.Rent();
+        Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
         return CreateSnapshotAndClear($"{html()}");
     }
 
@@ -356,5 +360,10 @@ public static class SnapshotComposerExtension
     {
         current ??= new SnapshotComposer();
         return current.CreateSnapshotAndClear(html);
+    }
+
+    public static void Return(this Keyhole[] buffer)
+    {
+        ArrayPool<Keyhole>.Shared.Return(buffer);
     }
 }
