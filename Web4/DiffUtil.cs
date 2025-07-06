@@ -97,6 +97,8 @@ public ref struct DiffUtil<T>(
                     DiffPartials(ref mutationBatch, keyholeAfter.Key, childBefore, childAfter);
                     break;
                 case FormatType.Attribute:
+                    // TODO: Implement
+                    break;
                 case FormatType.Enumerable:
                     // TODO: Implement
                     break;
