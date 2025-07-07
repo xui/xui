@@ -134,9 +134,9 @@ public class Window
     {
         try
         {
-            var listener = FindListener(key);
+            var listener = windowBuilder.GetEventListener(key);
 
-            // Invoke the proper method signature
+            // Invoke the proper method signature.  Important notes:
             // - it might not pass in the event, e.g. `void OnClick()`
             // - it may or may not be async but clearly does not await here
             // - it disposes the event after the method completes
@@ -145,24 +145,6 @@ public class Window
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-        }
-    }
-
-    private EventListener FindListener(string? key)
-    {
-        using var perf = Debug.PerfCheck("FindListener"); // TODO: Remove PerfCheck
-
-        switch (key)
-        {
-            case null:
-                return default;
-            case string s1 when s1.StartsWith("win"):
-            case string s2 when s2.StartsWith("doc"):
-                return int.TryParse(key.AsSpan()[3..], out var index) && index < windowBuilder.Listeners.Count
-                    ? windowBuilder.Listeners[index]
-                    : default;
-            default:
-                return windowBuilder.Html.FindEventListener(key);
         }
     }
 }

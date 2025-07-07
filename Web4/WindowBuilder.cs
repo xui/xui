@@ -57,6 +57,28 @@ public class WindowBuilder :
         return this;
     }
 
+    public EventListener GetEventListener(string? key)
+    {
+        using var perf = Debug.PerfCheck("GetEventListener"); // TODO: Remove PerfCheck
+
+        switch (key)
+        {
+            case null:
+                return default;
+            // If the key starts with "win" or "doc" that means it's a top-level window or document event.
+            // These live in a simple List<> and can be looked up by index.
+            case string s1 when s1.StartsWith("win"):
+            case string s2 when s2.StartsWith("doc"):
+                return int.TryParse(key.AsSpan()[3..], out var index) && index < Listeners.Count
+                    ? Listeners[index]
+                    : default;
+            // Otherwise, it starts with "key" and is bound to some element burried somewhere in the HTML.
+            // The only way to find it is to compose the HTML and compare every keyhole to the supplied key.
+            default:
+                return Html.FindEventListener(key);
+        }
+    }
+
     public Action<Event>? OnAfterPrint { set => AddEventListener(nameof(OnAfterPrint), value, null); }
     public Action<Event>? OnBeforePrint { set => AddEventListener(nameof(OnBeforePrint), value, null); }
     public Action<Event.BeforeUnload>? OnBeforeUnload { set => AddEventListener(nameof(OnBeforeUnload), value, null); }
