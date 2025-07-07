@@ -28,8 +28,6 @@ public class SnapshotComposer : BaseComposer
 
     protected override void Clear()
     {
-        keyGenerator.Reset();
-
         // The first keyhole uses its Integer property to denote the 
         // full buffer length, not just the root-level Html length.
         Snapshot[0].Integer = keyGenerator.WriteHead;

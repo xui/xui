@@ -17,7 +17,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {        
         isJsRegisterWritten = false;
         suppressSentinels = false;
-        keyGenerator.Reset();
         base.Clear();
     }
 
