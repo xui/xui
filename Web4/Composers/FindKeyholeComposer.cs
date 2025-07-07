@@ -19,10 +19,10 @@ public class FindKeyholeComposer : BaseComposer
     public EventListener ToEventListenerAndClear(string key, Func<Html> html)
     {
         this.key = key;
-        return ToEventListenerAndClear($"{html()}");
+        return ToEventListenerAndClear(this, $"{html()}");
     }
 
-    private EventListener ToEventListenerAndClear([InterpolatedStringHandlerArgument("")] Html html)
+    private EventListener ToEventListenerAndClear(BaseComposer composer, [InterpolatedStringHandlerArgument("composer")] Html html)
     {
         var result = new EventListener()
         {
@@ -37,14 +37,9 @@ public class FindKeyholeComposer : BaseComposer
         actionEvent = null;
         func = null;
         funcEvent = null;
+        Current = null;
 
         return result;
-    }
-
-    protected override void Clear()
-    {
-        keyGenerator.Reset();
-        base.Clear();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -67,6 +62,9 @@ public class FindKeyholeComposer : BaseComposer
 
     public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
+        if (this.key is null)
+            return false;
+
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
     }
@@ -79,10 +77,11 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
+        if (this.key is null)
+            return false;
+            
         if (key != keyGenerator.GetNextKey())
-        {
             return base.CompleteFormattedValue();
-        }
 
         switch (listener)
         {
@@ -124,16 +123,11 @@ public class FindKeyholeComposer : BaseComposer
                 funcEvent = fe;
                 break;
         }
-        ;
 
-        // TODO: Shortcircuiting seems to leak memory.  But where?  For now, keep the full flow.
-        // Test this by perf-surrounding `var keyhole = window.GetKeyhole(key);` in HttpXContext.ListenForEvents.
-        return base.CompleteFormattedValue();
-
-        // // Found it so save some time.  Return false to
-        // // short circuit any following calls to html.Append*().
-        // Clear();
-        // return false;
+        key = null;
+        // Found it so save some time.  Return false to
+        // short circuit any following calls to html.Append*().
+        return false;
     }
 
     public override bool WriteMutableValue(ref Html parent, string value) => MoveNextKeyAndComplete();
@@ -151,6 +145,9 @@ public class FindKeyholeComposer : BaseComposer
 
     public override bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
+        if (this.key is null)
+            return false;
+            
         var itemCount = partials.Count;
         var key = keyGenerator.GetNextKey();
 
@@ -170,6 +167,9 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool MoveNextKeyAndComplete()
     {
+        if (this.key is null)
+            return false;
+
         keyGenerator.MoveNextKey();
         return base.CompleteFormattedValue();
     }

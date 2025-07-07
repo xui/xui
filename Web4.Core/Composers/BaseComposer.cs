@@ -24,6 +24,8 @@ public abstract class BaseComposer
 
     public BaseComposer Init()
     {
+        literalLengthRemaining = 0;
+        formattedValuesRemaining = 0;
         LiteralLength = 0;
         FormattedCount = 0;
         return this;
