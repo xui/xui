@@ -300,13 +300,13 @@ internal record struct WebSocketEvent : Event, IDisposable
         {
             foreach (var pair in references)
             {
-                if (isFirst)
-                    isFirst = false;
-                else
-                    stringBuilder.Append(", ");
-
                 if (types.TryGetValue(pair.Key, out var type))
                 {
+                    if (isFirst)
+                        isFirst = false;
+                    else
+                        stringBuilder.Append(", ");
+
                     if (type == typeof(string))
                         stringBuilder.Append($"{pair.Key}: \"{GetReference(pair.Key)}\"");
                     // TODO: Implement others
