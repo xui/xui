@@ -54,8 +54,8 @@ public static class WriterExtensions
     public static ValueTask<FlushResult> WriteWithServerTimingAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        Func<Html> html, 
-        HttpContext http, 
+        Func<Html> html,
+        HttpContext http,
         CancellationToken cancel = default)
     {
         long gc1 = GC.GetAllocatedBytesForCurrentThread();
@@ -68,12 +68,12 @@ public static class WriterExtensions
 
         // Ironically this allocates.  But it occurs after measurement and only in DEBUG.
         http.Response.Headers["Server-Timing"] = $"""
-            allocations;desc="Allocations: {gc2-gc1}b", render;desc="Web4.Render";dur={elapsed.TotalNanoseconds / 1_000_000d}
-            """;                    
+            allocations;desc="Allocations: {gc2 - gc1}b", render;desc="Web4.Render";dur={elapsed.TotalNanoseconds / 1_000_000d}
+            """;
 
         return writer.FlushAsync(cancel);
     }
-    
+
     public static void Compose(
         this BaseComposer composer,
         [InterpolatedStringHandlerArgument("composer")] Html html)
