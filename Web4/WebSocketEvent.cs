@@ -117,8 +117,7 @@ internal record struct WebSocketEvent : Event, IDisposable
                                 }
                                 else if (type == typeof(EventTarget))
                                 {
-                                    references ??= [];
-                                    // TODO: Implement
+                                    ParseEventTarget(reader);
                                 }
                                 else if (type == typeof(TouchPoint[]))
                                 {
@@ -172,6 +171,49 @@ internal record struct WebSocketEvent : Event, IDisposable
         return values!.TryGetValue(propName, out long value)
             ? BitConverter.Int64BitsToDouble(value)
             : null;
+    }
+
+    private EventTarget? GetTarget(string propName)
+    {
+        LazyParse(canIgnoreRefTypes: false);
+        return references!.GetValueOrDefault("target") as EventTarget;
+    }
+
+    private void ParseEventTarget(Utf8JsonReader reader)
+    {
+        string id = "", type = "", value = "", name = "";
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                references ??= [];
+                references["target"] = new EventTarget(id, name, type, false, value);
+                return;
+            }
+
+            if (reader.TokenType == JsonTokenType.PropertyName)
+            {
+                var atleastOne =
+                    ParseString(reader, "id", ref id) ||
+                    ParseString(reader, "type", ref type) ||
+                    ParseString(reader, "value", ref value) ||
+                    ParseString(reader, "name", ref name);
+
+                // TODO: How to handle it's .checked value? That's a made up thing right?
+            }
+        }
+    }
+
+    private bool ParseString(Utf8JsonReader reader, string propertyName, ref string str)
+    {
+        if (reader.ValueTextEquals(propertyName))
+        {
+            references ??= [];
+            reader.Read();
+            str = reader.GetString() ?? "";
+            return true;
+        }
+        return false;
     }
 
     static WebSocketEvent()
@@ -546,7 +588,7 @@ internal record struct WebSocketEvent : Event, IDisposable
     public double? TangentialPressure => GetDouble("tangentialPressure");
     double IPressures.TangentialPressure => TangentialPressure ?? default;
 
-    public EventTarget? Target { get; private set; } = null; // TODO:
+    public EventTarget? Target => GetTarget("target");
     EventTarget ITarget.Target => Target ?? EventTarget.Empty;
     EventTarget<string> ITarget<string>.Target => Target ?? EventTarget.Empty;
     EventTarget<bool> ITarget<bool>.Target => Target ?? EventTarget.Empty;
