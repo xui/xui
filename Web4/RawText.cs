@@ -8,15 +8,8 @@ namespace Web4;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
-public readonly ref struct RawText
+public readonly ref struct RawText(int literalLength, int formattedCount, IBufferWriter<byte> writer)
 {
-    private readonly IBufferWriter<byte> writer;
-
-    public RawText(int literalLength, int formattedCount, IBufferWriter<byte> writer)
-    {
-        this.writer = writer;
-    }
-
     public readonly void AppendLiteral(ReadOnlySpan<char> value)
     {
         Encoding.UTF8.GetBytes(value, writer);
