@@ -80,7 +80,7 @@ public class FindKeyholeComposer : BaseComposer
         if (this.key is null)
             return false;
             
-        if (key != keyGenerator.GetNextKey())
+        if (!keyGenerator.IsNextKey(this.key))
             return base.CompleteFormattedValue();
 
         switch (listener)

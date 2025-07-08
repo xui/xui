@@ -11,6 +11,7 @@ internal struct StableKeyTreeWalker()
 
     public void MoveNextKey() => keyCursor++;
     public string GetNextKey() => Keymaker.GetKey(parentKey, keyCursor++, parentLength);
+    public bool IsNextKey(string key) => Keymaker.IsKey(key, parentKey, keyCursor++, parentLength);
 
     public void CreateNewGeneration(string key, int numberOfChildren)
     {

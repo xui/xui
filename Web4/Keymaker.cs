@@ -2,12 +2,12 @@ using System.Buffers;
 
 namespace Web4;
 
-internal struct Keymaker
+internal readonly struct Keymaker
 {
     // Note: Not all characters are used so that no curse words can be injected into people's HTML.
     private static readonly char[] VALID_CHARS = "abcdef0123456789".ToCharArray();
     private static readonly int BASE = VALID_CHARS!.Length;
-    private static Dictionary<string, string>.AlternateLookup<ReadOnlySpan<char>> cache 
+    private static readonly Dictionary<string, string>.AlternateLookup<ReadOnlySpan<char>> cache 
         = new Dictionary<string, string>().GetAlternateLookup<ReadOnlySpan<char>>();
 
     /// <summary>
@@ -44,6 +44,31 @@ internal struct Keymaker
             return value;
         }
         return value;
+    }
+
+    public static bool IsKey(string compare, string parentKey, int cursor, int siblings)
+    {
+        var isRoot = parentKey.Length == 0;
+        var parentKeyLength = isRoot ? 3 : parentKey.Length; // 3 for "key" prefix.
+        var numberWidth = GetNumberWidth(siblings / 2);
+        var keyLength = parentKeyLength + numberWidth;
+
+        Span<char> key = stackalloc char[keyLength];
+        if (isRoot)
+            "key".CopyTo(key);
+        else
+            parentKey.CopyTo(key);
+
+        while (numberWidth > 0)
+        {
+            var index = parentKeyLength + numberWidth - 1;
+            var thisDigit = cursor % BASE;
+            key[index] = VALID_CHARS[thisDigit];
+            cursor /= BASE;
+            numberWidth--;
+        }
+
+        return key.SequenceEqual(compare);
     }
 
     public static void CacheKey(string key)
