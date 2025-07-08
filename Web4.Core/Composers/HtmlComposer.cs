@@ -39,10 +39,8 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
 
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
     {
-        // TODO: Color could have some great format strings
-        var output = value.Name;
-        var destination = Writer.GetSpan(output.Length);
-        var length = Encoding.UTF8.GetBytes(output, destination);
+        var destination = Writer.GetSpan(value.GetMaxPossibleLength());
+        value.TryFormat(destination, out int length, format);
         Writer.Advance(length);
 
         return base.WriteMutableValue(ref parent, value);
@@ -131,9 +129,10 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         Encoding.UTF8.GetBytes(attrName, Writer);
         Encoding.UTF8.GetBytes("=\"", Writer);
 
-        // TODO: Write color without allocating and with custom string formatters.
-        var value = attrValue(null!).ToString();
-        Encoding.UTF8.GetBytes(value, Writer);
+        var value = attrValue(null!);
+        var destination = Writer.GetSpan(value.GetMaxPossibleLength());
+        value.TryFormat(destination, out int length);
+        Writer.Advance(length);
 
         Encoding.UTF8.GetBytes("\"", Writer);
 

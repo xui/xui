@@ -82,8 +82,8 @@ public ref partial struct Html
         {
             string s => composer.WriteMutableValue(ref this, s),
             bool b => composer.WriteMutableValue(ref this, b),
-            Color c => composer.WriteMutableValue(ref this, c),
-            Uri u => composer.WriteMutableValue(ref this, u),
+            Color c => composer.WriteMutableValue(ref this, c, format),
+            Uri u => composer.WriteMutableValue(ref this, u, format),
             _ => true
         };
 

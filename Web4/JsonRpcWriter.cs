@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Drawing;
 using System.Text;
 
 namespace Web4;
@@ -50,7 +51,7 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             FormatType.StringLiteral => Write(keyhole.String!),
             FormatType.String => Write(keyhole.String!),
             FormatType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
-            FormatType.Color => Write(keyhole.Color.ToString()), // TODO: Fix memory allocation!  Bonus: format strings would be great here.
+            FormatType.Color => Write(keyhole.Color, keyhole.Format),
             FormatType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
             FormatType.Integer => Write(keyhole.Integer, keyhole.Format),
             FormatType.Long => Write(keyhole.Long, keyhole.Format),
@@ -95,6 +96,23 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
         Span<byte> destination = buffer.AsSpan(cursor..);
 
         if (value.TryFormat(destination, out var bytesWritten, format, null))
+        {
+            cursor += bytesWritten;
+            return true;
+        }
+        else
+        {
+            GrowBuffer(1);
+            return Write(value, format);
+        }
+    }
+
+    private bool Write(Color value, string? format = null)
+    {
+        buffer ??= ArrayPool<byte>.Shared.Rent(bufferSize);
+        Span<byte> destination = buffer.AsSpan(cursor..);
+
+        if (value.TryFormat(destination, out var bytesWritten, format))
         {
             cursor += bytesWritten;
             return true;

@@ -63,7 +63,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
     public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? Boolean.TrueString : Boolean.FalseString);
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableString(ref parent, value.Name);
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableColor(ref parent, value, format);
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => WriteMutableString(ref parent, value.ToString()); // TODO: Memory allocation!
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
@@ -109,7 +109,31 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         var key = keyGenerator.GetNextKey();
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
-            Writer.Inject($"""<script>key`{key.AsSpan()[3..]}`</script>""");
+            Writer.Inject($"""
+                <script>key`{key.AsSpan()[3..]}`</script>
+                """);
+        }
+
+        return CompleteFormattedValue();
+    }
+
+    private bool WriteMutableColor(ref Html parent, Color value, string? format = null)
+    {
+        if (!suppressSentinels)
+        {
+            Writer.Inject($"<!-- -->");
+        }
+
+        var destination = Writer.GetSpan(value.GetMaxPossibleLength());
+        value.TryFormat(destination, out int length, format);
+        Writer.Advance(length);
+
+        var key = keyGenerator.GetNextKey();
+        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
+        {
+            Writer.Inject($"""
+                <script>key`{key.AsSpan()[3..]}`</script>
+                """);
         }
 
         return CompleteFormattedValue();
