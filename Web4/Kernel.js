@@ -23,7 +23,11 @@ function rpc(key, ev, incl) {
 }
 
 function mutate(key, value) {
-  ui[key].nodeValue = value;
+  let node = ui[key];
+  switch (node.nodeType) {
+    case 3: node.nodeValue = value; break;
+    case 2: node.value = value; break;
+  }
 }
 
 let eventID = 0;
