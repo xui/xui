@@ -1,3 +1,4 @@
+#pragma warning disable CS9113 // Parameter is unread.
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -27,3 +28,4 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
         writer.Advance(length);
     }
 }
+#pragma warning restore CS9113 // Parameter is unread.
