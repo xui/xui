@@ -123,6 +123,12 @@ function bootstrap() {
     }
     s.parentNode.removeChild(s);
   }
+  for (i = 0; i < attrs.snapshotLength; i++) {
+    let attr = attrs.snapshotItem(i);
+    if (attr.name.startsWith('key')) {
+      attr.ownerElement.removeAttribute(attr.name)
+    }
+  }
 }
 
 const eventTargetKeys = ["id", "name", "type", "value", "checked"];
