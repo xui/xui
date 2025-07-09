@@ -10,6 +10,7 @@ int c = 0;
 double d = 3.14;
 string[] names = ["one", "two", "three", "four", "five", "six", "seven"];
 Color color = Color.Green;
+bool b = true;
 
 var window = app.MapWeb4("/app", () => $"""
     <html>
@@ -35,6 +36,8 @@ var window = app.MapWeb4("/app", () => $"""
             <input type="number" {value => c} oninput={e => c = e.Target.Value} /> {c}
             <br/>
             <input type="text" {value => name} oninput={e => name = e.Target.Value} /> {name}
+            <br/>
+            <input type="checkbox" {value => b} oninput={e => b = e.Target.Value} /> {b}
             <br/>
             <input type="color" {value => color} oninput={e => color = e.Target.Value} />
             <span { style => (Html)$"color: {color}" }>{color:RGB}</span>
