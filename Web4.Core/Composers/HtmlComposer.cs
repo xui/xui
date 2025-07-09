@@ -29,7 +29,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool WriteMutableValue(ref Html parent, bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
-        var output = value ? Boolean.TrueString : Boolean.FalseString;
+        var output = value ? "true" : "false";
         var destination = Writer.GetSpan(output.Length);
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);

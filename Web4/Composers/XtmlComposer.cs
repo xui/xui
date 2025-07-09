@@ -62,7 +62,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     }
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
-    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? Boolean.TrueString : Boolean.FalseString);
+    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? "true" : "false");
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableColor(ref parent, value, format);
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => WriteMutableString(ref parent, value.ToString()); // TODO: Memory allocation!
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
