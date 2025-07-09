@@ -37,7 +37,7 @@ var window = app.MapWeb4("/app", () => $"""
             <br/>
             <input type="text" {value => name} oninput={e => name = e.Target.Value} /> {name}
             <br/>
-            <input type="checkbox" {value => b} oninput={e => b = e.Target.Value} /> {b}
+            <input type="checkbox" {@checked => b} oninput={e => b = e.Target.Value} /> {b}
             <br/>
             <input type="color" {value => color} oninput={e => color = e.Target.Value} />
             <span { style => (Html)$"color: {color}" }>{color:RGB}</span>
