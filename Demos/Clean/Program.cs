@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Drawing;
 using Web4;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ string name = "World";
 int c = 0;
 double d = 3.14;
 string[] names = ["one", "two", "three", "four", "five", "six", "seven"];
+Color color = Color.Green;
 
 var window = app.MapWeb4("/app", () => $"""
     <html>
@@ -28,18 +30,21 @@ var window = app.MapWeb4("/app", () => $"""
             <br />
 
             { names.Select(n => NoCButton(text: n)) }
-            
-            ...and then...
-            
-            { names.Where(n => n[0] != 't').Select(n => NoCButton(text: n)) }
 
-            ...lastly...
-            
-            {
-                from n in names
-                where n[0] == 't'
-                select NoCButton(text: n)
-            }
+            <h2>Attribute stuffs</h2>
+            <input type="number" {value => c} oninput={e => c = e.Target.Value} /> {c}
+            <br/>
+            <input type="text" {value => name} oninput={e => name = e.Target.Value} /> {name}
+            <br/>
+            <input type="color" {value => color} oninput={e => color = e.Target.Value} />
+            <span { style => (Html)$"color: {color}" }>{color:RGB}</span>
+            <br/>
+            <input type="color" { value => color } oninput={ e => color = e.Target.Value } />
+            <span { style => $"color: {color}" }>{color:RGB}</span>
+            <br/>
+            <input type="color" { value => color } oninput={ e => color = e.Target.Value } />
+            <span style="color:{color}">{color:RGB}</span>
+            <br/>
 
             <h2>Click on the buttons</h2>
             <div>
@@ -95,7 +100,6 @@ static void OnClick(Event.Mouse e)
 {
     // c++;
 
-    // Console.WriteLine(e.X);
     var x = e.X;
 }
 
@@ -106,7 +110,7 @@ static void OnClick(Event.Mouse e)
 // window.OnClick = e => Console.WriteLine($"win4: window.OnClick 1: {"e"}");
 // window.Document.OnSelectionChange = e => Console.WriteLine($"doc5: {e.Type}");
 // window.Document.AddEventListener("click", e => Console.WriteLine($"doc6: document.onclick: {e.X}"));
-window.AddEventListener("mousemove", e => c = (int)e.X);
+// window.AddEventListener("mousemove", e => c = (int)e.X);
 
 window.MapGet("/about", ctx => 
 {
