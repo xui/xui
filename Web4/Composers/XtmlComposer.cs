@@ -43,7 +43,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!suppressSentinels)
         {
             Writer.Inject($"""
-                <script>key`{partial.Key.AsSpan()[3..]}`</script>
+                <script>key`{partial.Key.AsSpan(3..)}`</script>
                 """);
         }
 
@@ -88,7 +88,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>key`{key.AsSpan()[3..]}`</script>
+                <script>key`{key.AsSpan(3..)}`</script>
                 """);
         }
 
@@ -110,7 +110,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>key`{key.AsSpan()[3..]}`</script>
+                <script>key`{key.AsSpan(3..)}`</script>
                 """);
         }
 
@@ -132,7 +132,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
         {
             Writer.Inject($"""
-                <script>key`{key.AsSpan()[3..]}`</script>
+                <script>key`{key.AsSpan(3..)}`</script>
                 """);
         }
 
@@ -262,7 +262,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             Writer.Inject($"""
-                <script>key`{keyGenerator.GetNextKey()}`</script>
+                <script>key`{keyGenerator.GetNextKey().AsSpan(3..)}`</script>
                 """);
 
             i++;
@@ -276,7 +276,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         if (!isJsRegisterWritten)
         {
-            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k[0]]=document.currentScript.previousSibling;}key`{{key.AsSpan()[3..]}}`;</script>""");
+            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k[0]]=document.currentScript.previousSibling;}key`{{key.AsSpan(3..)}}`;</script>""");
             isJsRegisterWritten = true;
             return false;
         }
