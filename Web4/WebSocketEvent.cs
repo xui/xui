@@ -182,12 +182,13 @@ internal record struct WebSocketEvent : Event, IDisposable
     private void ParseEventTarget(Utf8JsonReader reader)
     {
         string id = "", type = "", value = "", name = "";
+        bool @checked = false;
         while (reader.Read())
         {
             if (reader.TokenType == JsonTokenType.EndObject)
             {
                 references ??= [];
-                references["target"] = new EventTarget(id, name, type, false, value);
+                references["target"] = new EventTarget(id, name, type, @checked, value);
                 return;
             }
 
@@ -197,20 +198,31 @@ internal record struct WebSocketEvent : Event, IDisposable
                     ParseString(reader, "id", ref id) ||
                     ParseString(reader, "type", ref type) ||
                     ParseString(reader, "value", ref value) ||
-                    ParseString(reader, "name", ref name);
-
-                // TODO: How to handle it's .checked value? That's a made up thing right?
+                    ParseString(reader, "name", ref name) ||
+                    ParseBool(reader, "checked", ref @checked);
             }
         }
     }
 
-    private bool ParseString(Utf8JsonReader reader, string propertyName, ref string str)
+    private bool ParseString(Utf8JsonReader reader, string propertyName, ref string value)
     {
         if (reader.ValueTextEquals(propertyName))
         {
             references ??= [];
             reader.Read();
-            str = reader.GetString() ?? "";
+            value = reader.GetString() ?? "";
+            return true;
+        }
+        return false;
+    }
+
+    private bool ParseBool(Utf8JsonReader reader, string propertyName, ref bool value)
+    {
+        if (reader.ValueTextEquals(propertyName))
+        {
+            references ??= [];
+            reader.Read();
+            value = reader.GetBoolean();
             return true;
         }
         return false;
