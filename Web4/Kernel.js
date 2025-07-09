@@ -41,7 +41,7 @@ function encodeEvent(e, incl) {
         json[k] = {};
         for (let k2 in v) {
           let v2 = v[k2];
-          if (eventTargetKeys.includes(k2) && v2 != "") json[k][k2] = v2;
+          if (eventTargetKeys.includes(k2) && v2 !== "") json[k][k2] = v2;
         }
       } else {
         json[k] = v;
