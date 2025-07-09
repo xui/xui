@@ -91,7 +91,7 @@ function bootstrap() {
   ws.onerror = console.error;
   ws.onmessage = (e) => clientRpc(e.data);
 
-  var ui = ui ?? {};
+  if (ui == undefined) { ui = {}; }
   for (let k in ui) {
     let n = ui[k];
     if (n.nodeType == 8) {
@@ -100,11 +100,13 @@ function bootstrap() {
       ui[k] = t;
     }
   }
-  const attrsXPath = '//*/attribute::*[starts-with(name(), "key")]';
-  const attrs = document.evaluate(attrsXPath, document, null, 7, null);
+  const attrs = document.evaluate('//*/attribute::*', document, null, 7, null);
   for (i = 0; i < attrs.snapshotLength; i++) {
-    let a = attrs.snapshotItem(i);
-    ui[a.name] = a;
+    let attr = attrs.snapshotItem(i);
+    if (attr.name.startsWith('key')) {
+      let prev = attrs.snapshotItem(i - 1);
+      ui[attr.name] = prev;
+    }
   }
 
   // TODO: What is the performance cost of manipulating the DOM so many times onload?

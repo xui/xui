@@ -142,7 +142,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         return @continue;
     }
@@ -150,7 +150,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         return @continue;
     }
@@ -159,7 +159,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         return @continue;
     }
@@ -176,7 +176,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         suppressSentinels = true;
 
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
 
@@ -188,7 +188,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         return @continue;
     }
@@ -196,7 +196,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
     {
         var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}=\"{attrName}\"");
+        Writer.Inject($" {keyGenerator.GetNextKey()}");
 
         return @continue;
     }
