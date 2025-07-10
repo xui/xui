@@ -10,13 +10,14 @@ namespace Web4.Composers;
 public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
 {
     private StableKeyTreeWalker keyGenerator = new();
-    private bool isJsRegisterWritten = false;
-    private bool suppressSentinels = false;
+
+    private enum AttributeStatus { None, Pending, InProgress }
+    private AttributeStatus attributeStatus = AttributeStatus.None;
+    private string? deferredLiteral = null;
 
     protected override void Clear()
-    {        
-        isJsRegisterWritten = false;
-        suppressSentinels = false;
+    {
+        attributeStatus = AttributeStatus.None;
         base.Clear();
     }
 
@@ -35,16 +36,29 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
+        if (attributeStatus == AttributeStatus.Pending)
+        {
+            // TODO: Handle deferred literal (we know it's not a bool).
+            Writer.Inject($"\"");
+            attributeStatus = AttributeStatus.InProgress;
+        }
+
         base.OnHtmlPartialBegins(ref html);
     }
 
     public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
-        if (!suppressSentinels)
+        if (attributeStatus == AttributeStatus.None && partial.Key?.Length > 0)
         {
             Writer.Inject($"""
-                <script>key`{partial.Key.AsSpan(3..)}`</script>
+                <!-- {partial.Key} -->
                 """);
+        }
+
+        if (attributeStatus == AttributeStatus.InProgress)
+        {
+            Writer.Inject($"\"");
+            attributeStatus = AttributeStatus.None;
         }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
@@ -58,38 +72,70 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             return true;
         }
 
+        // This makes the assumption that keyholes preceeded with an '=' are 
+        // always attributes.  Attributes need different sentinels than regular
+        // keyholes and boolean attributes have a few strange rules to follow:
+        // https://developer.mozilla.org/en-US/docs/Glossary/Boolean/HTML
+        if (literal.Length > 0 && literal[^1] == '=')
+        {
+            attributeStatus = AttributeStatus.Pending;
+            // deferredLiteral = literal;
+            // return CompleteStringLiteral(literal.Length);
+        }
+
         return base.WriteImmutableMarkup(ref parent, literal);
     }
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
-    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableString(ref parent, value ? "true" : "false");
+    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableBool(ref parent, value);
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableColor(ref parent, value, format);
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => WriteMutableString(ref parent, value.ToString()); // TODO: Memory allocation!
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        // Wraps the mutable value with a comment tag on one side 
-        // to separate it from any preceding text and a script tag 
-        // on the other side which registers it without the need 
-        // for id= or document.getElementById().
+        // Wraps the mutable value with two comment tags
+        // to separate it from any neighboring text.
+        // At the end of the body an inline script registers them 
+        // because we can't rely on id= or document.getElementById().
         // It should end up looking like this:
-        // $"<!-- -->{value:format}<script>key`{id}`)</script>"
-
-        if (!suppressSentinels)
-        {
-            Writer.Inject($"<!-- -->");
-        }
-
-        var destination = Writer.GetSpan();
-        value.TryFormat(destination, out int length, format, null);
-        Writer.Advance(length);
+        // $"<!-- -->{value:format}<!--keyabc-->"
+    
+        // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
 
         var key = keyGenerator.GetNextKey();
-        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
+        int length;
+        switch (attributeStatus)
         {
-            Writer.Inject($"""
-                <script>key`{key.AsSpan(3..)}`</script>
-                """);
+            case AttributeStatus.None:
+                Writer.Inject($"<!-- -->");
+
+                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                Writer.Advance(length);
+
+                Writer.Inject($"<!--{key}-->");
+                break;
+
+            case AttributeStatus.Pending:
+                // TODO: Handle deferred literal (we know it's not a bool).
+                Writer.Inject($"\"");
+
+                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                Writer.Advance(length);
+
+                Writer.Inject($"""
+                    " {key}
+                    """);
+                // status jumps from Pending to None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                Writer.Advance(length);
+                break;
         }
 
         return CompleteFormattedValue();
@@ -97,21 +143,73 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private bool WriteMutableString(ref Html parent, string value)
     {
-        if (!suppressSentinels)
-        {
-            Writer.Inject($"<!-- -->{value}");
-        }
-        else
-        {
-            Encoding.UTF8.GetBytes(value, Writer);
-        }
+        // Strings have no format strings.
 
         var key = keyGenerator.GetNextKey();
-        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
+        switch (attributeStatus)
         {
-            Writer.Inject($"""
-                <script>key`{key.AsSpan(3..)}`</script>
-                """);
+            case AttributeStatus.None:
+                Writer.Inject($"""
+                    <!-- -->{value}<!--{key}-->
+                    """);
+                break;
+
+            case AttributeStatus.Pending:
+                // TODO: Handle deferred literal (we know it's not a bool).
+                Writer.Inject($"""
+                    "{value}" {key}
+                    """);
+                // status jumps from Pending to None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                Encoding.UTF8.GetBytes(value, Writer);
+                break;
+        }
+
+        return CompleteFormattedValue();
+    }
+
+    private bool WriteMutableBool(ref Html parent, bool value)
+    {
+        var key = keyGenerator.GetNextKey();
+        switch (attributeStatus)
+        {
+            case AttributeStatus.None:
+                var b = value ? "true" : "false";
+                Writer.Inject($"""
+                    <!-- -->{b}<!--{key}-->
+                    """);
+                break;
+
+            case AttributeStatus.Pending:
+                // TODO: Handle deferred literal (IT'S A BOOL)!!!
+                if (value)
+                {
+                    Writer.Inject($"""
+                        "from-deferred" {key}="from-deferred"
+                        """);
+                }
+                else
+                {
+                    Writer.Inject($"""
+                        {key}="from-deferred"
+                        """);
+                }
+                // status jumps from Pending to None because the whole 
+                    // attribute is just one value, not a bunch of keyholes+literals.
+                    attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                Encoding.UTF8.GetBytes(value ? "true" : "false", Writer);
+                break;
         }
 
         return CompleteFormattedValue();
@@ -119,93 +217,49 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private bool WriteMutableColor(ref Html parent, Color value, string? format = null)
     {
-        if (!suppressSentinels)
-        {
-            Writer.Inject($"<!-- -->");
-        }
-
-        var destination = Writer.GetSpan(value.GetMaxPossibleLength());
-        value.TryFormat(destination, out int length, format);
-        Writer.Advance(length);
-
         var key = keyGenerator.GetNextKey();
-        if (!suppressSentinels && EnsureJsRegisterIsWritten(key))
+        int length;
+        switch (attributeStatus)
         {
-            Writer.Inject($"""
-                <script>key`{key.AsSpan(3..)}`</script>
-                """);
+            case AttributeStatus.None:
+                Writer.Inject($"<!-- -->");
+
+                value.TryFormat(Writer.GetSpan(), out length, format);
+                Writer.Advance(length);
+
+                Writer.Inject($"<!--{key}-->");
+                break;
+
+            case AttributeStatus.Pending:
+                // TODO: Handle deferred literal (we know it's not a bool).
+                Writer.Inject($"\"");
+
+                value.TryFormat(Writer.GetSpan(), out length, format);
+                Writer.Advance(length);
+
+                Writer.Inject($"""
+                    " {key}
+                    """);
+                // status jumps from Pending to None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                value.TryFormat(Writer.GetSpan(), out length, format);
+                Writer.Advance(length);
+                break;
         }
 
         return CompleteFormattedValue();
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
-    {
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        return @continue;
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
-    {
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        return @continue;
-    }
-
-    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        return @continue;
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
-    {
-        // Mutable attributes can't be simply wrapped like mutable values.  So instead,
-        // they include a sentinel by its key ID which indicates the
-        // attribute name to references.  At the end of the body, a script
-        // picks them all up and registers them in a single pass.
-        // It should end up looking like this:
-        //   <input type={ myType } keyAB="type" />
-
-        suppressSentinels = true;
-
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-
-        suppressSentinels = false;
-
-        return @continue;
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
-    {
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        return @continue;
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
-    {
-        var @continue = base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-        Writer.Inject($" {keyGenerator.GetNextKey()}");
-
-        return @continue;
     }
 
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
-    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => WriteEventListener(ref parent, argName);
     private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         var key = keyGenerator.GetNextKey();
@@ -227,18 +281,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 "rpc('{key}')"
                 """);
         }
-        return CompleteFormattedValue();
-    }
-    private bool WriteEventListener(ref Html parent, ReadOnlySpan<char> includedAttributeName)
-    {
-        Writer.Inject($"{includedAttributeName}=");
-        Writer.Inject($"""
-            "rpc('{keyGenerator.GetNextKey()}')"
-            """);
-        // Note: When the attribute name is included as a part of the expression 
-        // (e.g. $"<button { onclick => Onclick() }>Click me</button>")
-        // then there's never a way to ALSO pass the event arg into the method signature.
-        // For that, you'd need $"<button onclick={ e => OnClick(e) }Click me</button>">
+        
+        attributeStatus = AttributeStatus.None;
         return CompleteFormattedValue();
     }
 
@@ -257,12 +301,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
         // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
-        foreach (var partial in partials)
+        var enumerator = partials.GetEnumerator();
+        while (enumerator.MoveNext())
         {
+            var current = enumerator.Current;
+
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             Writer.Inject($"""
-                <script>key`{keyGenerator.GetNextKey().AsSpan(3..)}`</script>
+                <!-- {keyGenerator.GetNextKey()} -->
                 """);
 
             i++;
@@ -270,17 +317,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
-    }
-
-    private bool EnsureJsRegisterIsWritten(string key)
-    {
-        if (!isJsRegisterWritten)
-        {
-            Writer.Inject($$"""<script>ui={};function key(k){ui['key'+k[0]]=document.currentScript.previousSibling;}key`{{key.AsSpan(3..)}}`;</script>""");
-            isJsRegisterWritten = true;
-            return false;
-        }
-        return true;
     }
 
     // Fear not, this Dictionary will not grow unbounded.  
@@ -301,7 +337,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // If there are zero mutable keys, then we can skip this.
         if (FormattedCount <= 1)
         {
-            suppressSentinels = true;
             return false;
         }
 
@@ -330,7 +365,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             }
 
 
-            suppressSentinels = true;
             CompleteStringLiteral(literal.Length);
             return true;
         }

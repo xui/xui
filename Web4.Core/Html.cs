@@ -104,62 +104,54 @@ public ref partial struct Html
     }
 
 
-    // MUTABLE ATTRIBUTES
+    // EVENT HANDLERS
 
-    // The following signatures used to be defined here but became redundant
-    // from the more specific signatures inside Target<T>.
-    //   - Func<Event, string> attribute
-    //   - Func<Event, bool> attribute
-    //   - Func<Event, T> attribute (where T : struct, IUtf8SpanFormattable)
-
-    // Ex: <h1 { style => $"background-color: { bg }; color: { fg };" }>Hello</h1>
-    public bool AppendFormatted(
-        Func<Event, Html> attribute,
-        [CallerArgumentExpression(nameof(attribute))] string? expression = null)
+    // Ex: <button onclick={ Increment }>Clicks: { c }</button>
+    // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
+    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    private bool AppendEventListener(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableAttribute(
-            ref this,
-            GetArgName(expression),
-            attribute,
-            expression);
+        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        Cursor++;
+        return @continue;
+    }
+    
+    // Ex: <button onclick={ Increment }>Clicks: { c }</button>
+    // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
+    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    private bool AppendEventListener(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
 
+        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        Cursor++;
+        return @continue;
+    }
+    
+    // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
+    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    private bool AppendEventListener(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
 
-
-    // EVENT HANDLERS
-
-    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
-    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
-    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
     public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
-    private bool AppendEventListener<T>(T listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+    private bool AppendEventListener(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = listener switch
-        {
-            // Ex: <button onclick={ Increment }>Clicks: { c }</button>
-            // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
-            Action noArg => composer.WriteEventListener(ref this, noArg, format, expression),
-
-            // Ex: <button onclick={ Increment }>Clicks: { c }</button>
-            // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
-            Action<Event> eventArg => composer.WriteEventListener(ref this, eventArg, format, expression),
-
-            // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
-            Func<Task> noArgAsync => composer.WriteEventListener(ref this, noArgAsync, format, expression),
-
-            // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
-            Func<Event, Task> eventArgAsync => composer.WriteEventListener(ref this, eventArgAsync, format, expression),
-            _ => true,
-        };
-
+        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
