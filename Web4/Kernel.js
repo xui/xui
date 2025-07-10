@@ -13,9 +13,12 @@ function rpc(key, ev, incl) {
 
 function mutate(key, value) {
   let node = ui[key];
+  if (!node) return console.error(`Keyhole ${key} is missing`);
   switch (node.nodeType) {
-    case 3: node.nodeValue = value; break;
-    case 2: node.value = value; break;
+    case Node.TEXT_NODE:              node.nodeValue = value; break;
+    case Node.ATTRIBUTE_NODE:         node.value = value; break;
+    case Node.ELEMENT_NODE:           node.outerHTML = value; break;
+    case Node.ENTITY_REFERENCE_NODE:  node.owner[node.booleanAttribute] = value; break;
   }
 }
 
