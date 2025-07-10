@@ -18,7 +18,7 @@ function mutate(key, value) {
     case Node.TEXT_NODE:              node.nodeValue = value; break;
     case Node.ATTRIBUTE_NODE:         node.value = value; break;
     case Node.ELEMENT_NODE:           node.outerHTML = value; break;
-    case Node.ENTITY_REFERENCE_NODE:  node.owner[node.booleanAttribute] = value; break;
+    case Node.ENTITY_REFERENCE_NODE:  node.owner[node.booleanAttribute] = value && value !== "false"; break;
   }
 }
 

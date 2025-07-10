@@ -38,7 +38,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         if (attributeStatus == AttributeStatus.Pending)
         {
-            // TODO: Handle deferred literal (we know it's not a bool).
+            HandleDeferredLiteral();
             Writer.Inject($"\"");
             attributeStatus = AttributeStatus.InProgress;
         }
@@ -76,11 +76,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // always attributes.  Attributes need different sentinels than regular
         // keyholes and boolean attributes have a few strange rules to follow:
         // https://developer.mozilla.org/en-US/docs/Glossary/Boolean/HTML
-        if (literal.Length > 0 && literal[^1] == '=')
+        if (literal.EndsWith('='))
         {
             attributeStatus = AttributeStatus.Pending;
-            // deferredLiteral = literal;
-            // return CompleteStringLiteral(literal.Length);
+            deferredLiteral = literal;
+            return CompleteStringLiteral(literal.Length);
         }
 
         return base.WriteImmutableMarkup(ref parent, literal);
@@ -99,7 +99,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // because we can't rely on id= or document.getElementById().
         // It should end up looking like this:
         // $"<!-- -->{value:format}<!--keyabc-->"
-    
+
         // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
 
         var key = keyGenerator.GetNextKey();
@@ -116,7 +116,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
 
             case AttributeStatus.Pending:
-                // TODO: Handle deferred literal (we know it's not a bool).
+                HandleDeferredLiteral();
                 Writer.Inject($"\"");
 
                 value.TryFormat(Writer.GetSpan(), out length, format, null);
@@ -125,7 +125,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 Writer.Inject($"""
                     " {key}
                     """);
-                // status jumps from Pending to None because the whole 
+                // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
                 break;
@@ -155,11 +155,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
 
             case AttributeStatus.Pending:
-                // TODO: Handle deferred literal (we know it's not a bool).
+                HandleDeferredLiteral();
                 Writer.Inject($"""
                     "{value}" {key}
                     """);
-                // status jumps from Pending to None because the whole 
+                // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
                 break;
@@ -187,22 +187,22 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
 
             case AttributeStatus.Pending:
-                // TODO: Handle deferred literal (IT'S A BOOL)!!!
+                var attributeName = HandleDeferredLiteral(isBooleanAttribute: true);
                 if (value)
                 {
                     Writer.Inject($"""
-                        "from-deferred" {key}="from-deferred"
+                         {attributeName} {key}="{attributeName}"
                         """);
                 }
                 else
                 {
                     Writer.Inject($"""
-                        {key}="from-deferred"
+                         {key}="{attributeName}"
                         """);
                 }
-                // status jumps from Pending to None because the whole 
-                    // attribute is just one value, not a bunch of keyholes+literals.
-                    attributeStatus = AttributeStatus.None;
+                // status jumps from .Pending to .None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
                 break;
 
             case AttributeStatus.InProgress:
@@ -231,7 +231,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
 
             case AttributeStatus.Pending:
-                // TODO: Handle deferred literal (we know it's not a bool).
+                HandleDeferredLiteral();
                 Writer.Inject($"\"");
 
                 value.TryFormat(Writer.GetSpan(), out length, format);
@@ -240,7 +240,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 Writer.Inject($"""
                     " {key}
                     """);
-                // status jumps from Pending to None because the whole 
+                // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
                 break;
@@ -256,12 +256,42 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
+    private void HandleDeferredLiteral()
+    {
+        ArgumentNullException.ThrowIfNull(deferredLiteral);
+
+        Encoding.UTF8.GetBytes(deferredLiteral, Writer);
+    }
+
+    private ReadOnlySpan<char> HandleDeferredLiteral(bool isBooleanAttribute = true)
+    {
+        if (!isBooleanAttribute)
+        {
+            HandleDeferredLiteral();
+            return [];
+        }
+
+        ArgumentNullException.ThrowIfNull(deferredLiteral);
+
+        // This string literal will look something like `...<input type="checkbox" checked=`
+        // Note: We know they always end with `=`.
+        int indexBeforeAttribute = deferredLiteral.LastIndexOf(' ');
+        ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteral.Length - 2);
+
+        Encoding.UTF8.GetBytes(deferredLiteral.AsSpan(..indexBeforeAttribute), Writer);
+        return deferredLiteral.AsSpan((indexBeforeAttribute + 1)..^1);
+    }
+
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
     private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
     {
+        if (deferredLiteral != null)
+            HandleDeferredLiteral();
+
         var key = keyGenerator.GetNextKey();
         if (includeEventArg && format != null)
         {
