@@ -87,17 +87,25 @@ public ref struct DiffUtil<T>(
                 case FormatType.TimeOnly:
                     if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
                     {
-                        mutationBatch.UpdateValue(key, ref keyholeBefore, ref keyholeAfter);
+                        if (!keyholeAfter.IsMemberOfHtmlAttribute)
+                        {
+                            mutationBatch.UpdateValue(key, ref keyholeBefore, ref keyholeAfter);
+                        }
+                        else
+                        {
+                            Span<Keyhole> attrBefore = GetAttributeSpan(ref keyholeBefore, bufferBefore);
+                            Span<Keyhole> attrAfter = GetAttributeSpan(ref keyholeAfter, bufferAfter);
+                            mutationBatch.UpdateAttribute(key, attrBefore, attrAfter);
+                            return; // Return early.  This whole attribute will be updated.
+                        }
                     }
                     break;
                 case FormatType.Html:
-                    var childBefore = bufferBefore.AsSpan(keyholeBefore.ChildIndices);
-                    var childAfter = bufferAfter.AsSpan(keyholeAfter.ChildIndices);
-                    // Recursively traverse deeper, then come back and continue these siblings.
-                    DiffPartials(ref mutationBatch, keyholeAfter.Key, childBefore, childAfter);
-                    break;
                 case FormatType.Attribute:
-                    // TODO: Implement
+                    Span<Keyhole> keyholesBefore = bufferBefore.AsSpan(keyholeBefore.ChildIndices);
+                    Span<Keyhole> keyholesAfter = bufferAfter.AsSpan(keyholeAfter.ChildIndices);
+                    // Recursively traverse deeper, then come back and continue these siblings.
+                    DiffPartials(ref mutationBatch, keyholeAfter.Key, keyholesBefore, keyholesAfter);
                     break;
                 case FormatType.Enumerable:
                     // TODO: Implement
@@ -112,5 +120,13 @@ public ref struct DiffUtil<T>(
                     throw new InvalidOperationException("It should be impossible to find a non-mutable value in an odd index");
             }
         }
+    }
+
+    private static Span<Keyhole> GetAttributeSpan(ref Keyhole keyhole, Keyhole[] buffer)
+    {
+        var start = keyhole.AttributeStartIndex;
+        ref var startKeyhole = ref buffer[start];
+        var end = start + startKeyhole.Length;
+        return buffer.AsSpan(start..end);
     }
 }

@@ -9,6 +9,7 @@ public class SnapshotComposer : BaseComposer
     // TODO: Don't forget to implement the high watermark logic.
     private static int highWaterMark = 2048;
     private StableKeyTreeWalker keyGenerator = new();
+    private bool isWritingAttribute = false;
     public Keyhole[] Snapshot { get; private set; } = [];
 
     public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
@@ -52,6 +53,7 @@ public class SnapshotComposer : BaseComposer
             var key = keyGenerator.GetNextKey();
             html.Key = key;
             html.Index = keyGenerator.WriteHead;
+            html.IsAttribute = isWritingAttribute;
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
@@ -71,7 +73,7 @@ public class SnapshotComposer : BaseComposer
             var index = parent.Index + parent.Cursor;
             ref var keyhole = ref Snapshot[index];
             keyhole.Key = partial.Key;
-            keyhole.Type = FormatType.Html;
+            keyhole.Type = partial.IsAttribute ? FormatType.Attribute : FormatType.Html;
             keyhole.String = expression;
             keyhole.Integer = partial.Index;
             keyhole.Length = partial.Length;
@@ -90,6 +92,8 @@ public class SnapshotComposer : BaseComposer
             ref var keyhole = ref Snapshot[index];
             keyhole.String = literal;
             keyhole.Type = FormatType.StringLiteral;
+            keyhole.Length = parent.Length;
+            isWritingAttribute = literal.EndsWith('=');
         }
 
         return base.WriteImmutableMarkup(ref parent, literal);
@@ -99,10 +103,19 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.String = value;
         keyhole.Type = FormatType.String;
         keyhole.Format = null;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key;
+            keyhole.AttributeStartIndex = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.AttributeStartIndex = -1;
+        }
 
         return base.WriteMutableValue(ref parent, value);
     }
@@ -111,10 +124,19 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Boolean = value;
         keyhole.Type = FormatType.Boolean;
         keyhole.Format = null;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key;
+            keyhole.AttributeStartIndex = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.AttributeStartIndex = -1;
+        }
 
         return base.WriteMutableValue(ref parent, value);
     }
@@ -123,10 +145,19 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Color = value;
         keyhole.Type = FormatType.Color;
         keyhole.Format = format;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key;
+            keyhole.AttributeStartIndex = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.AttributeStartIndex = -1;
+        }
 
         return base.WriteMutableValue(ref parent, value);
     }
@@ -135,10 +166,19 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Uri = value;
         keyhole.Type = FormatType.Uri;
         keyhole.Format = format;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key;
+            keyhole.AttributeStartIndex = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.AttributeStartIndex = -1;
+        }
 
         return base.WriteMutableValue(ref parent, value);
     }
@@ -148,8 +188,17 @@ public class SnapshotComposer : BaseComposer
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Format = format;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key;
+            keyhole.AttributeStartIndex = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.AttributeStartIndex = -1;
+        }
 
         switch (value)
         {

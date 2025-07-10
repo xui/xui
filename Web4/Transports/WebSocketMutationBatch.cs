@@ -16,6 +16,8 @@ public ref struct WebSocketMutationBatch() : IMutationBatch
 
     public void UpdateAttribute(string key, Span<Keyhole> before, Span<Keyhole> after)
     {
+        ref var writer = ref jsonRpcWriter;
+        writer.WriteRpc("mutate", key, after);
     }
 
     public void UpdatePartial(string key, Span<Keyhole> before, Span<Keyhole> after)
@@ -37,6 +39,6 @@ public ref struct WebSocketMutationBatch() : IMutationBatch
     public void Commit()
     {
         ref var writer = ref jsonRpcWriter;
-        writer.End();
+        writer.EndBatch();
     }
 }

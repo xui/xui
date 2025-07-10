@@ -15,6 +15,7 @@ public ref partial struct Html
     public int Index { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; }
+    public bool IsAttribute { get; set; }
 
     public Html(int literalLength, int formattedCount)
     {

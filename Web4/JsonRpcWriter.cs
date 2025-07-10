@@ -4,48 +4,28 @@ using System.Text;
 
 namespace Web4;
 
-public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
+public struct JsonRpcWriter : IDisposable
 {
+    private int bufferSize;
     private byte[]? buffer = null;
     private int cursor = 0;
 
-    public readonly ReadOnlyMemory<byte>? Memory => buffer?.AsMemory(..cursor);
-
-    public void WriteRpc(string method, params ReadOnlySpan<string> args)
+    public JsonRpcWriter() : this(1024)
     {
-        Write(cursor == 0 ? "[" : ",");
-
-        Write("""
-            {"jsonrpc":"2.0","method":"
-            """);
-        Write(method);
-        Write("""
-            ","params":[
-            """);
-        for (int i = 0; i < args.Length; i++)
-        {
-            Write(i == 0 ? "\"" : ",\"");
-            Write(args[i]);
-            Write("\"");
-        }
-        Write("]}");
     }
+
+    public JsonRpcWriter(int bufferSize = 1024)
+    {
+        this.bufferSize = bufferSize;
+    }
+
+    public readonly ReadOnlyMemory<byte>? Memory => buffer?.AsMemory(..cursor);
 
     public void WriteRpc(string method, ref Keyhole keyhole)
     {
         var isBool = keyhole.Type == FormatType.Boolean;
+        StartRpcMessage(method, keyhole.Key, useQuotes: !isBool);
 
-        Write(cursor == 0 ? "[" : ",");
-
-        Write("""
-            {"jsonrpc":"2.0","method":"
-            """);
-        Write(method);
-        Write("""
-            ","params":["
-            """);
-        Write(keyhole.Key);
-        Write(isBool ? "\"," : "\",\"");
         _ = keyhole.Type switch
         {
             FormatType.StringLiteral => Write(keyhole.String!),
@@ -62,14 +42,60 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             FormatType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
             FormatType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
             FormatType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
-            // TODO: Implement
-            FormatType.Attribute => throw new NotImplementedException(),
-            FormatType.EventListener => throw new NotImplementedException(),
-            FormatType.Html => throw new NotImplementedException(),
-            FormatType.Enumerable => throw new NotImplementedException(),
             _ => throw new NotImplementedException()
         };
-        Write(isBool ? "]}" : "\"]}");
+
+        EndRpcMessage(!isBool);
+    }
+
+    public void WriteRpc(string method, string key, Span<Keyhole> keyholes)
+    {
+        StartRpcMessage(method, key);
+
+        for (int i = 0; i < keyholes.Length; i++)
+        {
+            ref var keyhole = ref keyholes[i];
+            _ = keyhole.Type switch
+            {
+                FormatType.StringLiteral => Write(keyhole.String ?? string.Empty),
+                FormatType.String => Write(keyhole.String ?? string.Empty),
+                FormatType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
+                FormatType.Color => Write(keyhole.Color, keyhole.Format),
+                FormatType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
+                FormatType.Integer => Write(keyhole.Integer, keyhole.Format),
+                FormatType.Long => Write(keyhole.Long, keyhole.Format),
+                FormatType.Float => Write(keyhole.Float, keyhole.Format),
+                FormatType.Double => Write(keyhole.Double, keyhole.Format),
+                FormatType.Decimal => Write(keyhole.Decimal, keyhole.Format),
+                FormatType.DateTime => Write(keyhole.DateTime, keyhole.Format),
+                FormatType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
+                FormatType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
+                FormatType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        EndRpcMessage();
+    }
+
+    private void StartRpcMessage(string method, string key, bool useQuotes = true)
+    {
+        Write(cursor == 0 ? "[" : ",");
+
+        Write("""
+            {"jsonrpc":"2.0","method":"
+            """);
+        Write(method);
+        Write("""
+            ","params":["
+            """);
+        Write(key);
+        Write(useQuotes ? "\",\"" : "\",");
+    }
+
+    private void EndRpcMessage(bool useQuotes = true)
+    {
+        Write(useQuotes ? "\"]}" : "]}");
     }
 
     private bool Write(string value)
@@ -124,7 +150,7 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
         }
     }
 
-    public void End()
+    public void EndBatch()
     {
         if (cursor > 0)
             Write("]");
@@ -136,14 +162,14 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
 
         // Growing by small increments is wasteful.  Buffer-growth should at least double.
         // Skip the gradual doubling if we know it won't be enough.
-        int newSize = Math.Max(sizeHint, buffer.Length) + buffer.Length;
+        bufferSize = Math.Max(sizeHint, buffer.Length) + buffer.Length;
 
         // TODO: Should this be a configuration somewhere?
-        if (newSize > 100_000_000)
+        if (bufferSize > 100_000_000)
             throw new ApplicationException("Max buffer size exceeded.");
 
         var oldBuffer = buffer;
-        var newBuffer = ArrayPool<byte>.Shared.Rent(newSize);
+        var newBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
         oldBuffer.CopyTo(newBuffer, 0);
         buffer = newBuffer;
         ArrayPool<byte>.Shared.Return(oldBuffer);

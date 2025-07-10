@@ -1,7 +1,4 @@
-using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Text;
 
 namespace Web4;
 
@@ -23,6 +20,17 @@ public struct Keyhole
     /// Helper property to make the code in DiffUtil read easier.
     /// </summary>
     public readonly Range ChildIndices => Integer..(Integer + Length);
+
+    /// <summary>
+    /// Helper property to make the code in DiffUtil read easier
+    /// </summary>
+    public readonly bool IsMemberOfHtmlAttribute => Length > 0;
+
+    /// <summary>
+    /// Value-based keyholes don't need to track a range and can reuse this 
+    /// backing field as an index to its parent attribute.
+    /// </summary>
+    public int AttributeStartIndex { readonly get => Length; set => Length = value; }
 
     public string? String { readonly get => reference as string; set => this.reference = value; }
     public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
@@ -61,12 +69,7 @@ public struct Keyhole
             FormatType.TimeOnly or
             FormatType.Color
                 => left.value == right.value && left.Format == right.Format,
-            FormatType.Attribute or
-            FormatType.EventListener or
-            FormatType.Html or
-            FormatType.Enumerable
-                => false,
-            _ => throw new NotImplementedException()
+            _ => throw new NotSupportedException()
         };
 
     public override readonly bool Equals(object? obj)
