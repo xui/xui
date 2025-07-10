@@ -33,6 +33,8 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
 
     public void WriteRpc(string method, ref Keyhole keyhole)
     {
+        var isBool = keyhole.Type == FormatType.Boolean;
+
         Write(cursor == 0 ? "[" : ",");
 
         Write("""
@@ -43,9 +45,7 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             ","params":["
             """);
         Write(keyhole.Key);
-        Write("""
-            ","
-            """);
+        Write(isBool ? "\"," : "\",\"");
         _ = keyhole.Type switch
         {
             FormatType.StringLiteral => Write(keyhole.String!),
@@ -69,7 +69,7 @@ public struct JsonRpcWriter(int bufferSize = 1024) : IDisposable
             FormatType.Enumerable => throw new NotImplementedException(),
             _ => throw new NotImplementedException()
         };
-        Write("\"]}");
+        Write(isBool ? "]}" : "\"]}");
     }
 
     private bool Write(string value)
