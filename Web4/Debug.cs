@@ -149,9 +149,6 @@ public static class Debug
                 yield return new("console.groupEnd", []);
                 break;
             case FormatType.Attribute:
-                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
-                yield return new("console.groupEnd", []);
-                break;
             case FormatType.Html:
             case FormatType.Enumerable:
                 int start = keyhole.Integer;
