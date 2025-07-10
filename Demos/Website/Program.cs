@@ -95,7 +95,7 @@ window.AddEventListener("click", e =>
 
 
 
-app.Map("/x01", () => $"""
+app.MapWeb4("/x01", () => $"""
     <!doctype html>
     <html>
         <body>
