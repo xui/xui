@@ -67,98 +67,11 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return base.WriteMutableValue(ref parent, value, format);
     }
 
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
-    {
-        Encoding.UTF8.GetBytes(attrName, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        var value = attrValue(null!);
-        Encoding.UTF8.GetBytes(value, Writer);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
-    {
-        // Boolean attributes are interesting in that the DOM treats them
-        // as true regardless of what value you supply.  The only way to 
-        // evaluate a boolean attribute to false is to exclude it.
-
-        var isTrue = attrValue(null!);
-        if (isTrue)
-        {
-            Encoding.UTF8.GetBytes(attrName, Writer);
-            // Boolean attributes don't need any value.
-        }
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
-        // where T : struct, IUtf8SpanFormattable
-    {
-        Encoding.UTF8.GetBytes(attrName, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        var value = attrValue(null!);
-        var destination = Writer.GetSpan();
-        value.TryFormat(destination, out int length, format, null);
-        Writer.Advance(length);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
-    {
-        Encoding.UTF8.GetBytes(attrName, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        attrValue(null!);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
-    {
-        Encoding.UTF8.GetBytes(attrName, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        var value = attrValue(null!);
-        var destination = Writer.GetSpan(value.GetMaxPossibleLength());
-        value.TryFormat(destination, out int length);
-        Writer.Advance(length);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
-    {
-        Encoding.UTF8.GetBytes(attrName, Writer);
-        Encoding.UTF8.GetBytes("=\"", Writer);
-
-        // TODO: Write Uri without allocating and with custom string formatters?
-        var value = attrValue(null!).ToString();
-        Encoding.UTF8.GetBytes(value, Writer);
-
-        Encoding.UTF8.GetBytes("\"", Writer);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
 
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => HandleNotSupported();
     
     private bool HandleNotSupported()
     {

@@ -29,147 +29,89 @@ namespace Web4
     public ref partial struct Html
     {
         public bool AppendFormatted(
-            Func<Target<string>, string> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous<string, int>(
-                    GetArgName(expression), 
-                    listener, 
-                    null, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<string>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<bool>, bool> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous<bool, int>(
-                    GetArgName(expression), 
-                    listener, 
-                    null, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<bool>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<int>, int> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<int>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
+
+        // TODO: I think converting `Func<Event, T>` to `Action<Event>` (e => listener(e)) is allocating.  
+        // Verify this and fix it.  There are 4 below, and one more `e => c++` at the bottom.
+
+        // How interesting.  Long, float, double, and decimal must use the signature
+        // `Func<Target<T>, T>` instead of `Action<Target<T>>` or else the 
+        // "call is ambiguous" due to these types' ability to cast to other types.
+        public bool AppendFormatted(
+            Func<Target<long>, long> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(e => listener(e), format, expression);
 
         public bool AppendFormatted(
-            Func<Target<long>, long> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Func<Target<float>, float> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(e => listener(e), format, expression);
 
         public bool AppendFormatted(
-            Func<Target<float>, float> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Func<Target<double>, double> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(e => listener(e), format, expression);
 
         public bool AppendFormatted(
-            Func<Target<double>, double> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Func<Target<decimal>, decimal> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(e => listener(e), format, expression);
 
         public bool AppendFormatted(
-            Func<Target<decimal>, decimal> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<DateTime>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<DateTime>, DateTime> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<DateOnly>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<DateOnly>, DateOnly> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<TimeOnly>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<TimeOnly>, TimeOnly> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous(
-                    GetArgName(expression), 
-                    listener, 
-                    listener, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<Color>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
         public bool AppendFormatted(
-            Func<Target<Color>, Color> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous<Color, int>(
-                    GetArgName(expression), 
-                    listener, 
-                    null, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Action<Target<Uri>> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(listener, format, expression);
 
+        // This is the only one where listener is a Func.  Also, `int` is the only return type  
+        // we need to support because because I want `onclick={e => c++}` to work without extra brackets.
         public bool AppendFormatted(
-            Func<Target<Uri>, Uri> listener, 
-            string? format = null, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendAmbiguous<Uri, int>(
-                    GetArgName(expression), 
-                    listener, 
-                    null, 
-                    formatForAttribute: format,
-                    formatForListener: format ?? Target.Format, 
-                    expression: expression);
+            Func<Target<int>, int> listener,
+            string? format = Target.Format,
+            [CallerArgumentExpression(nameof(listener))] string? expression = null)
+                => AppendEventListener(e => listener(e), format, expression);
     }
 }

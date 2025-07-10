@@ -202,83 +202,10 @@ public class SnapshotComposer : BaseComposer
         return base.WriteMutableValue(ref parent, value, format);
     }
 
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null)
-    // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, format, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        // Must trigger Html to append its splits.  Then reset the parent.
-        _ = attrValue(null!);
-
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.Attribute;
-        keyhole.String = expression;
-
-        return base.WriteMutableAttribute(ref parent, attrName, attrValue, expression);
-    }
-
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
-    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => WriteEventListener(ref parent, expression);
     private bool WriteEventListener(ref Html parent, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;

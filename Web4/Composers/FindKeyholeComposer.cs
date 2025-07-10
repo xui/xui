@@ -73,7 +73,6 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventListener(ref Html parent, ReadOnlySpan<char> argName, Action<object> listener, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
@@ -135,13 +134,6 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
-
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, string> attrValue, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, bool> attrValue, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableAttribute<T>(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, T> attrValue, string? format = null, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Html> attrValue, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Color> attrValue, string? expression = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableAttribute(ref Html parent, ReadOnlySpan<char> attrName, Func<Event, Uri> attrValue, string? expression = null) => MoveNextKeyAndComplete();
 
     public override bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
