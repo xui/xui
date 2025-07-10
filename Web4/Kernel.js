@@ -87,7 +87,7 @@ function bootstrap() {
   ws.onerror = console.error;
   ws.onmessage = (e) => clientRpc(e.data);
 
-  if (ui == undefined) { ui = {}; }
+  globalThis["ui"] = {};
   for (let k in ui) {
     let n = ui[k];
     if (n.nodeType == 8) {
@@ -96,12 +96,31 @@ function bootstrap() {
       ui[k] = t;
     }
   }
-  const attrs = document.evaluate('//*/attribute::*', document, null, 7, null);
+
+  let comments = document.evaluate('//comment()', document, null, 0, null);
+  let node = comments.iterateNext();
+  while (node) {
+    let key = node.textContent;
+    if (key.startsWith('key')) {
+      ui[key] = node.previousSibling;
+    }
+    node = comments.iterateNext();
+  }
+
+  let attrs = document.evaluate('//*/attribute::*', document, null, 7, null);
   for (i = 0; i < attrs.snapshotLength; i++) {
     let attr = attrs.snapshotItem(i);
-    if (attr.name.startsWith('key')) {
-      let prev = attrs.snapshotItem(i - 1);
-      ui[attr.name] = prev;
+    let key = attr.name;
+    if (key.startsWith('key')) {
+      if (attr.value === "") {
+        ui[key] = attrs.snapshotItem(i - 1);
+      } else {
+        ui[key] = { 
+          nodeType: Node.ENTITY_REFERENCE_NODE, 
+          booleanAttribute: attr.value, 
+          owner: attr.ownerElement
+        };
+      }
     }
   }
 
