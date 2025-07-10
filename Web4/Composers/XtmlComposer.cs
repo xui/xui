@@ -46,7 +46,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.OnHtmlPartialBegins(ref html);
     }
 
-    public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null)
     {
         switch (attributeStatus)
         {

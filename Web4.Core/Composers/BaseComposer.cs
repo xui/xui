@@ -69,7 +69,7 @@ public abstract class BaseComposer
     }
 
     public virtual void OnHtmlPartialBegins(ref Html parent) { }
-    public virtual bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public virtual bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null)
     {
         // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
         // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
@@ -83,14 +83,17 @@ public abstract class BaseComposer
     public virtual bool WriteMutableValue(ref Html parent, Color value, string? format = null) => CompleteFormattedValue();
     public virtual bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => CompleteFormattedValue();
     public virtual bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
-    
+
     public virtual bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    
+
     public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent
-        => OnHtmlPartialEnds(ref parent, component.Render(), format, expression);
+    {
+        var partial = component.Render();
+        return OnHtmlPartialEnds(ref parent, ref partial, format, expression);
+    }
 
     public virtual bool WriteMutableElement<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {

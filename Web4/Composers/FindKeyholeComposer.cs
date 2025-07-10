@@ -60,7 +60,7 @@ public class FindKeyholeComposer : BaseComposer
         base.OnHtmlPartialBegins(ref html);
     }
 
-    public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
+    public override bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null)
     {
         if (this.key is null)
             return false;

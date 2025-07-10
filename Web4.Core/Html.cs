@@ -176,7 +176,7 @@ public ref partial struct Html
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnHtmlPartialEnds(ref this, html, format, expression);
+        var @continue = composer.OnHtmlPartialEnds(ref this, ref html, format, expression);
         Cursor++;
         return @continue;
     }
