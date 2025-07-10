@@ -1,13 +1,13 @@
-function rpc(key, ev, incl) {
+function rpc(key, event, incl) {
   if (incl?.includes("preventDefault")) {
-    ev.preventDefault();
+    event.preventDefault();
     incl = incl.replace("preventDefault,", "");
     if (incl == "null") incl = null;
   }
   ws.send(JSON.stringify({
     jsonrpc: "2.0",
     method: key,
-    params: ev ? encodeEvent(ev, incl) : undefined,
+    params: event ? trimEvent(event, incl) : undefined,
   }));
 }
 
