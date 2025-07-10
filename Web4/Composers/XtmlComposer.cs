@@ -48,19 +48,26 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnHtmlPartialEnds(ref Html parent, Html partial, string? format = null, string? expression = null)
     {
-        if (attributeStatus == AttributeStatus.None && partial.Key?.Length > 0)
+        switch (attributeStatus)
         {
-            Writer.Inject($"""
-                <!-- {partial.Key} -->
-                """);
-        }
+            case AttributeStatus.None:
+                if (partial.Key?.Length > 0)
+                {
+                    Writer.Inject($"""
+                        <!-- {partial.Key} -->
+                        """);
+                }
+                break;
 
-        if (attributeStatus == AttributeStatus.InProgress)
-        {
-            Writer.Inject($"""
-                " {partial.Key}
-                """);
-            attributeStatus = AttributeStatus.None;
+            case AttributeStatus.InProgress:
+                Writer.Inject($"""
+                    " {partial.Key}
+                    """);
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.Pending:
+                throw new NotSupportedException("Attributes cannot have nested Htmls");
         }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
