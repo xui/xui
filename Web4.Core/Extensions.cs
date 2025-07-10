@@ -41,7 +41,7 @@ public static class Extensions
         };
 
         bytesWritten++;
-        return true;
+        return success;
     }
 
     /// <summary>
