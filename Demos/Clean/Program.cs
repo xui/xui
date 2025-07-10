@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
 string name = "World";
-int c = 0;
+int c = 16;
 double d = 3.14;
 string[] names = ["one", "two", "three", "four", "five", "six", "seven"];
 Color color = Color.Green;
@@ -40,9 +40,11 @@ var window = app.MapWeb4("/app", () => $"""
             <br/>
             <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
             <br/>
+            <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
+            <br/>
 
             <input type="color" value={color} oninput={e => color = e.Target.Value} />
-            <span style={$"color: {color}"}>{color:RGB}</span>
+            <span style={$"color: {color}; font-size: {c}pt;"}>{color:RGB}</span>
             <br/>
 
             <h2>Click on the buttons</h2>
