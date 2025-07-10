@@ -57,7 +57,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         if (attributeStatus == AttributeStatus.InProgress)
         {
-            Writer.Inject($"\"");
+            Writer.Inject($"""
+                " {partial.Key}
+                """);
             attributeStatus = AttributeStatus.None;
         }
 
