@@ -4,22 +4,11 @@ function rpc(key, ev, incl) {
     incl = incl.replace("preventDefault,", "");
     if (incl == "null") incl = null;
   }
-  if (ev) {
-    ws.send(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        method: key,
-        params: encodeEvent(ev, incl),
-      })
-    );
-  } else {
-    ws.send(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        method: key,
-      })
-    );
-  }
+  ws.send(JSON.stringify({
+    jsonrpc: "2.0",
+    method: key,
+    params: ev ? encodeEvent(ev, incl) : undefined,
+  }));
 }
 
 function mutate(key, value) {
