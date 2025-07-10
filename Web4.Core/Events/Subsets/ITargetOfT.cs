@@ -105,13 +105,5 @@ namespace Web4
             string? format = Target.Format,
             [CallerArgumentExpression(nameof(listener))] string? expression = null)
                 => AppendEventListener(listener, format, expression);
-
-        // This is the only one where listener is a Func.  Also, `int` is the only return type  
-        // we need to support because because I want `onclick={e => c++}` to work without extra brackets.
-        public bool AppendFormatted(
-            Func<Target<int>, int> listener,
-            string? format = Target.Format,
-            [CallerArgumentExpression(nameof(listener))] string? expression = null)
-                => AppendEventListener(e => listener(e), format, expression);
     }
 }
