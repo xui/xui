@@ -8,9 +8,7 @@ public class SnapshotComposer : BaseComposer
 {
     // TODO: Don't forget to implement the high watermark logic.
     private static int highWaterMark = 2048;
-    
     private StableKeyTreeWalker keyGenerator = new();
-
     public Keyhole[] Snapshot { get; private set; } = [];
 
     public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
