@@ -23,8 +23,8 @@ function mutate(key, value) {
 }
 
 let eventID = 0;
-function encodeEvent(e, incl) {
-  const allowList = incl?.split(",") ?? rootKeys;
+function trimEvent(e, incl) {
+  const allowList = incl?.split(",") ?? eventKeys;
   const json = {};
   for (let k in e) {
     let v = e[k];
