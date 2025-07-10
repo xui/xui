@@ -15,14 +15,10 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => true;
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => true; // where T : struct, IUtf8SpanFormattable // (from base)
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => true;
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => true;
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
 
-    private bool HandleNotSupported() => true;
-    private bool HandleNotSupported(ReadOnlySpan<char> attributeName) => true;
-
-    public override bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) => OnHtmlPartialEnds(ref parent, component.Render(), format, expression);
     public override bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null) => true;
 }
