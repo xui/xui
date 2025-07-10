@@ -93,7 +93,7 @@ public static class Debug
 
         if (debounceUntil > DateTime.Now)
         {
-            await Log(new JsonRpc("console.log", [$"Server diff output is debounced for {DEBOUNCE_SECONDS} second(s)..."]));
+            await Log(new JsonRpc("console.log", [$"Server console output is debounced for {DEBOUNCE_SECONDS} second(s)..."]));
             return;
         }
 
@@ -101,7 +101,7 @@ public static class Debug
 
         var messages = new List<JsonRpc>
         {
-            new("console.groupCollapsed", ["Server diff (2)"]),
+            new("console.groupCollapsed", ["Keyholes"]),
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
@@ -133,6 +133,14 @@ public static class Debug
                 break;
             case FormatType.Integer:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
+                yield return new("console.groupEnd", []);
+                break;
+            case FormatType.Boolean:
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
+                yield return new("console.groupEnd", []);
+                break;
+            case FormatType.Color:
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c◼ %c#{keyhole.Color.ToRgb():x}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x}", CSS_NUMBER]);
                 yield return new("console.groupEnd", []);
                 break;
             // TODO: Support the other FormatTypes too
