@@ -168,14 +168,14 @@ app.MapWeb4("/x01", () => $"""
                 OnClickAsync: { c }
             </button>
 
-            <button { style => $"background-color: {bg}; color: {fg};" } { size => max }>
-                Clicks: { c }
+            <button style={$"background-color: {bg}; color: {fg};"} size={max}>
+                Clicks: {c}
             </button>
 
-            <input type="checkbox" { @checked => isSelected } />
+            <input type="checkbox" checked={isSelected} />
 
-            <input type="number" { value => c } onchange={ e => c = e.Target.Value } />
-            <input type="text" { value => name } onchange={ e => name = e.Target?.Value ?? "" } onkeyup={ e => name = e.Target?.Value ?? "" } />
+            <input type="number" value={c} onchange={e => c = e.Target.Value} />
+            <input type="text" value={name} onchange={e => name = e.Target?.Value ?? ""} onkeyup={e => name = e.Target?.Value ?? ""} />
 
         </body>
     </html>
@@ -202,28 +202,28 @@ app.MapGet("/ctx", ctx => $"""
         <body>
             Hello world {c}
 
-            { JustAMethod(name: name) }
+            {JustAMethod(name: name)}
 
-            <button onclick="{ e => c++ }">
+            <button onclick={e => c++}>
                 Clicks: {c}
             </button>
 
-            <button onclick="{ OnClick }">
+            <button onclick={OnClick}>
                 Clicks: {c}
             </button>
 
-            <button onclick={ () => c++ }>
+            <button onclick={() => c++}>
                 Clicks: {c}
             </button>
 
-            <button { style => $"background-color: {bg}; color: {fg};" }>
-                Clicks: { c }
+            <button style={$"background-color: {bg}; color: {fg};"}>
+                Clicks: {c}
             </button>
 
-            <p {size => max:c}>{ ctx.Connection.Id }</p>
+            <p size={max:c}>{ctx.Connection.Id}</p>
 
-            <input type="checkbox" { @checked => isSelected } />
-            <input type="checkbox" { (isSelected ? "checked" : "") } />
+            <input type="checkbox" checked={isSelected} />
+            <input type="checkbox" {(isSelected ? "checked" : "")} />
         </body>
     </html>
     """
@@ -311,11 +311,11 @@ app.MapWeb4("/signatures", () => $"""
             <p>html: {TempFooter()}
 
             <h2>Mutable Attributes</h2>
-            <p><input {name => s} value="attribute string" /></p>
-            <p><input {@checked => b} type="checkbox" />attribute bool</p>
-            <p><input {max => i} type="number" />attribute int</p>
-            <p><input {value => 0.5} min="0" max="1" step="0.5" type="range" />attribute double</p>
-            <p><input {style => $"background-color: {bg}; color: {fg};"} type="submit" value="attribute html" /></p>
+            <p><input name={s} value="attribute string" /></p>
+            <p><input checked={b} type="checkbox" />attribute bool</p>
+            <p><input max={i} type="number" />attribute int</p>
+            <p><input value={0.5} min="0" max="1" step="0.5" type="range" />attribute double</p>
+            <p><input style={$"background-color: {bg}; color: {fg};"} type="submit" value="attribute html" /></p>
 
             <h2>Event Handlers</h2>
 
@@ -359,21 +359,21 @@ app.MapWeb4("/signatures", () => $"""
 
             <h3>Input Values</h3>
             <p>
-                <input type="text" { value => s } oninput={ e => s = e.Target?.Value ?? "error" } /> {s} <br/>
-                <input type="text" { value => s } oninput={ e => s = e.Target.Value } /> {s} <br/>
-                <input type="checkbox" { @checked => b } oninput={ e => b = e.Target.Value } /> {b}
-                <input type="checkbox" { @checked => b } oninput={ e => b = e.Target.Value } /> {b} <br/>
-                <input type="number" { value => i } oninput={ e => i = e.Target.Value } step="1" /> {i} <br/>
-                <input type="number" { value => l } oninput={ e => l = e.Target.Value } step="1000000" /> {l} <br/>
-                <input type="number" { value => f } oninput={ e => f = e.Target.Value } step="0.1" /> {f} <br/>
-                <input type="number" { value => d } oninput={ e => d = e.Target.Value } step="0.1" /> {d} <br/>
-                <input type="number" { value => m } oninput={ e => m = e.Target.Value } step="0.1" /> {m} <br/>
-                <input type="datetime-local" { value => dt } oninput={ e => dt = e.Target.Value } /> {dt} <br/>
-                <input type="date" { value => dO } oninput={ e => dO = e.Target.Value } /> {dO} <br/>
-                <input type="time" { value => tO } oninput={ e => tO = e.Target.Value } /> {tO} <br/>
-                <input type="color" { value => color } oninput={ e => color = e.Target.Value } /> {color} <br/>
-                <input type="url" { value => u } oninput={ e => u = e.Target.Value } /> {u} <br/>
-                <input type="file" { value => u } oninput={ e => u = e.Target.Value } /> {u} <br/>
+                <input type="text" value={s} oninput={e => s = e.Target?.Value ?? "error"} /> {s} <br/>
+                <input type="text" value={s} oninput={e => s = e.Target.Value} /> {s} <br/>
+                <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
+                <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b} <br/>
+                <input type="number" value={i} oninput={e => i = e.Target.Value} step="1" /> {i} <br/>
+                <input type="number" value={l} oninput={e => l = e.Target.Value} step="1000000" /> {l} <br/>
+                <input type="number" value={f} oninput={e => f = e.Target.Value} step="0.1" /> {f} <br/>
+                <input type="number" value={d} oninput={e => d = e.Target.Value} step="0.1" /> {d} <br/>
+                <input type="number" value={m} oninput={e => m = e.Target.Value} step="0.1" /> {m} <br/>
+                <input type="datetime-local" value={dt} oninput={e => dt = e.Target.Value} /> {dt} <br/>
+                <input type="date" value={dO} oninput={e => dO = e.Target.Value} /> {dO} <br/>
+                <input type="time" value={tO} oninput={e => tO = e.Target.Value} /> {tO} <br/>
+                <input type="color" value={color} oninput={e => color = e.Target.Value} /> {color} <br/>
+                <input type="url" value={u} oninput={e => u = e.Target.Value} /> {u} <br/>
+                <input type="file" value={u} oninput={e => u = e.Target.Value} /> {u} <br/>
             </p>
 
             <button id="itID" name="itName" onclick={DoIt2}>DoIt2</button>

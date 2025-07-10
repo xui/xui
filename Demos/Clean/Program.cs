@@ -11,6 +11,7 @@ double d = 3.14;
 string[] names = ["one", "two", "three", "four", "five", "six", "seven"];
 Color color = Color.Green;
 bool b = true;
+bool @checked = true;
 
 var window = app.MapWeb4("/app", () => $"""
     <html>
@@ -20,7 +21,7 @@ var window = app.MapWeb4("/app", () => $"""
             </button>
             {c:c} and {d:c}
 
-            {$"one {"two"} {3} four"}
+            {$"<div>one {"two"} {3} four</div>"}
             {MyButton(text: "Nice to repeat you")}
             {MyButton(text: "Nice to repeat you"):Fade}
 
@@ -33,20 +34,15 @@ var window = app.MapWeb4("/app", () => $"""
             { names.Select(n => NoCButton(text: n)) }
 
             <h2>Attribute stuffs</h2>
-            <input type="number" {value => c} oninput={e => c = e.Target.Value} /> {c}
+            <input type="number" value={c} oninput={e => c = e.Target.Value} /> {c}
             <br/>
-            <input type="text" {value => name} oninput={e => name = e.Target.Value} /> {name}
+            <input type="text" value={name} oninput={e => name = e.Target.Value} /> {name}
             <br/>
-            <input type="checkbox" {@checked => b} oninput={e => b = e.Target.Value} /> {b}
+            <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
             <br/>
-            <input type="color" {value => color} oninput={e => color = e.Target.Value} />
-            <span { style => (Html)$"color: {color}" }>{color:RGB}</span>
-            <br/>
-            <input type="color" { value => color } oninput={ e => color = e.Target.Value } />
-            <span { style => $"color: {color}" }>{color:RGB}</span>
-            <br/>
-            <input type="color" { value => color } oninput={ e => color = e.Target.Value } />
-            <span style="color:{color}">{color:RGB}</span>
+
+            <input type="color" value={color} oninput={e => color = e.Target.Value} />
+            <span style={$"color: {color}"}>{color:RGB}</span>
             <br/>
 
             <h2>Click on the buttons</h2>
