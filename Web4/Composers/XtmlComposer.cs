@@ -54,7 +54,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 if (partial.Key?.Length > 0)
                 {
                     Writer.Inject($"""
-                        <!-- {partial.Key} -->
+                        <!--{partial.Key}-->
                         """);
                 }
                 break;
@@ -348,7 +348,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             Writer.Inject($"""
-                <!-- {keyGenerator.GetNextKey()} -->
+                <!--{keyGenerator.GetNextKey()}-->
                 """);
 
             i++;
