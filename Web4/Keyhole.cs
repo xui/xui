@@ -1,57 +1,64 @@
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Web4;
 
 public struct Keyhole
 {
-    private long value; // 64 bits
-    private object? reference; // 64 bits
-    public string Key { get; set; } // 64 bits
-    public FormatType Type { get; set; } // 32 bits
-    public string? Format { get; set; } // 64 bits
-    public int Length { get; set; } // 32 bits
+    private string key;         // 64 bits
+    private object? reference;  // 64 bits
+    private long value1;        // 64 bits
+    private int value2;         // 32 bits
+    private KeyholeType type;   // 32 bits
+    private string? format;     // 64 bits
 
-    /// <summary>
-    /// Helper property to make the code in DiffUtil read easier.
-    /// </summary>
-    public readonly string? StringLiteral => String;
+    public string Key { readonly get => key; set => key = value; }
+    public KeyholeType Type { readonly get => type; set => type = value; }
+    public string? Format { readonly get => format; set => format = value; }
 
-    /// <summary>
-    /// Helper property to make the code in DiffUtil read easier.
-    /// </summary>
-    public readonly Range ChildIndices => Integer..(Integer + Length);
-
-    /// <summary>
-    /// Helper property to make the code in DiffUtil read easier
-    /// </summary>
-    public readonly bool IsMemberOfHtmlAttribute => Length > 0;
-
-    /// <summary>
-    /// Value-based keyholes don't need to track a range and can reuse this 
-    /// backing field as an index to its parent attribute.
-    /// </summary>
-    public int AttributeStartIndex { readonly get => Length; set => Length = value; }
-
+    // --- shared backing field: reference ---
+    // These properties all use `reference` as their backing field.  Since each keyhole
+    // can only represent a single type at a time we can save a great deal of 
+    // wasted RAM and boost memory locality of keyhole buffers by sharing a single backing store.
+    public string? StringLiteral { readonly get => reference as string; set => this.reference = value; }
     public string? String { readonly get => reference as string; set => this.reference = value; }
-    public bool Boolean { readonly get => value != 0; set => this.value = value ? 1 : 0; }
-    public Color Color { readonly get => Color.FromArgb((int)value); set => this.value = value.ToArgb(); }
     public Uri? Uri { readonly get => reference as Uri; set => this.reference = value; }
-    public int Integer { readonly get => (int)value; set => this.value = value; }
-    public long Long { readonly get => value; set => this.value = value; }
-    public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits(value); }
-    public double Double { readonly get => BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits(value); }
-    public decimal Decimal { readonly get => (decimal)BitConverter.Int64BitsToDouble(value); set => this.value = BitConverter.DoubleToInt64Bits((double)value); } // Note: lossy precision here
-    public DateTime DateTime { readonly get => new(value); set => this.value = value.Ticks; }
-    public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value); set => this.value = value.DayNumber; }
-    public TimeSpan TimeSpan { readonly get => new(value); set => this.value = value.Ticks; }
-    public TimeOnly TimeOnly { readonly get => new(value); set => this.value = value.Ticks; }
+
+    // --- backing field: value1 ---
+    // These properties all use `value1` as their backing field.  Since each keyhole
+    // can only represent a single type at a time we can save a great deal of 
+    // wasted RAM and boost memory locality of keyhole buffers by sharing a single backing store 
+    // and converting to and from a 64 bit number.  The primary use case is to check
+    // equality between two keyholes and we can bypass type conversion and compare 
+    // value1's directly (as long at the types match too).
+    public bool Boolean { readonly get => value1 != 0; set => this.value1 = value ? 1 : 0; }
+    public Color Color { readonly get => Color.FromArgb((int)value1); set => this.value1 = value.ToArgb(); }
+    public int Integer { readonly get => (int)value1; set => this.value1 = value; }
+    public long Long { readonly get => value1; set => this.value1 = value; }
+    public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits(value); }
+    public double Double { readonly get => BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits(value); }
+    public decimal Decimal { readonly get => (decimal)BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits((double)value); } // Note: lossy precision here
+    public DateTime DateTime { readonly get => new(value1); set => this.value1 = value.Ticks; }
+    public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value1); set => this.value1 = value.DayNumber; }
+    public TimeSpan TimeSpan { readonly get => new(value1); set => this.value1 = value.Ticks; }
+    public TimeOnly TimeOnly { readonly get => new(value1); set => this.value1 = value.Ticks; }
+
+    // --- backing field: value2 ---
+    // These properties all use `value2` as their backing field.  Like the properties that use 
+    // value1, they aim to conserve memory width in keyhole buffers by reusing one backing field 
+    // across a number of properties that are only used depending on the keyhole type.
+    public int Length { readonly get => value2; set => value2 = value; }
+    public readonly Range ChildIndices => Integer..(Integer + value2);
+    public readonly bool IsMemberOfHtmlAttribute => value2 > 0;
+    public int AttributeStartIndex { readonly get => value2; set => value2 = value; }
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
     public static bool operator !=(Keyhole left, Keyhole right) => !Equals(ref left, ref right);
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {
-            KeyholeType.StringLiteral or
+            KeyholeType.StringLiteral
+                => Object.ReferenceEquals(left.reference, right.reference),
             KeyholeType.String
                 => left.reference == right.reference,
             KeyholeType.Uri
