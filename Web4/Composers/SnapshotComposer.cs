@@ -73,7 +73,7 @@ public class SnapshotComposer : BaseComposer
             var index = parent.Index + parent.Cursor;
             ref var keyhole = ref Snapshot[index];
             keyhole.Key = partial.Key;
-            keyhole.Type = partial.IsAttribute ? FormatType.Attribute : FormatType.Html;
+            keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
             keyhole.String = expression;
             keyhole.Integer = partial.Index;
             keyhole.Length = partial.Length;
@@ -91,7 +91,7 @@ public class SnapshotComposer : BaseComposer
             var index = parent.Index + parent.Cursor;
             ref var keyhole = ref Snapshot[index];
             keyhole.String = literal;
-            keyhole.Type = FormatType.StringLiteral;
+            keyhole.Type = KeyholeType.StringLiteral;
             keyhole.Length = parent.Length;
             isWritingAttribute = literal.EndsWith('=');
         }
@@ -104,7 +104,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.String = value;
-        keyhole.Type = FormatType.String;
+        keyhole.Type = KeyholeType.String;
         keyhole.Format = null;
         if (parent.IsAttribute)
         {
@@ -125,7 +125,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.Boolean = value;
-        keyhole.Type = FormatType.Boolean;
+        keyhole.Type = KeyholeType.Boolean;
         keyhole.Format = null;
         if (parent.IsAttribute)
         {
@@ -146,7 +146,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.Color = value;
-        keyhole.Type = FormatType.Color;
+        keyhole.Type = KeyholeType.Color;
         keyhole.Format = format;
         if (parent.IsAttribute)
         {
@@ -167,7 +167,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.Uri = value;
-        keyhole.Type = FormatType.Uri;
+        keyhole.Type = KeyholeType.Uri;
         keyhole.Format = format;
         if (parent.IsAttribute)
         {
@@ -204,39 +204,39 @@ public class SnapshotComposer : BaseComposer
         {
             case int i:
                 keyhole.Integer = i;
-                keyhole.Type = FormatType.Integer;
+                keyhole.Type = KeyholeType.Integer;
                 break;
             case long l:
                 keyhole.Long = l;
-                keyhole.Type = FormatType.Long;
+                keyhole.Type = KeyholeType.Long;
                 break;
             case float f:
                 keyhole.Float = f;
-                keyhole.Type = FormatType.Float;
+                keyhole.Type = KeyholeType.Float;
                 break;
             case double d:
                 keyhole.Double = d;
-                keyhole.Type = FormatType.Double;
+                keyhole.Type = KeyholeType.Double;
                 break;
             case decimal m:
                 keyhole.Decimal = m;
-                keyhole.Type = FormatType.Decimal;
+                keyhole.Type = KeyholeType.Decimal;
                 break;
             case DateTime dt:
                 keyhole.DateTime = dt;
-                keyhole.Type = FormatType.DateTime;
+                keyhole.Type = KeyholeType.DateTime;
                 break;
             case DateOnly dO:
                 keyhole.DateOnly = dO;
-                keyhole.Type = FormatType.DateOnly;
+                keyhole.Type = KeyholeType.DateOnly;
                 break;
             case TimeSpan ts:
                 keyhole.TimeSpan = ts;
-                keyhole.Type = FormatType.TimeSpan;
+                keyhole.Type = KeyholeType.TimeSpan;
                 break;
             case TimeOnly tO:
                 keyhole.TimeOnly = tO;
-                keyhole.Type = FormatType.TimeOnly;
+                keyhole.Type = KeyholeType.TimeOnly;
                 break;
             default:
                 // In the future, possibly support other/custom IUtf8SpanFormattable types?
@@ -258,7 +258,7 @@ public class SnapshotComposer : BaseComposer
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.Key = keyGenerator.GetNextKey();
-        keyhole.Type = FormatType.EventListener;
+        keyhole.Type = KeyholeType.EventListener;
         keyhole.String = expression;
 
         return CompleteFormattedValue();
@@ -275,7 +275,7 @@ public class SnapshotComposer : BaseComposer
         var key = keyGenerator.GetNextKey();
         ref var enumerableKeyhole = ref Snapshot[parent.Index + parent.Cursor];
         enumerableKeyhole.Key = key;
-        enumerableKeyhole.Type = FormatType.Enumerable;
+        enumerableKeyhole.Type = KeyholeType.Enumerable;
         enumerableKeyhole.String = expression;
         enumerableKeyhole.Integer = keyGenerator.WriteHead;
         enumerableKeyhole.Length = itemCount;
@@ -291,7 +291,7 @@ public class SnapshotComposer : BaseComposer
 
             ref var itemKeyhole = ref Snapshot[index + i];
             itemKeyhole.Key = keyGenerator.GetNextKey();
-            itemKeyhole.Type = FormatType.Html;
+            itemKeyhole.Type = KeyholeType.Html;
             itemKeyhole.String = expression;
             itemKeyhole.Integer = partial.Index;
             itemKeyhole.Length = partial.Length;

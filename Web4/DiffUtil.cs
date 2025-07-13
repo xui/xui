@@ -72,19 +72,19 @@ public ref struct DiffUtil<T>(
 
             switch (keyholeAfter.Type)
             {
-                case FormatType.String:
-                case FormatType.Boolean:
-                case FormatType.Color:
-                case FormatType.Uri:
-                case FormatType.Integer:
-                case FormatType.Long:
-                case FormatType.Float:
-                case FormatType.Double:
-                case FormatType.Decimal:
-                case FormatType.DateTime:
-                case FormatType.DateOnly:
-                case FormatType.TimeSpan:
-                case FormatType.TimeOnly:
+                case KeyholeType.String:
+                case KeyholeType.Boolean:
+                case KeyholeType.Color:
+                case KeyholeType.Uri:
+                case KeyholeType.Integer:
+                case KeyholeType.Long:
+                case KeyholeType.Float:
+                case KeyholeType.Double:
+                case KeyholeType.Decimal:
+                case KeyholeType.DateTime:
+                case KeyholeType.DateOnly:
+                case KeyholeType.TimeSpan:
+                case KeyholeType.TimeOnly:
                     if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
                     {
                         if (!keyholeAfter.IsMemberOfHtmlAttribute)
@@ -100,21 +100,21 @@ public ref struct DiffUtil<T>(
                         }
                     }
                     break;
-                case FormatType.Html:
-                case FormatType.Attribute:
+                case KeyholeType.Html:
+                case KeyholeType.Attribute:
                     Span<Keyhole> keyholesBefore = bufferBefore.AsSpan(keyholeBefore.ChildIndices);
                     Span<Keyhole> keyholesAfter = bufferAfter.AsSpan(keyholeAfter.ChildIndices);
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffPartials(ref mutationBatch, keyholeAfter.Key, keyholesBefore, keyholesAfter);
                     break;
-                case FormatType.Enumerable:
+                case KeyholeType.Enumerable:
                     // TODO: Implement
                     break;
-                case FormatType.EventListener:
+                case KeyholeType.EventListener:
                     // Event listeners never need to be diff'd.  
                     // Their only purpose is for lookup.
                     break;
-                case FormatType.StringLiteral:
+                case KeyholeType.StringLiteral:
                     throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index");
                 default:
                     throw new InvalidOperationException("It should be impossible to find a non-mutable value in an odd index");

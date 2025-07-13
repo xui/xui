@@ -1,6 +1,6 @@
 namespace Web4;
 
-public enum FormatType
+public enum KeyholeType
 {
     StringLiteral,
     String,

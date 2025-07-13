@@ -122,35 +122,35 @@ public static class Debug
     {
         switch (keyhole.Type)
         {
-            case FormatType.StringLiteral:
+            case KeyholeType.StringLiteral:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c ",-24} 🟢 %c`{InlineString(keyhole.String)}`", CSS_VARIABLE, CSS_LITERAL]);
                 yield return new("console.log", [$"\n{keyhole.String}\n\n"]);
                 yield return new("console.groupEnd", []);
                 break;
-            case FormatType.String:
+            case KeyholeType.String:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING]);
                 yield return new("console.groupEnd", []);
                 break;
-            case FormatType.Integer:
+            case KeyholeType.Integer:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
                 yield return new("console.groupEnd", []);
                 break;
-            case FormatType.Boolean:
+            case KeyholeType.Boolean:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER]);
                 yield return new("console.groupEnd", []);
                 break;
-            case FormatType.Color:
+            case KeyholeType.Color:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c◼ %c#{keyhole.Color.ToRgb():x6}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", CSS_NUMBER]);
                 yield return new("console.groupEnd", []);
                 break;
             // TODO: Support the other FormatTypes too
-            case FormatType.EventListener:
+            case KeyholeType.EventListener:
                 yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.String} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
                 yield return new("console.groupEnd", []);
                 break;
-            case FormatType.Attribute:
-            case FormatType.Html:
-            case FormatType.Enumerable:
+            case KeyholeType.Attribute:
+            case KeyholeType.Html:
+            case KeyholeType.Enumerable:
                 int start = keyhole.Integer;
                 int length = (int)keyhole.Length;
                 if (keyhole.Key != string.Empty)

@@ -51,24 +51,24 @@ public struct Keyhole
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {
-            FormatType.StringLiteral or
-            FormatType.String
+            KeyholeType.StringLiteral or
+            KeyholeType.String
                 => left.reference == right.reference,
-            FormatType.Uri
+            KeyholeType.Uri
                 => left.reference == right.reference && left.Format == right.Format,
-            FormatType.Boolean
-                => left.value == right.value,
-            FormatType.Integer or
-            FormatType.Long or
-            FormatType.Float or
-            FormatType.Double or
-            FormatType.Decimal or
-            FormatType.DateTime or
-            FormatType.DateOnly or
-            FormatType.TimeSpan or
-            FormatType.TimeOnly or
-            FormatType.Color
-                => left.value == right.value && left.Format == right.Format,
+            KeyholeType.Boolean
+                => left.value1 == right.value1,
+            KeyholeType.Integer or
+            KeyholeType.Long or
+            KeyholeType.Float or
+            KeyholeType.Double or
+            KeyholeType.Decimal or
+            KeyholeType.DateTime or
+            KeyholeType.DateOnly or
+            KeyholeType.TimeSpan or
+            KeyholeType.TimeOnly or
+            KeyholeType.Color
+                => left.value1 == right.value1 && left.Format == right.Format,
             _ => throw new NotSupportedException()
         };
 
