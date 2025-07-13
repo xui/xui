@@ -31,26 +31,29 @@ public struct Keyhole
     // and converting to and from a 64 bit number.  The primary use case is to check
     // equality between two keyholes and we can bypass type conversion and compare 
     // value1's directly (as long at the types match too).
-    public bool Boolean { readonly get => value1 != 0; set => this.value1 = value ? 1 : 0; }
-    public Color Color { readonly get => Color.FromArgb((int)value1); set => this.value1 = value.ToArgb(); }
-    public int Integer { readonly get => (int)value1; set => this.value1 = value; }
-    public long Long { readonly get => value1; set => this.value1 = value; }
-    public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits(value); }
-    public double Double { readonly get => BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits(value); }
-    public decimal Decimal { readonly get => (decimal)BitConverter.Int64BitsToDouble(value1); set => this.value1 = BitConverter.DoubleToInt64Bits((double)value); } // Note: lossy precision here
-    public DateTime DateTime { readonly get => new(value1); set => this.value1 = value.Ticks; }
-    public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value1); set => this.value1 = value.DayNumber; }
-    public TimeSpan TimeSpan { readonly get => new(value1); set => this.value1 = value.Ticks; }
-    public TimeOnly TimeOnly { readonly get => new(value1); set => this.value1 = value.Ticks; }
+    public bool Boolean { readonly get => value1 != 0; set => value1 = value ? 1 : 0; }
+    public Color Color { readonly get => Color.FromArgb((int)value1); set => value1 = value.ToArgb(); }
+    public int Integer { readonly get => (int)value1; set => value1 = value; }
+    public long Long { readonly get => value1; set => value1 = value; }
+    public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value1); set => value1 = BitConverter.DoubleToInt64Bits(value); }
+    public double Double { readonly get => BitConverter.Int64BitsToDouble(value1); set => value1 = BitConverter.DoubleToInt64Bits(value); }
+    public decimal Decimal { readonly get => (decimal)BitConverter.Int64BitsToDouble(value1); set => value1 = BitConverter.DoubleToInt64Bits((double)value); } // Note: lossy precision here
+    public DateTime DateTime { readonly get => new(value1); set => value1 = value.Ticks; }
+    public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value1); set => value1 = value.DayNumber; }
+    public TimeSpan TimeSpan { readonly get => new(value1); set => value1 = value.Ticks; }
+    public TimeOnly TimeOnly { readonly get => new(value1); set => value1 = value.Ticks; }
+    public int StartIndex { readonly get => (int)value1; set => value1 = value; }
 
     // --- backing field: value2 ---
     // These properties all use `value2` as their backing field.  Like the properties that use 
     // value1, they aim to conserve memory width in keyhole buffers by reusing one backing field 
     // across a number of properties that are only used depending on the keyhole type.
-    public int Length { readonly get => value2; set => value2 = value; }
-    public readonly Range ChildIndices => Integer..(Integer + value2);
-    public readonly bool IsMemberOfHtmlAttribute => value2 > 0;
+    public int KeyholeCount { readonly get => value2; set => value2 = value; }
+    public int ParentKeyholeCount { readonly get => value2; set => value2 = value; }
+    public int ItemCount { readonly get => value2; set => value2 = value; }
     public int AttributeStartIndex { readonly get => value2; set => value2 = value; }
+    public readonly bool IsMemberOfHtmlAttribute => AttributeStartIndex > -1;
+    public readonly Range HtmlRange => StartIndex..(StartIndex + KeyholeCount);
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
     public static bool operator !=(Keyhole left, Keyhole right) => !Equals(ref left, ref right);

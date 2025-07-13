@@ -11,8 +11,11 @@ public ref struct DiffUtil<T>(
     {
         using var perf = Debug.PerfCheck("DiffUtil.Run"); // TODO: Remove PerfCheck
 
-        Span<Keyhole> partialBefore = bufferBefore.AsSpan(0, bufferBefore[0].Length);
-        Span<Keyhole> partialAfter = bufferAfter.AsSpan(0, bufferAfter[0].Length);
+        ref Keyhole firstBefore = ref bufferBefore[0];
+        ref Keyhole firstAfter = ref bufferAfter[0];
+        
+        Span<Keyhole> partialBefore = bufferBefore.AsSpan(..firstBefore.KeyholeCount);
+        Span<Keyhole> partialAfter = bufferAfter.AsSpan(..firstAfter.KeyholeCount);
 
         DiffPartials(ref mutationBatch, string.Empty, partialBefore, partialAfter);
 
@@ -102,8 +105,8 @@ public ref struct DiffUtil<T>(
                     break;
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    Span<Keyhole> keyholesBefore = bufferBefore.AsSpan(keyholeBefore.ChildIndices);
-                    Span<Keyhole> keyholesAfter = bufferAfter.AsSpan(keyholeAfter.ChildIndices);
+                    Span<Keyhole> keyholesBefore = bufferBefore.AsSpan(keyholeBefore.HtmlRange);
+                    Span<Keyhole> keyholesAfter = bufferAfter.AsSpan(keyholeAfter.HtmlRange);
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffPartials(ref mutationBatch, keyholeAfter.Key, keyholesBefore, keyholesAfter);
                     break;
@@ -126,7 +129,7 @@ public ref struct DiffUtil<T>(
     {
         var start = keyhole.AttributeStartIndex;
         ref var startKeyhole = ref buffer[start];
-        var end = start + startKeyhole.Length;
+        var end = start + startKeyhole.KeyholeCount;
         return buffer.AsSpan(start..end);
     }
 }

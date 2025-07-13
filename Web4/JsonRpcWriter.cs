@@ -28,7 +28,7 @@ public struct JsonRpcWriter : IDisposable
 
         _ = keyhole.Type switch
         {
-            KeyholeType.StringLiteral => Write(keyhole.String!),
+            KeyholeType.StringLiteral => Write(keyhole.StringLiteral!),
             KeyholeType.String => Write(keyhole.String!),
             KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
             KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
@@ -57,7 +57,7 @@ public struct JsonRpcWriter : IDisposable
             ref var keyhole = ref keyholes[i];
             _ = keyhole.Type switch
             {
-                KeyholeType.StringLiteral => Write(keyhole.String ?? string.Empty),
+                KeyholeType.StringLiteral => Write(keyhole.StringLiteral ?? string.Empty),
                 KeyholeType.String => Write(keyhole.String ?? string.Empty),
                 KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
                 KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
