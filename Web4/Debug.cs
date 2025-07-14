@@ -73,18 +73,14 @@ public static class Debug
 
     private static async Task Log(JsonRpc message)
     {
-        await http.Response.WriteAsync("data: ");
-        await http.Response.WriteAsync(JsonSerializer.Serialize(message));
-        await http.Response.WriteAsync("\n\n");
-        await http.Response.Body.FlushAsync(http.RequestAborted);
+        // TODO: Memory allocations
+        await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(message) + "\n\n", http.RequestAborted);
     }
 
     private static async Task Log(params IEnumerable<JsonRpc> messages)
     {
-        await http.Response.WriteAsync("data: ");
-        await http.Response.WriteAsync(JsonSerializer.Serialize(messages));
-        await http.Response.WriteAsync("\n\n");
-        await http.Response.Body.FlushAsync(http.RequestAborted);
+        // TODO: Memory allocations
+        await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(messages) + "\n\n", http.RequestAborted);
     }
 
     internal static async ValueTask Log(Keyhole[] before, Keyhole[] after)
@@ -105,7 +101,7 @@ public static class Debug
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
-        var rootLength = after[0].Length;
+        var rootLength = after[0].KeyholeCount;
         for (int index = 0; index < rootLength; index++)
         {
             ref Keyhole keyhole = ref after[index];
