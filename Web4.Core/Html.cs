@@ -160,17 +160,6 @@ public ref partial struct Html
 
     // MUTABLE ELEMENTS
 
-    // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public bool AppendFormatted<TComponent>(TComponent component, string? format = null, [CallerArgumentExpression(nameof(component))] string? expression = null) where TComponent : struct, IComponent
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
-        var @continue = composer.WriteMutableElement(ref this, ref component, format, expression);
-        Cursor++;
-        return @continue;
-    }
-
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public bool AppendFormatted(Html html, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
@@ -191,6 +180,17 @@ public ref partial struct Html
         var @continue = composer.WriteMutableElement(ref this, htmls, format, expression);
         Cursor++;
 
+        return @continue;
+    }
+
+    // EX: <div>{ new MyComponent(name: "Rylan") }</div>
+    public bool AppendFormatted<TComponent>(TComponent component, string? format = null, [CallerArgumentExpression(nameof(component))] string? expression = null) where TComponent : struct, IComponent
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableElement(ref this, ref component, format, expression);
+        Cursor++;
         return @continue;
     }
 
