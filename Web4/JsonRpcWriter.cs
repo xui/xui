@@ -25,56 +25,15 @@ public struct JsonRpcWriter : IDisposable
     {
         var isBool = keyhole.Type == KeyholeType.Boolean;
         StartRpcMessage(method, keyhole.Key, useQuotes: !isBool);
-
-        _ = keyhole.Type switch
-        {
-            KeyholeType.StringLiteral => Write(keyhole.StringLiteral!),
-            KeyholeType.String => Write(keyhole.String!),
-            KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
-            KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
-            KeyholeType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
-            KeyholeType.Integer => Write(keyhole.Integer, keyhole.Format),
-            KeyholeType.Long => Write(keyhole.Long, keyhole.Format),
-            KeyholeType.Float => Write(keyhole.Float, keyhole.Format),
-            KeyholeType.Double => Write(keyhole.Double, keyhole.Format),
-            KeyholeType.Decimal => Write(keyhole.Decimal, keyhole.Format),
-            KeyholeType.DateTime => Write(keyhole.DateTime, keyhole.Format),
-            KeyholeType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
-            KeyholeType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
-            KeyholeType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
-            _ => throw new NotImplementedException()
-        };
-
+        Write(ref keyhole);
         EndRpcMessage(!isBool);
     }
 
     public void WriteRpc(string method, string key, Span<Keyhole> keyholes)
     {
         StartRpcMessage(method, key);
-
         for (int i = 0; i < keyholes.Length; i++)
-        {
-            ref var keyhole = ref keyholes[i];
-            _ = keyhole.Type switch
-            {
-                KeyholeType.StringLiteral => Write(keyhole.StringLiteral ?? string.Empty),
-                KeyholeType.String => Write(keyhole.String ?? string.Empty),
-                KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
-                KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
-                KeyholeType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
-                KeyholeType.Integer => Write(keyhole.Integer, keyhole.Format),
-                KeyholeType.Long => Write(keyhole.Long, keyhole.Format),
-                KeyholeType.Float => Write(keyhole.Float, keyhole.Format),
-                KeyholeType.Double => Write(keyhole.Double, keyhole.Format),
-                KeyholeType.Decimal => Write(keyhole.Decimal, keyhole.Format),
-                KeyholeType.DateTime => Write(keyhole.DateTime, keyhole.Format),
-                KeyholeType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
-                KeyholeType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
-                KeyholeType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
-                _ => throw new NotImplementedException()
-            };
-        }
-
+            Write(ref keyholes[i]);
         EndRpcMessage();
     }
 
@@ -96,6 +55,28 @@ public struct JsonRpcWriter : IDisposable
     private void EndRpcMessage(bool useQuotes = true)
     {
         Write(useQuotes ? "\"]}" : "]}");
+    }
+
+    private bool Write(ref Keyhole keyhole)
+    {
+        return keyhole.Type switch
+        {
+            KeyholeType.StringLiteral => Write(keyhole.StringLiteral ?? string.Empty),
+            KeyholeType.String => Write(keyhole.String ?? string.Empty),
+            KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
+            KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
+            KeyholeType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
+            KeyholeType.Integer => Write(keyhole.Integer, keyhole.Format),
+            KeyholeType.Long => Write(keyhole.Long, keyhole.Format),
+            KeyholeType.Float => Write(keyhole.Float, keyhole.Format),
+            KeyholeType.Double => Write(keyhole.Double, keyhole.Format),
+            KeyholeType.Decimal => Write(keyhole.Decimal, keyhole.Format),
+            KeyholeType.DateTime => Write(keyhole.DateTime, keyhole.Format),
+            KeyholeType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
+            KeyholeType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
+            KeyholeType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
+            _ => throw new NotImplementedException()
+        };
     }
 
     private bool Write(string value)
