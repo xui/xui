@@ -197,30 +197,6 @@ public ref partial struct Html
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsEven(int number) => number % 2 == 0;
 
-    private static ReadOnlySpan<char> GetArgName(ReadOnlySpan<char> expression)
-    {
-        // Receives the expression but passed in as a string literal thanks to the
-        // compile-time magic of CompilerServices and CallerArgumentExpression!
-        // It can then peek at the first handful of bytes to disambiguate 
-        // the developer's intended usage based on "convention" (i.e the arg's name)
-        // Example expressions:
-        //     "maxlength => size" (this is an attribute)
-        //     "e => c++"          (this is an event handler method that takes an event as an argument)
-        //     "onclick => c++"    (this is an event handler method that takes zero arguments)
-
-        if (expression.Length >= 2)
-        {
-            // TODO: Make sure this doesn't allocate.
-            var end = expression.IndexOfAny([' ', '=']);
-            if (end > 0)
-            {
-                var start = expression[0] == '@' ? 1 : 0;
-                return expression[start..end];
-            }
-        }
-        return string.Empty;
-    }
-
     public struct Enumerable<T>(IEnumerable<T> source, Func<T, Html> selector)
     {
         public readonly int Count => source.Count();
