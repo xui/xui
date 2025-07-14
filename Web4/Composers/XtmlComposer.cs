@@ -340,11 +340,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
         // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
-        var enumerator = partials.GetEnumerator();
-        while (enumerator.MoveNext())
+        foreach (var partial in partials)
         {
-            var current = enumerator.Current;
-
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             Writer.Inject($"""
