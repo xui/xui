@@ -33,7 +33,9 @@ public struct JsonRpcWriter : IDisposable
     {
         StartRpcMessage(method, key);
         for (int i = 0; i < keyholes.Length; i++)
+        {
             Write(ref keyholes[i]);
+        }
         EndRpcMessage();
     }
 
