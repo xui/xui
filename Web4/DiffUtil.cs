@@ -2,27 +2,28 @@ using Web4.Transports;
 
 namespace Web4;
 
-public ref struct DiffUtil<T>(
-    Keyhole[] bufferBefore,
-    Keyhole[] bufferAfter)
-        where T : struct, IMutationBatch, allows ref struct
+public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
 {
-    public readonly void Run(ref T mutationBatch)
+    public static T CreateBatch<T>(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
+        where T : struct, IMutationBatch, allows ref struct
     {
-        using var perf = Debug.PerfCheck("DiffUtil.Run"); // TODO: Remove PerfCheck
+        using var perf = Debug.PerfCheck("DiffUtil.CreateBatch"); // TODO: Remove PerfCheck
 
         ref Keyhole firstBefore = ref bufferBefore[0];
         ref Keyhole firstAfter = ref bufferAfter[0];
-        
         Span<Keyhole> partialBefore = bufferBefore.AsSpan(..firstBefore.KeyholeCount);
         Span<Keyhole> partialAfter = bufferAfter.AsSpan(..firstAfter.KeyholeCount);
 
-        DiffPartials(ref mutationBatch, string.Empty, partialBefore, partialAfter);
-
+        T mutationBatch = default(T);
+        var diffUtil = new DiffUtil(bufferBefore, bufferAfter);
+        diffUtil.DiffPartials(ref mutationBatch, string.Empty, partialBefore, partialAfter);
         mutationBatch.Commit();
+
+        return mutationBatch;
     }
 
-    private readonly void DiffPartials(ref T mutationBatch, string key, Span<Keyhole> partialBefore, Span<Keyhole> partialAfter)
+    private readonly void DiffPartials<T>(ref T mutationBatch, string key, Span<Keyhole> partialBefore, Span<Keyhole> partialAfter)
+        where T : struct, IMutationBatch, allows ref struct
     {
         // The first thing to compare is the easiest (and fastest).
         // If the two partials have a different quantity of keyholes, 

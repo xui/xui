@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
@@ -41,18 +42,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     public async ValueTask ApplyMutations(Keyhole[] before, Keyhole[] after)
     {
-        var mutationBatch = new WebSocketMutationBatch();
-
-        new DiffUtil<WebSocketMutationBatch>(before, after)
-            .Run(ref mutationBatch);
-
-        using var writer = mutationBatch.Writer;
-
+        using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(before, after);
         using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
-        if (writer.Memory is ReadOnlyMemory<byte> batch)
+
+        if (mutationBatch.Buffer is ReadOnlyMemory<byte> buffer)
         {
             await webSocket.SendAsync(
-                buffer: batch,
+                buffer: buffer,
                 messageType: WebSocketMessageType.Text,
                 endOfMessage: true,
                 cancellationToken: http.RequestAborted);
@@ -71,9 +67,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             }
 
             var rpcEvent = new WebSocketEvent(message);
-            window.Invalidate(); // TODO: This line doesn't belong here.
+            foreach (var w in windows.Values)
+                w.Invalidate(); // TODO: This line doesn't belong here.
+
             window.HandleEvent(rpcMethod, ref rpcEvent);
-            window.RequestUpdate(); // TODO: This line doesn't belong here.
+
+            foreach (var w in windows.Values)
+                w.RequestUpdate(); // TODO: This line doesn't belong here.
         }
     }
 

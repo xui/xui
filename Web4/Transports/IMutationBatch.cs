@@ -1,6 +1,6 @@
 namespace Web4.Transports;
 
-public interface IMutationBatch
+public interface IMutationBatch : IDisposable
 {
     void UpdateValue(string key, ref Keyhole before, ref Keyhole after);
     void UpdateAttribute(string key, Span<Keyhole> before, Span<Keyhole> after);

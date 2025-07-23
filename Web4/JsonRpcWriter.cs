@@ -1,161 +1,219 @@
 using System.Buffers;
 using System.Drawing;
 using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Web4;
 
-public struct JsonRpcWriter : IDisposable
+public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
 {
-    private int bufferSize;
-    private byte[]? buffer = null;
     private int cursor = 0;
+    private byte[] buffer;
+    private readonly Utf8JsonWriter utf8JsonWriter;
 
-    public JsonRpcWriter() : this(1024)
+    public JsonRpcWriter() : this(1024) { }
+
+    public JsonRpcWriter(int bufferSize)
     {
+        buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        utf8JsonWriter = new(this);
     }
 
-    public JsonRpcWriter(int bufferSize = 1024)
+    public ReadOnlyMemory<byte>? Result => buffer?.AsMemory(..cursor);
+
+    public JsonRpcWriter BeginBatch()
     {
-        this.bufferSize = bufferSize;
+        utf8JsonWriter.WriteStartArray();
+        return this;
     }
 
-    public readonly ReadOnlyMemory<byte>? Memory => buffer?.AsMemory(..cursor);
+    public JsonRpcWriter EndBatch()
+    {
+        utf8JsonWriter.WriteEndArray();
+        utf8JsonWriter.Flush();
+        return this;
+    }
 
     public void WriteRpc(string method, ref Keyhole keyhole)
     {
-        var isBool = keyhole.Type == KeyholeType.Boolean;
-        StartRpcMessage(method, keyhole.Key, useQuotes: !isBool);
-        Write(ref keyhole);
-        EndRpcMessage(!isBool);
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+        utf8JsonWriter.WriteString("method", method);
+        utf8JsonWriter.WriteStartArray("params");
+        utf8JsonWriter.WriteStringValue(keyhole.Key);
+        WriteKeyholeValue(ref keyhole);
+        utf8JsonWriter.WriteEndArray();
+        utf8JsonWriter.WriteEndObject();
     }
 
-    public void WriteRpc(string method, string key, Span<Keyhole> keyholes)
+    public void WriteRpc(string method, string key, Span<Keyhole> keyholes, bool includeSentinels)
     {
-        StartRpcMessage(method, key);
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+        utf8JsonWriter.WriteString("method", method);
+        utf8JsonWriter.WriteStartArray("params");
+
+        utf8JsonWriter.WriteStringValue(key);
+
         for (int i = 0; i < keyholes.Length; i++)
         {
-            Write(ref keyholes[i]);
+            ref var keyhole = ref keyholes[i];
+
+            if (keyhole.Type == KeyholeType.StringLiteral)
+            {
+                var isLast = i == keyholes.Length - 1;
+                utf8JsonWriter.WriteStringValueSegment(keyhole.StringLiteral, isLast);
+                continue;
+            }
+
+            if (includeSentinels)
+            {
+                utf8JsonWriter.WriteStringValueSegment("<!-- -->", false);
+            }
+
+            switch (keyhole.Type)
+            {
+                case KeyholeType.String:
+                    utf8JsonWriter.WriteStringValueSegment(keyhole.String, false);
+                    break;
+                case KeyholeType.Boolean:
+                    utf8JsonWriter.WriteStringValueSegment(keyhole.Boolean ? "true" : "false", false);
+                    break;
+                default:
+                    utf8JsonWriter.Flush();
+                    WriteRawWithFormatString(ref keyhole);
+                    break;
+            }
+
+            if (includeSentinels)
+            {
+                utf8JsonWriter.WriteStringValueSegment("<!--", false);
+                utf8JsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                utf8JsonWriter.WriteStringValueSegment("-->", false);
+            }
         }
-        EndRpcMessage();
+
+        utf8JsonWriter.WriteEndArray();
+        utf8JsonWriter.WriteEndObject();
     }
 
-    private void StartRpcMessage(string method, string key, bool useQuotes = true)
+    private void WriteKeyholeValue(ref Keyhole keyhole)
     {
-        Write(cursor == 0 ? "[" : ",");
-
-        Write("""
-            {"jsonrpc":"2.0","method":"
-            """);
-        Write(method);
-        Write("""
-            ","params":["
-            """);
-        Write(key);
-        Write(useQuotes ? "\",\"" : "\",");
-    }
-
-    private void EndRpcMessage(bool useQuotes = true)
-    {
-        Write(useQuotes ? "\"]}" : "]}");
-    }
-
-    private bool Write(ref Keyhole keyhole)
-    {
-        return keyhole.Type switch
+        // String and Boolean do not use format strings.
+        switch (keyhole.Type)
         {
-            KeyholeType.StringLiteral => Write(keyhole.StringLiteral ?? string.Empty),
-            KeyholeType.String => Write(keyhole.String ?? string.Empty),
-            KeyholeType.Boolean => Write(keyhole.Boolean ? "true" : "false"),
-            KeyholeType.Color => Write(keyhole.Color, keyhole.Format),
-            KeyholeType.Uri => Write(keyhole.Uri!.ToString()), // TODO: Fix memory allocation!
-            KeyholeType.Integer => Write(keyhole.Integer, keyhole.Format),
-            KeyholeType.Long => Write(keyhole.Long, keyhole.Format),
-            KeyholeType.Float => Write(keyhole.Float, keyhole.Format),
-            KeyholeType.Double => Write(keyhole.Double, keyhole.Format),
-            KeyholeType.Decimal => Write(keyhole.Decimal, keyhole.Format),
-            KeyholeType.DateTime => Write(keyhole.DateTime, keyhole.Format),
-            KeyholeType.DateOnly => Write(keyhole.DateOnly, keyhole.Format),
-            KeyholeType.TimeSpan => Write(keyhole.TimeSpan, keyhole.Format),
-            KeyholeType.TimeOnly => Write(keyhole.TimeOnly, keyhole.Format),
-            _ => throw new NotImplementedException()
-        };
-    }
-
-    private bool Write(string value)
-    {
-        buffer ??= ArrayPool<byte>.Shared.Rent(bufferSize);
-        Span<byte> destination = buffer.AsSpan(cursor..);
-
-        if (cursor + value.Length < buffer.Length)
-        {
-            var bytesWritten = Encoding.UTF8.GetBytes(value, destination);
-            cursor += bytesWritten;
-            return true;
+            case KeyholeType.String:
+                utf8JsonWriter.WriteStringValue(keyhole.String);
+                return;
+            case KeyholeType.Boolean:
+                utf8JsonWriter.WriteBooleanValue(keyhole.Boolean);
+                return;
         }
-        else
-        {
-            GrowBuffer(value.Length);
-            return Write(value);
-        }
+
+        utf8JsonWriter.Flush();
+        Encoding.UTF8.GetBytes(",\"", this);
+        WriteRawWithFormatString(ref keyhole);        
+        Encoding.UTF8.GetBytes("\"", this);
     }
 
-    private bool Write<T>(T value, string? format = null) where T : struct, IUtf8SpanFormattable
+    private void WriteRawWithFormatString(ref Keyhole keyhole)
     {
-        buffer ??= ArrayPool<byte>.Shared.Rent(bufferSize);
-        Span<byte> destination = buffer.AsSpan(cursor..);
-
-        if (value.TryFormat(destination, out var bytesWritten, format, null))
+        // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
+        int length = 0;
+        switch (keyhole.Type)
         {
-            cursor += bytesWritten;
-            return true;
+            case KeyholeType.Color:
+                while (!keyhole.Color.TryFormat(GetSpan(9), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Uri:
+                // TODO: Fix memory allocation and support format string?
+                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), this);
+                break;
+            case KeyholeType.Integer:
+                while (!keyhole.Integer.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Long:
+                while (!keyhole.Long.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Float:
+                while (!keyhole.Float.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Double:
+                while (!keyhole.Double.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Decimal:
+                while (!keyhole.Decimal.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.DateTime:
+                while (!keyhole.DateTime.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.DateOnly:
+                while (!keyhole.DateOnly.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.TimeSpan:
+                while (!keyhole.TimeSpan.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.TimeOnly:
+                while (!keyhole.TimeOnly.TryFormat(GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
         }
-        else
-        {
-            GrowBuffer(1);
-            return Write(value, format);
-        }
+        Advance(length);
     }
 
-    private bool Write(Color value, string? format = null)
-    {
-        buffer ??= ArrayPool<byte>.Shared.Rent(bufferSize);
-        Span<byte> destination = buffer.AsSpan(cursor..);
-
-        if (value.TryFormat(destination, out var bytesWritten, format))
-        {
-            cursor += bytesWritten;
-            return true;
-        }
-        else
-        {
-            GrowBuffer(1);
-            return Write(value, format);
-        }
-    }
-
-    public void EndBatch()
-    {
-        if (cursor > 0)
-            Write("]");
-    }
-
-    private void GrowBuffer(int sizeHint)
+    private void GrowBuffer(int sizeHint = 1)
     {
         ArgumentNullException.ThrowIfNull(buffer);
 
         // Growing by small increments is wasteful.  Buffer-growth should at least double.
         // Skip the gradual doubling if we know it won't be enough.
-        bufferSize = Math.Max(sizeHint, buffer.Length) + buffer.Length;
+        int newLength = Math.Max(sizeHint, buffer.Length) + buffer.Length;
 
         // TODO: Should this be a configuration somewhere?
-        if (bufferSize > 100_000_000)
+        if (newLength > 100_000_000)
             throw new ApplicationException("Max buffer size exceeded.");
 
         var oldBuffer = buffer;
-        var newBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var newBuffer = ArrayPool<byte>.Shared.Rent(newLength);
         oldBuffer.CopyTo(newBuffer, 0);
         buffer = newBuffer;
         ArrayPool<byte>.Shared.Return(oldBuffer);
+    }
+
+    public void Advance(int count)
+    {
+        cursor += count;
+    }
+
+    public Memory<byte> GetMemory(int sizeHint = 0)
+    {
+        if (cursor + sizeHint > buffer.Length)
+            GrowBuffer();
+        return buffer.AsMemory(cursor..);
+    }
+
+    public Span<byte> GetSpan(int sizeHint = 0)
+    {
+        if (cursor + sizeHint > buffer.Length)
+            GrowBuffer();
+        return buffer.AsSpan(cursor..);
+    }
+
+    public bool TryReset()
+    {
+        cursor = 0;
+        utf8JsonWriter.Reset(this);
+        return true;
     }
 
     public void Dispose()
