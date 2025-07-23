@@ -1,10 +1,10 @@
 function setTextNode(key, value) {
-  let textNode = ui[key];
+  let textNode = keyholes[key];
   textNode.nodeValue = value;
 }
 
 function setAttribute(key, value) {
-  let attribute = ui[key];
+  let attribute = keyholes[key];
   if (typeof value !== "boolean") {
     attribute.value = value;
   } else {
@@ -14,12 +14,12 @@ function setAttribute(key, value) {
 }
 
 function setElement(key, value, transition) {
-  let oldElement = ui[key];
+  let oldElement = keyholes[key];
   let newElement = document
     .createRange()
     .createContextualFragment(value)
     .children[0];
-  ui[key] = newElement;
+  keyholes[key] = newElement;
   registerKeys(newElement);
 
   // Transition not requested or not supported
@@ -81,7 +81,7 @@ function registerKeys(parentNode) {
   while (node) {
     let key = node.textContent;
     if (key.startsWith('key')) {
-      ui[key] = node.previousSibling;
+      keyholes[key] = node.previousSibling;
     }
     toRemove.push(node);
     node = comments.iterateNext();
@@ -90,12 +90,12 @@ function registerKeys(parentNode) {
   // TODO: What is the performance cost of manipulating the DOM so many times onload?
   toRemove.forEach(n => n.parentElement.removeChild(n));
 
-  for (let k in ui) {
-    let n = ui[k];
+  for (let k in keyholes) {
+    let n = keyholes[k];
     if (n.nodeType == 8) {
       let t = document.createTextNode("");
       n.parentNode.insertBefore(t, n.nextSibling);
-      ui[k] = t;
+      keyholes[k] = t;
     }
   }
   
@@ -105,9 +105,9 @@ function registerKeys(parentNode) {
     let key = attr.name;
     if (key.startsWith('key')) {
       if (attr.value === "") {
-        ui[key] = attrs.snapshotItem(i - 1);
+        keyholes[key] = attrs.snapshotItem(i - 1);
       } else {
-        ui[key] = { 
+        keyholes[key] = { 
           nodeType: Node.ENTITY_REFERENCE_NODE, 
           booleanAttribute: attr.value, 
           owner: attr.ownerElement
@@ -119,20 +119,15 @@ function registerKeys(parentNode) {
   }
 }
 
-function bootstrap() {
-  const protocol = location.protocol.replace("http", "ws");
-  const ws = new WebSocket(`${protocol}//${location.host}${location.pathname}`);
-  globalThis["ws"] = ws;
-  ws.onopen = console.debug;
-  ws.onclose = console.debug;
-  ws.onerror = console.error;
-  ws.onmessage = (e) => clientRpc(e.data);
-
-  globalThis["ui"] = {};
-  registerKeys(document);
-}
-
-bootstrap();
+let keyholes = {};
+registerKeys(document);
 
 let propagationID = 0;
+let protocol = location.protocol.replace("http", "ws");
+let ws = new WebSocket(`${protocol}//${location.host}${location.pathname}`);
+ws.onopen = console.debug;
+ws.onclose = console.debug;
+ws.onerror = console.error;
+ws.onmessage = (e) => clientRpc(e.data);
+
 const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
