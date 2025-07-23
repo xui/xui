@@ -306,12 +306,12 @@ public class WindowBuilder :
     private string CreateListenerString(string? format, string type, string target, string key, string options) => format switch
     {
         // Serialize nothing – the event object is never used
-        ""      => $"{target}.addEventListener('{type}', () => rpc('{key}'), {options});",
+        ""      => $"{target}.addEventListener('{type}', () => serverRpc('{key}'), {options});",
 
         // Serialize the event – the event object is needed
-        null    => $"{target}.addEventListener('{type}', e => rpc('{key}', e), {options});",
+        null    => $"{target}.addEventListener('{type}', e => serverRpc('{key}', e), {options});",
 
         // Serialize selectively – only a few properties are ever used
-        _       => $"{target}.addEventListener('{type}', e => rpc('{key}', e, '{format}'), {options});",
+        _       => $"{target}.addEventListener('{type}', e => serverRpc('{key}', e, '{format}'), {options});",
     };
 }

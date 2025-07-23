@@ -21,7 +21,7 @@ namespace Web4
             Target<Color>,
             Target<Uri>
         {
-            new const string Format = "target";
+            new const string Format = "target,id,name,type,checked,value";
 
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.

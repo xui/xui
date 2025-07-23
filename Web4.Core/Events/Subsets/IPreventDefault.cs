@@ -31,17 +31,5 @@ namespace Web4
             string? format = PreventDefault.Format, 
             [CallerArgumentExpression(nameof(listener))] string? expression = null) 
                 => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Action<Event.PreventDefault> listener, 
-            string? format = "preventDefault,null", 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Event.PreventDefault, Task> listener, 
-            string? format = "preventDefault,null", 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }

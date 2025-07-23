@@ -305,19 +305,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (includeEventArg && format != null)
         {
             Writer.Inject($"""
-                "rpc('{key}',event,'{format ?? ""}')"
+                "serverRpc('{key}',event,'{format ?? ""}')"
                 """);
         }
         else if (includeEventArg && format == null)
         {
             Writer.Inject($"""
-                "rpc('{key}',event)"
+                "serverRpc('{key}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "rpc('{key}')"
+                "serverRpc('{key}')"
                 """);
         }
         

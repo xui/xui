@@ -1,93 +1,95 @@
-function rpc(key, event, incl) {
-  if (incl?.includes("preventDefault")) {
-    event.preventDefault();
-    incl = incl.replace("preventDefault,", "");
-    if (incl == "null") incl = null;
-  }
-  ws.send(JSON.stringify({
-    jsonrpc: "2.0",
-    method: key,
-    params: event ? trimEvent(event, incl) : undefined,
-  }));
+function setTextNode(key, value) {
+  let textNode = ui[key];
+  textNode.nodeValue = value;
 }
 
-function mutate(key, value) {
-  let node = ui[key];
-  if (!node) return console.error(`Keyhole ${key} is missing`);
-  switch (node.nodeType) {
-    case Node.TEXT_NODE:              node.nodeValue = value; break;
-    case Node.ATTRIBUTE_NODE:         node.value = value; break;
-    case Node.ELEMENT_NODE:           node.outerHTML = value; break;
-    case Node.ENTITY_REFERENCE_NODE:  node.owner[node.booleanAttribute] = value; break;
+function setAttribute(key, value) {
+  let attribute = ui[key];
+  if (typeof value !== "boolean") {
+    attribute.value = value;
+  } else {
+    let attrName = attribute.booleanAttribute;
+    attribute.owner[attrName] = value;
   }
 }
 
-let eventID = 0;
-function trimEvent(e, incl) {
-  const allowList = incl?.split(",") ?? eventKeys;
-  const json = {};
-  for (let k in e) {
-    let v = e[k];
-    if (v != null && allowList.includes(k)) {
-      if (v instanceof EventTarget) {
-        json[k] = {};
-        for (let k2 in v) {
-          let v2 = v[k2];
-          if (eventTargetKeys.includes(k2) && v2 !== "") json[k][k2] = v2;
-        }
-      } else {
-        json[k] = v;
-      }
-    }
+function setElement(key, value, transition) {
+  let oldElement = ui[key];
+  let newElement = document
+    .createRange()
+    .createContextualFragment(value)
+    .children[0];
+  ui[key] = newElement;
+  registerKeys(newElement);
+
+  // Transition not requested or not supported
+  if (!document.startViewTransition || !transition) {
+    oldElement.replaceWith(newElement);
+    return;
   }
-  if (!e._id) e._id = ++eventID;
-  json._id = e._id;
-  return json;
+  
+  // Animate this mutation
+  document.startViewTransition(() => {
+    oldElement.replaceWith(newElement);
+  });
 }
 
-function replaceNode(node, content) {
-  const regScript = node.nextSibling;
-  node.outerHTML = content;
-  node = regScript.previousSibling;
-  reRegister(regScript);
-  for (let s of node.getElementsByTagName("script")) {
-    reRegister(s);
+function moveElement() {
+
+}
+
+function addElement() {
+
+}
+
+function removeElement() {
+
+}
+
+function clientRpc(data) {
+  let batch = JSON.parse(data);
+  if (!Array.isArray(batch)) batch = [batch];
+  batch.forEach((jsonRpcMessage) => {
+    let func = globalThis;
+    jsonRpcMessage.method.split(".").forEach((s) => (func = func[s]));
+    func.apply(globalThis, jsonRpcMessage.params)
+  });
+}
+
+function serverRpc(key, event, includeProperties) {
+  if (event && !event.propagationID)
+    event.propagationID = ++propagationID;
+
+  if (includeProperties?.includes("preventDefault")) {
+    event?.preventDefault();
+    if (includeProperties === "preventDefault")
+      includeProperties = null;
   }
-}
+  includeProperties = includeProperties?.split(",") ?? ALLOWED_EVENT_PROPERTIES;
 
-function reRegister(node) {
-  if (node.tagName == "SCRIPT") {
-    const s = document.createElement("script");
-    s.textContent = node.textContent;
-    node.replaceWith(s);
-  }
-}
-
-function findRpcFunction(name) {
-  let f = globalThis;
-  name.split(".").forEach((s) => (f = f[s]));
-  return f;
-}
-
-function clientRpc(message) {
-  let json = JSON.parse(message);
-  if (!Array.isArray(json)) json = [json];
-  json.forEach((message) =>
-    findRpcFunction(message.method).apply(globalThis, message.params)
+  let message = JSON.stringify(
+    { jsonrpc: "2.0", method: key, params: event }, 
+    [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
   );
+  ws.send(message);
 }
 
-function bootstrap() {
-  const l = location;
-  const p = l.protocol.replace("http", "ws");
-  const ws = new WebSocket(`${p}//${l.host}${l.pathname}`);
-  globalThis["ws"] = ws;
-  ws.onopen = console.debug;
-  ws.onclose = console.debug;
-  ws.onerror = console.error;
-  ws.onmessage = (e) => clientRpc(e.data);
+function registerKeys(parentNode) {
+  let comments = document.evaluate('//comment()', parentNode, null, 0, null);
+  let node = comments.iterateNext();
+  let toRemove = [];
+  while (node) {
+    let key = node.textContent;
+    if (key.startsWith('key')) {
+      ui[key] = node.previousSibling;
+    }
+    toRemove.push(node);
+    node = comments.iterateNext();
+  }
 
-  globalThis["ui"] = {};
+  // TODO: What is the performance cost of manipulating the DOM so many times onload?
+  toRemove.forEach(n => n.parentElement.removeChild(n));
+
   for (let k in ui) {
     let n = ui[k];
     if (n.nodeType == 8) {
@@ -96,18 +98,8 @@ function bootstrap() {
       ui[k] = t;
     }
   }
-
-  let comments = document.evaluate('//comment()', document, null, 0, null);
-  let node = comments.iterateNext();
-  while (node) {
-    let key = node.textContent;
-    if (key.startsWith('key')) {
-      ui[key] = node.previousSibling;
-    }
-    node = comments.iterateNext();
-  }
-
-  let attrs = document.evaluate('//*/attribute::*', document, null, 7, null);
+  
+  let attrs = document.evaluate('//*/attribute::*', parentNode, null, 7, null);
   for (i = 0; i < attrs.snapshotLength; i++) {
     let attr = attrs.snapshotItem(i);
     let key = attr.name;
@@ -121,28 +113,26 @@ function bootstrap() {
           owner: attr.ownerElement
         };
       }
-    }
-  }
-
-  // TODO: What is the performance cost of manipulating the DOM so many times onload?
-  // Clean up the many <script> and <!-- --> nodes.
-  while (document.scripts.length > 0) {
-    const s = document.scripts[0];
-    const c = s.previousSibling.previousSibling;
-    if (c.nodeType == Node.COMMENT_NODE) {
-      c.parentNode.removeChild(c);
-    }
-    s.parentNode.removeChild(s);
-  }
-  for (i = 0; i < attrs.snapshotLength; i++) {
-    let attr = attrs.snapshotItem(i);
-    if (attr.name.startsWith('key')) {
+      // TODO: What is the performance cost of manipulating the DOM so many times onload?
       attr.ownerElement.removeAttribute(attr.name)
     }
   }
 }
 
-const eventTargetKeys = ["id", "name", "type", "value", "checked"];
-const eventKeys = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y" ];
+function bootstrap() {
+  const protocol = location.protocol.replace("http", "ws");
+  const ws = new WebSocket(`${protocol}//${location.host}${location.pathname}`);
+  globalThis["ws"] = ws;
+  ws.onopen = console.debug;
+  ws.onclose = console.debug;
+  ws.onerror = console.error;
+  ws.onmessage = (e) => clientRpc(e.data);
+
+  globalThis["ui"] = {};
+  registerKeys(document);
+}
 
 bootstrap();
+
+let propagationID = 0;
+const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
