@@ -15,13 +15,16 @@ bool @checked = true;
 
 var window = app.MapWeb4("/app", () => $"""
     <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
         <body>
-            <button onclick={() => c++}>
+            <button onmousedown={() => c++}>
                 Clicks: {c}
             </button>
             {c:c} and {d:c}
 
-            {$"<div>one {"two"} {3} four</div>"}
+            {$"<div>one {name} {c} four</div>"}
             {MyButton(text: "Nice to repeat you")}
             {MyButton(text: "Nice to repeat you"):Fade}
 
@@ -42,6 +45,10 @@ var window = app.MapWeb4("/app", () => $"""
             <br/>
             <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
             <br/>
+            {(b
+                ? (Html)$"<p>one {name} {c} four</p>" 
+                : (Html)$"<p>{color}</p>"
+            )}
 
             <input type="color" value={color} oninput={e => color = e.Target.Value} />
             <span style={$"color: {color}; font-size: {c}pt;"}>{color:RGB}</span>
