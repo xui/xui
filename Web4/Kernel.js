@@ -75,32 +75,24 @@ function serverRpc(key, event, includeProperties) {
 }
 
 function registerKeys(parentNode) {
-  let comments = document.evaluate('//comment()', parentNode, null, 0, null);
-  let node = comments.iterateNext();
-  let toRemove = [];
-  while (node) {
-    let key = node.textContent;
+  let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+  for (let i = comments.snapshotLength - 1; i >= 0; i--) {
+    let comment = comments.snapshotItem(i);
+    let key = comment.textContent;
     if (key.startsWith('key')) {
-      keyholes[key] = node.previousSibling;
+      let keyhole = comment.previousSibling;
+      if (keyhole.nodeType === Node.COMMENT_NODE) {
+        // Text node was missing because keyhole value was ""
+        // e.g. `<!----><!--key123-->`
+        keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+      }
+      keyholes[key] = keyhole;
     }
-    toRemove.push(node);
-    node = comments.iterateNext();
-  }
-
-  // TODO: What is the performance cost of manipulating the DOM so many times onload?
-  toRemove.forEach(n => n.parentElement.removeChild(n));
-
-  for (let k in keyholes) {
-    let n = keyholes[k];
-    if (n.nodeType == 8) {
-      let t = document.createTextNode("");
-      n.parentNode.insertBefore(t, n.nextSibling);
-      keyholes[k] = t;
-    }
+    comment.parentElement.removeChild(comment);
   }
   
-  let attrs = document.evaluate('//*/attribute::*', parentNode, null, 7, null);
-  for (i = 0; i < attrs.snapshotLength; i++) {
+  let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+  for (let i = 0; i < attrs.snapshotLength; i++) {
     let attr = attrs.snapshotItem(i);
     let key = attr.name;
     if (key.startsWith('key')) {
@@ -113,7 +105,6 @@ function registerKeys(parentNode) {
           owner: attr.ownerElement
         };
       }
-      // TODO: What is the performance cost of manipulating the DOM so many times onload?
       attr.ownerElement.removeAttribute(attr.name)
     }
   }
