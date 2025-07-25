@@ -43,15 +43,14 @@ public struct Keyhole
     public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value1); set => value1 = value.DayNumber; }
     public TimeSpan TimeSpan { readonly get => new(value1); set => value1 = value.Ticks; }
     public TimeOnly TimeOnly { readonly get => new(value1); set => value1 = value.Ticks; }
-    public int ParentStart { readonly get => (int)value1; set => value1 = value; }
+    public int ParentLength { readonly get => (int)value1; set => value1 = value; }
+    public int ItemCount { readonly get => (int)value1; set => value1 = value; }
 
     // --- backing field: value2 ---
     // These properties all use `value2` as their backing field.  Like the properties that use 
     // value1, they aim to conserve memory width in keyhole buffers by reusing one backing field 
     // across a number of properties that are only used depending on the keyhole type.
-    public int ParentLength { readonly get => value2; set => value2 = value; }
-    public int ItemCount { readonly get => value2; set => value2 = value; }
-    public int AttributeStartIndex { readonly get => value2; set => value2 = value; }
+    public int ParentStart { readonly get => value2; set => value2 = value; }
     public bool IsAttributeValue { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }
     public readonly Range ParentRange => ParentStart..(ParentStart + ParentLength);
 
@@ -94,7 +93,7 @@ public struct Keyhole
 
     public Span<Keyhole> GetAttributeSpan(Keyhole[] buffer)
     {
-        var start = AttributeStartIndex;
+        var start = ParentStart;
         ref var startKeyhole = ref buffer[start];
         var end = start + startKeyhole.ParentLength;
         return buffer.AsSpan(start..end);

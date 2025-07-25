@@ -25,11 +25,6 @@ public class SnapshotComposer : BaseComposer
         return result;
     }
 
-    protected override void Clear()
-    {
-        base.Clear();
-    }
-
     public override void OnHtmlPartialBegins(ref Html html)
     {
         if (IsInitialHtml())
