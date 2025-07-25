@@ -97,26 +97,26 @@ public class Window
             return;
         }
 
-        Keyhole[] bufferBefore = snapshot;
-        Keyhole[] bufferAfter = CaptureSnapshot();
+        Keyhole[] oldBuffer = snapshot;
+        Keyhole[] newBuffer = CaptureSnapshot();
 
         // TODO: Move your debugger to be part of the service config.
-        await Debug.Log(bufferBefore, bufferAfter);
+        await Debug.Log(oldBuffer, newBuffer);
 
-        await transport.ApplyMutations(bufferBefore, bufferAfter);
+        await transport.ApplyMutations(oldBuffer, newBuffer);
 
         switch (SnapshotStrategy)
         {
             case SnapshotStrategy.Recapture:
                 // Do not keep this snapshot buffer for later.
                 snapshot = null;
-                bufferBefore.Return();
-                bufferAfter.Return();
+                oldBuffer.Return();
+                newBuffer.Return();
                 break;
             case SnapshotStrategy.Retain:
                 // Keep this snapshot buffer around to use as the "before" next time.
-                snapshot = bufferAfter;
-                bufferBefore.Return();
+                snapshot = newBuffer;
+                oldBuffer.Return();
                 break;
         }
 

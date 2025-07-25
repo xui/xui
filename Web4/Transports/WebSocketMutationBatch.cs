@@ -8,46 +8,46 @@ public struct WebSocketMutationBatch() : IMutationBatch
     private JsonRpcWriter? writer = null;
     public readonly ReadOnlyMemory<byte>? Buffer { get => writer?.Result; }
 
-    public void UpdateValue(string key, ref Keyhole before, ref Keyhole after)
+    public void UpdateValue(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("setTextNode", ref after);
+        writer.WriteRpc("setTextNode", ref newKeyhole);
     }
 
-    public void UpdateAttribute(string key, ref Keyhole before, ref Keyhole after)
+    public void UpdateAttribute(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("setAttribute", ref after);
+        writer.WriteRpc("setAttribute", ref newKeyhole);
     }
 
-    public void UpdateAttribute(string key, Span<Keyhole> before, Span<Keyhole> after)
+    public void UpdateAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("setAttribute", key, after, includeSentinels: false);
+        writer.WriteRpc("setAttribute", key, newKeyholes, includeSentinels: false);
     }
 
-    public void UpdatePartial(string key, Span<Keyhole> before, Span<Keyhole> after)
+    public void UpdatePartial(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("setElement", key, after, includeSentinels: true);
+        writer.WriteRpc("setElement", key, newKeyholes, includeSentinels: true);
     }
 
-    public void AddPartial(string key, int index, Span<Keyhole> partial)
+    public void AddPartial(string key, int index, Span<Keyhole> keyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("addElement", key, after);
+        // writer.WriteRpc("addElement", key, keyholes);
     }
 
-    public void RemovePartial(string key, int index, Span<Keyhole> partial)
+    public void RemovePartial(string key, int index, Span<Keyhole> keyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("removeElement", key, after);
+        // writer.WriteRpc("removeElement", key, keyholes);
     }
 
     public void MovePartial(string key, int from, int to)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("moveElement", key, after);
+        // writer.WriteRpc("moveElement", key, keyholes);
     }
 
     public void Commit()

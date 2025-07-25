@@ -23,7 +23,7 @@ public static class Debug
 
     public const string JS = "";
     internal static void MapOutput(RouteGroupBuilder group) { }
-    internal static async ValueTask Log(Keyhole[] before, Keyhole[] after) { }
+    internal static async ValueTask Log(Keyhole[] oldKeyhole, Keyhole[] newKeyhole) { }
     // TODO: ^ Empty body still has perf cost.  Make this a zero-cost abstraction.
     internal static void MapDebugOutput(this RouteGroupBuilder group) { }
 
@@ -83,7 +83,7 @@ public static class Debug
         await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(messages) + "\n\n", http.RequestAborted);
     }
 
-    internal static async ValueTask Log(Keyhole[] before, Keyhole[] after)
+    internal static async ValueTask Log(Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
         var cancel = http.RequestAborted;
 
@@ -101,11 +101,11 @@ public static class Debug
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
-        var rootLength = after[0].ParentLength;
+        var rootLength = newBuffer[0].ParentLength;
         for (int index = 0; index < rootLength; index++)
         {
-            ref Keyhole keyhole = ref after[index];
-            messages.AddRange(Write(index, keyhole, before, after));
+            ref Keyhole keyhole = ref newBuffer[index];
+            messages.AddRange(Write(index, keyhole, oldBuffer, newBuffer));
         }
 
         messages.Add(new("console.log", ["\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT]));
@@ -114,7 +114,7 @@ public static class Debug
         await Log(messages);
     }
     
-    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Keyhole[] before, Keyhole[] after)
+    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
         switch (keyhole.Type)
         {
@@ -160,8 +160,8 @@ public static class Debug
 
                 for (int i = start; i < start + length; i++)
                 {
-                    ref var k = ref after[i];
-                    foreach (var m in Write(i, k, before, after))
+                    ref var k = ref newBuffer[i];
+                    foreach (var m in Write(i, k, oldBuffer, newBuffer))
                         yield return m;
                 }
                 yield return new("console.groupEnd", []);

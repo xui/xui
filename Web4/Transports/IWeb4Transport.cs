@@ -5,5 +5,5 @@ namespace Web4.Transports;
 public interface IWeb4Transport
 {
     Window GetOrCreateWindow(WindowBuilder builder);
-    ValueTask ApplyMutations(Keyhole[] before, Keyhole[] after);
+    ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer);
 }
