@@ -110,7 +110,10 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             Span<Keyhole> oldAttr = oldKeyhole.GetAttributeSpan(oldBuffer);
                             Span<Keyhole> newAttr = newKeyhole.GetAttributeSpan(newBuffer);
                             mutationBatch.UpdateAttribute(key, oldAttr, newAttr);
-                            return; // Return early.  This whole attribute will be updated.
+
+                            // Shortcircuit.  No need to diff the rest of this span.
+                            // This whole attribute needs updating.
+                            return;
                         }
                         else if (newKeyhole.IsAttributeValue)
                         {
