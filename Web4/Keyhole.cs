@@ -50,7 +50,6 @@ public struct Keyhole
     // value1, they aim to conserve memory width in keyhole buffers by reusing one backing field 
     // across a number of properties that are only used depending on the keyhole type.
     public int ParentLength { readonly get => value2; set => value2 = value; }
-    public int ParentKeyholeCount { readonly get => value2; set => value2 = value; }
     public int ItemCount { readonly get => value2; set => value2 = value; }
     public int AttributeStartIndex { readonly get => value2; set => value2 = value; }
     public bool IsAttributeValue { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }

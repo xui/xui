@@ -92,7 +92,7 @@ public class SnapshotComposer : BaseComposer
             ref var keyhole = ref Snapshot[index];
             keyhole.String = literal;
             keyhole.Type = KeyholeType.StringLiteral;
-            keyhole.ParentKeyholeCount = parent.Length;
+            keyhole.ParentLength = parent.Length;
             isWritingAttribute = literal.EndsWith('=');
         }
 
