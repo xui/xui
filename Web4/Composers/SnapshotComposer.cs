@@ -74,7 +74,7 @@ public class SnapshotComposer : BaseComposer
             ref var keyhole = ref Snapshot[index];
             keyhole.Key = partial.Key;
             keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
-            keyhole.String = expression;
+            keyhole.Expression = expression;
             keyhole.StartIndex = partial.Index;
             keyhole.KeyholeCount = partial.Length;
 
@@ -259,7 +259,7 @@ public class SnapshotComposer : BaseComposer
         ref var keyhole = ref Snapshot[index];
         keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = KeyholeType.EventListener;
-        keyhole.String = expression;
+        keyhole.Expression = expression;
 
         return CompleteFormattedValue();
     }
@@ -276,7 +276,7 @@ public class SnapshotComposer : BaseComposer
         ref var enumerableKeyhole = ref Snapshot[parent.Index + parent.Cursor];
         enumerableKeyhole.Key = key;
         enumerableKeyhole.Type = KeyholeType.Enumerable;
-        enumerableKeyhole.String = expression;
+        enumerableKeyhole.Expression = expression;
         enumerableKeyhole.StartIndex = keyGenerator.WriteHead;
         enumerableKeyhole.ItemCount = itemCount;
 
@@ -292,7 +292,7 @@ public class SnapshotComposer : BaseComposer
             ref var itemKeyhole = ref Snapshot[index + i];
             itemKeyhole.Key = keyGenerator.GetNextKey();
             itemKeyhole.Type = KeyholeType.Html;
-            itemKeyhole.String = expression;
+            itemKeyhole.Expression = expression;
             itemKeyhole.StartIndex = partial.Index;
             itemKeyhole.KeyholeCount = partial.Length;
 

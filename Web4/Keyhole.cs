@@ -23,6 +23,7 @@ public struct Keyhole
     public string? StringLiteral { readonly get => reference as string; set => this.reference = value; }
     public string? String { readonly get => reference as string; set => this.reference = value; }
     public Uri? Uri { readonly get => reference as Uri; set => this.reference = value; }
+    public string? Expression { readonly get => reference as string; set => this.reference = value; }
 
     // --- backing field: value1 ---
     // These properties all use `value1` as their backing field.  Since each keyhole
