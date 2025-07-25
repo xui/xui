@@ -101,7 +101,7 @@ public static class Debug
             new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
         };
 
-        var rootLength = after[0].KeyholeCount;
+        var rootLength = after[0].ParentLength;
         for (int index = 0; index < rootLength; index++)
         {
             ref Keyhole keyhole = ref after[index];
@@ -147,7 +147,7 @@ public static class Debug
             case KeyholeType.Attribute:
             case KeyholeType.Html:
             case KeyholeType.Enumerable:
-                int start = keyhole.StartIndex;
+                int start = keyhole.ParentStart;
                 int length = keyhole.ItemCount;
                 if (keyhole.Key != string.Empty)
                 {

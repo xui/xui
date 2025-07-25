@@ -11,8 +11,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
-        Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.KeyholeCount);
-        Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.KeyholeCount);
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.ParentLength);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.ParentLength);
 
         T mutationBatch = default(T);
         var diffUtil = new DiffUtil(oldBuffer, newBuffer);
@@ -127,8 +127,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     break;
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.HtmlRange);
-                    var newKeyholes = newBuffer.AsSpan(newKeyhole.HtmlRange);
+                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.ParentRange);
+                    var newKeyholes = newBuffer.AsSpan(newKeyhole.ParentRange);
                     var isAttribute = newKeyhole.Type == KeyholeType.Attribute;
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffKeyholeSpans(ref mutationBatch, newKeyhole.Key, oldKeyholes, newKeyholes, isAttribute);

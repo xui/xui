@@ -44,7 +44,7 @@ public class SnapshotComposer : BaseComposer
         {
             html.Key = string.Empty;
             html.Index = 0;
-            Snapshot[0].KeyholeCount = html.Length;
+            Snapshot[0].ParentLength = html.Length;
             keyGenerator.Reset();
             keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
@@ -75,8 +75,8 @@ public class SnapshotComposer : BaseComposer
             keyhole.Key = partial.Key;
             keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
             keyhole.Expression = expression;
-            keyhole.StartIndex = partial.Index;
-            keyhole.KeyholeCount = partial.Length;
+            keyhole.ParentStart = partial.Index;
+            keyhole.ParentLength = partial.Length;
 
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
@@ -277,7 +277,7 @@ public class SnapshotComposer : BaseComposer
         enumerableKeyhole.Key = key;
         enumerableKeyhole.Type = KeyholeType.Enumerable;
         enumerableKeyhole.Expression = expression;
-        enumerableKeyhole.StartIndex = keyGenerator.WriteHead;
+        enumerableKeyhole.ParentStart = keyGenerator.WriteHead;
         enumerableKeyhole.ItemCount = itemCount;
 
         int i = 0, index = keyGenerator.WriteHead;
@@ -293,8 +293,8 @@ public class SnapshotComposer : BaseComposer
             itemKeyhole.Key = keyGenerator.GetNextKey();
             itemKeyhole.Type = KeyholeType.Html;
             itemKeyhole.Expression = expression;
-            itemKeyhole.StartIndex = partial.Index;
-            itemKeyhole.KeyholeCount = partial.Length;
+            itemKeyhole.ParentStart = partial.Index;
+            itemKeyhole.ParentLength = partial.Length;
 
             i++;
         }
