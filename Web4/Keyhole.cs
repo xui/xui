@@ -91,4 +91,12 @@ public struct Keyhole
     {
         return base.GetHashCode();
     }
+
+    public Span<Keyhole> GetAttributeSpan(Keyhole[] buffer)
+    {
+        var start = AttributeStartIndex;
+        ref var startKeyhole = ref buffer[start];
+        var end = start + startKeyhole.KeyholeCount;
+        return buffer.AsSpan(start..end);
+    }
 }

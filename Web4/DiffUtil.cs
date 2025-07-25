@@ -125,12 +125,4 @@ public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
             }
         }
     }
-
-    private static Span<Keyhole> GetAttributeSpan(ref Keyhole keyhole, Keyhole[] buffer)
-    {
-        var start = keyhole.AttributeStartIndex;
-        ref var startKeyhole = ref buffer[start];
-        var end = start + startKeyhole.KeyholeCount;
-        return buffer.AsSpan(start..end);
-    }
 }
