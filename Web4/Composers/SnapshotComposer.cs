@@ -114,7 +114,7 @@ public class SnapshotComposer : BaseComposer
         else
         {
             keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.AttributeStartIndex = -1;
+            keyhole.IsAttributeValue = isWritingAttribute;
         }
 
         return base.WriteMutableValue(ref parent, value);
@@ -135,7 +135,7 @@ public class SnapshotComposer : BaseComposer
         else
         {
             keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.AttributeStartIndex = -1;
+            keyhole.IsAttributeValue = isWritingAttribute;
         }
 
         return base.WriteMutableValue(ref parent, value);
@@ -156,7 +156,7 @@ public class SnapshotComposer : BaseComposer
         else
         {
             keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.AttributeStartIndex = -1;
+            keyhole.IsAttributeValue = isWritingAttribute;
         }
 
         return base.WriteMutableValue(ref parent, value);
@@ -177,7 +177,7 @@ public class SnapshotComposer : BaseComposer
         else
         {
             keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.AttributeStartIndex = -1;
+            keyhole.IsAttributeValue = isWritingAttribute;
         }
 
         return base.WriteMutableValue(ref parent, value);
@@ -197,7 +197,7 @@ public class SnapshotComposer : BaseComposer
         else
         {
             keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.AttributeStartIndex = -1;
+            keyhole.IsAttributeValue = isWritingAttribute;
         }
 
         switch (value)
