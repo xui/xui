@@ -2,21 +2,21 @@ using Web4.Transports;
 
 namespace Web4;
 
-public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
+public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
-    public static T CreateBatch<T>(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
+    public static T CreateBatch<T>(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         where T : struct, IMutationBatch, allows ref struct
     {
         using var perf = Debug.PerfCheck("DiffUtil.CreateBatch"); // TODO: Remove PerfCheck
 
-        ref Keyhole firstBefore = ref bufferBefore[0];
-        ref Keyhole firstAfter = ref bufferAfter[0];
-        Span<Keyhole> partialBefore = bufferBefore.AsSpan(..firstBefore.KeyholeCount);
-        Span<Keyhole> partialAfter = bufferAfter.AsSpan(..firstAfter.KeyholeCount);
+        ref Keyhole oldFirst = ref oldBuffer[0];
+        ref Keyhole newFirst = ref newBuffer[0];
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.KeyholeCount);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.KeyholeCount);
 
         T mutationBatch = default(T);
-        var diffUtil = new DiffUtil(bufferBefore, bufferAfter);
-        diffUtil.DiffKeyholeSpans(ref mutationBatch, string.Empty, partialBefore, partialAfter);
+        var diffUtil = new DiffUtil(oldBuffer, newBuffer);
+        diffUtil.DiffKeyholeSpans(ref mutationBatch, string.Empty, oldSpan, newSpan);
         mutationBatch.Commit();
 
         return mutationBatch;
@@ -25,8 +25,8 @@ public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
     private readonly void DiffKeyholeSpans<T>(
         ref T mutationBatch,
         string key,
-        Span<Keyhole> partialBefore,
-        Span<Keyhole> partialAfter,
+        Span<Keyhole> oldSpan,
+        Span<Keyhole> newSpan,
         bool isSpanAnAttribute = false)
             where T : struct, IMutationBatch, allows ref struct
     {
@@ -34,57 +34,61 @@ public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
         // If the two spans have a different quantity of keyholes, 
         // then it's impossible that they are the same.  
         // So replace the whole span.
-        // Speed: fast!  One operation comparing two ints!
-        if (partialBefore.Length != partialAfter.Length)
+        if (oldSpan.Length != newSpan.Length)
         {
             if (isSpanAnAttribute)
-                mutationBatch.UpdateAttribute(key, partialBefore, partialAfter);
+                mutationBatch.UpdateAttribute(key, oldSpan, newSpan);
             else
-                mutationBatch.UpdatePartial(key, partialBefore, partialAfter);
-            return; // shortcircuit, no need to iterate through these partials or traverse deeper
+                mutationBatch.UpdatePartial(key, oldSpan, newSpan);
+
+            // Shortcircuit.  No need to finish diffing this span or traverse deeper
+            // since this whole span (and possibly its children) will be sent to the browser.
+            return;
         }
 
         // --- IMMUTABLES (string literals) ---
         // Traverse every even index – these are guaranteed to be string literals only.
         // If any of the string literals do not match up that means this whole sequence 
         // and all its children must be replaced.
-        // Usually this is the result of switch-expressions or ternary-conditionals (?:):
+        // Usually this is the result of switch-expressions or ternary-conditionals:
         //   • $"<div>{ value switch { 1 => MyComponent1(), 2 => MyComponent2(), ... } }</div>"
         //   • $"<div>{ (condition ? MyComponent1() : MyComponent2()) }</div>" 
         // Caveat: Don't forget about Hot Reload (DEBUG only) which can cheat the
         // compiler guarantees that InterpolatedStringHandlers gives us where
         // we can expect the exact same string literals at each keyhole every time.
-        // Speed: fast!  One operation comparing two pointers!  
-        for (int i = 0; i < partialAfter.Length; i += 2)
+        for (int i = 0; i < newSpan.Length; i += 2)
         {
-            ref Keyhole keyholeBefore = ref partialBefore[i];
-            ref Keyhole keyholeAfter = ref partialAfter[i];
+            ref Keyhole oldKeyhole = ref oldSpan[i];
+            ref Keyhole newKeyhole = ref newSpan[i];
 
             // Note: We must use `Object.ReferenceEquals` and NOT `str1 == str2` since the latter 
-            // will try comparing char by char if the pointers don't match and thanks to the 
+            // will try comparing char by char if the pointers don't match.  Thanks to the 
             // compiler guarantees around string literals, string interning, and InterpolatedStringHandler,
             // comparing pointers is enough to guarantee equality in this rare context. 
             // (This is especially helpful when the two strings are several kilobytes in length!)
-            if (!Object.ReferenceEquals(keyholeBefore.StringLiteral, keyholeAfter.StringLiteral))
+            if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (isSpanAnAttribute)
-                    mutationBatch.UpdateAttribute(key, partialBefore, partialAfter);
+                    mutationBatch.UpdateAttribute(key, oldSpan, newSpan);
                 else
-                    mutationBatch.UpdatePartial(key, partialBefore, partialAfter);
-                return; // shortcircuit, no need to check mutables for changes or traverse deeper
+                    mutationBatch.UpdatePartial(key, oldSpan, newSpan);
+                
+                // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
+                // so there's no need to diff its mutables or traverse deeper.
+                return;
             }
         }
 
         // --- MUTABLES (state) ---
         // Traverse every odd index – these are guaranteed to be a mutable keyholes only.
-        for (int i = 1; i < partialAfter.Length; i += 2)
+        for (int i = 1; i < newSpan.Length; i += 2)
         {
-            ref Keyhole keyholeBefore = ref partialBefore[i];
-            ref Keyhole keyholeAfter = ref partialAfter[i];
+            ref Keyhole oldKeyhole = ref oldSpan[i];
+            ref Keyhole newKeyhole = ref newSpan[i];
 
             // TODO: How much faster is it without the switch?  There's already a switch inside .Equals()!
 
-            switch (keyholeAfter.Type)
+            switch (newKeyhole.Type)
             {
                 case KeyholeType.String:
                 case KeyholeType.Boolean:
@@ -99,32 +103,32 @@ public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
                 case KeyholeType.DateOnly:
                 case KeyholeType.TimeSpan:
                 case KeyholeType.TimeOnly:
-                    if (!Keyhole.Equals(ref keyholeBefore, ref keyholeAfter))
+                    if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
                     {
                         if (isSpanAnAttribute)
                         {
-                            Span<Keyhole> attrBefore = keyholeBefore.GetAttributeSpan(bufferBefore);
-                            Span<Keyhole> attrAfter = keyholeAfter.GetAttributeSpan(bufferAfter);
-                            mutationBatch.UpdateAttribute(key, attrBefore, attrAfter);
+                            Span<Keyhole> oldAttr = oldKeyhole.GetAttributeSpan(oldBuffer);
+                            Span<Keyhole> newAttr = newKeyhole.GetAttributeSpan(newBuffer);
+                            mutationBatch.UpdateAttribute(key, oldAttr, newAttr);
                             return; // Return early.  This whole attribute will be updated.
                         }
-                        else if (keyholeAfter.IsAttributeValue)
+                        else if (newKeyhole.IsAttributeValue)
                         {
-                            mutationBatch.UpdateAttribute(key, ref keyholeBefore, ref keyholeAfter);
+                            mutationBatch.UpdateAttribute(key, ref oldKeyhole, ref newKeyhole);
                         }
                         else
                         {
-                            mutationBatch.UpdateValue(key, ref keyholeBefore, ref keyholeAfter);
+                            mutationBatch.UpdateValue(key, ref oldKeyhole, ref newKeyhole);
                         }
                     }
                     break;
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    Span<Keyhole> keyholesBefore = bufferBefore.AsSpan(keyholeBefore.HtmlRange);
-                    Span<Keyhole> keyholesAfter = bufferAfter.AsSpan(keyholeAfter.HtmlRange);
-                    var isAttribute = keyholeAfter.Type == KeyholeType.Attribute;
+                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.HtmlRange);
+                    var newKeyholes = newBuffer.AsSpan(newKeyhole.HtmlRange);
+                    var isAttribute = newKeyhole.Type == KeyholeType.Attribute;
                     // Recursively traverse deeper, then come back and continue these siblings.
-                    DiffKeyholeSpans(ref mutationBatch, keyholeAfter.Key, keyholesBefore, keyholesAfter, isAttribute);
+                    DiffKeyholeSpans(ref mutationBatch, newKeyhole.Key, oldKeyholes, newKeyholes, isAttribute);
                     break;
                 case KeyholeType.Enumerable:
                     // TODO: Implement
@@ -136,7 +140,7 @@ public ref struct DiffUtil(Keyhole[] bufferBefore, Keyhole[] bufferAfter)
                 case KeyholeType.StringLiteral:
                     throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index");
                 default:
-                    throw new InvalidOperationException("It should be impossible to find a non-mutable value in an odd index");
+                    throw new InvalidOperationException("KeyholeType not supported.  This is very unexpected.");
             }
         }
     }
