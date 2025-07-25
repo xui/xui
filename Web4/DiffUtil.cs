@@ -107,9 +107,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     {
                         if (isSpanAnAttribute)
                         {
-                            Span<Keyhole> oldAttr = oldKeyhole.GetAttributeSpan(oldBuffer);
-                            Span<Keyhole> newAttr = newKeyhole.GetAttributeSpan(newBuffer);
-                            mutationBatch.UpdateAttribute(key, oldAttr, newAttr);
+                            mutationBatch.UpdateAttribute(
+                                key,
+                                oldKeyholes: oldKeyhole.GetAttributeSpan(oldBuffer),
+                                newKeyholes: newKeyhole.GetAttributeSpan(newBuffer)
+                            );
 
                             // Shortcircuit.  No need to diff the rest of this span.
                             // This whole attribute needs updating.
@@ -127,11 +129,14 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     break;
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.Children);
-                    var newKeyholes = newBuffer.AsSpan(newKeyhole.Children);
-                    var isAttribute = newKeyhole.Type == KeyholeType.Attribute;
                     // Recursively traverse deeper, then come back and continue these siblings.
-                    DiffKeyholeSpans(ref mutationBatch, newKeyhole.Key, oldKeyholes, newKeyholes, isAttribute);
+                    DiffKeyholeSpans(
+                        ref mutationBatch,
+                        key: newKeyhole.Key,
+                        oldSpan: oldBuffer.AsSpan(oldKeyhole.Children),
+                        newSpan: newBuffer.AsSpan(newKeyhole.Children),
+                        isSpanAnAttribute: newKeyhole.Type == KeyholeType.Attribute
+                    );
                     break;
                 case KeyholeType.Enumerable:
                     // TODO: Implement
