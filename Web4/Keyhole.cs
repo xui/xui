@@ -52,7 +52,7 @@ public struct Keyhole
     public int ParentKeyholeCount { readonly get => value2; set => value2 = value; }
     public int ItemCount { readonly get => value2; set => value2 = value; }
     public int AttributeStartIndex { readonly get => value2; set => value2 = value; }
-    public readonly bool IsMemberOfHtmlAttribute => AttributeStartIndex > -1;
+    public bool IsAttributeValue { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }
     public readonly Range HtmlRange => StartIndex..(StartIndex + KeyholeCount);
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
