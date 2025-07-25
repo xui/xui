@@ -3,6 +3,7 @@ namespace Web4.Transports;
 public interface IMutationBatch : IDisposable
 {
     void UpdateValue(string key, ref Keyhole before, ref Keyhole after);
+    void UpdateAttribute(string key, ref Keyhole before, ref Keyhole after);
     void UpdateAttribute(string key, Span<Keyhole> before, Span<Keyhole> after);
     void UpdatePartial(string key, Span<Keyhole> before, Span<Keyhole> after);
     void AddPartial(string key, int index, Span<Keyhole> partial);

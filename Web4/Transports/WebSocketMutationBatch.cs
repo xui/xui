@@ -14,6 +14,12 @@ public struct WebSocketMutationBatch() : IMutationBatch
         writer.WriteRpc("setTextNode", ref after);
     }
 
+    public void UpdateAttribute(string key, ref Keyhole before, ref Keyhole after)
+    {
+        writer ??= pool.Get().BeginBatch();
+        writer.WriteRpc("setAttribute", ref after);
+    }
+
     public void UpdateAttribute(string key, Span<Keyhole> before, Span<Keyhole> after)
     {
         writer ??= pool.Get().BeginBatch();
