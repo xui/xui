@@ -52,7 +52,7 @@ public struct Keyhole
     // across a number of properties that are only used depending on the keyhole type.
     public int ParentStart { readonly get => value2; set => value2 = value; }
     public bool IsAttributeValue { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }
-    public readonly Range ParentRange => ParentStart..(ParentStart + ParentLength);
+    public readonly Range Children => ParentStart..(ParentStart + ParentLength);
 
     public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
     public static bool operator !=(Keyhole left, Keyhole right) => !Equals(ref left, ref right);

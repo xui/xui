@@ -127,8 +127,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     break;
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.ParentRange);
-                    var newKeyholes = newBuffer.AsSpan(newKeyhole.ParentRange);
+                    var oldKeyholes = oldBuffer.AsSpan(oldKeyhole.Children);
+                    var newKeyholes = newBuffer.AsSpan(newKeyhole.Children);
                     var isAttribute = newKeyhole.Type == KeyholeType.Attribute;
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffKeyholeSpans(ref mutationBatch, newKeyhole.Key, oldKeyholes, newKeyholes, isAttribute);
