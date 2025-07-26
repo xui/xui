@@ -13,7 +13,7 @@ function setAttribute(key, value) {
   }
 }
 
-function setElement(key, value, transition) {
+function replaceElement(key, value, transition) {
   let oldElement = keyholes[key];
   let newElement = document
     .createRange()
