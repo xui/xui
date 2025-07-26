@@ -114,8 +114,7 @@ let keyholes = {};
 registerKeys(document);
 
 let propagationID = 0;
-let protocol = location.protocol.replace("http", "ws");
-let ws = new WebSocket(`${protocol}//${location.host}${location.pathname}`);
+let ws = new WebSocket(`//${location.host}${location.pathname}`);
 ws.onopen = console.debug;
 ws.onclose = console.debug;
 ws.onerror = console.error;
