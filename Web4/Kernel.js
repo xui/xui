@@ -48,11 +48,11 @@ function removeElement() {
 
 function clientRpc(data) {
   let batch = JSON.parse(data);
-  if (!Array.isArray(batch)) batch = [batch];
-  batch.forEach((jsonRpcMessage) => {
-    let func = globalThis;
-    jsonRpcMessage.method.split(".").forEach((s) => (func = func[s]));
-    func.apply(globalThis, jsonRpcMessage.params)
+  batch = Array.isArray(batch) ? batch : [batch];
+  batch.forEach(rpc => {
+    let func = window;
+    rpc.method.split(".").forEach(prop => func = func[prop]);
+    func(...rpc.params);
   });
 }
 
@@ -118,6 +118,6 @@ let ws = new WebSocket(`//${location.host}${location.pathname}`);
 ws.onopen = console.debug;
 ws.onclose = console.debug;
 ws.onerror = console.error;
-ws.onmessage = (e) => clientRpc(e.data);
+ws.onmessage = e => clientRpc(e.data);
 
 const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
