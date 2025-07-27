@@ -50,8 +50,9 @@ function clientRpc(data) {
   let batch = JSON.parse(data);
   batch = Array.isArray(batch) ? batch : [batch];
   batch.forEach(rpc => {
-    let func = window;
-    rpc.method.split(".").forEach(prop => func = func[prop]);
+    let func = rpc.method
+      .split(".")
+      .reduce((obj, prop) => obj[prop], window);
     func(...rpc.params);
   });
 }
