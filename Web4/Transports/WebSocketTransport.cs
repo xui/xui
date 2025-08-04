@@ -42,7 +42,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
-        using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer );
+        using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);
         using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
 
         if (mutationBatch.Buffer is ReadOnlyMemory<byte> buffer)
