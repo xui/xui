@@ -24,7 +24,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     public static async Task<WebSocketTransport> Create(HttpContext http)
     {
-        var webSocket = await http.WebSockets.AcceptWebSocketAsync();
+        // TODO: Move to config
+        var context = new WebSocketAcceptContext
+        {
+            KeepAliveInterval = TimeSpan.FromSeconds(60),
+            KeepAliveTimeout = TimeSpan.FromSeconds(20)
+        };
+        var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         return new WebSocketTransport(http, webSocket);
     }
 
