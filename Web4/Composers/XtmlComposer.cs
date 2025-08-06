@@ -76,7 +76,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        if (IsFinalAppend(literal) && TryInjectHttpXKernel(literal))
+        if (IsFinalAppend(literal) && TryInjectBootloader(literal))
         {
             return true;
         }
@@ -368,7 +368,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // .Replace("\n", "")
         // .Replace("  ", "");
 
-    private bool TryInjectHttpXKernel(string literal)
+    private bool TryInjectBootloader(string literal)
     {
         // If there are zero mutable keys, then we can skip this.
         if (FormattedCount <= 1)
