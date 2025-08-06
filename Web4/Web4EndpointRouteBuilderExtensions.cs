@@ -102,6 +102,12 @@ public static class Web4EndpointRouteBuilderExtensions
             }
         });
 
+        group.Map("/alive", async http =>
+        {
+            if (http.WebSockets.IsWebSocketRequest)
+                await http.WebSockets.AcceptWebSocketAsync();
+        });
+
         return windowBuilder;
     }
 }
