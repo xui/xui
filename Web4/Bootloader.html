@@ -1,0 +1,173 @@
+<!-- Web4 bootloader -->
+
+<dialog id="web4DisconnectedDialog" onkeydown="event.preventDefault()">
+    <div>
+        <progress aria-label="Please wait..."></progress>
+        <div>Looking for server...</div>
+    </div>
+</dialog>
+
+<style>
+    ::backdrop { backdrop-filter: blur(4px) grayscale(1); }
+    dialog:focus { outline: none; }
+    #web4DisconnectedDialog[open] { background-color: transparent; border-width: 0; }
+</style>
+
+<script>
+
+  function setTextNode(key, value) {
+    let textNode = keyholes[key];
+    textNode.nodeValue = value;
+  }
+
+  function setAttribute(key, value) {
+    let attribute = keyholes[key];
+    if (typeof value !== "boolean") {
+      attribute.value = value;
+    } else {
+      let attrName = attribute.booleanAttribute;
+      attribute.owner[attrName] = value;
+    }
+  }
+
+  function replaceElement(key, value, transition) {
+    let oldElement = keyholes[key];
+    let newElement = document
+      .createRange()
+      .createContextualFragment(value)
+      .children[0];
+    keyholes[key] = newElement;
+    registerKeys(newElement);
+
+    // Transition not requested or not supported
+    if (!document.startViewTransition || !transition) {
+      oldElement.replaceWith(newElement);
+      return;
+    }
+    
+    // Animate this mutation
+    document.startViewTransition(() => {
+      oldElement.replaceWith(newElement);
+    });
+  }
+
+  function moveElement() {
+
+  }
+
+  function addElement() {
+
+  }
+
+  function removeElement() {
+
+  }
+
+  function clientRpc(event) {
+    let batch = JSON.parse(event.data);
+    batch = Array.isArray(batch) ? batch : [batch];
+    batch.forEach(rpc => {
+      let func = rpc.method
+        .split(".")
+        .reduce((obj, prop) => obj[prop], window);
+      func(...rpc.params);
+    });
+  }
+
+  function serverRpc(key, event, includeProperties) {
+    if (event && !event.propagationID)
+      event.propagationID = ++propagationID;
+
+    if (includeProperties?.includes("preventDefault")) {
+      event?.preventDefault();
+      if (includeProperties === "preventDefault")
+        includeProperties = null;
+    }
+    includeProperties = includeProperties?.split(",") ?? ALLOWED_EVENT_PROPERTIES;
+
+    let message = JSON.stringify(
+      { jsonrpc: "2.0", method: key, params: event }, 
+      [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
+    );
+    ws.send(message);
+  }
+
+  function registerKeys(parentNode) {
+    let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    for (let i = comments.snapshotLength - 1; i >= 0; i--) {
+      let comment = comments.snapshotItem(i);
+      let key = comment.textContent;
+      if (key.startsWith('key')) {
+        let keyhole = comment.previousSibling;
+        if (keyhole.nodeType === Node.COMMENT_NODE) {
+          // Text node was missing because keyhole value was ""
+          // e.g. `<!----><!--key123-->`
+          keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+        }
+        keyholes[key] = keyhole;
+      }
+      comment.parentElement.removeChild(comment);
+    }
+    
+    let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    for (let i = 0; i < attrs.snapshotLength; i++) {
+      let attr = attrs.snapshotItem(i);
+      let key = attr.name;
+      if (key.startsWith('key')) {
+        if (attr.value === "") {
+          keyholes[key] = attrs.snapshotItem(i - 1);
+        } else {
+          keyholes[key] = { 
+            nodeType: Node.ENTITY_REFERENCE_NODE, 
+            booleanAttribute: attr.value, 
+            owner: attr.ownerElement
+          };
+        }
+        attr.ownerElement.removeAttribute(attr.name)
+      }
+    }
+  }
+
+  async function checkConnection() {
+    switch (ws.readyState) {
+      case WebSocket.CONNECTING:
+        web4DisconnectedDialog.showModal();
+        break;
+      case WebSocket.OPEN:
+        web4DisconnectedDialog.close();
+        break;
+      case WebSocket.CLOSING:
+      case WebSocket.CLOSED:
+        web4DisconnectedDialog.showModal();
+        if (reconnectionAttempts == 0) {
+          while (++reconnectionAttempts <= 10) {
+            console.debug(`trying to reconnect (attempt ${reconnectionAttempts} of 10)...`);
+            new WebSocket(`//${location.host}${location.pathname}`)
+              .onopen = e => location.reload();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          reconnectionAttempts = 0;
+        }
+        break;
+    }
+  }
+
+  let keyholes = {};
+  let propagationID = 0;
+  let reconnectionAttempts = 0;
+  registerKeys(document);
+
+  let ws = new WebSocket(`//${location.host}${location.pathname}`);
+  ws.onmessage = clientRpc;
+  ws.onerror = console.error;
+  ws.onopen = checkConnection;
+  ws.onclose = checkConnection;
+  setTimeout(checkConnection, 1000);
+  window.addEventListener("online", checkConnection);
+  window.addEventListener("visibilitychange", checkConnection);
+  window.addEventListener("focus", checkConnection);
+  web4DisconnectedDialog.addEventListener("mouseenter", checkConnection);
+
+  const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
+
+</script>

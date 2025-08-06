@@ -359,10 +359,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     // Since it's only ever called from AppendLiteral, that means the universe of
     // possible keys is finite - only what is already compiled into the executable.
     private static readonly Dictionary<string, int> jsInjectionPoint = [];
-    private static readonly string KERNEL_JS = 
+    private static readonly string BOOTLOADER = 
         new StreamReader(System.Reflection.Assembly
             .GetExecutingAssembly()
-            .GetManifestResourceStream("Web4.Kernel.js")!
+            .GetManifestResourceStream("Web4.Bootloader.html")!
         )
         .ReadToEnd();
         // .Replace("\n", "")
@@ -377,29 +377,29 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
 
         // Inject the necessary JavaScript before the end of the </body> tag.
-        if (!jsInjectionPoint.TryGetValue(literal, out int index))
-        {
+        // if (!jsInjectionPoint.TryGetValue(literal, out int index))
+        // {
+            // TODO: Benchmark the difference
             // Avoid expensive operation?
-            index = literal.IndexOf("</body>");
-            jsInjectionPoint[literal] = index;
-        }
+            int index = literal.IndexOf("</body>");
+            // jsInjectionPoint[literal] = index;
+        // }
         if (index >= 0)
         {
             var beforeBody = literal.AsSpan(0, index);
             var afterBody = literal.AsSpan(index, literal.Length - index);
 
-            if (window.Listeners.Count > 0)
+            if (window.Listeners.Count == 0)
             {
-                Writer.Inject($"{beforeBody}\n<!-- Web4 kernel injected -->\n<script>");
-                foreach (var listener in window.Listeners)
-                    Writer.Inject($"\n{listener.Html}");
-                Writer.Inject($"\n\n{KERNEL_JS}{Debug.JS}</script>\n{afterBody}");
+                Writer.Inject($"{beforeBody}\n\n{BOOTLOADER}\n\n{afterBody}");
             }
             else
             {
-                Writer.Inject($"{beforeBody}\n<!-- Web4 kernel injected -->\n<script>\n{KERNEL_JS}{Debug.JS}</script>\n{afterBody}");
+                Writer.Inject($"{beforeBody}\n\n{BOOTLOADER}\n\n<script>\n");
+                foreach (var listener in window.Listeners)
+                    Writer.Inject($"  {listener.Html}\n");
+                Writer.Inject($"</script>\n\n{afterBody}");
             }
-
 
             CompleteStringLiteral(literal.Length);
             return true;

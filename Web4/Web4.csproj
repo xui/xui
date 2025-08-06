@@ -3,7 +3,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../Web4.Core/Web4.Core.csproj" />
-    <EmbeddedResource Include="Kernel.js" />
+    <EmbeddedResource Include="Bootloader.html" />
   </ItemGroup>
   
   <PropertyGroup>
