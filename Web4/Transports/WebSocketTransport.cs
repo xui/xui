@@ -46,6 +46,23 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         return window;
     }
 
+    public async Task Disconnect()
+    {
+        await webSocket.CloseAsync(
+            WebSocketCloseStatus.NormalClosure,
+            "Application stopping",
+            CancellationToken.None
+        );
+    }
+
+    public static void DisconnectAll()
+    {
+        Parallel.ForEach(
+            windows.Values,
+            async (window, cancel) => await window.Disconnect()
+        );
+    }
+
     public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
         using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);

@@ -55,6 +55,11 @@ public class Window
         while (!updateDebouncer.Writer.TryWrite(0)) ;
     }
 
+    public async Task Disconnect()
+    {
+        await transport.Disconnect();
+    }
+
     private void ReadFromUpdateDebouncer(CancellationToken cancel)
     {
         Task.Run(async () =>

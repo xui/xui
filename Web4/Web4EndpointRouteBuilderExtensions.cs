@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.WebSockets;
 using Html = Web4.Html;
 using System.Diagnostics;
 using Web4.Transports;
+using Microsoft.Extensions.Hosting;
 
 // TODO: Html namespace collision problem?
 //namespace Microsoft.AspNetCore.Builder;
@@ -79,6 +80,7 @@ public static class Web4EndpointRouteBuilderExtensions
 #endif
 
         app.UseWebSockets();
+        app.Lifetime.ApplicationStopping.Register(WebSocketTransport.DisconnectAll);
         var group = app.MapGroup(pattern);
         var windowBuilder = new WindowBuilder(group, html);
 
