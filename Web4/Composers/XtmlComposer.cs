@@ -377,13 +377,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
 
         // Inject the necessary JavaScript before the end of the </body> tag.
+        // TODO: Benchmark the difference
+        int index = literal.IndexOf("</body>");
         // if (!jsInjectionPoint.TryGetValue(literal, out int index))
         // {
-            // TODO: Benchmark the difference
-            // Avoid expensive operation?
-            int index = literal.IndexOf("</body>");
-            // jsInjectionPoint[literal] = index;
+        //     // Avoid expensive operation?
+        //     index = literal.IndexOf("</body>");
+        //     jsInjectionPoint[literal] = index;
         // }
+
         if (index >= 0)
         {
             var beforeBody = literal.AsSpan(0, index);
