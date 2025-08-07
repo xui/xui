@@ -88,21 +88,22 @@ public static class Web4EndpointRouteBuilderExtensions
 
         group.Map("/", async http =>
         {
+            var pipeWriter = http.Response.BodyWriter;
+            var composer = new XtmlComposer(pipeWriter, windowBuilder);
+            await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, http.RequestAborted);
+        });
+
+        group.Map("/web4", async http =>
+        {
             if (http.WebSockets.IsWebSocketRequest)
             {
                 var transport = await WebSocketTransport.Create(http);
                 var window = transport.GetOrCreateWindow(windowBuilder);
                 await transport.ListenForRpcMessages(window);
             }
-            else
-            {
-                var pipeWriter = http.Response.BodyWriter;
-                var composer = new XtmlComposer(pipeWriter, windowBuilder);
-                await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, http.RequestAborted);
-            }
         });
 
-        group.Map("/alive", async http =>
+        group.Map("/web4/alive", async http =>
         {
             if (http.WebSockets.IsWebSocketRequest)
                 await http.WebSockets.AcceptWebSocketAsync();
