@@ -1,16 +1,16 @@
 <!-- Web4 bootloader -->
 
-<dialog id="web4DisconnectedDialog" onkeydown="event.preventDefault()">
+<dialog id="web4Modal" onkeydown="event.preventDefault()">
     <div>
-        <progress aria-label="Please wait..."></progress>
+        <progress></progress>
         <div>Looking for server...</div>
     </div>
 </dialog>
 
 <style>
-    ::backdrop { backdrop-filter: blur(4px) grayscale(1); }
-    dialog:focus { outline: none; }
-    #web4DisconnectedDialog[open] { background-color: transparent; border-width: 0; }
+    #web4Modal::backdrop { backdrop-filter: blur(4px) grayscale(1); }
+    #web4Modal:focus { outline: none; }
+    #web4Modal[open] { background-color: transparent; border-width: 0; }
 </style>
 
 <script>
@@ -128,17 +128,17 @@
     }
   }
 
-  async function checkConnection() {
+  async function updateConnectionState() {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
-        web4DisconnectedDialog.showModal();
+        web4Modal.showModal();
         break;
       case WebSocket.OPEN:
-        web4DisconnectedDialog.close();
+        web4Modal.close();
         break;
       case WebSocket.CLOSING:
       case WebSocket.CLOSED:
-        web4DisconnectedDialog.showModal();
+        web4Modal.showModal();
         if (reconnectionAttempts == 0) {
           while (++reconnectionAttempts <= 10) {
             console.debug(`Web4 reconnect: (attempt ${reconnectionAttempts} of 10)...`);
@@ -160,13 +160,13 @@
   let ws = new WebSocket(`${location.pathname}/web4`);
   ws.onmessage = clientRpc;
   ws.onerror = console.error;
-  ws.onopen = checkConnection;
-  ws.onclose = checkConnection;
-  setTimeout(checkConnection, 1000);
+  ws.onopen = updateConnectionState;
+  ws.onclose = updateConnectionState;
+  setTimeout(updateConnectionState, 1000);
   window.onbeforeunload = e => ws = undefined;
-  window.addEventListener("online", checkConnection);
-  window.addEventListener("visibilitychange", checkConnection);
-  web4DisconnectedDialog.addEventListener("mouseenter", checkConnection);
+  window.addEventListener("online", updateConnectionState);
+  window.addEventListener("visibilitychange", updateConnectionState);
+  web4Modal.addEventListener("mouseenter", updateConnectionState);
 
   const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
 
