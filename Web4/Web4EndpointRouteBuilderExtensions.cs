@@ -72,25 +72,16 @@ public static class Web4EndpointRouteBuilderExtensions
         [StringSyntax("Route")] string pattern,
         Func<Html> html)
     {
-// TODO: Move to config, then simplify your pipeWriter.WriteAsync(...).
-#if DEBUG
-        bool includeServerTiming = true;
-#else
-        bool includeServerTiming = false;
-#endif
-
         app.UseWebSockets();
         app.Lifetime.ApplicationStopping.Register(WebSocketTransport.DisconnectAll);
         var group = app.MapGroup(pattern);
         var windowBuilder = new WindowBuilder(group, html);
 
-        group.MapDebugOutput();
-
         group.Map("/", async http =>
         {
             var pipeWriter = http.Response.BodyWriter;
             var composer = new XtmlComposer(pipeWriter, windowBuilder);
-            await pipeWriter.WriteAsync(composer, windowBuilder.Html, http, includeServerTiming, http.RequestAborted);
+            await pipeWriter.WriteAsync(composer, windowBuilder.Html, http);
         });
 
         group.Map("/web4", async http =>
@@ -108,6 +99,8 @@ public static class Web4EndpointRouteBuilderExtensions
             if (http.WebSockets.IsWebSocketRequest)
                 await http.WebSockets.AcceptWebSocketAsync();
         });
+
+        group.MapDebugOutput();
 
         return windowBuilder;
     }

@@ -51,6 +51,20 @@ public static class WriterExtensions
                 ? writer.WriteWithServerTimingAsync(composer, html, http, cancel)
                 : writer.WriteAsync(composer, $"{html()}", cancel);
 
+    public static ValueTask<FlushResult> WriteAsync(
+        this PipeWriter writer,
+        StreamingComposer composer,
+        Func<Html> html,
+        HttpContext http)
+    {
+        // TODO: Move to config.  Server-timing in RELEASE mode should be possible.
+#if DEBUG
+        return writer.WriteWithServerTimingAsync(composer, html, http, http.RequestAborted);
+#else
+        return writer.WriteAsync(composer, $"{html()}", http.RequestAborted);        
+#endif
+    }
+
     public static ValueTask<FlushResult> WriteWithServerTimingAsync(
         this PipeWriter writer,
         StreamingComposer composer,
