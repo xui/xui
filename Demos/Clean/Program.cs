@@ -14,6 +14,7 @@ bool b = true;
 bool @checked = true;
 
 var window = app.MapWeb4("/app", () => $"""
+    <!DOCTYPE html>
     <html>
         <head>
             <meta name="viewport" content="width=device-width, initial-scale=1">
