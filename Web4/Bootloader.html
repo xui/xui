@@ -141,7 +141,7 @@
         web4DisconnectedDialog.showModal();
         if (reconnectionAttempts == 0) {
           while (++reconnectionAttempts <= 10) {
-            console.debug(`trying to reconnect (attempt ${reconnectionAttempts} of 10)...`);
+            console.debug(`Web4 reconnect: (attempt ${reconnectionAttempts} of 10)...`);
             new WebSocket(`${location.pathname}/web4/alive`)
               .onopen = e => location.reload();
             await new Promise(resolve => setTimeout(resolve, 1000));
