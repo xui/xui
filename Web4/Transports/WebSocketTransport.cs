@@ -50,7 +50,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     {
         await webSocket.CloseAsync(
             WebSocketCloseStatus.NormalClosure,
-            "Application stopping",
+            "Application ended...",
             CancellationToken.None
         );
     }
