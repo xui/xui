@@ -136,6 +136,11 @@
     }
   }
 
+  function openServerConsole() {
+    new EventSource(`${location.pathname}/web4/console`)
+      .onmessage = clientRpc;
+  }
+
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:

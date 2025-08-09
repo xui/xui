@@ -25,19 +25,8 @@ public static class Debug
     internal static void MapOutput(RouteGroupBuilder group) { }
     internal static async ValueTask Log(Keyhole[] oldKeyhole, Keyhole[] newKeyhole) { }
     // TODO: ^ Empty body still has perf cost.  Make this a zero-cost abstraction.
-    internal static void MapDebugOutput(this RouteGroupBuilder group) { }
 
     #else
-
-    // TODO: This does not consider subroutes that might exist
-    public const string JS = """
-
-        let path = window.location.pathname;
-        if (path.endsWith('/')) path = path.substring(0, path.length - 1);
-        const eventSource = new EventSource(path + "/__debug");
-        eventSource.onmessage = (e) => clientRpc(e.data);
-        eventSource.onerror = () => eventSource.close();
-        """;
 
     private const string CSS_DEFAULT = "font-weight:normal;font-family:monospace,monospace;";
     private const string CSS_VARIABLE = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
@@ -54,39 +43,26 @@ public static class Debug
 
     private const int DEBOUNCE_SECONDS = 1;
     private static DateTime debounceUntil = DateTime.Now;
-    private static HttpContext http;
+    public static HttpContext? http;
 
-    private record JsonRpc(string method, string[] @params, string jsonrpc = "2.0");
-
-    internal static void MapDebugOutput(this RouteGroupBuilder group)
-    {
-        group.MapGet("__debug", async http =>
-        {
-            Debug.http = http;
-            http.Response.Headers.ContentType = "text/event-stream";
-            
-            await Log(new JsonRpc("console.log", ["Server diff output established"]));
-
-            await Task.Delay(Timeout.Infinite, http.RequestAborted);
-        });
-    }
+    public record JsonRpc(string method, string[] @params, string jsonrpc = "2.0");
 
     private static async Task Log(JsonRpc message)
     {
         // TODO: Memory allocations
-        await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(message) + "\n\n", http.RequestAborted);
+        if (http is not null)
+            await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(message) + "\n\n", CancellationToken.None);
     }
 
     private static async Task Log(params IEnumerable<JsonRpc> messages)
     {
         // TODO: Memory allocations
-        await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(messages) + "\n\n", http.RequestAborted);
+        if (http is not null)
+            await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(messages) + "\n\n", CancellationToken.None);
     }
 
     internal static async ValueTask Log(Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
-        var cancel = http.RequestAborted;
-
         if (debounceUntil > DateTime.Now)
         {
             await Log(new JsonRpc("console.log", [$"Server console output is debounced for {DEBOUNCE_SECONDS} second(s)..."]));

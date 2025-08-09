@@ -100,7 +100,12 @@ public static class Web4EndpointRouteBuilderExtensions
                 await http.WebSockets.AcceptWebSocketAsync();
         });
 
-        group.MapDebugOutput();
+        group.MapGet("/web4/console", async http =>
+        {
+            Web4.Debug.http = http;
+            http.Response.Headers.ContentType = "text/event-stream";            
+            await Task.Delay(Timeout.Infinite, http.RequestAborted);
+        });
 
         return windowBuilder;
     }
