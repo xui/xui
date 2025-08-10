@@ -27,7 +27,7 @@ var window = app.MapWeb4("/app", () => $"""
 
             {$"<div>one {name} {c} four</div>"}
             {MyButton(text: "Nice to repeat you")}
-            {MyButton(text: "Nice to repeat you"):Fade}
+            {MyButton(text: "Nice to repeat you")}
 
             <br />
             <br />
