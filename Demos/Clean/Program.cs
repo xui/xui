@@ -13,11 +13,24 @@ Color color = Color.Green;
 bool b = true;
 bool @checked = true;
 
+app.MapWeb4("/swiftui", () => $"""
+    <!doctype html>
+    <html>
+        <head>
+        </head>
+        <body>
+            <column>
+                { Icons.Globe }
+                Hello, World!
+            </column>
+        </body>
+    </html>
+    """);
+
 var window = app.MapWeb4("/app", () => $"""
     <!DOCTYPE html>
     <html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body>
             <button onmousedown={() => c++}>
@@ -34,22 +47,39 @@ var window = app.MapWeb4("/app", () => $"""
             {MyButton(text: "111")}{MyButton(text: "222")}{MyButton(text: "333")}{MyButton(text: "444")}
             <br />
             <br />
+ 
+            <row> 
+                { names.Select(n => NoCButton(text: n)) }
+            </row>
 
-            { names.Select(n => NoCButton(text: n)) }
-
-            <h2>Attribute stuffs</h2>
-            <input type="number" value={c} oninput={e => c = e.Target.Value} /> {c}
-            <br/>
-            <input type="text" value={name} oninput={e => name = e.Target.Value} /> {name}
-            <br/>
-            <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
-            <br/>
-            <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
-            <br/>
+            <section>
+                <h2>Attribute stuffs</h2>
+                <input type="number" value={c} oninput={e => c = e.Target.Value} /> {c}
+                <br/>
+                <input type="text" value={name} oninput={e => name = e.Target.Value} /> {name}
+                <br/>
+                <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
+                <br/>
+                <input type="checkbox" checked={b} oninput={e => b = e.Target.Value} /> {b}
+                <br/>
+            </section>
+            
             {(b
-                ? (Html)$"<p>one {name} {c} four</p>" 
-                : (Html)$"<p>{color}</p>"
-            )}
+                ? (Html)$"<row>one {name}<br>{c} four</row>" 
+                : (Html)$"<row>{color}</row>"
+            ):zoom-fade}
+
+            <row style='view-transition-name: keyb3'>
+                {true switch {
+                    _ when c < 5  => MyButton(text: "Neato"),
+                    _ when c == 15 => NoCButton(name),
+                    _ when c > 50 => YourButton(),
+                    _ => NoneButton()
+                }}
+            </row>
+
+
+            <br/><br/>
 
             <input type="color" value={color} oninput={e => color = e.Target.Value} />
             <span style={$"color: {color}; font-size: {c}pt;"}>{color:RGB}</span>
@@ -96,7 +126,7 @@ Html NoCButton(string text) => $"""
     """;
 
 Html NoneButton() => $"""
-    <p>None</p>
+    <span>None</span>
     """;
 
 Html ComponentWithComponentInside() => $"""
