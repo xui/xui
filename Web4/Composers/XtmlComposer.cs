@@ -90,9 +90,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        int offset = 0;
-        if (IsBeforeAppend())
-            offset = TryInjectBootloader(literal);
+        int offset = IsBeforeAppend() ? InjectBootloader(literal) : 0;
 
         // This makes the assumption that keyholes preceeded with an '=' are 
         // always attributes.  Attributes need different sentinels than regular
@@ -396,7 +394,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         )
         .ReadToEnd();
 
-    private int TryInjectBootloader(string literal)
+    private int InjectBootloader(string literal)
     {
         // If there are zero mutable keys then we can skip this
         if (FormattedCount <= 1)
