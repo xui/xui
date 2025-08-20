@@ -13,7 +13,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
-    private string? deferredLiteral = null;
+    private ReadOnlyMemory<char>? deferredLiteral = null;
 
     protected override void Clear()
     {
@@ -89,10 +89,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        if (IsFinalAppend(literal) && TryInjectBootloader(literal))
-        {
-            return true;
-        }
+        int offset = 0;
+        if (IsBeforeAppend())
+            offset = TryInjectBootloader(literal);
 
         // This makes the assumption that keyholes preceeded with an '=' are 
         // always attributes.  Attributes need different sentinels than regular
@@ -101,11 +100,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (literal.EndsWith('='))
         {
             attributeStatus = AttributeStatus.Pending;
-            deferredLiteral = literal;
+            deferredLiteral = literal.AsMemory(offset);
             return CompleteStringLiteral(literal.Length);
         }
 
-        return base.WriteImmutableMarkup(ref parent, literal);
+        return offset > 0
+            ? CompleteStringLiteral(literal.Length)
+            : base.WriteImmutableMarkup(ref parent, literal);
     }
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
@@ -280,9 +281,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private void HandleDeferredLiteral()
     {
-        ArgumentNullException.ThrowIfNull(deferredLiteral);
+        if (!deferredLiteral.HasValue)
+            throw new NullReferenceException(nameof(deferredLiteral));
 
-        Encoding.UTF8.GetBytes(deferredLiteral, Writer);
+        Encoding.UTF8.GetBytes(deferredLiteral.Value.Span, Writer);
+        deferredLiteral = null;
     }
 
     private ReadOnlySpan<char> HandleDeferredLiteral(bool isBooleanAttribute = true)
@@ -293,16 +296,20 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             return [];
         }
 
-        ArgumentNullException.ThrowIfNull(deferredLiteral);
+        if (!deferredLiteral.HasValue)
+            throw new NullReferenceException(nameof(deferredLiteral));
 
         // This string literal will look something like `...<input type="checkbox" checked=`
         // Note: We know they always end with `=`.
-        int indexBeforeAttribute = deferredLiteral.LastIndexOf(' ');
+        var deferredLiteralSpan = deferredLiteral.Value.Span;
+        int indexBeforeAttribute = deferredLiteralSpan.LastIndexOf(' ');
         ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteral.Length - 2);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteralSpan.Length - 2);
 
-        Encoding.UTF8.GetBytes(deferredLiteral.AsSpan(..indexBeforeAttribute), Writer);
-        return deferredLiteral.AsSpan((indexBeforeAttribute + 1)..^1);
+        Encoding.UTF8.GetBytes(deferredLiteralSpan[..indexBeforeAttribute], Writer);
+        var attributeName = deferredLiteralSpan[(indexBeforeAttribute + 1)..^1];
+        deferredLiteral = null;
+        return attributeName;
     }
 
     public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
@@ -381,44 +388,35 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // .Replace("\n", "")
         // .Replace("  ", "");
 
-    private bool TryInjectBootloader(string literal)
+    private int TryInjectBootloader(string literal)
     {
         // If there are zero mutable keys, then we can skip this.
         if (FormattedCount <= 1)
-        {
-            return false;
-        }
+            return 0;
 
-        // Inject the necessary JavaScript before the end of the </body> tag.
-        // TODO: Benchmark the difference
-        if (!jsInjectionPoint.TryGetValue(literal, out int index))
-        {
-            // Avoid expensive operation?
-            index = literal.IndexOf("</body>");
-            jsInjectionPoint[literal] = index;
-        }
-
+        int index = literal.IndexOf("<head>");
         if (index >= 0)
         {
-            var beforeBody = literal.AsSpan(0, index);
-            var afterBody = literal.AsSpan(index, literal.Length - index);
+            index += 6; // "<head>".Length;
+            var beforeHead = literal.AsSpan(0, index);
+            var afterHead = literal.AsSpan(index, literal.Length - index);
 
-            if (window.Listeners.Count == 0)
+            Writer.Inject($"""
+                {beforeHead}
+                {BOOTLOADER}
+                """);
+
+            if (window.Listeners.Count > 0)
             {
-                Writer.Inject($"{beforeBody}\n\n{BOOTLOADER}\n\n{afterBody}");
-            }
-            else
-            {
-                Writer.Inject($"{beforeBody}\n\n{BOOTLOADER}\n\n<script>\n");
+                Writer.Inject($"\n\n<script>\n");
                 foreach (var listener in window.Listeners)
                     Writer.Inject($"  {listener.Html}\n");
-                Writer.Inject($"</script>\n\n{afterBody}");
+                Writer.Inject($"</script>\n\n{afterHead}");
             }
 
-            CompleteStringLiteral(literal.Length);
-            return true;
+            return index;
         }
 
-        return false;
+        return 0;
     }
 }
