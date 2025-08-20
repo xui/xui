@@ -16,8 +16,6 @@ bool @checked = true;
 app.MapWeb4("/swiftui", () => $"""
     <!doctype html>
     <html>
-        <head>
-        </head>
         <body>
             <column>
                 { Icons.Globe }
@@ -31,6 +29,7 @@ var window = app.MapWeb4("/app", () => $"""
     <!DOCTYPE html>
     <html>
         <head>
+            <title>Neato</title>
         </head>
         <body>
             <button onmousedown={() => c++}>

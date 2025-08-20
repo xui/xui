@@ -14,6 +14,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
+    private bool isBodyOmitted = false;
 
     protected override void Clear()
     {
@@ -375,48 +376,71 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    // Fear not, this Dictionary will not grow unbounded.  
-    // Since it's only ever called from AppendLiteral, that means the universe of
-    // possible keys is finite - only what is already compiled into the executable.
-    private static readonly Dictionary<string, int> jsInjectionPoint = [];
     private static readonly string BOOTLOADER = 
         new StreamReader(System.Reflection.Assembly
             .GetExecutingAssembly()
             .GetManifestResourceStream("Web4.Bootloader.html")!
         )
         .ReadToEnd();
-        // .Replace("\n", "")
-        // .Replace("  ", "");
 
     private int TryInjectBootloader(string literal)
     {
-        // If there are zero mutable keys, then we can skip this.
+        // If there are zero mutable keys then we can skip this
         if (FormattedCount <= 1)
             return 0;
 
-        int index = literal.IndexOf("<head>");
-        if (index >= 0)
+        Writer.Inject($"""
+            <!doctype html>
+                <head>
+            
+            """);
+
+        // Write dev-included <head> content (if any)
+        int headStart = literal.IndexOf("<head>");
+        bool isHeadOmitted = headStart < 0;
+        if (!isHeadOmitted)
         {
-            index += 6; // "<head>".Length;
-            var beforeHead = literal.AsSpan(0, index);
-            var afterHead = literal.AsSpan(index, literal.Length - index);
-
-            Writer.Inject($"""
-                {beforeHead}
-                {BOOTLOADER}
-                """);
-
-            if (window.Listeners.Count > 0)
+            headStart += 6; // "<head>".Length;
+            int headEnd = literal.IndexOf("</head>");
+            if (headEnd > headStart)
             {
-                Writer.Inject($"\n\n<script>\n");
-                foreach (var listener in window.Listeners)
-                    Writer.Inject($"  {listener.Html}\n");
-                Writer.Inject($"</script>\n\n{afterHead}");
+                Encoding.UTF8.GetBytes(
+                    chars: literal.AsSpan(headStart, headEnd - headStart),
+                    writer: Writer
+                );
             }
-
-            return index;
         }
 
-        return 0;
+        // Write necesary JavaScript and CSS to operate Web4
+        Encoding.UTF8.GetBytes(BOOTLOADER, Writer);
+
+        // Write event handlers set on window or document
+        if (window.Listeners.Count > 0)
+        {
+            Encoding.UTF8.GetBytes("\n\n<script>\n", Writer);
+
+            foreach (var listener in window.Listeners)
+                Writer.Inject($"  {listener.Html}\n");
+
+            Encoding.UTF8.GetBytes("</script>\n\n", Writer);
+        }
+
+        // Locate the start of the <body> tag (if present)
+        int bodyStart = literal.IndexOf("<body");
+        this.isBodyOmitted = bodyStart < 0;
+        if (isBodyOmitted)
+        {
+            Encoding.UTF8.GetBytes("""
+                </head>
+                <body>
+                """, Writer);
+            return 0;
+        }
+        else
+        {
+            Encoding.UTF8.GetBytes("</head>", Writer);
+            return bodyStart;
+        }
+
     }
 }
