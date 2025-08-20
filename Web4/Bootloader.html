@@ -1,25 +1,30 @@
-<!-- Web4 bootloader -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-  <dialog id="web4Modal" onkeydown="event.preventDefault()">
-      <div>
-          <progress></progress>
-          <div id="web4ModalMessage">Looking for server...</div>
-      </div>
-  </dialog>
+<style>
+    body {
+        font-family: sans-serif;
+        height: 100vh;
+        margin: 0;
+        touch-action: pan-x pan-y;
+        display: flex; flex-direction: column; justify-content: center;
+    }
+    column { display: flex; flex-direction: column; justify-content: center; }
+    row    { display: flex; flex-direction: row;    justify-content: center; }
 
-  <style>
-      #web4Modal::backdrop { background-color: #ffffff66; backdrop-filter: grayscale(0.75) blur(6px); }
-      #web4Modal:focus { outline: none; }
-      #web4Modal[open] { 
-          background-color: transparent; 
-          border-width: 0;
-          animation: scaleFade .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-      }
-      @keyframes scaleFade {
-          0% { transform: scale(1.25); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-      }
-  </style>
+    @keyframes slide-in        { from { opacity: 0; translate: 50px; } }
+    @keyframes slide-out       { to   { opacity: 0; translate: -50px; } }
+    @keyframes zoom-fade-in    { from { opacity: 0; scale: 1.2; } }
+    @keyframes zoom-fade-out   { to   { opacity: 0; scale: .8; } }
+    ::view-transition-group(*) { animation-duration: 300ms; animation-timing-function: ease-in-out; }
+
+    #web4Modal::backdrop { background-color: #ffffff66; backdrop-filter: grayscale(0.75) blur(6px); }
+    #web4Modal:focus { outline: none; }
+    #web4Modal[open] { 
+        background-color: transparent; 
+        border-width: 0;
+        animation: scaleFade .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+    }
+</style>
 
 <script>
 
@@ -38,24 +43,40 @@
     }
   }
 
-  function replaceElement(key, value, transition) {
+  function replaceElement(key, rawHtml, transition) {
     let oldElement = keyholes[key];
     let newElement = document
       .createRange()
-      .createContextualFragment(value)
+      .createContextualFragment(rawHtml)
       .children[0];
     keyholes[key] = newElement;
-    registerKeys(newElement);
+    registerKeys(newElement, key);
 
-    // Transition not requested or not supported
-    if (!document.startViewTransition || !transition) {
+    // No transition
+    let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
+    if (!document.startViewTransition || !transition || !isInTransitionContainer) {
       oldElement.replaceWith(newElement);
       return;
     }
     
-    // Animate this mutation
+    // View Transition API
+    let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+    let viewTransitionName = `web4-${key}-${direction}`;
+    oldElement.style.viewTransitionName = viewTransitionName;
+    newElement.style.viewTransitionName = viewTransitionName;
+    oldElement.parentElement.childNodes.forEach((sibling, i) => {
+      if (sibling != oldElement && sibling.style)
+        sibling.style.viewTransitionName = `web4-sibling-${i}`
+    });
+
     document.startViewTransition(() => {
       oldElement.replaceWith(newElement);
+    })
+    .finished.then(() => {
+      newElement.parentElement.childNodes.forEach(sibling => {
+        if (sibling.style?.viewTransitionName?.startsWith("web4"))
+          sibling.style.removeProperty("view-transition-name");
+      });
     });
   }
 
@@ -100,7 +121,7 @@
     ws.send(message);
   }
 
-  function registerKeys(parentNode) {
+  function registerKeys(parentNode, parentKey) {
     let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     for (let i = comments.snapshotLength - 1; i >= 0; i--) {
       let comment = comments.snapshotItem(i);
@@ -111,10 +132,16 @@
           // Text node was missing because keyhole value was ""
           // e.g. `<!----><!--key123-->`
           keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+        } else if (keyhole.nodeType == Node.ELEMENT_NODE) {
+          // keyhole.style.viewTransitionName = key;
         }
+
         keyholes[key] = keyhole;
       }
       comment.parentElement.removeChild(comment);
+    }
+    if (parentKey) {
+      // parentNode.style.viewTransitionName = parentKey;
     }
     
     let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -166,22 +193,24 @@
     }
   }
 
+  let ws;
   let keyholes = {};
   let propagationID = 0;
   let reconnectionAttempts = 0;
-  registerKeys(document);
-
-  let ws = new WebSocket(`${location.pathname}/web4`);
-  ws.onmessage = clientRpc;
-  ws.onerror = console.error;
-  ws.onopen = updateConnectionState;
-  ws.onclose = updateConnectionState;
-  setTimeout(updateConnectionState, 1000);
-  window.onbeforeunload = e => ws = undefined;
-  window.addEventListener("online", updateConnectionState);
-  window.addEventListener("visibilitychange", updateConnectionState);
-  web4Modal.addEventListener("mouseenter", updateConnectionState);
-
   const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    registerKeys(document);
+    ws = new WebSocket(`${location.pathname}/web4`);
+    ws.onmessage = clientRpc;
+    ws.onerror = console.error;
+    ws.onopen = updateConnectionState;
+    ws.onclose = updateConnectionState;
+    setTimeout(updateConnectionState, 1000);
+    window.onbeforeunload = e => ws = undefined;
+    window.addEventListener("online", updateConnectionState);
+    window.addEventListener("visibilitychange", updateConnectionState);
+    //web4Modal.addEventListener("mouseenter", updateConnectionState);
+  });
 
 </script>
