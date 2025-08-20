@@ -26,10 +26,10 @@ public struct WebSocketMutationBatch() : IMutationBatch
         writer.WriteRpc("setAttribute", key, newKeyholes, includeSentinels: false);
     }
 
-    public void ReplaceElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
+    public void ReplaceElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("replaceElement", key, newKeyholes, includeSentinels: true);
+        writer.WriteRpc("replaceElement", key, newKeyholes, includeSentinels: true, transition);
     }
 
     public void AddElement(string key, int index, Span<Keyhole> keyholes)

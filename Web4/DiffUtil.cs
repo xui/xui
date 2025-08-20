@@ -27,7 +27,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         string key,
         Span<Keyhole> oldSpan,
         Span<Keyhole> newSpan,
-        bool isSpanAnAttribute = false)
+        bool isSpanAnAttribute = false,
+        string? transition = null)
             where T : struct, IMutationBatch, allows ref struct
     {
         // The first thing to compare is the easiest (and fastest).
@@ -39,7 +40,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             if (isSpanAnAttribute)
                 mutationBatch.SetAttribute(key, oldSpan, newSpan);
             else
-                mutationBatch.ReplaceElement(key, oldSpan, newSpan);
+                mutationBatch.ReplaceElement(key, oldSpan, newSpan, transition);
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -71,7 +72,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                 if (isSpanAnAttribute)
                     mutationBatch.SetAttribute(key, oldSpan, newSpan);
                 else
-                    mutationBatch.ReplaceElement(key, oldSpan, newSpan);
+                    mutationBatch.ReplaceElement(key, oldSpan, newSpan, transition);
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -139,7 +140,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         key: newKeyhole.Key,
                         oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
                         newSpan: newBuffer.AsSpan(newKeyhole.Sequence),
-                        isSpanAnAttribute: newKeyhole.Type == KeyholeType.Attribute
+                        isSpanAnAttribute: newKeyhole.Type == KeyholeType.Attribute,
+                        transition: newKeyhole.Format
                     );
                     break;
                 case KeyholeType.Enumerable:

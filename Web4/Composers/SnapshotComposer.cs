@@ -65,6 +65,7 @@ public class SnapshotComposer : BaseComposer
             ref var keyhole = ref Snapshot[index];
             keyhole.Key = partial.Key;
             keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
+            keyhole.Format = format;
             keyhole.Expression = expression;
             keyhole.SequenceStart = partial.Index;
             keyhole.SequenceLength = partial.Length;
