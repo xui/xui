@@ -24,6 +24,9 @@ public abstract class BaseComposer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected bool IsBeforeAppend() => FormattedCount == formattedValuesRemaining;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected bool IsComplete() => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
+
     public BaseComposer Init()
     {
         literalLengthRemaining = 0;

@@ -102,12 +102,25 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             attributeStatus = AttributeStatus.Pending;
             deferredLiteral = literal.AsMemory(offset);
-            return CompleteStringLiteral(literal.Length);
+        }
+        else
+        {
+            Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
         }
 
-        return offset > 0
-            ? CompleteStringLiteral(literal.Length)
-            : base.WriteImmutableMarkup(ref parent, literal);
+        CompleteStringLiteral(literal.Length);
+
+        if (isBodyOmitted && literal.Length == 0 && IsComplete())
+        {
+            Encoding.UTF8.GetBytes("""
+                    
+                    </body>
+                </html>
+                """,
+                Writer);
+        }
+
+        return true;
     }
 
     public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
