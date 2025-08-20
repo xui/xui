@@ -416,7 +416,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             if (headEnd > headStart)
             {
                 Encoding.UTF8.GetBytes(
-                    chars: literal.AsSpan(headStart, headEnd - headStart),
+                    chars: literal.AsSpan(headStart..headEnd),
                     writer: Writer
                 );
             }
