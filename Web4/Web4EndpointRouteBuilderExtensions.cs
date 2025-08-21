@@ -100,7 +100,7 @@ public static class Web4EndpointRouteBuilderExtensions
                 await http.WebSockets.AcceptWebSocketAsync();
         });
 
-        group.MapGet("/web4/console", async http =>
+        group.Map("/web4/console", async http =>
         {
             Web4.Debug.http = http;
             http.Response.Headers.ContentType = "text/event-stream";            
