@@ -44,7 +44,7 @@ public class FindKeyholeComposer : BaseComposer
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        if (IsBeforeAppend())
+        if (IsBeforeAppend)
         {
             html.Key = string.Empty;
             keyGenerator.Reset();

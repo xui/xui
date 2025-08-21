@@ -24,7 +24,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        if (IsBeforeAppend())
+        if (IsBeforeAppend)
         {
             html.Key = string.Empty;
             keyGenerator.Reset();
@@ -90,7 +90,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
-        int offset = IsBeforeAppend() ? InjectBootloader(literal) : 0;
+        int offset = IsBeforeAppend ? InjectBootloader(literal) : 0;
 
         // This makes the assumption that keyholes preceeded with an '=' are 
         // always attributes.  Attributes need different sentinels than regular
@@ -108,7 +108,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         CompleteStringLiteral(literal.Length);
 
-        if (isBodyOmitted && literal.Length == 0 && IsComplete())
+        if (isBodyOmitted && literal.Length == 0 && IsComplete)
         {
             Encoding.UTF8.GetBytes("""
                     

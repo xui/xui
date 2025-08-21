@@ -18,14 +18,9 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected bool IsInitialHtml() => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected bool IsBeforeAppend() => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected bool IsComplete() => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
+    protected bool IsInitialHtml => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
+    protected bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
+    protected bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 
     public BaseComposer Init()
     {

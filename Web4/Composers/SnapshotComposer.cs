@@ -27,11 +27,11 @@ public class SnapshotComposer : BaseComposer
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        if (IsInitialHtml())
+        if (IsInitialHtml)
         {
             html.Index = -1;
         }
-        else if (IsBeforeAppend())
+        else if (IsBeforeAppend)
         {
             html.Key = string.Empty;
             html.Index = 0;
