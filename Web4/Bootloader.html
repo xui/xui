@@ -16,14 +16,6 @@
     @keyframes zoom-fade-in    { from { opacity: 0; scale: 1.2; } }
     @keyframes zoom-fade-out   { to   { opacity: 0; scale: .8; } }
     ::view-transition-group(*) { animation-duration: 300ms; animation-timing-function: ease-in-out; }
-
-    #web4Modal::backdrop { background-color: #ffffff66; backdrop-filter: grayscale(0.75) blur(6px); }
-    #web4Modal:focus { outline: none; }
-    #web4Modal[open] { 
-        background-color: transparent; 
-        border-width: 0;
-        animation: scaleFade .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-    }
 </style>
 
 <script>
@@ -74,8 +66,11 @@
     })
     .finished.then(() => {
       newElement.parentElement.childNodes.forEach(sibling => {
-        if (sibling.style?.viewTransitionName?.startsWith("web4"))
+        if (sibling.style?.viewTransitionName?.startsWith("web4")) {
           sibling.style.removeProperty("view-transition-name");
+          if (sibling.style.length == 0)
+            sibling.removeAttribute("style");
+        }
       });
     });
   }
@@ -171,15 +166,15 @@
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
-        web4Modal.showModal();
+        showModal();
         break;
       case WebSocket.OPEN:
-        web4Modal.close();
+        document.getElementById("web4Modal")?.close();
         break;
       case WebSocket.CLOSING:
       case WebSocket.CLOSED:
-        web4ModalMessage.textContent = e.reason ? e.reason : "Looking for server...";
-        web4Modal.showModal();
+        showModal();
+        document.getElementById("web4ModalMessage").textContent = e.reason ? e.reason : "Looking for server...";
         if (reconnectionAttempts == 0) {
           while (++reconnectionAttempts <= 10) {
             console.debug(`Web4 reconnect: (attempt ${reconnectionAttempts} of 10)...`);
@@ -191,6 +186,15 @@
         }
         break;
     }
+  }
+
+  function showModal() {
+    let web4Modal = document.getElementById("web4Modal");
+    if (!web4Modal) {
+      document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
+      web4Modal = document.getElementById("web4Modal");
+    }
+    web4Modal.showModal();
   }
 
   let ws;
@@ -210,7 +214,24 @@
     window.onbeforeunload = e => ws = undefined;
     window.addEventListener("online", updateConnectionState);
     window.addEventListener("visibilitychange", updateConnectionState);
-    //web4Modal.addEventListener("mouseenter", updateConnectionState);
   });
 
 </script>
+
+<template id="web4ModalTemplate">
+  <dialog id="web4Modal" onkeydown="event.preventDefault()" onmouseenter="updateConnectionState(event)">
+      <div>
+          <progress></progress>
+          <div id="web4ModalMessage">Looking for server...</div>
+      </div>
+  </dialog>
+  <style>
+    #web4Modal::backdrop { background-color: #ffffff66; backdrop-filter: grayscale(0.75) blur(6px); }
+    #web4Modal:focus { outline: none; }
+    #web4Modal[open] { 
+        background-color: transparent; 
+        border-width: 0;
+        animation: .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards zoom-fade-in;
+    }
+  </style>
+</template>
