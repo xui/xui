@@ -22,7 +22,7 @@ public abstract class BaseComposer
     protected bool IsInitialHtml() => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected bool IsBeforeAppend() => FormattedCount == formattedValuesRemaining;
+    protected bool IsBeforeAppend() => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected bool IsComplete() => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
