@@ -49,7 +49,7 @@
     ws.send(message);
   }
 
-  function registerKeys(parentNode, parentKey) {
+  function registerKeys(parentNode) {
     let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     for (let i = comments.snapshotLength - 1; i >= 0; i--) {
       let comment = comments.snapshotItem(i);
@@ -60,16 +60,11 @@
           // Text node was missing because keyhole value was ""
           // e.g. `<!----><!--key123-->`
           keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
-        } else if (keyhole.nodeType == Node.ELEMENT_NODE) {
-          // keyhole.style.viewTransitionName = key;
         }
 
         keyholes[key] = keyhole;
       }
       comment.parentElement.removeChild(comment);
-    }
-    if (parentKey) {
-      // parentNode.style.viewTransitionName = parentKey;
     }
     
     let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -153,7 +148,7 @@
         .createContextualFragment(rawHtml)
         .children[0];
       keyholes[key] = newElement;
-      registerKeys(newElement, key);
+      registerKeys(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
