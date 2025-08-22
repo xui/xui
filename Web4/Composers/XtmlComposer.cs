@@ -452,10 +452,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             Encoding.UTF8.GetBytes("""
                 
                 </head>
-                
+
                 """, Writer);
             return bodyStart;
         }
-
     }
 }
