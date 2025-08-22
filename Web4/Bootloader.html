@@ -91,11 +91,6 @@
     }
   }
 
-  function openServerConsole() {
-    new EventSource(`${location.pathname}/web4/console`)
-      .onmessage = clientRpc;
-  }
-
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
@@ -213,6 +208,8 @@
 
   class Web4RpcConsole {
     connect = function connect() {
+      new EventSource(`${location.pathname}/web4/console`)
+        .onmessage = clientRpc;
     }
 
     disconnect = function disconnect() {
