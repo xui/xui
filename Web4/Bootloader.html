@@ -62,7 +62,7 @@
           keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
         }
 
-        keyholes[key] = keyhole;
+        rpc.keyholes[key] = keyhole;
       }
       comment.parentElement.removeChild(comment);
     }
@@ -73,9 +73,9 @@
       let key = attr.name;
       if (key.startsWith('key')) {
         if (attr.value === "") {
-          keyholes[key] = attrs.snapshotItem(i - 1);
+          rpc.keyholes[key] = attrs.snapshotItem(i - 1);
         } else {
-          keyholes[key] = { 
+          rpc.keyholes[key] = { 
             nodeType: Node.ENTITY_REFERENCE_NODE, 
             booleanAttribute: attr.value, 
             owner: attr.ownerElement
@@ -123,16 +123,17 @@
   class Web4Rpc {
     client = new Web4RpcClient();
     server = new Web4RpcServer();
+    keyholes = {};
   }
 
   class Web4RpcClient {
     setTextNode = function setTextNode(key, value) {
-      let textNode = keyholes[key];
+      let textNode = rpc.keyholes[key];
       textNode.nodeValue = value;
     }
 
     setAttribute = function setAttribute(key, value) {
-      let attribute = keyholes[key];
+      let attribute = rpc.keyholes[key];
       if (typeof value !== "boolean") {
         attribute.value = value;
       } else {
@@ -142,12 +143,12 @@
     }
 
     setElement = function setElement(key, rawHtml, transition) {
-      let oldElement = keyholes[key];
+      let oldElement = rpc.keyholes[key];
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
-      keyholes[key] = newElement;
+      rpc.keyholes[key] = newElement;
       registerKeys(newElement);
 
       // No transition
@@ -214,7 +215,6 @@
   window.rpc = new Web4Rpc();
 
   let ws;
-  let keyholes = {};
   let propagationID = 0;
   let reconnectionAttempts = 0;
   const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
