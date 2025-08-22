@@ -20,73 +20,6 @@
 
 <script>
 
-  function setTextNode(key, value) {
-    let textNode = keyholes[key];
-    textNode.nodeValue = value;
-  }
-
-  function setAttribute(key, value) {
-    let attribute = keyholes[key];
-    if (typeof value !== "boolean") {
-      attribute.value = value;
-    } else {
-      let attrName = attribute.booleanAttribute;
-      attribute.owner[attrName] = value;
-    }
-  }
-
-  function replaceElement(key, rawHtml, transition) {
-    let oldElement = keyholes[key];
-    let newElement = document
-      .createRange()
-      .createContextualFragment(rawHtml)
-      .children[0];
-    keyholes[key] = newElement;
-    registerKeys(newElement, key);
-
-    // No transition
-    let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
-    if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-      oldElement.replaceWith(newElement);
-      return;
-    }
-    
-    // View Transition API
-    let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-    let viewTransitionName = `web4-${key}-${direction}`;
-    oldElement.style.viewTransitionName = viewTransitionName;
-    newElement.style.viewTransitionName = viewTransitionName;
-    oldElement.parentElement.childNodes.forEach((sibling, i) => {
-      if (sibling != oldElement && sibling.style)
-        sibling.style.viewTransitionName = `web4-sibling-${i}`
-    });
-
-    document.startViewTransition(() => {
-      oldElement.replaceWith(newElement);
-    })
-    .finished.then(() => {
-      newElement.parentElement.childNodes.forEach(sibling => {
-        if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-          sibling.style.removeProperty("view-transition-name");
-          if (sibling.style.length == 0)
-            sibling.removeAttribute("style");
-        }
-      });
-    });
-  }
-
-  function moveElement() {
-
-  }
-
-  function addElement() {
-
-  }
-
-  function removeElement() {
-
-  }
-
   function clientRpc(event) {
     let batch = JSON.parse(event.data);
     batch = Array.isArray(batch) ? batch : [batch];
@@ -196,6 +129,97 @@
     }
     web4Modal.showModal();
   }
+
+  class Web4Rpc {
+    client = new Web4RpcClient();
+    server = new Web4RpcServer();
+  }
+
+  class Web4RpcClient {
+    setTextNode = function setTextNode(key, value) {
+      let textNode = keyholes[key];
+      textNode.nodeValue = value;
+    }
+
+    setAttribute = function setAttribute(key, value) {
+      let attribute = keyholes[key];
+      if (typeof value !== "boolean") {
+        attribute.value = value;
+      } else {
+        let attrName = attribute.booleanAttribute;
+        attribute.owner[attrName] = value;
+      }
+    }
+
+    setElement = function setElement(key, rawHtml, transition) {
+      let oldElement = keyholes[key];
+      let newElement = document
+        .createRange()
+        .createContextualFragment(rawHtml)
+        .children[0];
+      keyholes[key] = newElement;
+      registerKeys(newElement, key);
+
+      // No transition
+      let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
+      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
+        oldElement.replaceWith(newElement);
+        return;
+      }
+      
+      // View Transition API
+      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+      let viewTransitionName = `web4-${key}-${direction}`;
+      oldElement.style.viewTransitionName = viewTransitionName;
+      newElement.style.viewTransitionName = viewTransitionName;
+      oldElement.parentElement.childNodes.forEach((sibling, i) => {
+        if (sibling != oldElement && sibling.style)
+          sibling.style.viewTransitionName = `web4-sibling-${i}`
+      });
+
+      document.startViewTransition(() => {
+        oldElement.replaceWith(newElement);
+      })
+      .finished.then(() => {
+        newElement.parentElement.childNodes.forEach(sibling => {
+          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
+            sibling.style.removeProperty("view-transition-name");
+            if (sibling.style.length == 0)
+              sibling.removeAttribute("style");
+          }
+        });
+      });
+    }
+
+    addElement = function addElement() {
+    }
+
+    removeElement = function removeElement() {
+    }
+
+    moveElement = function moveElement() {
+    }
+  }
+
+  class Web4RpcServer {
+    connect = function connect() {
+    }
+
+    dispatchEvent = function dispatchEvent() {
+    }
+
+    console = new Web4RpcConsole();
+  }
+
+  class Web4RpcConsole {
+    connect = function connect() {
+    }
+
+    disconnect = function disconnect() {
+    }
+  }
+
+  window.rpc = new Web4Rpc();
 
   let ws;
   let keyholes = {};
