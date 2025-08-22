@@ -402,7 +402,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         Writer.Inject($"""
             <!doctype html>
-                <head>
+            <head>
             
             """);
 
@@ -442,8 +442,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (isBodyOmitted)
         {
             Encoding.UTF8.GetBytes("""
+
                 </head>
                 <body>
+                
                 """, Writer);
             return 0;
         }
