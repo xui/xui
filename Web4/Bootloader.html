@@ -89,14 +89,14 @@
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
-        showModal();
+        getOrCreateModal().showModal();
         break;
       case WebSocket.OPEN:
         document.getElementById("web4Modal")?.close();
         break;
       case WebSocket.CLOSING:
       case WebSocket.CLOSED:
-        showModal();
+        getOrCreateModal().showModal();
         document.getElementById("web4ModalMessage").textContent = e.reason ? e.reason : "Looking for server...";
         if (reconnectionAttempts == 0) {
           while (++reconnectionAttempts <= 10) {
@@ -109,15 +109,15 @@
         }
         break;
     }
-  }
 
-  function showModal() {
-    let web4Modal = document.getElementById("web4Modal");
-    if (!web4Modal) {
-      document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
-      web4Modal = document.getElementById("web4Modal");
+    function getOrCreateModal() {
+      let web4Modal = document.getElementById("web4Modal");
+      if (!web4Modal) {
+        document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
+        web4Modal = document.getElementById("web4Modal")
+      }
+      return web4Modal;
     }
-    web4Modal.showModal();
   }
 
   class Web4Rpc {
