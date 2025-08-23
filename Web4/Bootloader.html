@@ -227,15 +227,15 @@
     ws.onopen = updateConnectionState;
     ws.onclose = updateConnectionState;
     setTimeout(updateConnectionState, 1000);
-    window.onbeforeunload = e => ws = undefined;
     window.addEventListener("online", updateConnectionState);
     window.addEventListener("visibilitychange", updateConnectionState);
+    window.onbeforeunload = e => ws = undefined;
   });
 
 </script>
 
 <template id="web4ModalTemplate">
-  <dialog id="web4Modal" onkeydown="event.preventDefault()" onmouseenter="updateConnectionState(event)">
+  <dialog id="web4Modal" onkeydown="event.preventDefault()">
     <div>
       <progress></progress>
       <div id="web4ModalMessage">Looking for server...</div>
