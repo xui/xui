@@ -189,14 +189,14 @@
     async #updateConnectionState(e) {
       switch (this.#webSocket?.readyState) {
         case WebSocket.CONNECTING:
-          Web4RpcServer.#getOrCreateModal().showModal();
+          this.#getOrCreateModal().showModal();
           break;
         case WebSocket.OPEN:
           document.getElementById("web4Modal")?.close();
           break;
         case WebSocket.CLOSING:
         case WebSocket.CLOSED:
-          Web4RpcServer.#getOrCreateModal().showModal();
+          this.#getOrCreateModal().showModal();
           document.getElementById("web4ModalMessage").textContent = e.reason ? e.reason : "Looking for server...";
           if (reconnectionAttempts == 0) {
             while (++reconnectionAttempts <= 10) {
@@ -211,7 +211,7 @@
       }
     }
 
-    static #getOrCreateModal() {
+    #getOrCreateModal() {
       let web4Modal = document.getElementById("web4Modal");
       if (!web4Modal) {
         document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
