@@ -11,43 +11,43 @@ public struct WebSocketMutationBatch() : IMutationBatch
     public void SetTextNode(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("window.rpc.client.setTextNode", ref newKeyhole);
+        writer.WriteRpc("rpc.client.setTextNode", ref newKeyhole);
     }
 
     public void SetAttribute(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("window.rpc.client.setAttribute", ref newKeyhole);
+        writer.WriteRpc("rpc.client.setAttribute", ref newKeyhole);
     }
 
     public void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("window.rpc.client.setAttribute", key, newKeyholes, includeSentinels: false);
+        writer.WriteRpc("rpc.client.setAttribute", key, newKeyholes, includeSentinels: false);
     }
 
     public void ReplaceElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null)
     {
         writer ??= pool.Get().BeginBatch();
-        writer.WriteRpc("window.rpc.client.setElement", key, newKeyholes, includeSentinels: true, transition);
+        writer.WriteRpc("rpc.client.setElement", key, newKeyholes, includeSentinels: true, transition);
     }
 
     public void AddElement(string key, int index, Span<Keyhole> keyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("window.rpc.client.addElement", key, keyholes);
+        // writer.WriteRpc("rpc.client.addElement", key, keyholes);
     }
 
     public void RemoveElement(string key, int index, Span<Keyhole> keyholes)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("window.rpc.client.removeElement", key, keyholes);
+        // writer.WriteRpc("rpc.client.removeElement", key, keyholes);
     }
 
     public void MoveElement(string key, int from, int to)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("window.rpc.client.moveElement", key, keyholes);
+        // writer.WriteRpc("rpc.client.moveElement", key, keyholes);
     }
 
     public void Commit()

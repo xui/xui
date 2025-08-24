@@ -337,19 +337,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (includeEventArg && format != null)
         {
             Writer.Inject($"""
-                "window.rpc.server.dispatchEvent('{key}',event,'{format ?? ""}')"
+                "rpc.server.dispatchEvent('{key}',event,'{format ?? ""}')"
                 """);
         }
         else if (includeEventArg && format == null)
         {
             Writer.Inject($"""
-                "window.rpc.server.dispatchEvent('{key}',event)"
+                "rpc.server.dispatchEvent('{key}',event)"
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "window.rpc.server.dispatchEvent('{key}')"
+                "rpc.server.dispatchEvent('{key}')"
                 """);
         }
         
