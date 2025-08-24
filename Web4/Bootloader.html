@@ -31,24 +31,6 @@
     });
   }
 
-  function serverRpc(key, event, includeProperties) {
-    if (event && !event.propagationID)
-      event.propagationID = ++propagationID;
-
-    if (includeProperties?.includes("preventDefault")) {
-      event?.preventDefault();
-      if (includeProperties === "preventDefault")
-        includeProperties = null;
-    }
-    includeProperties = includeProperties?.split(",") ?? ALLOWED_EVENT_PROPERTIES;
-
-    let message = JSON.stringify(
-      { jsonrpc: "2.0", method: key, params: event }, 
-      [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
-    );
-    ws.send(message);
-  }
-
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
@@ -200,9 +182,24 @@
     connect = function connect() {
     }
 
-    dispatchEvent = function dispatchEvent() {
-    }
+    dispatchEvent = function dispatchEvent(key, event, includeProperties) {
+      if (event && !event.propagationID)
+        event.propagationID = ++propagationID;
 
+      if (includeProperties?.includes("preventDefault")) {
+        event?.preventDefault();
+        if (includeProperties === "preventDefault")
+          includeProperties = null;
+      }
+      includeProperties = includeProperties?.split(",") ?? ALLOWED_EVENT_PROPERTIES;
+
+      let message = JSON.stringify(
+        { jsonrpc: "2.0", method: key, params: event }, 
+        [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
+      );
+      ws.send(message);
+    }
+    
     console = new Web4RpcConsole();
   }
 
