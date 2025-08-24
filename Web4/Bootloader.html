@@ -49,43 +49,6 @@
     ws.send(message);
   }
 
-  function registerKeys(parentNode) {
-    let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    for (let i = comments.snapshotLength - 1; i >= 0; i--) {
-      let comment = comments.snapshotItem(i);
-      let key = comment.textContent;
-      if (key.startsWith('key')) {
-        let keyhole = comment.previousSibling;
-        if (keyhole.nodeType === Node.COMMENT_NODE) {
-          // Text node was missing because keyhole value was ""
-          // e.g. `<!----><!--key123-->`
-          keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
-        }
-
-        rpc.keyholes[key] = keyhole;
-      }
-      comment.parentElement.removeChild(comment);
-    }
-    
-    let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-    for (let i = 0; i < attrs.snapshotLength; i++) {
-      let attr = attrs.snapshotItem(i);
-      let key = attr.name;
-      if (key.startsWith('key')) {
-        if (attr.value === "") {
-          rpc.keyholes[key] = attrs.snapshotItem(i - 1);
-        } else {
-          rpc.keyholes[key] = { 
-            nodeType: Node.ENTITY_REFERENCE_NODE, 
-            booleanAttribute: attr.value, 
-            owner: attr.ownerElement
-          };
-        }
-        attr.ownerElement.removeAttribute(attr.name)
-      }
-    }
-  }
-
   async function updateConnectionState(e) {
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
@@ -127,12 +90,18 @@
   }
 
   class Web4RpcClient {
-    setTextNode = function setTextNode(key, value) {
+    constructor() {
+      document.addEventListener('DOMContentLoaded', () => {
+        Web4RpcClient.#registerKeyholes(document);
+      });
+    }
+
+    setTextNode(key, value) {
       let textNode = rpc.keyholes[key];
       textNode.nodeValue = value;
     }
 
-    setAttribute = function setAttribute(key, value) {
+    setAttribute(key, value) {
       let attribute = rpc.keyholes[key];
       if (typeof value !== "boolean") {
         attribute.value = value;
@@ -142,14 +111,14 @@
       }
     }
 
-    setElement = function setElement(key, rawHtml, transition) {
+    setElement(key, rawHtml, transition) {
       let oldElement = rpc.keyholes[key];
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
       rpc.keyholes[key] = newElement;
-      registerKeys(newElement);
+      Web4RpcClient.#registerKeyholes(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
@@ -182,13 +151,48 @@
       });
     }
 
-    addElement = function addElement() {
+    addElement() {
     }
 
-    removeElement = function removeElement() {
+    removeElement() {
     }
 
-    moveElement = function moveElement() {
+    moveElement() {
+    }
+
+    static #registerKeyholes(parentNode) {
+      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = comments.snapshotLength - 1; i >= 0; i--) {
+        let comment = comments.snapshotItem(i);
+        let key = comment.textContent;
+        if (key.startsWith('key')) {
+          let keyhole = comment.previousSibling;
+          if (keyhole.nodeType === Node.COMMENT_NODE) {
+            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
+            keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+          }
+          rpc.keyholes[key] = keyhole;
+        }
+        comment.parentElement.removeChild(comment);
+      }
+      
+      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = 0; i < attrs.snapshotLength; i++) {
+        let attr = attrs.snapshotItem(i);
+        let key = attr.name;
+        if (key.startsWith('key')) {
+          if (attr.value === "") {
+            rpc.keyholes[key] = attrs.snapshotItem(i - 1);
+          } else {
+            rpc.keyholes[key] = { 
+              nodeType: Node.ENTITY_REFERENCE_NODE, 
+              booleanAttribute: attr.value, 
+              owner: attr.ownerElement
+            };
+          }
+          attr.ownerElement.removeAttribute(attr.name)
+        }
+      }
     }
   }
 
