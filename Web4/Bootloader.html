@@ -179,10 +179,10 @@
   }
 
   class Web4RpcServer {
-    connect = function connect() {
+    connect() {
     }
 
-    dispatchEvent = function dispatchEvent(key, event, includeProperties) {
+    dispatchEvent(key, event, includeProperties) {
       if (event && !event.propagationID)
         event.propagationID = ++propagationID;
 
@@ -204,12 +204,12 @@
   }
 
   class Web4RpcConsole {
-    connect = function connect() {
+    connect() {
       new EventSource(`${location.pathname}/web4/console`)
         .onmessage = clientRpc;
     }
 
-    disconnect = function disconnect() {
+    disconnect() {
     }
   }
 
