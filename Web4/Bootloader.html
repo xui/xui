@@ -24,10 +24,10 @@
     let batch = JSON.parse(event.data);
     batch = Array.isArray(batch) ? batch : [batch];
     batch.forEach(rpc => {
-      let func = rpc.method
+      let [obj, func] = rpc.method
         .split(".")
-        .reduce((obj, prop) => obj[prop], window);
-      func(...rpc.params);
+        .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
+      func.apply(obj, rpc.params);
     });
   }
 
@@ -40,7 +40,7 @@
   class Web4RpcClient {
     constructor() {
       document.addEventListener('DOMContentLoaded', () => {
-        Web4RpcClient.#registerKeyholes(document);
+        this.#registerKeyholes(document);
       });
     }
 
@@ -66,7 +66,7 @@
         .createContextualFragment(rawHtml)
         .children[0];
       rpc.keyholes[key] = newElement;
-      Web4RpcClient.#registerKeyholes(newElement);
+      this.#registerKeyholes(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
@@ -108,7 +108,7 @@
     moveElement() {
     }
 
-    static #registerKeyholes(parentNode) {
+    #registerKeyholes(parentNode) {
       let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (let i = comments.snapshotLength - 1; i >= 0; i--) {
         let comment = comments.snapshotItem(i);
