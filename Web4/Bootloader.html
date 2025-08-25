@@ -153,20 +153,23 @@
       document.addEventListener('DOMContentLoaded', () => this.connect());
     }
 
-    connect() {      
-      this.#webSocket?.close();
-      this.#webSocket = new WebSocket(`${location.pathname}/web4`);
-      this.#webSocket.onmessage = clientRpc;
-      this.#webSocket.onerror = console.error;
-      this.#webSocket.onopen = e => this.#updateConnectionState(e);
-      this.#webSocket.onclose = e => this.#updateConnectionState(e);
-      setTimeout(e => this.#updateConnectionState(e), 1000);
-      window.addEventListener("online", e => this.#updateConnectionState(e));
-      window.addEventListener("visibilitychange", e => this.#updateConnectionState(e));
-      window.onbeforeunload = e => this.#webSocket = undefined;
+    connect() {
+      let webSocket = new WebSocket(`${location.pathname}/web4`);
+      webSocket.onmessage = clientRpc;
+      webSocket.onerror = console.error;
+      webSocket.onopen = e => this.#updateConnectionState(webSocket, e);
+      webSocket.onclose = e => this.#updateConnectionState(webSocket, e);
+      setTimeout(e => this.#updateConnectionState(webSocket, e), 1000);
+      window.addEventListener("online", e => this.#updateConnectionState(webSocket, e));
+      window.addEventListener("visibilitychange", e => this.#updateConnectionState(webSocket, e));
+      window.onbeforeunload = e => webSocket = undefined;
+
+      this.dispatchEvent = function(key, event, includeProperties) {
+        this.#dispatchEvent(webSocket, key, event, includeProperties);
+      }
     }
 
-    dispatchEvent(key, event, includeProperties) {
+    #dispatchEvent(webSocket, key, event, includeProperties) {
       if (event && !event.propagationID)
         event.propagationID = ++propagationID;
 
@@ -181,11 +184,11 @@
         { jsonrpc: "2.0", method: key, params: event }, 
         [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
       );
-      this.#webSocket.send(message);
+      webSocket.send(message);
     }
     
-    async #updateConnectionState(e) {
-      switch (this.#webSocket?.readyState) {
+    async #updateConnectionState(webSocket, e) {
+      switch (webSocket?.readyState) {
         case WebSocket.CONNECTING:
           this.#getOrCreateModal().showModal();
           break;
