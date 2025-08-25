@@ -42,12 +42,12 @@
       document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
-    setTextNode(key, value) {
+    setTextNode = function(key, value) {
       let textNode = rpc.keyholes[key];
       textNode.nodeValue = value;
     }
 
-    setAttribute(key, value) {
+    setAttribute = function(key, value) {
       let attribute = rpc.keyholes[key];
       if (typeof value !== "boolean") {
         attribute.value = value;
@@ -57,7 +57,7 @@
       }
     }
 
-    setElement(key, rawHtml, transition) {
+    setElement = function(key, rawHtml, transition) {
       let oldElement = rpc.keyholes[key];
       let newElement = document
         .createRange()
@@ -97,13 +97,13 @@
       });
     }
 
-    addElement() {
+    addElement = function() {
     }
 
-    removeElement() {
+    removeElement = function() {
     }
 
-    moveElement() {
+    moveElement = function() {
     }
 
     #registerKeyholes(parentNode) {
