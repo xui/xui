@@ -39,9 +39,7 @@
 
   class Web4RpcClient {
     constructor() {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.#registerKeyholes(document);
-      });
+      document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
     setTextNode(key, value) {
