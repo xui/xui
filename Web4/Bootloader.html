@@ -150,9 +150,7 @@
     console = new Web4RpcConsole();
 
     constructor() {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.connect();
-      });
+      document.addEventListener('DOMContentLoaded', () => this.connect());
     }
 
     connect() {      
