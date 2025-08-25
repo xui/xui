@@ -20,17 +20,6 @@
 
 <script>
 
-  function clientRpc(event) {
-    let batch = JSON.parse(event.data);
-    batch = Array.isArray(batch) ? batch : [batch];
-    batch.forEach(rpc => {
-      let [obj, func] = rpc.method
-        .split(".")
-        .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
-      func.apply(obj, rpc.params);
-    });
-  }
-
   class Web4Rpc {
     client = new Web4RpcClient();
     server = new Web4RpcServer();
@@ -140,6 +129,17 @@
         }
       }
     }
+
+    static callAll(event) {
+      let batch = JSON.parse(event.data);
+      batch = Array.isArray(batch) ? batch : [batch];
+      batch.forEach(rpc => {
+        let [obj, func] = rpc.method
+          .split(".")
+          .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
+        func.apply(obj, rpc.params);
+      });
+    }
   }
 
   class Web4RpcServer {
@@ -151,7 +151,7 @@
 
     connect() {
       let webSocket = new WebSocket(`${location.pathname}/web4`);
-      webSocket.onmessage = clientRpc;
+      webSocket.onmessage = Web4RpcClient.callAll;
       webSocket.onerror = console.error;
       webSocket.onopen = e => updateConnectionState(webSocket, e);
       webSocket.onclose = e => updateConnectionState(webSocket, e);
@@ -220,7 +220,7 @@
   class Web4RpcConsole {
     connect() {
       new EventSource(`${location.pathname}/web4/console`)
-        .onmessage = clientRpc;
+        .onmessage = Web4RpcClient.callAll;
     }
 
     disconnect() {
