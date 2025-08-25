@@ -68,7 +68,7 @@ var window = app.MapWeb4("/app", () => $"""
                 : (Html)$"<row>{color}</row>"
             ):zoom-fade}
 
-            <row style='view-transition-name: keyb3'>
+            <row>
                 {true switch {
                     _ when c < 5  => MyButton(text: "Neato"),
                     _ when c == 15 => NoCButton(name),
