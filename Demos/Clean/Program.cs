@@ -14,15 +14,10 @@ bool b = true;
 bool @checked = true;
 
 app.MapWeb4("/swiftui", () => $"""
-    <!doctype html>
-    <html>
-        <body>
-            <column>
-                { Icons.Globe }
-                Hello, World!
-            </column>
-        </body>
-    </html>
+    <column>
+        { Icons.Globe }
+        Hello, World!
+    </column>
     """);
 
 var window = app.MapWeb4("/app", () => $"""
