@@ -99,7 +99,8 @@
       }
 
       // View Transition API
-      element.parentElement.childNodes.forEach((sibling, i) => {
+      let parentElement = element.parentElement;
+      parentElement.childNodes.forEach((sibling, i) => {
         if (sibling.style)
           sibling.style.viewTransitionName = `web4-sibling-${i}`
       });
@@ -109,7 +110,7 @@
         element.parentNode.removeChild(element);
       })
       .finished.then(() => {
-        element.parentElement.childNodes.forEach(sibling => {
+        parentElement.childNodes.forEach(sibling => {
           if (sibling.style?.viewTransitionName?.startsWith("web4")) {
             sibling.style.removeProperty("view-transition-name");
             if (sibling.style.length == 0)
