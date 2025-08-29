@@ -47,6 +47,19 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         utf8JsonWriter.WriteEndObject();
     }
 
+    public void WriteRpc(string method, string key, string? transition = null)
+    {
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+        utf8JsonWriter.WriteString("method", method);
+        utf8JsonWriter.WriteStartArray("params");
+        utf8JsonWriter.WriteStringValue(key);
+        if (transition != null)
+            utf8JsonWriter.WriteStringValue(transition);
+        utf8JsonWriter.WriteEndArray();
+        utf8JsonWriter.WriteEndObject();
+    }
+
     public void WriteRpc(string method, string key, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();

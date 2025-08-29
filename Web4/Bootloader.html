@@ -56,7 +56,7 @@
       this.#registerKeyholes(newElement);
 
       // No transition
-      let isInTransitionContainer = ["ROW", "COL", "BODY"].includes(oldElement.parentElement.tagName);
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
       if (!document.startViewTransition || !transition || !isInTransitionContainer) {
         oldElement.replaceWith(newElement);
         return;
@@ -64,13 +64,12 @@
       
       // View Transition API
       let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-      let viewTransitionName = `web4-${key}-${direction}`;
-      oldElement.style.viewTransitionName = viewTransitionName;
-      newElement.style.viewTransitionName = viewTransitionName;
       oldElement.parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling != oldElement && sibling.style)
+        if (sibling.style)
           sibling.style.viewTransitionName = `web4-sibling-${i}`
       });
+      oldElement.style.viewTransitionName = `web4-${key}-${direction}`;
+      newElement.style.viewTransitionName = `web4-${key}-${direction}`;
 
       document.startViewTransition(() => {
         oldElement.replaceWith(newElement);
@@ -89,7 +88,35 @@
     addElement = function() {
     }
 
-    removeElement = function() {
+    removeElement = function(key, transition) {
+      let element = rpc.keyholes[key];
+
+      // No transition
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
+      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
+        element.parentNode.removeChild(element);
+        return;
+      }
+
+      // View Transition API
+      element.parentElement.childNodes.forEach((sibling, i) => {
+        if (sibling.style)
+          sibling.style.viewTransitionName = `web4-sibling-${i}`
+      });
+      element.style.viewTransitionName = `web4-${key}`;
+
+      document.startViewTransition(() => {
+        element.parentNode.removeChild(element);
+      })
+      .finished.then(() => {
+        element.parentElement.childNodes.forEach(sibling => {
+          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
+            sibling.style.removeProperty("view-transition-name");
+            if (sibling.style.length == 0)
+              sibling.removeAttribute("style");
+          }
+        });
+      });
     }
 
     moveElement = function() {

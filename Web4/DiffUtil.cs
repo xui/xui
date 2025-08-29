@@ -145,7 +145,51 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     );
                     break;
                 case KeyholeType.Enumerable:
-                    // TODO: Implement
+                    var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
+                    var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
+                    transition = newKeyhole.Format;
+                    int minLength = Math.Min(oldItems.Length, newItems.Length);
+                    for (int d = 0; d < minLength; d++)
+                    {
+                        ref var oldItem = ref oldItems[d];
+                        ref var newItem = ref newItems[d];
+                        if (oldItem.Tag != newItem.Tag)
+                        {
+                            // Resend all items.  Tags not matching could be an indication of 
+                            // something added, something removed, or something moved.  
+                            // Instead of running Myers diff algorithm (costly) and manually
+                            // re-mapping every keyhole (which must remain positionally stable), 
+                            // this work can be offloaded to the browser via its View Transitions API.
+                            mutationBatch.SetElement(key, oldSpan, newSpan, transition);
+                            return;
+                        }
+                    }
+
+                    if (oldItems.Length < newItems.Length)
+                    {
+                        // The new enumerable has more items than the old one. 
+                        // These items can simply be appended to the end.  
+                        // This will not violate any keyhole's positional stability
+                        // or cause any keyname collisions.
+                        for (int d = minLength; d < newItems.Length; d++)
+                        {
+                            ref var item = ref newItems[d];
+                            ref var itemSpan = ref newBuffer[item.SequenceStart];
+                            // mutationBatch.AddElement(key, d, itemSpan);
+                        }
+                    }
+                    else if (oldItems.Length > newItems.Length)
+                    {
+                        // The old enumerable has more items than the new one. 
+                        // These items can simply be removed.  
+                        // This will not violate any keyhole's positional stability.
+                        for (int d = minLength; d < oldItems.Length; d++)
+                        {
+                            ref var item = ref oldItems[d];
+                            mutationBatch.RemoveElement(item.Key, transition);
+                        }
+                    }
+                    
                     break;
                 case KeyholeType.EventListener:
                     // Event listeners never need to be diff'd.  

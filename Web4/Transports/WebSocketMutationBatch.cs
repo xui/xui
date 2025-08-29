@@ -32,16 +32,16 @@ public struct WebSocketMutationBatch() : IMutationBatch
         writer.WriteRpc("rpc.client.setElement", key, newKeyholes, includeSentinels: true, transition);
     }
 
-    public void AddElement(string key, int index, Span<Keyhole> keyholes)
+    public void AddElement(string key, int index, Span<Keyhole> keyholes, string? transition = null)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("rpc.client.addElement", key, keyholes);
+        writer.WriteRpc("rpc.client.addElement", key, keyholes, includeSentinels: true, transition);
     }
 
-    public void RemoveElement(string key, int index, Span<Keyhole> keyholes)
+    public void RemoveElement(string key, string? transition = null)
     {
         writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("rpc.client.removeElement", key, keyholes);
+        writer.WriteRpc("rpc.client.removeElement", key, transition);
     }
 
     public void Commit()

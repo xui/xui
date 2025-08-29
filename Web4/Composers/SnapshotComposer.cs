@@ -269,6 +269,7 @@ public class SnapshotComposer : BaseComposer
         ref var enumerableKeyhole = ref Snapshot[parent.Index + parent.Cursor];
         enumerableKeyhole.Key = key;
         enumerableKeyhole.Type = KeyholeType.Enumerable;
+        enumerableKeyhole.Format = format;
         enumerableKeyhole.Expression = expression;
         enumerableKeyhole.SequenceStart = keyGenerator.WriteHead;
         enumerableKeyhole.SequenceLength = itemCount;
