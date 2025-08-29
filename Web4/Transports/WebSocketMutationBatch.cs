@@ -26,7 +26,7 @@ public struct WebSocketMutationBatch() : IMutationBatch
         writer.WriteRpc("rpc.client.setAttribute", key, newKeyholes, includeSentinels: false);
     }
 
-    public void ReplaceElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null)
+    public void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null)
     {
         writer ??= pool.Get().BeginBatch();
         writer.WriteRpc("rpc.client.setElement", key, newKeyholes, includeSentinels: true, transition);
@@ -42,12 +42,6 @@ public struct WebSocketMutationBatch() : IMutationBatch
     {
         writer ??= pool.Get().BeginBatch();
         // writer.WriteRpc("rpc.client.removeElement", key, keyholes);
-    }
-
-    public void MoveElement(string key, int from, int to)
-    {
-        writer ??= pool.Get().BeginBatch();
-        // writer.WriteRpc("rpc.client.moveElement", key, keyholes);
     }
 
     public void Commit()

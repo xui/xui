@@ -40,7 +40,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             if (isSpanAnAttribute)
                 mutationBatch.SetAttribute(key, oldSpan, newSpan);
             else
-                mutationBatch.ReplaceElement(key, oldSpan, newSpan, transition);
+                mutationBatch.SetElement(key, oldSpan, newSpan, transition);
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -72,7 +72,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                 if (isSpanAnAttribute)
                     mutationBatch.SetAttribute(key, oldSpan, newSpan);
                 else
-                    mutationBatch.ReplaceElement(key, oldSpan, newSpan, transition);
+                    mutationBatch.SetElement(key, oldSpan, newSpan, transition);
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
