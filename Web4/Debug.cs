@@ -100,7 +100,7 @@ public static class Debug
                 yield return new("console.groupEnd", []);
                 break;
             case KeyholeType.String:
-                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{keyhole.String}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING]);
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 %c'{InlineString(keyhole.String)}'", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_STRING]);
                 yield return new("console.groupEnd", []);
                 break;
             case KeyholeType.Integer:
