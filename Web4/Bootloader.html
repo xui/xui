@@ -124,11 +124,11 @@
   }
 
   class Web4Keyholes {
-    #all = {};
+    all = {};
 
     constructor() {
       // Object.defineProperty(this, 'all', { get() { return this.#all; } });
-      document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
+      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.#registerKeyholes(document));
     }
 
     toConsole = function() {
@@ -136,12 +136,12 @@
     }
 
     setTextNode = function(key, value) {
-      let textNode = this.#all[key];
+      let textNode = this.all[key];
       textNode.nodeValue = value;
     }
 
     setAttribute = function(key, value) {
-      let attribute = this.#all[key];
+      let attribute = this.all[key];
       if (typeof value !== "boolean") {
         attribute.value = value;
       } else {
@@ -151,13 +151,13 @@
     }
 
     setElement = function(key, rawHtml, transition) {
-      let oldElement = this.#all[key];
+      let oldElement = this.all[key];
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
-      this.#all[key] = newElement;
-      this.#registerKeyholes(newElement);
+      this.all[key] = newElement;
+      Web4Keyholes.#registerKeyholes(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
@@ -186,6 +186,8 @@
               sibling.removeAttribute("style");
           }
         });
+
+        Web4Keyholes.#unregisterKeyholes();
       });
     }
 
@@ -193,7 +195,7 @@
     }
 
     removeElement = function(key, transition) {
-      let element = this.#all[key];
+      let element = this.all[key];
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
@@ -221,10 +223,12 @@
               sibling.removeAttribute("style");
           }
         });
+
+        Web4Keyholes.#unregisterKeyholes();
       });
     }
 
-    #registerKeyholes(parentNode) {
+    static #registerKeyholes(parentNode) {
       let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (let i = comments.snapshotLength - 1; i >= 0; i--) {
         let comment = comments.snapshotItem(i);
@@ -235,7 +239,7 @@
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
             keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          this.#all[key] = keyhole;
+          app.keyholes.all[key] = keyhole;
         }
         comment.parentElement.removeChild(comment);
       }
@@ -246,9 +250,9 @@
         let key = attr.name;
         if (key.startsWith('key')) {
           if (attr.value === "") {
-            this.#all[key] = attrs.snapshotItem(i - 1);
+            app.keyholes.all[key] = attrs.snapshotItem(i - 1);
           } else {
-            this.#all[key] = { 
+            app.keyholes.all[key] = { 
               nodeType: Node.ENTITY_REFERENCE_NODE, 
               booleanAttribute: attr.value, 
               owner: attr.ownerElement
@@ -256,6 +260,15 @@
           }
           attr.ownerElement.removeAttribute(attr.name)
         }
+      }
+
+      Web4Keyholes.#unregisterKeyholes();
+    }
+
+    static #unregisterKeyholes() {
+      for (let key in app.keyholes.all) {
+        if (!document.body.contains(app.keyholes.all[key]))
+          delete app.keyholes.all[key];
       }
     }
   }
