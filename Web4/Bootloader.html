@@ -20,145 +20,26 @@
 
 <script>
 
-  class Web4Rpc {
-    client = new Web4RpcClient();
-    server = new Web4RpcServer();
-    keyholes = {};
-  }
+  class Web4App {
+    keyholes = new Web4Keyholes();
 
-  class Web4RpcClient {
     constructor() {
-      document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
+      document.addEventListener('DOMContentLoaded', () => this.#connect());
     }
 
-    setTextNode = function(key, value) {
-      let textNode = rpc.keyholes[key];
-      textNode.nodeValue = value;
-    }
-
-    setAttribute = function(key, value) {
-      let attribute = rpc.keyholes[key];
-      if (typeof value !== "boolean") {
-        attribute.value = value;
-      } else {
-        let attrName = attribute.booleanAttribute;
-        attribute.owner[attrName] = value;
+    ping = function(repeat) {
+      repeat = repeat ?? 1;
+      for (let i = 0; i < repeat; i++) {
+        console.time("ping");
+        console.timeEnd("ping");
       }
     }
 
-    setElement = function(key, rawHtml, transition) {
-      let oldElement = rpc.keyholes[key];
-      let newElement = document
-        .createRange()
-        .createContextualFragment(rawHtml)
-        .children[0];
-      rpc.keyholes[key] = newElement;
-      this.#registerKeyholes(newElement);
-
-      // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
-      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-        oldElement.replaceWith(newElement);
-        return;
-      }
+    pong(id) {
       
-      // View Transition API
-      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-      oldElement.parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style)
-          sibling.style.viewTransitionName = `web4-sibling-${i}`
-      });
-      oldElement.style.viewTransitionName = `web4-${key}-${direction}`;
-      newElement.style.viewTransitionName = `web4-${key}-${direction}`;
-
-      document.startViewTransition(() => {
-        oldElement.replaceWith(newElement);
-      })
-      .finished.then(() => {
-        newElement.parentElement.childNodes.forEach(sibling => {
-          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-            sibling.style.removeProperty("view-transition-name");
-            if (sibling.style.length == 0)
-              sibling.removeAttribute("style");
-          }
-        });
-      });
     }
 
-    addElement = function() {
-    }
-
-    removeElement = function(key, transition) {
-      let element = rpc.keyholes[key];
-
-      // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
-      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-        element.parentNode.removeChild(element);
-        return;
-      }
-
-      // View Transition API
-      let parentElement = element.parentElement;
-      parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style)
-          sibling.style.viewTransitionName = `web4-sibling-${i}`
-      });
-      element.style.viewTransitionName = `web4-${key}`;
-
-      document.startViewTransition(() => {
-        element.parentNode.removeChild(element);
-      })
-      .finished.then(() => {
-        parentElement.childNodes.forEach(sibling => {
-          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-            sibling.style.removeProperty("view-transition-name");
-            if (sibling.style.length == 0)
-              sibling.removeAttribute("style");
-          }
-        });
-      });
-    }
-
-    moveElement = function() {
-    }
-
-    #registerKeyholes(parentNode) {
-      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-      for (let i = comments.snapshotLength - 1; i >= 0; i--) {
-        let comment = comments.snapshotItem(i);
-        let key = comment.textContent;
-        if (key.startsWith('key')) {
-          let keyhole = comment.previousSibling;
-          if (keyhole.nodeType === Node.COMMENT_NODE) {
-            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
-            keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
-          }
-          rpc.keyholes[key] = keyhole;
-        }
-        comment.parentElement.removeChild(comment);
-      }
-      
-      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-      for (let i = 0; i < attrs.snapshotLength; i++) {
-        let attr = attrs.snapshotItem(i);
-        let key = attr.name;
-        if (key.startsWith('key')) {
-          if (attr.value === "") {
-            rpc.keyholes[key] = attrs.snapshotItem(i - 1);
-          } else {
-            rpc.keyholes[key] = { 
-              nodeType: Node.ENTITY_REFERENCE_NODE, 
-              booleanAttribute: attr.value, 
-              owner: attr.ownerElement
-            };
-          }
-          attr.ownerElement.removeAttribute(attr.name)
-        }
-      }
-    }
-
-    static callAll(event) {
+    #callAll(event) {
       let batch = JSON.parse(event.data);
       batch = Array.isArray(batch) ? batch : [batch];
       batch.forEach(rpc => {
@@ -168,18 +49,10 @@
         func.apply(obj, rpc.params);
       });
     }
-  }
 
-  class Web4RpcServer {
-    console = new Web4RpcConsole();
-
-    constructor() {
-      document.addEventListener('DOMContentLoaded', () => this.connect());
-    }
-
-    connect() {
+    #connect() {
       let webSocket = new WebSocket(`${location.pathname}/web4`);
-      webSocket.onmessage = Web4RpcClient.callAll;
+      webSocket.onmessage = this.#callAll;
       webSocket.onerror = console.error;
       webSocket.onopen = e => updateConnectionState(webSocket, e);
       webSocket.onclose = e => updateConnectionState(webSocket, e);
@@ -243,19 +116,153 @@
         return web4Modal;
       }
     }
+
+    // Proxied from window.document
+    setTitle = title => document.title = title;
   }
 
-  class Web4RpcConsole {
-    connect() {
-      new EventSource(`${location.pathname}/web4/console`)
-        .onmessage = Web4RpcClient.callAll;
+  class Web4Keyholes {
+    #keyholes = {};
+
+    constructor() {
+      Object.defineProperty(this, 'all', { get() { return this.#getAll(); } });
+      document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
-    disconnect() {
+    toConsole = function() {
+      console.log("Keyholes (144)");
+    }
+
+    #getAll() {
+      return this.#keyholes;
+    }
+
+    setTextNode = function(key, value) {
+      let textNode = this.#keyholes[key];
+      textNode.nodeValue = value;
+    }
+
+    setAttribute = function(key, value) {
+      let attribute = this.#keyholes[key];
+      if (typeof value !== "boolean") {
+        attribute.value = value;
+      } else {
+        let attrName = attribute.booleanAttribute;
+        attribute.owner[attrName] = value;
+      }
+    }
+
+    setElement = function(key, rawHtml, transition) {
+      let oldElement = this.#keyholes[key];
+      let newElement = document
+        .createRange()
+        .createContextualFragment(rawHtml)
+        .children[0];
+      this.#keyholes[key] = newElement;
+      this.#registerKeyholes(newElement);
+
+      // No transition
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
+      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
+        oldElement.replaceWith(newElement);
+        return;
+      }
+      
+      // View Transition API
+      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+      oldElement.parentElement.childNodes.forEach((sibling, i) => {
+        if (sibling.style)
+          sibling.style.viewTransitionName = `web4-sibling-${i}`
+      });
+      oldElement.style.viewTransitionName = `web4-${key}-${direction}`;
+      newElement.style.viewTransitionName = `web4-${key}-${direction}`;
+
+      document.startViewTransition(() => {
+        oldElement.replaceWith(newElement);
+      })
+      .finished.then(() => {
+        newElement.parentElement.childNodes.forEach(sibling => {
+          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
+            sibling.style.removeProperty("view-transition-name");
+            if (sibling.style.length == 0)
+              sibling.removeAttribute("style");
+          }
+        });
+      });
+    }
+
+    addElement = function() {
+    }
+
+    removeElement = function(key, transition) {
+      let element = this.#keyholes[key];
+
+      // No transition
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
+      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
+        element.parentNode.removeChild(element);
+        return;
+      }
+
+      // View Transition API
+      let parentElement = element.parentElement;
+      parentElement.childNodes.forEach((sibling, i) => {
+        if (sibling.style)
+          sibling.style.viewTransitionName = `web4-sibling-${i}`
+      });
+      element.style.viewTransitionName = `web4-${key}`;
+
+      document.startViewTransition(() => {
+        element.parentNode.removeChild(element);
+      })
+      .finished.then(() => {
+        parentElement.childNodes.forEach(sibling => {
+          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
+            sibling.style.removeProperty("view-transition-name");
+            if (sibling.style.length == 0)
+              sibling.removeAttribute("style");
+          }
+        });
+      });
+    }
+
+    #registerKeyholes(parentNode) {
+      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = comments.snapshotLength - 1; i >= 0; i--) {
+        let comment = comments.snapshotItem(i);
+        let key = comment.textContent;
+        if (key.startsWith('key')) {
+          let keyhole = comment.previousSibling;
+          if (keyhole.nodeType === Node.COMMENT_NODE) {
+            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
+            keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+          }
+          this.#keyholes[key] = keyhole;
+        }
+        comment.parentElement.removeChild(comment);
+      }
+      
+      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = 0; i < attrs.snapshotLength; i++) {
+        let attr = attrs.snapshotItem(i);
+        let key = attr.name;
+        if (key.startsWith('key')) {
+          if (attr.value === "") {
+            this.#keyholes[key] = attrs.snapshotItem(i - 1);
+          } else {
+            this.#keyholes[key] = { 
+              nodeType: Node.ENTITY_REFERENCE_NODE, 
+              booleanAttribute: attr.value, 
+              owner: attr.ownerElement
+            };
+          }
+          attr.ownerElement.removeAttribute(attr.name)
+        }
+      }
     }
   }
 
-  window.rpc = new Web4Rpc();
+  this.app = new Web4App();
 
 </script>
 

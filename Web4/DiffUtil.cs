@@ -160,7 +160,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             // Instead of running Myers diff algorithm (costly) and manually
                             // re-mapping every keyhole (which must remain positionally stable), 
                             // this work can be offloaded to the browser via its View Transitions API.
-                            mutationBatch.SetElement(key, oldSpan, newSpan, transition);
+
+                            // mutationBatch.SetElement(key, oldSpan, newSpan, transition);
                             return;
                         }
                     }
@@ -175,6 +176,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         {
                             ref var item = ref newItems[d];
                             ref var itemSpan = ref newBuffer[item.SequenceStart];
+                            
                             // mutationBatch.AddElement(key, d, itemSpan);
                         }
                     }
