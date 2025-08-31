@@ -124,10 +124,10 @@
   }
 
   class Web4Keyholes {
-    #keyholes = {};
+    #all = {};
 
     constructor() {
-      Object.defineProperty(this, 'all', { get() { return this.#getAll(); } });
+      // Object.defineProperty(this, 'all', { get() { return this.#all; } });
       document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
@@ -135,17 +135,13 @@
       console.log("Keyholes (144)");
     }
 
-    #getAll() {
-      return this.#keyholes;
-    }
-
     setTextNode = function(key, value) {
-      let textNode = this.#keyholes[key];
+      let textNode = this.#all[key];
       textNode.nodeValue = value;
     }
 
     setAttribute = function(key, value) {
-      let attribute = this.#keyholes[key];
+      let attribute = this.#all[key];
       if (typeof value !== "boolean") {
         attribute.value = value;
       } else {
@@ -155,12 +151,12 @@
     }
 
     setElement = function(key, rawHtml, transition) {
-      let oldElement = this.#keyholes[key];
+      let oldElement = this.#all[key];
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
-      this.#keyholes[key] = newElement;
+      this.#all[key] = newElement;
       this.#registerKeyholes(newElement);
 
       // No transition
@@ -197,7 +193,7 @@
     }
 
     removeElement = function(key, transition) {
-      let element = this.#keyholes[key];
+      let element = this.#all[key];
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
@@ -239,7 +235,7 @@
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
             keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          this.#keyholes[key] = keyhole;
+          this.#all[key] = keyhole;
         }
         comment.parentElement.removeChild(comment);
       }
@@ -250,9 +246,9 @@
         let key = attr.name;
         if (key.startsWith('key')) {
           if (attr.value === "") {
-            this.#keyholes[key] = attrs.snapshotItem(i - 1);
+            this.#all[key] = attrs.snapshotItem(i - 1);
           } else {
-            this.#keyholes[key] = { 
+            this.#all[key] = { 
               nodeType: Node.ENTITY_REFERENCE_NODE, 
               booleanAttribute: attr.value, 
               owner: attr.ownerElement
