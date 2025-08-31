@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Drawing;
+using System.Security.Cryptography;
 using Web4;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,10 +9,66 @@ var app = builder.Build();
 string name = "World";
 int c = 16;
 double d = 3.14;
-string[] names = ["one", "two", "three", "four", "five", "six", "seven"];
+List<string> names = ["one", "two", "three", "four", "five", "six", "seven"];
 Color color = Color.Green;
 bool b = true;
 bool @checked = true;
+
+app.MapWeb4("/list", () => $"""
+    <div>
+        {GetList()}
+    </div>
+    """);
+
+Html GetList() => $"""
+    <list>
+
+        {names.Select(n => $"""
+            <lr>
+                <ld>{ Icons.Globe }</ld>
+                <ld>Hello, { n }!</ld>
+            </lr>
+        """):zoom-fade}
+
+        <button onclick={EditRandom}>
+            Edit Random
+        </button>
+
+        <button onclick={Shuffle}>
+            Shuffle
+        </button>
+
+        <button onclick={AddOne}>
+            Add One
+        </button>
+
+        <button onclick={RemoveOne}>
+            Remove One
+        </button>
+        
+    </list>
+    """;
+
+void EditRandom()
+{
+    var index = Random.Shared.Next(names.Count);
+    names[index] = names[index] + " &#128514;";
+}
+
+void Shuffle()
+{
+    names = names.OrderBy(n => Random.Shared.Next()).ToList();
+}
+
+void AddOne()
+{
+    names.Add(names.Count.ToString());
+}
+
+void RemoveOne()
+{
+    names.RemoveAt(names.Count - 1);
+}
 
 app.MapWeb4("/swiftui", () => $"""
     <column>
@@ -21,7 +78,7 @@ app.MapWeb4("/swiftui", () => $"""
     """);
 
 var window = app.MapWeb4("/app", () => $"""
-    <!DOCTYPE html>
+    <!doctype app>
     <html>
         <head>
             <title>Neato</title>
