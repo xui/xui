@@ -16,6 +16,14 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     private readonly HttpContext http;
     private readonly WebSocket webSocket;
 
+    static WebSocketTransport()
+    {
+        Keymaker.CacheKey("app.dispatchEvent");
+        Keymaker.CacheKey("app.keyholes.dump");
+        Keymaker.CacheKey("app.ping");
+        Keymaker.CacheKey("app.pong");
+    }
+
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
     {
         this.http = http;
@@ -82,21 +90,43 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     {
         await foreach (var message in GetNextMessage())
         {
+            // TODO: This doesn't belong here.
+            foreach (var w in windows.Values)
+                w.Invalidate();
+
             var rpcMethod = ParseMethod(message);
-            if (rpcMethod is null)
+
+            // TODO: For dispatchEvent, move key to params instead of method name.
+            string key = string.Empty;
+            if (rpcMethod?.StartsWith("key") ?? false)
             {
-                Console.WriteLine($"🔴 Could not parse the method from the message.");
-                continue;
+                key = rpcMethod;
+                rpcMethod = "app.dispatchEvent";
             }
 
-            var rpcEvent = new WebSocketEvent(message);
-            foreach (var w in windows.Values)
-                w.Invalidate(); // TODO: This line doesn't belong here.
+            switch (rpcMethod)
+            {
+                case "app.keyholes.dump":
+                    Console.WriteLine("dump()");
+                    break;
+                case "app.ping":
+                    Console.WriteLine("ping()");
+                    break;
+                case "app.pong":
+                    Console.WriteLine("pong()");
+                    break;
+                case "app.dispatchEvent":
+                    var rpcEvent = new WebSocketEvent(message);
+                    window.HandleEvent(key, ref rpcEvent);
+                    break;
+                default:
+                    Console.WriteLine($"🔴 Could not parse the method from the message: {rpcMethod}");
+                    break;
+            }
 
-            window.HandleEvent(rpcMethod, ref rpcEvent);
-
+            // TODO: This doesn't belong here.
             foreach (var w in windows.Values)
-                w.RequestUpdate(); // TODO: This line doesn't belong here.
+                w.RequestUpdate();
         }
     }
 

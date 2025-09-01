@@ -28,99 +28,25 @@
 
   class Web4App {
     keyholes = new Web4Keyholes();
+    #transport = new WebSocketTransport();
 
-    constructor() {
-      document.addEventListener('DOMContentLoaded', () => this.#connect());
+    getElementByKey(key) {
+      let element = this.keyholes.all[key];
+      if (!(element instanceof Node))
+        element = element.owner;
+      return element;
     }
 
-    ping = function(repeat) {
-      repeat = repeat ?? 1;
-      for (let i = 0; i < repeat; i++) {
-        console.time("ping");
-        console.timeEnd("ping");
-      }
+    dispatchEvent(key, event, includeProperties) {
+      this.#transport.dispatchEvent(key, event, includeProperties);
     }
 
-    pong = function(id) {
-      
+    ping(repeat) {
+      this.#transport.ping(repeat);
     }
 
-    #callAll(event) {
-      let batch = JSON.parse(event.data);
-      batch = Array.isArray(batch) ? batch : [batch];
-      batch.forEach(rpc => {
-        let [obj, func] = rpc.method
-          .split(".")
-          .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
-        func.apply(obj, rpc.params);
-      });
-    }
-
-    #connect() {
-      let webSocket = new WebSocket(`${location.pathname}/web4`);
-      webSocket.onmessage = this.#callAll;
-      webSocket.onerror = console.error;
-      webSocket.onopen = e => updateConnectionState(webSocket, e);
-      webSocket.onclose = e => updateConnectionState(webSocket, e);
-      setTimeout(e => updateConnectionState(webSocket, e), 1000);
-      window.addEventListener("online", e => updateConnectionState(webSocket, e));
-      window.addEventListener("visibilitychange", e => updateConnectionState(webSocket, e));
-      window.onbeforeunload = e => webSocket = undefined;
-
-      let propagationID = 0;
-      const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
-      this.dispatchEvent = function(key, event, includeProperties) {
-        if (event && !event.propagationID)
-          event.propagationID = ++propagationID;
-
-        if (includeProperties?.includes("preventDefault")) {
-          event?.preventDefault();
-          if (includeProperties === "preventDefault")
-            includeProperties = null;
-        }
-        includeProperties = includeProperties?.split(",") ?? ALLOWED_EVENT_PROPERTIES;
-
-        let message = JSON.stringify(
-          { jsonrpc: "2.0", method: key, params: event }, 
-          [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
-        );
-        webSocket.send(message);
-      }
-
-      let reconnectionAttempts = 0;
-      async function updateConnectionState(e) {
-        switch (webSocket?.readyState) {
-          case WebSocket.CONNECTING:
-            getOrCreateModal().showModal();
-            break;
-          case WebSocket.OPEN:
-            document.getElementById("web4Modal")?.close();
-            break;
-          case WebSocket.CLOSING:
-          case WebSocket.CLOSED:
-            getOrCreateModal().showModal();
-            document.getElementById("web4ModalMessage").textContent = e.reason ? e.reason : "Looking for server...";
-            if (reconnectionAttempts == 0) {
-              while (++reconnectionAttempts <= 10) {
-                console.debug(`Web4 reconnect: (attempt ${reconnectionAttempts} of 10)...`);
-                new WebSocket(`${location.pathname}/web4/alive`)
-                  .onopen = e => location.reload();
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-              reconnectionAttempts = 0;
-            }
-            break;
-        }
-      }
-
-      function getOrCreateModal() {
-        let web4Modal = document.getElementById("web4Modal");
-        if (!web4Modal) {
-          document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
-          web4Modal = document.getElementById("web4Modal")
-        }
-        return web4Modal;
-      }
+    pong(id) {
+      this.#transport.pong(id);
     }
 
     // Proxied from window.document
@@ -277,6 +203,107 @@
       //   if (!document.body.contains(element))
       //     delete this.all[key];
       // }
+    }
+  }
+
+  class WebSocketTransport {
+    #webSocket = new WebSocket(`${location.pathname}/web4`);
+    #reconnectionAttempts = 0;
+    #propagationID = 0;
+    #ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
+
+    constructor() {
+      this.#webSocket.onmessage = this.#callAll;
+      this.#webSocket.onerror = console.error;
+      this.#webSocket.onopen = e => this.#updateConnectionState(this.#webSocket, e);
+      this.#webSocket.onclose = e => this.#updateConnectionState(this.#webSocket, e);
+      setTimeout(e => this.#updateConnectionState(this.#webSocket, e), 1000);
+      window.addEventListener("online", e => this.#updateConnectionState(this.#webSocket, e));
+      window.addEventListener("visibilitychange", e => this.#updateConnectionState(this.#webSocket, e));
+      window.onbeforeunload = e => this.#webSocket = undefined;
+    }
+
+    dispatchEvent(key, event, includeProperties) {
+      if (event && !event.propagationID)
+        event.propagationID = ++this.#propagationID;
+
+      if (includeProperties?.includes("preventDefault")) {
+        event?.preventDefault();
+        if (includeProperties === "preventDefault")
+          includeProperties = null;
+      }
+      includeProperties = includeProperties?.split(",") ?? this.#ALLOWED_EVENT_PROPERTIES;
+
+      let message = JSON.stringify(
+        { jsonrpc: "2.0", method: key, params: event }, 
+        [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
+      );
+      this.#webSocket.send(message);
+    }
+    
+    ping(repeat) {
+      repeat = repeat ?? 1;
+      for (let i = 0; i < repeat; i++) {
+        console.time("ping");
+        let message = { 
+          jsonrpc: "2.0", 
+          method: "app.pong", 
+          params: [],
+          id: crypto.randomUUID()
+        };
+        this.#webSocket.send(JSON.stringify(message));
+
+        console.timeEnd("ping");
+      }
+    }
+
+    pong(id) {
+      
+    }
+
+    #callAll(event) {
+      let batch = JSON.parse(event.data);
+      batch = Array.isArray(batch) ? batch : [batch];
+      batch.forEach(rpc => {
+        let [obj, func] = rpc.method
+          .split(".")
+          .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
+        func.apply(obj, rpc.params);
+      });
+    }
+
+    async #updateConnectionState(e) {
+      switch (this.#webSocket?.readyState) {
+        case WebSocket.CONNECTING:
+          this.#getOrCreateModal().showModal();
+          break;
+        case WebSocket.OPEN:
+          document.getElementById("web4Modal")?.close();
+          break;
+        case WebSocket.CLOSING:
+        case WebSocket.CLOSED:
+          this.#getOrCreateModal().showModal();
+          document.getElementById("web4ModalMessage").textContent = e.reason ? e.reason : "Looking for server...";
+          if (this.#reconnectionAttempts == 0) {
+            while (++this.#reconnectionAttempts <= 10) {
+              console.debug(`Web4 reconnect: (attempt ${this.#reconnectionAttempts} of 10)...`);
+              new WebSocket(`${location.pathname}/web4/alive`)
+                .onopen = e => location.reload();
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            this.#reconnectionAttempts = 0;
+          }
+          break;
+      }
+    }
+    
+    #getOrCreateModal() {
+      let web4Modal = document.getElementById("web4Modal");
+      if (!web4Modal) {
+        document.body.appendChild(web4ModalTemplate.content.cloneNode(true));
+        web4Modal = document.getElementById("web4Modal")
+      }
+      return web4Modal;
     }
   }
 
