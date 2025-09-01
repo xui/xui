@@ -269,11 +269,14 @@
       this.#unregisterKeyholes();
     }
 
-    static #unregisterKeyholes() {
-      for (let key in app.keyholes.all) {
-        if (!document.body.contains(app.keyholes.all[key]))
-          delete app.keyholes.all[key];
-      }
+    #unregisterKeyholes() {
+      // for (let key in this.all) {
+      //   let element = this.all[key];
+      //   if (!(element instanceof Node))
+      //     element = element.owner;
+      //   if (!document.body.contains(element))
+      //     delete this.all[key];
+      // }
     }
   }
 
