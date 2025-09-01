@@ -132,7 +132,7 @@
 
     constructor() {
       // Object.defineProperty(this, 'all', { get() { return this.#all; } });
-      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.#registerKeyholes(document));
+      document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
     toConsole = function() {
@@ -161,7 +161,7 @@
         .createContextualFragment(rawHtml)
         .children[0];
       this.all[key] = newElement;
-      Web4Keyholes.#registerKeyholes(newElement);
+      this.#registerKeyholes(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
@@ -191,7 +191,7 @@
           }
         });
 
-        Web4Keyholes.#unregisterKeyholes();
+        this.#unregisterKeyholes();
       });
     }
 
@@ -228,7 +228,7 @@
           }
         });
 
-        Web4Keyholes.#unregisterKeyholes();
+        this.#unregisterKeyholes();
       });
     }
 
@@ -266,7 +266,7 @@
         }
       }
 
-      Web4Keyholes.#unregisterKeyholes();
+      this.#unregisterKeyholes();
     }
 
     static #unregisterKeyholes() {
