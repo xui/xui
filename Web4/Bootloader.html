@@ -232,7 +232,7 @@
       });
     }
 
-    static #registerKeyholes(parentNode) {
+    #registerKeyholes(parentNode) {
       let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (let i = comments.snapshotLength - 1; i >= 0; i--) {
         let comment = comments.snapshotItem(i);
