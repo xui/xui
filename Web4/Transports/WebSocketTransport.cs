@@ -18,10 +18,10 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     static WebSocketTransport()
     {
-        Keymaker.CacheKey("app.dispatchEvent");
-        Keymaker.CacheKey("app.keyholes.dump");
-        Keymaker.CacheKey("app.ping");
-        Keymaker.CacheKey("app.pong");
+        Keymaker.CacheKey("dispatchEvent");
+        Keymaker.CacheKey("dump");
+        Keymaker.CacheKey("ping");
+        Keymaker.CacheKey("pong");
     }
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
@@ -101,21 +101,21 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             if (rpcMethod?.StartsWith("key") ?? false)
             {
                 key = rpcMethod;
-                rpcMethod = "app.dispatchEvent";
+                rpcMethod = "dispatchEvent";
             }
 
             switch (rpcMethod)
             {
-                case "app.keyholes.dump":
+                case "dump":
                     Console.WriteLine("dump()");
                     break;
-                case "app.ping":
+                case "ping":
                     Console.WriteLine("ping()");
                     break;
-                case "app.pong":
+                case "pong":
                     Console.WriteLine("pong()");
                     break;
-                case "app.dispatchEvent":
+                case "dispatchEvent":
                     var rpcEvent = new WebSocketEvent(message);
                     window.HandleEvent(key, ref rpcEvent);
                     break;
