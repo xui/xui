@@ -334,22 +334,16 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             HandleDeferredLiteral();
 
         var key = keyGenerator.GetNextKey();
-        if (includeEventArg && format != null)
+        if (includeEventArg)
         {
             Writer.Inject($"""
-                "app.dispatchEvent('{key}',event,'{format ?? ""}')"
-                """);
-        }
-        else if (includeEventArg && format == null)
-        {
-            Writer.Inject($"""
-                "app.dispatchEvent('{key}',event)"
+                "app.dispatchEvent('{key}',event.trim('{format ?? "*"}'))"
                 """);
         }
         else
         {
-            Writer.Inject($"""
-                "app.dispatchEvent('{key}')"
+            Writer.Inject($$"""
+                "app.dispatchEvent('{{key}}', {})"
                 """);
         }
         

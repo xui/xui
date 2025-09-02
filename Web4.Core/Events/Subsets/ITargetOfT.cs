@@ -8,7 +8,7 @@ namespace Web4
     {
         public interface ITarget<T> : ISubset
         {
-            const string Format = "target,id,name,type,checked,value";
+            const string Format = "target";
 
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.

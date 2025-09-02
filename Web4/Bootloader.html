@@ -37,8 +37,8 @@
       return element;
     }
 
-    dispatchEvent(key, event, includeProperties) {
-      this.#transport.dispatchEvent(key, event, includeProperties);
+    dispatchEvent(key, event) {
+      this.#transport.dispatchEvent(key, event);
     }
 
     ping(repeat) {
@@ -209,8 +209,6 @@
   class WebSocketTransport {
     #webSocket = new WebSocket(`${location.pathname}/web4`);
     #reconnectionAttempts = 0;
-    #propagationID = 0;
-    #ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
 
     constructor() {
       this.#webSocket.onmessage = this.#callAll;
@@ -224,21 +222,12 @@
     }
 
     dispatchEvent(key, event, includeProperties) {
-      if (event && !event.propagationID)
-        event.propagationID = ++this.#propagationID;
-
-      if (includeProperties?.includes("preventDefault")) {
-        event?.preventDefault();
-        if (includeProperties === "preventDefault")
-          includeProperties = null;
-      }
-      includeProperties = includeProperties?.split(",") ?? this.#ALLOWED_EVENT_PROPERTIES;
-
-      let message = JSON.stringify(
-        { jsonrpc: "2.0", method: key, params: event }, 
-        [ "jsonrpc", "method", "params", ...includeProperties, "propagationID" ]
-      );
-      this.#webSocket.send(message);
+      let message = {
+        jsonrpc: "2.0", 
+        method: key, 
+        params: event
+      };
+      this.#webSocket.send(JSON.stringify(message));
     }
     
     ping(repeat) {
@@ -308,6 +297,51 @@
   }
 
   this.app = new Web4App();
+
+  Event.prototype.trim = function(members) {
+    const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
+
+    if (!members)
+      return {};
+    
+    if (typeof members === "string")
+      members = members.split(",");
+
+    if (members.includes("preventDefault"))
+      this.preventDefault();
+
+    if (members.includes("*"))
+      members = ALLOWED_EVENT_PROPERTIES;
+
+    let trimmed = {};
+    
+    members.forEach(member => {
+      member = member.trim();
+      if (member in this) {
+        if (this[member] instanceof EventTarget) {
+          let eventTarget = {};
+          if (this[member].id) eventTarget.id = this[member].id;
+          if (this[member].name) eventTarget.name = this[member].name;
+          if (this[member].value) eventTarget.value = this[member].value;
+          if (this[member].value === "on") eventTarget.checked = this[member].checked;
+          if (Object.keys(eventTarget).length > 0)
+            trimmed[member] = eventTarget;
+        } else {
+          trimmed[member] = this[member];
+        }
+      }
+    });
+
+    if (!this.propagationID)
+      this.propagationID = Event.prototype.NEXT_PROPAGATION_ID++;
+    // TODO: Move propagationID to jsonrpc params array.
+    trimmed.propagationID = this.propagationID;
+
+    return trimmed;
+  }
+
+  if (!Event.prototype.NEXT_PROPAGATION_ID)
+    Event.prototype.NEXT_PROPAGATION_ID = 1;
 
 </script>
 
