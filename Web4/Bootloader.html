@@ -221,7 +221,7 @@
       window.onbeforeunload = e => this.#webSocket = undefined;
     }
 
-    dispatchEvent(key, event, includeProperties) {
+    dispatchEvent(key, event) {
       let message = {
         jsonrpc: "2.0", 
         method: key, 
