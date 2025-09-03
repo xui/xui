@@ -8,6 +8,8 @@ namespace Web4;
 
 public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
 {
+    public static ObjectPool<JsonRpcWriter> Pool { get; } = ObjectPool.Create<JsonRpcWriter>();
+
     private int cursor = 0;
     private byte[] buffer;
     private readonly Utf8JsonWriter utf8JsonWriter;
@@ -116,6 +118,29 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         utf8JsonWriter.WriteEndObject();
     }
 
+    public void WriteResult(int id)
+    {
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+        utf8JsonWriter.WriteNull("result");
+        utf8JsonWriter.WriteNumber("id", id);
+        utf8JsonWriter.WriteEndObject();
+        utf8JsonWriter.Flush();
+    }
+
+    public void WriteResult(int id, string? result)
+    {
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+        if (result is not null)
+            utf8JsonWriter.WriteString("result", result);
+        else
+            utf8JsonWriter.WriteNull("result");
+        utf8JsonWriter.WriteNumber("id", id);
+        utf8JsonWriter.WriteEndObject();
+        utf8JsonWriter.Flush();
+    }
+
     private void WriteKeyholeValue(ref Keyhole keyhole)
     {
         // String and Boolean do not use format strings.
@@ -131,7 +156,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
 
         utf8JsonWriter.Flush();
         Encoding.UTF8.GetBytes(",\"", this);
-        WriteRawWithFormatString(ref keyhole);        
+        WriteRawWithFormatString(ref keyhole);
         Encoding.UTF8.GetBytes("\"", this);
     }
 

@@ -21,7 +21,6 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         Keymaker.CacheKey("dispatchEvent");
         Keymaker.CacheKey("dump");
         Keymaker.CacheKey("ping");
-        Keymaker.CacheKey("pong");
     }
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
@@ -84,6 +83,22 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 endOfMessage: true,
                 cancellationToken: http.RequestAborted);
         }
+
+    private async ValueTask SendResult(int id)
+    {
+        var writer = JsonRpcWriter.Pool.Get();
+        writer.WriteResult(id);
+
+        if (writer.Result is ReadOnlyMemory<byte> buffer)
+        {
+            await webSocket.SendAsync(
+                buffer: buffer,
+                messageType: WebSocketMessageType.Text,
+                endOfMessage: true,
+                cancellationToken: http.RequestAborted);
+        }
+
+        JsonRpcWriter.Pool.Return(writer);
     }
 
     public async Task ListenForRpcMessages(Window window)
@@ -94,7 +109,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             foreach (var w in windows.Values)
                 w.Invalidate();
 
-            var rpcMethod = ParseMethod(message);
+            var (rpcMethod, rpcID) = ParseMessage(message);
 
             // TODO: For dispatchEvent, move key to params instead of method name.
             string key = string.Empty;
@@ -110,17 +125,15 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                     Console.WriteLine("dump()");
                     break;
                 case "ping":
-                    Console.WriteLine("ping()");
-                    break;
-                case "pong":
-                    Console.WriteLine("pong()");
+                    if (rpcID.HasValue)
+                        await SendResult(rpcID.Value);
                     break;
                 case "dispatchEvent":
                     var rpcEvent = new WebSocketEvent(message);
                     window.HandleEvent(key, ref rpcEvent);
                     break;
                 default:
-                    Console.WriteLine($"🔴 Could not parse the method from the message: {rpcMethod}");
+                    Console.WriteLine($"🔴 Could not parse the method from the message: {rpcMethod ?? "(null)"}");
                     break;
             }
 
@@ -177,25 +190,38 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         }
     }
 
-    private static string? ParseMethod(ReadOnlySequence<byte> sequence)
+    private static (string?, int?) ParseMessage(ReadOnlySequence<byte> sequence)
     {
-        using var perf = Debug.PerfCheck("ParseMethod"); // TODO: Remove PerfCheck
+        using var perf = Debug.PerfCheck("ParseMessage"); // TODO: Remove PerfCheck
 
-        string? key = null;
+        string? method = null;
+        int? id = null;
         try
         {
             var reader = new Utf8JsonReader(sequence);
 
             while (reader.Read())
             {
-                if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("method"))
+                if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    reader.Read();
-                    ReadOnlySpan<byte> value = reader.HasValueSequence
-                        ? reader.ValueSequence.ToArray() // TODO: Allocates, but is rare?  Confirm.
-                        : reader.ValueSpan;
-                    key = Keymaker.GetKeyIfCached(value);
-                    break;
+                    if (reader.ValueTextEquals("method"))
+                    {
+                        reader.Read();
+                        ReadOnlySpan<byte> value = reader.HasValueSequence
+                            ? reader.ValueSequence.ToArray() // TODO: Allocates, but is rare?  Confirm.
+                            : reader.ValueSpan;
+                        method = Keymaker.GetKeyIfCached(value);
+                    }
+                    else if (reader.ValueTextEquals("params"))
+                    {
+                        reader.Skip();
+                    }
+                    else if (reader.ValueTextEquals("id"))
+                    {
+                        reader.Read();
+                        if (reader.TryGetInt32(out int i))
+                            id = i;
+                    }
                 }
             }
         }
@@ -204,7 +230,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             Console.WriteLine(ex);
         }
 
-        return key;
+        return (method, id);
     }
 
     internal class Segment : ReadOnlySequenceSegment<byte>

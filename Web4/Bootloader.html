@@ -42,11 +42,13 @@
     }
 
     ping(repeat) {
-      this.#transport.ping(repeat);
-    }
-
-    pong(id) {
-      this.#transport.pong(id);
+      repeat = repeat ?? 1;
+      console.time("ping");
+      this.#transport.ping().then(async () => {
+        console.timeEnd("ping");
+        if (--repeat > 0)
+          this.ping(repeat);
+      });
     }
 
     // Proxied from window.document
@@ -208,11 +210,13 @@
 
   class WebSocketTransport {
     #webSocket = new WebSocket(`${location.pathname}/web4`);
+    #messageID = 0;
     #reconnectionAttempts = 0;
+    #promises = new Map();
 
     constructor() {
-      this.#webSocket.onmessage = this.#callAll;
-      this.#webSocket.onerror = console.error;
+      this.#webSocket.onmessage = e => this.#callAll(e);
+      this.#webSocket.onerror = e => console.error(e);
       this.#webSocket.onopen = e => this.#updateConnectionState(this.#webSocket, e);
       this.#webSocket.onclose = e => this.#updateConnectionState(this.#webSocket, e);
       setTimeout(e => this.#updateConnectionState(this.#webSocket, e), 1000);
@@ -230,34 +234,41 @@
       this.#webSocket.send(JSON.stringify(message));
     }
     
-    ping(repeat) {
-      repeat = repeat ?? 1;
-      for (let i = 0; i < repeat; i++) {
-        console.time("ping");
-        let message = { 
-          jsonrpc: "2.0", 
-          method: "pong", 
-          params: [],
-          id: crypto.randomUUID()
-        };
-        this.#webSocket.send(JSON.stringify(message));
+    ping() {
+      let message = { 
+        jsonrpc: "2.0", 
+        method: "ping", 
+        params: [],
+        id: ++this.#messageID,
+      };
+      this.#webSocket.send(JSON.stringify(message));
 
-        console.timeEnd("ping");
-      }
-    }
-
-    pong(id) {
-      
+      return new Promise((resolve, reject) => {
+        this.#promises.set(this.#messageID, { resolve, reject });
+      });
     }
 
     #callAll(event) {
       let batch = JSON.parse(event.data);
       batch = Array.isArray(batch) ? batch : [batch];
       batch.forEach(rpc => {
-        let [obj, func] = rpc.method
-          .split(".")
-          .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
-        func.apply(obj, rpc.params);
+
+        // A function to call
+        if (rpc.method) {
+          let [obj, func] = rpc.method
+            .split(".")
+            .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
+          func.apply(obj, rpc.params);
+        }
+
+        // A result to return
+        if (rpc.id) {
+          let promise = this.#promises.get(rpc.id);
+          if (rpc.error)
+            promise.reject(rpc.error);
+          else
+            promise.resolve(rpc.result);
+        }
       });
     }
 
