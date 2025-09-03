@@ -44,7 +44,7 @@
     ping(repeat) {
       repeat = repeat ?? 1;
       console.time("ping");
-      this.#transport.ping().then(async () => {
+      this.#transport.ping().then(() => {
         console.timeEnd("ping");
         if (--repeat > 0)
           this.ping(repeat);
