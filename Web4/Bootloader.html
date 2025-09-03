@@ -238,7 +238,6 @@
       let message = { 
         jsonrpc: "2.0", 
         method: "ping", 
-        params: [],
         id: ++this.#messageID,
       };
       this.#webSocket.send(JSON.stringify(message));
