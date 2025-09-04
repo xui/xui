@@ -5,7 +5,7 @@ using Web4.Events.Subsets;
 
 namespace Web4;
 
-internal partial record class HttpXEvent(
+internal partial record class WebAssemblyEvent(
     bool? Absolute = null,
     XYZ? Acceleration = null,
     XYZ? AccelerationIncludingGravity = null,
