@@ -1,6 +1,6 @@
 namespace Web4.Proxies;
 
-public class DocumentProxy
+public struct DocumentProxy
 {
     public string? Title { get; set; }
 }
