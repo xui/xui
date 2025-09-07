@@ -17,17 +17,10 @@ using Web4.Composers;
 
 namespace Web4;
 
+// TODO: Memory allocations everywhere
+
 public static class Debug
 {
-    #if !DEBUG
-
-    public const string JS = "";
-    internal static void MapOutput(RouteGroupBuilder group) { }
-    internal static async ValueTask Log(Keyhole[] oldKeyhole, Keyhole[] newKeyhole) { }
-    // TODO: ^ Empty body still has perf cost.  Make this a zero-cost abstraction.
-
-    #else
-
     private const string CSS_DEFAULT = "font-weight:normal;font-family:monospace,monospace;";
     private const string CSS_VARIABLE = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
     private const string CSS_FUNCTION = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
@@ -41,56 +34,39 @@ public static class Debug
     private const string CSS_LINK = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
     private const string CSS_BRACE = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
 
-    private const int DEBOUNCE_SECONDS = 1;
-    private static DateTime debounceUntil = DateTime.Now;
-    public static HttpContext? http;
-
     public record JsonRpc(string method, string[] @params, string jsonrpc = "2.0");
 
-    private static async Task Log(JsonRpc message)
+    public static ValueTask Dump(WebSocket webSocket, Keyhole[] buffer)
     {
-        // TODO: Memory allocations
-        if (http is not null)
-            await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(message) + "\n\n", CancellationToken.None);
+        var messages = GetMessages(buffer);
+        var output = JsonSerializer.Serialize(messages);
+        var bytes = Encoding.UTF8.GetBytes(output);
+        return webSocket.SendAsync(bytes.AsMemory(), WebSocketMessageType.Text, true, CancellationToken.None);
     }
 
-    private static async Task Log(params IEnumerable<JsonRpc> messages)
+    private static List<JsonRpc> GetMessages(Keyhole[] buffer)
     {
-        // TODO: Memory allocations
-        if (http is not null)
-            await http.Response.WriteAsync("data: " + JsonSerializer.Serialize(messages) + "\n\n", CancellationToken.None);
-    }
-
-    internal static async ValueTask Log(Keyhole[] oldBuffer, Keyhole[] newBuffer)
-    {
-        if (debounceUntil > DateTime.Now)
-        {
-            await Log(new JsonRpc("console.log", [$"Server console output is debounced for {DEBOUNCE_SECONDS} second(s)..."]));
-            return;
-        }
-
-        debounceUntil = DateTime.Now.AddSeconds(DEBOUNCE_SECONDS);
-
+        
         var messages = new List<JsonRpc>
         {
-            new("console.groupCollapsed", ["Keyholes"]),
-            new("console.log", ["%cDEBUG output is default-enabled for localhost\nManually configure using server.debug = [true | false]", CSS_NOTES])
+            new("console.group", ["Remote Keyhole Buffer"])
         };
 
-        var rootLength = newBuffer[0].SequenceLength;
+        var rootLength = buffer[0].SequenceLength;
         for (int index = 0; index < rootLength; index++)
         {
-            ref Keyhole keyhole = ref newBuffer[index];
-            messages.AddRange(Write(index, keyhole, oldBuffer, newBuffer));
+            ref Keyhole keyhole = ref buffer[index];
+            messages.AddRange(WriteKeyhole(index, keyhole, buffer));
         }
 
-        messages.Add(new("console.log", ["\n%cBenchmark this shell:\n%c› %cserver.%cbenchmark%c();", CSS_TYPE, CSS_VARIABLE, CSS_DEFAULT, CSS_FUNCTION, CSS_DEFAULT]));
+        // var keyholeSize = sizeof(Keyhole);
+        messages.Add(new("console.log", [$"%cRemote RAM:\n  buffer:     {170 * 40:n0} bytes\n  keyholes:   {85}\n    values:   {45}\n    pointers: {40}", CSS_NOTES]));
         messages.Add(new("console.groupEnd", []));
 
-        await Log(messages);
+        return messages;
     }
-    
-    private static IEnumerable<JsonRpc> Write(int index, Keyhole keyhole, Keyhole[] oldBuffer, Keyhole[] newBuffer)
+
+    private static IEnumerable<JsonRpc> WriteKeyhole(int index, Keyhole keyhole, Keyhole[] buffer)
     {
         switch (keyhole.Type)
         {
@@ -117,7 +93,7 @@ public static class Debug
                 break;
             // TODO: Support the other FormatTypes too
             case KeyholeType.EventListener:
-                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.Expression} %c}}" }", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
+                yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 {$"%c{{ %c{keyhole.Expression} %c}}"}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE]);
                 yield return new("console.groupEnd", []);
                 break;
             case KeyholeType.Attribute:
@@ -127,17 +103,17 @@ public static class Debug
                 int length = keyhole.SequenceLength;
                 if (keyhole.Key != string.Empty)
                 {
-                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 { $"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
+                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} 🟢 {$"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}"} %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
                 }
                 else
                 {
-                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 { $"%c{{ %c{keyhole.Expression} %c}}" } %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
+                    yield return new("console.groupCollapsed", [$"{$"[{index}]",-4}  {$"%c%c%c",-28} 🟢 {$"%c{{ %c{keyhole.Expression} %c}}"} %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK]);
                 }
 
                 for (int i = start; i < start + length; i++)
                 {
-                    ref var k = ref newBuffer[i];
-                    foreach (var m in Write(i, k, oldBuffer, newBuffer))
+                    ref var k = ref buffer[i];
+                    foreach (var m in WriteKeyhole(i, k, buffer))
                         yield return m;
                 }
                 yield return new("console.groupEnd", []);
@@ -157,15 +133,18 @@ public static class Debug
         int maxLength = 100;
         var inlined = new StringBuilder(value)
             .Replace("\n", "")
-            .Replace("\r", "") 
+            .Replace("\r", "")
             .Replace("  ", "")
             .ToString();
         return (inlined.Length > maxLength)
-            ? inlined[..(maxLength-3)] + "..."
+            ? inlined[..(maxLength - 3)] + "..."
             : inlined;
     }
-    
-    #endif
+
+    public static void Benchmark(WebSocket webSocket, Window window)
+    {
+
+    }
 
     public static IDisposable PerfCheck(string name = "unnamed") => new Perf(name);
 
