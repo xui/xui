@@ -1,49 +1,9 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Web4.Events;
-using Web4.Events.Subsets;
+namespace Web4.Proxies;
 
-namespace Web4;
-
-public static class EventExtensions
+public ref struct WindowProxy()
 {
-    public static Context GetContext(this IEvent e)
-    {
-        return new();
-    }
-
-    public static Context GetContext(this ISubset e)
-    {
-        return new();
-    }
-}
-
-public class BrowserConsole
-{
-    public void Log(string message) { }
-}
-
-public struct Context
-{
-    public Window Window { get; }
-    public HttpRequest Request { get; }
-    public HttpResponse Response { get; }
-    public ConnectionInfo Connection { get; }
-    public ISession Session { get; }
-    public ClaimsPrincipal User { get; set; }
-}
-
-public class Document
-{
-    public string? Title { get; set; }
-}
-
-public class Window_delete_me
-{
-    public Document Document { get; } = new();
-
-    // Objects
-    public BrowserConsole Console { get; } = new();
+    public DocumentProxy Document { get; } = new();
+    public ConsoleProxy Console { get; } = new();
 
     public float DevicePixelRatio { get; } = 2;
     public int InnerWidth { get; } = 786;
@@ -71,8 +31,6 @@ public class Window_delete_me
     //parent: Window
     //top
 
-
-
     public async Task Alert(string message) { await Task.Delay(1); }
     public void Close() { }
     public void Confirm() { }
@@ -85,7 +43,13 @@ public class Window_delete_me
     public void Open() { }
     public void PostMessage() { }
     public void Print() { }
-    public void Prompt() { }
+
+    public async Task<string> Prompt()
+    {
+        await Task.Yield();
+        return "";
+    }
+
     public void ResizeBy() { }
     public void ResizeTo() { }
     public void Scroll() { }
