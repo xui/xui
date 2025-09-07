@@ -105,9 +105,6 @@ public class Window
         Keyhole[] oldBuffer = snapshot;
         Keyhole[] newBuffer = CaptureSnapshot();
 
-        // TODO: Move your debugger to be part of the service config.
-        await Debug.Log(oldBuffer, newBuffer);
-
         await transport.ApplyMutations(oldBuffer, newBuffer);
 
         switch (SnapshotStrategy)
