@@ -13,7 +13,7 @@ public record struct EventListener(
     public EventListener(Func<Task> listener) : this(Func: listener) { }
     public EventListener(Func<Event, Task> listener) : this(FuncEvent: listener) { }
 
-    public readonly void Invoke(Event @event)
+    public readonly void Invoke(Event @event, int propagationID)
     {
         using var perf = Debug.PerfCheck("Invoke"); // TODO: Remove PerfCheck
 

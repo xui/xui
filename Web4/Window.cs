@@ -131,32 +131,25 @@ public class Window
         return windowBuilder.Html.CreateSnapshot();
     }
 
-    internal void HandleEvent<T>(string key, ref T @event) where T : struct, Event
-    {
-        try
-        {
-            var listener = windowBuilder.GetEventListener(key);
-
-            // Invoke the proper method signature.  Important notes:
-            // - it might not pass in the event, e.g. `void OnClick()`
-            // - it may or may not be async but clearly does not await here
-            // - it disposes the event after the method completes
-            listener.Invoke(@event);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
     public void Benchmark(int threads = 0)
     {
     }
 
     public void DispatchEvent(string key, Event @event, int propagationID)
     {
-        var listener = windowBuilder.GetEventListener(key);
-        listener.Invoke(@event, propagationID);
+        try
+        {
+            // Invoke the proper method signature.  Important notes:
+            // - it might not pass in the event, e.g. `void OnClick()`
+            // - it may or may not be async but clearly does not await here
+            // - it disposes the event after the method completes
+            var listener = windowBuilder.GetEventListener(key);
+            listener.Invoke(@event, propagationID);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     public void DumpKeyholes(System.Net.WebSockets.WebSocket webSocket) // TODO: Remove webSocket once ConsoleProxy is in place.
