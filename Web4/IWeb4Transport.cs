@@ -1,6 +1,4 @@
-using Web4;
-
-namespace Web4.Transports;
+namespace Web4;
 
 public interface IWeb4Transport
 {

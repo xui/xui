@@ -1,4 +1,4 @@
-namespace Web4.Transports;
+namespace Web4;
 
 public interface IMutationBatch : IDisposable
 {

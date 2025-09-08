@@ -1,6 +1,4 @@
-using Microsoft.Extensions.ObjectPool;
-
-namespace Web4.Transports;
+namespace Web4.WebSockets;
 
 public struct WebSocketMutationBatch() : IMutationBatch
 {

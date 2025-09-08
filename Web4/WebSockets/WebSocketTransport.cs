@@ -1,12 +1,10 @@
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Web4.Transports;
+namespace Web4.WebSockets;
 
 public class WebSocketTransport : IWeb4Transport, IDisposable
 {
@@ -72,6 +70,8 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
+        try
+        {
         using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);
         using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
 
@@ -83,6 +83,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 endOfMessage: true,
                 cancellationToken: http.RequestAborted);
         }
+        
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
 
     private async ValueTask SendResult(int id)
     {
@@ -101,7 +108,22 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         JsonRpcWriter.Pool.Return(writer);
     }
 
-    public async Task ListenForRpcMessages(Window window)
+    private record struct JsonRpc(string Method, int? ID)
+    {
+        public static JsonRpc Void = new("void", null);
+
+        public static JsonRpc Parse(ReadOnlySequence<byte> message)
+        {
+            return new("somemethod", 4);
+        }
+
+        public T GetNextPositionalParam<T>()
+        {
+            return default(T);
+        }
+    }
+
+    public async Task ListenForRpcMessages(Window app)
     {
         await foreach (var message in GetNextMessage())
         {
@@ -118,22 +140,37 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 key = rpcMethod;
                 rpcMethod = "dispatchEvent";
             }
+            
+            JsonRpc rpc = JsonRpc.Parse(message);
+            rpc.Method = rpcMethod!;
+            rpc.ID = rpcID;
 
-            switch (rpcMethod)
+            // No awaiting.  This event loop shouldn't be blocked by RPCs.
+            switch (rpc)
             {
-                case "dump":
-                    Console.WriteLine("dump()");
-                    break;
-                case "ping":
-                    if (rpcID.HasValue)
-                        await SendResult(rpcID.Value);
-                    break;
-                case "dispatchEvent":
+                case JsonRpc { Method: "dispatchEvent" }:
+                    var key2 = rpc.GetNextPositionalParam<string>();
+                    var @event = rpc.GetNextPositionalParam<WebSocketEvent>();
+                    var propagationID = rpc.GetNextPositionalParam<int>();
                     var rpcEvent = new WebSocketEvent(message);
-                    window.HandleEvent(key, ref rpcEvent);
+                    app.DispatchEvent(key, rpcEvent, propagationID);
                     break;
+
+                case JsonRpc { Method: "dump" }:
+                    app.DumpKeyholes(webSocket);
+                    break;
+
+                case JsonRpc { Method: "benchmark" }:
+                    var threads = rpc.GetNextPositionalParam<int?>();
+                    app.Benchmark(threads ?? 0);
+                    break;
+
+                case JsonRpc { Method: "ping", ID: int requestID }:
+                    app.Ping();
+                    await SendResult(requestID);
+                    break;
+
                 default:
-                    Console.WriteLine($"🔴 Could not parse the method from the message: {rpcMethod ?? "(null)"}");
                     break;
             }
 

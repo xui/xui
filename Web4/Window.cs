@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Channels;
 using Web4.Composers;
-using Web4.Transports;
 
 namespace Web4;
 
