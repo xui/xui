@@ -163,6 +163,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             return;
                         }
                     }
+                    
+                    // TODO: Handle when oldItems.Length = 0!
 
                     if (oldItems.Length < newItems.Length)
                     {

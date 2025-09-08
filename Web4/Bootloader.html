@@ -126,7 +126,42 @@
       });
     }
 
-    addElement = function() {
+    addElement = function(key, priorKey, rawHtml, transition) {
+      let priorElement = this.all[priorKey];
+      let newElement = document
+        .createRange()
+        .createContextualFragment(rawHtml)
+        .children[0];
+      let parentElement = priorElement.parentElement;
+      this.all[key] = newElement;
+      this.#registerKeyholes(newElement);
+
+      // No transition
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
+      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
+        priorElement.after(newElement);
+        return;
+      }
+      
+      // View Transition API
+      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+      parentElement.childNodes.forEach((sibling, i) => {
+        if (sibling.style)
+          sibling.style.viewTransitionName = `web4-sibling-${i}`
+      });
+
+      document.startViewTransition(() => {
+        priorElement.after(newElement);
+      })
+      .finished.then(() => {
+        parentElement.childNodes.forEach(sibling => {
+          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
+            sibling.style.removeProperty("view-transition-name");
+            if (sibling.style.length == 0)
+              sibling.removeAttribute("style");
+          }
+        });
+      });
     }
 
     removeElement = function(key, transition) {

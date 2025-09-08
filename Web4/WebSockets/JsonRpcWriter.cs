@@ -63,13 +63,18 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
     }
 
     public void WriteRpc(string method, string key, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
+        => WriteRpc(method, key, null, keyholes, includeSentinels, transition);
+        
+    public void WriteRpc(string method, string key1, string? key2, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
         utf8JsonWriter.WriteString("method", method);
         utf8JsonWriter.WriteStartArray("params");
 
-        utf8JsonWriter.WriteStringValue(key);
+        utf8JsonWriter.WriteStringValue(key1);
+        if (key2 is not null)
+            utf8JsonWriter.WriteStringValue(key2);
 
         for (int i = 0; i < keyholes.Length; i++)
         {
