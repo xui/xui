@@ -148,4 +148,25 @@ public class Window
             Console.WriteLine(ex);
         }
     }
+
+    public void Benchmark(int threads = 0)
+    {
+    }
+
+    public void DispatchEvent(string key, Event @event, int propagationID)
+    {
+        var listener = windowBuilder.GetEventListener(key);
+        listener.Invoke(@event, propagationID);
+    }
+
+    public void DumpKeyholes(System.Net.WebSockets.WebSocket webSocket) // TODO: Remove webSocket once ConsoleProxy is in place.
+    {
+        var snapshot = this.snapshot ?? CaptureSnapshot();
+        Debug.Dump(webSocket, snapshot);
+    }
+
+    public void Ping()
+    {
+        // no-op
+    }
 }
