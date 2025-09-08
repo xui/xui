@@ -116,7 +116,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             foreach (var w in windows.Values)
                 w.Invalidate();
 
-            var rpc = JsonRpc.Parse(message);
+            var rpc = JsonRpcReader.Parse(message);
 
             // TODO: For dispatchEvent, move key to params instead of method name.
             string key = string.Empty;

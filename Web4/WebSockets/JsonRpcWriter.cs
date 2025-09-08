@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
 
-namespace Web4;
+namespace Web4.WebSockets;
 
 public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
 {
