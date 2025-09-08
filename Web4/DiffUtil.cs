@@ -164,8 +164,6 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         }
                     }
                     
-                    // TODO: Handle when oldItems.Length = 0!
-
                     if (oldItems.Length < newItems.Length)
                     {
                         // The new enumerable has more items than the old one. 
@@ -174,10 +172,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         // or cause any keyname collisions.
                         for (int d = minLength; d < newItems.Length; d++)
                         {
-                            ref var item = ref newItems[d];
-                            ref var itemSpan = ref newBuffer[item.SequenceStart];
-                            
-                            // mutationBatch.AddElement(key, d, itemSpan);
+                            ref var priorItem = ref newItems[d - 1];
+                            ref var newItem = ref newItems[d];
+                            var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
+
+                            mutationBatch.AddElement(newItem.Key, priorItem.Key, newItemSpan, transition);
                         }
                     }
                     else if (oldItems.Length > newItems.Length)
