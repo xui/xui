@@ -90,11 +90,12 @@
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
+      let parentElement = oldElement.parentElement;
       this.all[key] = newElement;
       this.#registerKeyholes(newElement);
 
       // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(oldElement.parentElement.tagName);
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
       if (!document.startViewTransition || !transition || !isInTransitionContainer) {
         oldElement.replaceWith(newElement);
         return;
@@ -102,7 +103,7 @@
       
       // View Transition API
       let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-      oldElement.parentElement.childNodes.forEach((sibling, i) => {
+      parentElement.childNodes.forEach((sibling, i) => {
         if (sibling.style)
           sibling.style.viewTransitionName = `web4-sibling-${i}`
       });
@@ -113,7 +114,7 @@
         oldElement.replaceWith(newElement);
       })
       .finished.then(() => {
-        newElement.parentElement.childNodes.forEach(sibling => {
+        parentElement.childNodes.forEach(sibling => {
           if (sibling.style?.viewTransitionName?.startsWith("web4")) {
             sibling.style.removeProperty("view-transition-name");
             if (sibling.style.length == 0)
