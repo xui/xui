@@ -108,21 +108,6 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         JsonRpcWriter.Pool.Return(writer);
     }
 
-    private record struct JsonRpc(string Method, int? ID)
-    {
-        public static JsonRpc Void = new("void", null);
-
-        public static JsonRpc Parse(ReadOnlySequence<byte> message)
-        {
-            return new("somemethod", 4);
-        }
-
-        public T GetNextPositionalParam<T>()
-        {
-            return default(T);
-        }
-    }
-
     public async Task ListenForRpcMessages(Window app)
     {
         await foreach (var message in GetNextMessage())
@@ -131,20 +116,16 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             foreach (var w in windows.Values)
                 w.Invalidate();
 
-            var (rpcMethod, rpcID) = ParseMessage(message);
+            var rpc = JsonRpc.Parse(message);
 
             // TODO: For dispatchEvent, move key to params instead of method name.
             string key = string.Empty;
-            if (rpcMethod?.StartsWith("key") ?? false)
+            if (rpc.Method?.StartsWith("key") ?? false)
             {
-                key = rpcMethod;
-                rpcMethod = "dispatchEvent";
+                key = rpc.Method;
+                rpc.Method = "dispatchEvent";
             }
             
-            JsonRpc rpc = JsonRpc.Parse(message);
-            rpc.Method = rpcMethod!;
-            rpc.ID = rpcID;
-
             // No awaiting.  This event loop shouldn't be blocked by RPCs.
             switch (rpc)
             {
@@ -225,49 +206,6 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
             yield return sequence;
         }
-    }
-
-    private static (string?, int?) ParseMessage(ReadOnlySequence<byte> sequence)
-    {
-        using var perf = Debug.PerfCheck("ParseMessage"); // TODO: Remove PerfCheck
-
-        string? method = null;
-        int? id = null;
-        try
-        {
-            var reader = new Utf8JsonReader(sequence);
-
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.PropertyName)
-                {
-                    if (reader.ValueTextEquals("method"))
-                    {
-                        reader.Read();
-                        ReadOnlySpan<byte> value = reader.HasValueSequence
-                            ? reader.ValueSequence.ToArray() // TODO: Allocates, but is rare?  Confirm.
-                            : reader.ValueSpan;
-                        method = Keymaker.GetKeyIfCached(value);
-                    }
-                    else if (reader.ValueTextEquals("params"))
-                    {
-                        reader.Skip();
-                    }
-                    else if (reader.ValueTextEquals("id"))
-                    {
-                        reader.Read();
-                        if (reader.TryGetInt32(out int i))
-                            id = i;
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-        return (method, id);
     }
 
     internal class Segment : ReadOnlySequenceSegment<byte>
