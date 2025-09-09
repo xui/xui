@@ -2,6 +2,7 @@ namespace Web4.Proxies;
 
 public struct WindowProxy()
 {
+    public WindowProxy Window { get => this; }
     public DocumentProxy Document { get; } = new();
     public ConsoleProxy Console { get; } = new();
 
