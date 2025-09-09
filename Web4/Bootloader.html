@@ -275,7 +275,7 @@
     ping() {
       let message = { 
         jsonrpc: "2.0", 
-        method: "ping", 
+        method: "app.ping", 
         id: ++this.#messageID,
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -288,7 +288,7 @@
     dump() {
       let message = {
         jsonrpc: "2.0", 
-        method: "dump", 
+        method: "app.keyholes.dump", 
       };
       this.#webSocket.send(JSON.stringify(message));
     }

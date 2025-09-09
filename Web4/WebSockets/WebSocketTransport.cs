@@ -16,9 +16,10 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     static WebSocketTransport()
     {
-        Keymaker.CacheKey("dispatchEvent");
-        Keymaker.CacheKey("dump");
-        Keymaker.CacheKey("ping");
+        Keymaker.CacheKey("app.dispatchEvent");
+        Keymaker.CacheKey("app.keyholes.dump");
+        Keymaker.CacheKey("app.benchmark");
+        Keymaker.CacheKey("app.ping");
     }
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
@@ -123,13 +124,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             if (rpc.Method?.StartsWith("key") ?? false)
             {
                 key = rpc.Method;
-                rpc.Method = "dispatchEvent";
+                rpc.Method = "app.dispatchEvent";
             }
             
             // No awaiting.  This event loop shouldn't be blocked by RPCs.
             switch (rpc)
             {
-                case JsonRpc { Method: "dispatchEvent" }:
+                case JsonRpc { Method: "app.dispatchEvent" }:
                     var key2 = rpc.GetNextPositionalParam<string>();
                     var @event = rpc.GetNextPositionalParam<WebSocketEvent>();
                     var propagationID = rpc.GetNextPositionalParam<int>();
@@ -137,16 +138,16 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                     app.DispatchEvent(key, rpcEvent, propagationID);
                     break;
 
-                case JsonRpc { Method: "dump" }:
+                case JsonRpc { Method: "app.keyholes.dump" }:
                     app.DumpKeyholes(webSocket);
                     break;
 
-                case JsonRpc { Method: "benchmark" }:
+                case JsonRpc { Method: "app.benchmark" }:
                     var threads = rpc.GetNextPositionalParam<int?>();
                     app.Benchmark(threads ?? 0);
                     break;
 
-                case JsonRpc { Method: "ping", ID: int requestID }:
+                case JsonRpc { Method: "app.ping", ID: int requestID }:
                     app.Ping();
                     await SendResult(requestID);
                     break;
