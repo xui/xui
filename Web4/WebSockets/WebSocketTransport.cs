@@ -120,15 +120,15 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             try
             {
                 var rpc = JsonRpcReader.ParseMessage(message);
-                var rpcParams = JsonRpcReader.ParseParams(message);
 
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
                 switch (rpc)
                 {
                     case JsonRpc { Method: "app.dispatchEvent" }:
-                        var key = rpcParams.GetNextString();
-                        var @event = rpcParams.GetNextEvent();
-                        var propagationID = rpcParams.GetNextInt();
+                        var dispatchEventParams = JsonRpcReader.ParseParams(message);
+                        var key = dispatchEventParams.GetNextString();
+                        var @event = dispatchEventParams.GetNextEvent();
+                        var propagationID = dispatchEventParams.GetNextInt();
                         app.DispatchEvent(key, @event, propagationID);
                         break;
 
@@ -137,7 +137,8 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                         break;
 
                     case JsonRpc { Method: "app.benchmark" }:
-                        var threads = rpcParams.GetNextInt(); // TODO: This is supposed to be an int? not an int.
+                        var benchmarkParams = JsonRpcReader.ParseParams(message);
+                        var threads = benchmarkParams.GetNextInt(); // TODO: This is supposed to be an int? not an int.
                         app.Benchmark(threads);
                         break;
 
