@@ -3,13 +3,11 @@ using System.Buffers;
 using System.Drawing;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.ObjectPool;
 using Web4.Events;
 using Web4.Events.Subsets;
-using Web4.WebSockets;
 
-namespace Web4;
+namespace Web4.WebSockets;
 
 /// <summary>
 /// A WebSocket-optimized implementation of the Event interface.

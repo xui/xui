@@ -3,7 +3,7 @@ using System.Drawing;
 using Web4.Events;
 using Web4.Events.Subsets;
 
-namespace Web4;
+namespace Web4.WebAssembly;
 
 internal partial record class WebAssemblyEvent(
     bool? Absolute = null,
