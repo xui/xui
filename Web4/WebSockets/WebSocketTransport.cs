@@ -111,7 +111,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
     public async Task ListenForRpcMessages(Window app)
     {
-        await foreach (var message in GetNextMessage())
+        await foreach (var sequence in GetNextMessage())
         {
             // TODO: This doesn't belong here.
             foreach (var w in windows.Values)
@@ -119,30 +119,29 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
 
             try
             {
-                var rpc = JsonRpcReader.ParseMessage(message);
+                var message = JsonRpcReader.ParseMessage(sequence);
+                var @params = JsonRpcReader.LazyParseParams(sequence);
 
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
-                switch (rpc)
+                switch (message)
                 {
-                    case JsonRpc { Method: "app.dispatchEvent" }:
-                        var dispatchEventParams = JsonRpcReader.ParseParams(message);
-                        var key = dispatchEventParams.GetNextString();
-                        var @event = dispatchEventParams.GetNextEvent();
-                        var propagationID = dispatchEventParams.GetNextInt();
-                        app.DispatchEvent(key, @event, propagationID);
+                    case JsonRpcMessage { Method: "app.dispatchEvent" }:
+                        var @event          = @params.GetNextEvent();
+                        var key             = @params.GetNextString();
+                        var propagationID   = @params.GetNextInt();
+                        app.DispatchEvent(@event, key, propagationID);
                         break;
 
-                    case JsonRpc { Method: "app.keyholes.dump" }:
+                    case JsonRpcMessage { Method: "app.keyholes.dump" }:
                         app.DumpKeyholes(webSocket);
                         break;
 
-                    case JsonRpc { Method: "app.benchmark" }:
-                        var benchmarkParams = JsonRpcReader.ParseParams(message);
-                        var threads = benchmarkParams.GetNextInt(); // TODO: This is supposed to be an int? not an int.
+                    case JsonRpcMessage { Method: "app.benchmark" }:
+                        var threads = @params.GetNextNullableInt();
                         app.Benchmark(threads);
                         break;
 
-                    case JsonRpc { Method: "app.ping", ID: int requestID }:
+                    case JsonRpcMessage { Method: "app.ping", ID: int requestID }:
                         app.Ping();
                         await SendResult(requestID);
                         break;

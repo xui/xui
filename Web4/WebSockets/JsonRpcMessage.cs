@@ -3,4 +3,4 @@ using System.Text.Json;
 
 namespace Web4.WebSockets;
 
-record struct JsonRpc(string Method, int? ID);
+record struct JsonRpcMessage(string Method, int? ID);

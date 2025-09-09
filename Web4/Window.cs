@@ -135,7 +135,7 @@ public class Window
     {
     }
 
-    public void DispatchEvent(string key, Event @event, int propagationID)
+    public void DispatchEvent(Event @event, string key, int propagationID)
     {
         try
         {

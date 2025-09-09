@@ -37,8 +37,8 @@
       return element;
     }
 
-    dispatchEvent(key, event) {
-      this.#transport.dispatchEvent(key, event);
+    dispatchEvent(event, key) {
+      this.#transport.dispatchEvent(event, key);
     }
 
     ping(repeat) {
@@ -263,11 +263,11 @@
       window.onbeforeunload = e => this.#webSocket = undefined;
     }
 
-    dispatchEvent(key, event) {
+    dispatchEvent(event, key) {
       let message = {
         jsonrpc: "2.0", 
         method: "app.dispatchEvent", 
-        params: [key, event, Event.prototype.NEXT_PROPAGATION_ID]
+        params: [event, key, Event.prototype.NEXT_PROPAGATION_ID]
       };
       this.#webSocket.send(JSON.stringify(message));
     }

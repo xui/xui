@@ -7,7 +7,7 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
 {
     Utf8JsonReader reader = new(sequence);
 
-    public static JsonRpc ParseMessage(ReadOnlySequence<byte> sequence)
+    public static JsonRpcMessage ParseMessage(ReadOnlySequence<byte> sequence)
     {
         using var perf = Debug.PerfCheck("JsonRpcReader.Parse"); // TODO: Remove PerfCheck
 
@@ -43,48 +43,61 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
         return new(method ?? "error", id);
     }
 
-    public static JsonRpcReader ParseParams(ReadOnlySequence<byte> sequence)
+    public static JsonRpcReader LazyParseParams(ReadOnlySequence<byte> sequence) => new(sequence);
+
+    private void ParseToParams()
     {
-        using var perf = Debug.PerfCheck("JsonRpcReader.ParseParams"); // TODO: Remove PerfCheck
+        if (reader.TokenStartIndex > 0)
+            return;
+        
+        using var perf = Debug.PerfCheck("JsonRpcReader.ParseToParams"); // TODO: Remove PerfCheck
 
-        var rpc = new JsonRpcReader(sequence);
-
-        while (rpc.reader.Read())
+        while (reader.Read())
         {
-            if (rpc.reader.TokenType == JsonTokenType.PropertyName)
+            if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                if (rpc.reader.ValueTextEquals("params"))
+                if (reader.ValueTextEquals("params"))
                 {
-                    rpc.reader.Read();
-                    if (rpc.reader.TokenType == JsonTokenType.StartArray)
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.StartArray)
                     {
-                        return rpc;
+                        return;
                     }
                 }
                 else
                 {
-                    rpc.reader.Skip();
+                    reader.Skip();
                 }
             }
         }
-
-        return rpc;
     }
 
     public int GetNextInt()
     {
+        ParseToParams();
         reader.Read();
         return reader.GetInt32();
     }
 
+    public int? GetNextNullableInt()
+    {
+        ParseToParams();
+        reader.Read();
+        if (reader.TryGetInt32(out int value))
+            return value;
+        return null;
+    }
+
     public string GetNextString()
     {
+        ParseToParams();
         reader.Read();
         return reader.GetString()!;
     }
 
     public LazyEvent GetNextEvent()
     {
+        ParseToParams();
         reader.Read();
         reader.Skip();
         return new(sequence);
