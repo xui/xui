@@ -4,6 +4,6 @@ public struct DocumentProxy
 {
     public string? Title { get; set; }
     
-    public WindowProxy DefaultView { get; set; }
+    // public WindowProxy DefaultView { get; set; }
 }
 

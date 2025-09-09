@@ -3,7 +3,7 @@ namespace Web4.Proxies;
 public struct WindowProxy()
 {
     public WindowProxy Window { get => this; }
-    // public DocumentProxy Document { get; } = new(); // causes a cycle in the struct...
+    public DocumentProxy Document { get; } = new();
     public ConsoleProxy Console { get; } = new();
 
     public float DevicePixelRatio { get; } = 2;
