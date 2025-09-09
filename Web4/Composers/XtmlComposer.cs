@@ -343,7 +343,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         else
         {
             Writer.Inject($$"""
-                "app.dispatchEvent('{{key}}', {})"
+                "app.dispatchEvent('{{key}}', event.trim(''))"
                 """);
         }
         

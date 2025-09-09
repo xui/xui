@@ -117,47 +117,46 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             foreach (var w in windows.Values)
                 w.Invalidate();
 
-            var rpc = JsonRpcReader.Parse(message);
-
-            // TODO: For dispatchEvent, move key to params instead of method name.
-            string key = string.Empty;
-            if (rpc.Method?.StartsWith("key") ?? false)
+            try
             {
-                key = rpc.Method;
-                rpc.Method = "app.dispatchEvent";
+                var rpc = JsonRpcReader.ParseMessage(message);
+                var rpcParams = JsonRpcReader.ParseParams(message);
+
+                // No awaiting.  This event loop shouldn't be blocked by RPCs.
+                switch (rpc)
+                {
+                    case JsonRpc { Method: "app.dispatchEvent" }:
+                        var key = rpcParams.GetNextString();
+                        var @event = rpcParams.GetNextEvent();
+                        var propagationID = rpcParams.GetNextInt();
+                        app.DispatchEvent(key, @event, propagationID);
+                        break;
+
+                    case JsonRpc { Method: "app.keyholes.dump" }:
+                        app.DumpKeyholes(webSocket);
+                        break;
+
+                    case JsonRpc { Method: "app.benchmark" }:
+                        var threads = rpcParams.GetNextInt(); // TODO: This is supposed to be an int? not an int.
+                        app.Benchmark(threads);
+                        break;
+
+                    case JsonRpc { Method: "app.ping", ID: int requestID }:
+                        app.Ping();
+                        await SendResult(requestID);
+                        break;
+
+                    default:
+                        break;
+                }
             }
-            
-            // No awaiting.  This event loop shouldn't be blocked by RPCs.
-            switch (rpc)
+            catch (Exception ex)
             {
-                case JsonRpc { Method: "app.dispatchEvent" }:
-                    var key2 = rpc.GetNextPositionalParam<string>();
-                    var @event = rpc.GetNextPositionalParam<LazyEvent>();
-                    var propagationID = rpc.GetNextPositionalParam<int>();
-                    var rpcEvent = new LazyEvent(message);
-                    app.DispatchEvent(key, rpcEvent, propagationID);
-                    break;
-
-                case JsonRpc { Method: "app.keyholes.dump" }:
-                    app.DumpKeyholes(webSocket);
-                    break;
-
-                case JsonRpc { Method: "app.benchmark" }:
-                    var threads = rpc.GetNextPositionalParam<int?>();
-                    app.Benchmark(threads ?? 0);
-                    break;
-
-                case JsonRpc { Method: "app.ping", ID: int requestID }:
-                    app.Ping();
-                    await SendResult(requestID);
-                    break;
-
-                default:
-                    break;
+                Console.WriteLine($"Error parsing JsonRpc message:\n{ex}");
             }
 
             // TODO: This doesn't belong here.
-            foreach (var w in windows.Values)
+                foreach (var w in windows.Values)
                 w.RequestUpdate();
         }
     }

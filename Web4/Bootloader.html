@@ -266,8 +266,8 @@
     dispatchEvent(key, event) {
       let message = {
         jsonrpc: "2.0", 
-        method: key, 
-        params: event
+        method: "app.dispatchEvent", 
+        params: [key, event, Event.prototype.NEXT_PROPAGATION_ID]
       };
       this.#webSocket.send(JSON.stringify(message));
     }
@@ -356,6 +356,8 @@
 
   Event.prototype.trim = function(members) {
     const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
+    if (!this.propagationID)
+      this.propagationID = ++Event.prototype.NEXT_PROPAGATION_ID;
 
     if (!members)
       return {};
@@ -388,16 +390,10 @@
       }
     });
 
-    if (!this.propagationID)
-      this.propagationID = Event.prototype.NEXT_PROPAGATION_ID++;
-    // TODO: Move propagationID to jsonrpc params array.
-    trimmed.propagationID = this.propagationID;
-
     return trimmed;
   }
-
-  if (!Event.prototype.NEXT_PROPAGATION_ID)
-    Event.prototype.NEXT_PROPAGATION_ID = 1;
+  
+  Event.prototype.NEXT_PROPAGATION_ID = 0;
 
 </script>
 

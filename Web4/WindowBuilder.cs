@@ -306,7 +306,7 @@ public class WindowBuilder :
     private string CreateListenerString(string? format, string type, string target, string key, string options) => format switch
     {
         // Serialize nothing – the event object is never used
-        "" => $"{target}.addEventListener('{type}', () => app.dispatchEvent('{key}', {{}}), {options});",
+        "" => $"{target}.addEventListener('{type}', e => app.dispatchEvent('{key}', e.trim('')), {options});",
 
         // Serialize the event – the event object is needed
         null => $"{target}.addEventListener('{type}', e => app.dispatchEvent('{key}', e.trim('*')), {options});",
