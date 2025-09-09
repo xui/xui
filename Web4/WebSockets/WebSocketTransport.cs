@@ -157,7 +157,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             }
 
             // TODO: This doesn't belong here.
-                foreach (var w in windows.Values)
+            foreach (var w in windows.Values)
                 w.RequestUpdate();
         }
     }
