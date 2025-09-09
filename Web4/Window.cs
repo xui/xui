@@ -131,7 +131,7 @@ public class Window
         return windowBuilder.Html.CreateSnapshot();
     }
 
-    public void Benchmark(int threads = 0)
+    public void Benchmark(int? threads)
     {
     }
 
