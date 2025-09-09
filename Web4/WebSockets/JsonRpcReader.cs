@@ -40,7 +40,7 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
             }
         }
 
-        return new(sequence) { Method = method, ID = id };
+        return new(method ?? "error", id);
     }
 
     public static JsonRpcReader ParseParams(ReadOnlySequence<byte> sequence)
