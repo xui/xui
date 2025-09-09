@@ -1,7 +1,8 @@
+global using Web4;
+global using Web4.Proxies;
 using System.Collections;
 using System.Drawing;
 using System.Security.Cryptography;
-using Web4;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
