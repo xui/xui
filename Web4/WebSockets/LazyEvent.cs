@@ -19,7 +19,7 @@ namespace Web4.WebSockets;
 /// Additionally, if the only properties lazily accessed are value types (e.g. bool, int, long, double)
 /// then this struct will avoid allocating a surplus of memory on the heap by pooling its dictionary.
 /// </summary>
-internal record struct WebSocketEvent : Event, IDisposable
+internal record struct LazyEvent : Event, IDisposable
 {
     private static readonly ObjectPool<Dictionary<string, long>> valueDictionaryPool = ObjectPool.Create<Dictionary<string, long>>();
 
@@ -27,7 +27,7 @@ internal record struct WebSocketEvent : Event, IDisposable
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public WebSocketEvent(ReadOnlySequence<byte> message)
+    public LazyEvent(ReadOnlySequence<byte> message)
     {
         this.message = message;
     }
@@ -226,7 +226,7 @@ internal record struct WebSocketEvent : Event, IDisposable
         return false;
     }
 
-    static WebSocketEvent()
+    static LazyEvent()
     {
         foreach (var key in types.Keys)
             Keymaker.CacheKey(key);

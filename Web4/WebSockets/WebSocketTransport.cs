@@ -132,9 +132,9 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             {
                 case JsonRpc { Method: "app.dispatchEvent" }:
                     var key2 = rpc.GetNextPositionalParam<string>();
-                    var @event = rpc.GetNextPositionalParam<WebSocketEvent>();
+                    var @event = rpc.GetNextPositionalParam<LazyEvent>();
                     var propagationID = rpc.GetNextPositionalParam<int>();
-                    var rpcEvent = new WebSocketEvent(message);
+                    var rpcEvent = new LazyEvent(message);
                     app.DispatchEvent(key, rpcEvent, propagationID);
                     break;
 
