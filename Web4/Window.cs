@@ -6,18 +6,17 @@ namespace Web4;
 
 public class Window
 {
-    private readonly IWeb4Transport transport;
+    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
+    public bool IsInvalidated { get; private set; } = false;
+    public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
+    internal IWeb4Transport Transport { get; init; }
     private readonly WindowBuilder windowBuilder;
     private readonly Channel<int> updateDebouncer;
     private Keyhole[]? snapshot = null;
 
-    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
-    public bool IsInvalidated { get; private set; } = false;
-    public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
-
     public Window(IWeb4Transport transport, WindowBuilder windowBuilder, CancellationToken cancel)
     {
-        this.transport = transport;
+        this.Transport = transport;
         this.windowBuilder = windowBuilder;
 
         // This channel has a max capacity of 1 and is configured to 
@@ -78,11 +77,6 @@ public class Window
         while (!updateDebouncer.Writer.TryWrite(0)) ;
     }
 
-    public async Task Disconnect()
-    {
-        await transport.Disconnect();
-    }
-
     private async ValueTask Update()
     {
         if (!IsInvalidated)
@@ -100,7 +94,7 @@ public class Window
         Keyhole[] oldBuffer = snapshot;
         Keyhole[] newBuffer = CaptureSnapshot();
 
-        await transport.ApplyMutations(oldBuffer, newBuffer);
+        await Transport.ApplyMutations(oldBuffer, newBuffer);
 
         switch (SnapshotStrategy)
         {

@@ -28,7 +28,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         this.webSocket = webSocket;
     }
 
-    public static async Task<WebSocketTransport> Create(HttpContext http)
+    public static async Task<WebSocketTransport> Connect(HttpContext http)
     {
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -38,18 +38,6 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         };
         var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         return new WebSocketTransport(http, webSocket);
-    }
-
-    public Window GetOrCreateWindow(WindowBuilder builder)
-    {
-        // TODO: Move to header approach?
-        var key = http.Connection.Id;
-        if (!windows.TryGetValue(key, out var window))
-        {
-            window = new Window(this, builder, http.RequestAborted);
-            windows[key] = window;
-        }
-        return window;
     }
 
     public async Task Disconnect()
@@ -65,8 +53,20 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     {
         Parallel.ForEach(
             windows.Values,
-            async (window, cancel) => await window.Disconnect()
+            async (window, cancel) => await (window.Transport as WebSocketTransport)!.Disconnect()
         );
+    }
+
+    public Window GetOrCreateWindow(WindowBuilder builder)
+    {
+        // TODO: Move to header approach?
+        var key = http.Connection.Id;
+        if (!windows.TryGetValue(key, out var window))
+        {
+            window = new Window(this, builder, http.RequestAborted);
+            windows[key] = window;
+        }
+        return window;
     }
 
     public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
