@@ -31,7 +31,7 @@
     keyholes = new Web4Keyholes(this.#transport);
 
     getElementByKey(key) {
-      let element = this.keyholes.all[key];
+      let element = this.all[key];
       if (!(element instanceof Node))
         element = element.owner;
       return element;
@@ -217,7 +217,7 @@
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
             keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          app.keyholes.all[key] = keyhole;
+          this.all[key] = keyhole;
         }
         comment.parentElement.removeChild(comment);
       }
@@ -228,9 +228,9 @@
         let key = attr.name;
         if (key.startsWith('key')) {
           if (attr.value === "") {
-            app.keyholes.all[key] = attrs.snapshotItem(i - 1);
+            this.all[key] = attrs.snapshotItem(i - 1);
           } else {
-            app.keyholes.all[key] = { 
+            this.all[key] = { 
               nodeType: Node.ENTITY_REFERENCE_NODE, 
               booleanAttribute: attr.value, 
               owner: attr.ownerElement
