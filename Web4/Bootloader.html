@@ -31,10 +31,7 @@
     keyholes = new Web4Keyholes(this.#transport);
 
     getElementByKey(key) {
-      let element = this.all[key];
-      if (!(element instanceof Node))
-        element = element.owner;
-      return element;
+      return this.all[key].element;
     }
 
     dispatchEvent(event, key) {
@@ -68,7 +65,7 @@
     get elements() {
       let e = {};
       for (let key in this.all) {
-        e[key] = this.all[key];
+        e[key] = this.all[key].element;
       }
       return e;
     }
@@ -78,28 +75,28 @@
     }
 
     setTextNode = function(key, value) {
-      let textNode = this.all[key];
+      let textNode = this.all[key].element;
       textNode.nodeValue = value;
     }
 
     setAttribute = function(key, value) {
-      let attribute = this.all[key];
+      let keyhole = this.all[key];
       if (typeof value !== "boolean") {
-        attribute.value = value;
+        keyhole.value = value;
       } else {
-        let attrName = attribute.booleanAttribute;
-        attribute.owner[attrName] = value;
+        let attrName = keyhole.booleanAttribute;
+        keyhole.element[attrName] = value;
       }
     }
 
     setElement = function(key, rawHtml, transition) {
-      let oldElement = this.all[key];
+      let oldElement = this.all[key].element;
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
       let parentElement = oldElement.parentElement;
-      this.all[key] = newElement;
+      this.all[key] = { element: newElement };
       this.#registerKeyholes(newElement);
 
       // No transition
@@ -135,13 +132,13 @@
     }
 
     addElement = function(key, priorKey, rawHtml, transition) {
-      let priorElement = this.all[priorKey];
+      let priorElement = this.all[priorKey].element;
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
       let parentElement = priorElement.parentElement;
-      this.all[key] = newElement;
+      this.all[key] = { element: newElement };
       this.#registerKeyholes(newElement);
 
       // No transition
@@ -173,7 +170,7 @@
     }
 
     removeElement = function(key, transition) {
-      let element = this.all[key];
+      let element = this.all[key].element;
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(element.parentElement.tagName);
@@ -212,12 +209,12 @@
         let comment = comments.snapshotItem(i);
         let key = comment.textContent;
         if (key.startsWith('key')) {
-          let keyhole = comment.previousSibling;
-          if (keyhole.nodeType === Node.COMMENT_NODE) {
+          let element = comment.previousSibling;
+          if (element.nodeType === Node.COMMENT_NODE) {
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
-            keyhole = keyhole.parentNode.insertBefore(document.createTextNode(""), comment);
+            element = element.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          this.all[key] = keyhole;
+          this.all[key] = { element };
         }
         comment.parentElement.removeChild(comment);
       }
@@ -228,12 +225,12 @@
         let key = attr.name;
         if (key.startsWith('key')) {
           if (attr.value === "") {
-            this.all[key] = attrs.snapshotItem(i - 1);
+            this.all[key] = { element: attrs.snapshotItem(i - 1) };
           } else {
             this.all[key] = { 
               nodeType: Node.ENTITY_REFERENCE_NODE, 
               booleanAttribute: attr.value, 
-              owner: attr.ownerElement
+              element: attr.ownerElement
             };
           }
           attr.ownerElement.removeAttribute(attr.name)
@@ -245,7 +242,7 @@
 
     #unregisterKeyholes() {
       // for (let key in this.all) {
-      //   let element = this.all[key];
+      //   let element = this.all[key].element;
       //   if (!(element instanceof Node))
       //     element = element.owner;
       //   if (!document.body.contains(element))
