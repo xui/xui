@@ -124,13 +124,6 @@ public class Window
         IsInvalidated = false;
     }
 
-    private Keyhole[] CaptureSnapshot()
-    {
-        using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
-
-        return windowBuilder.Html.CreateSnapshot();
-    }
-
     public void Benchmark(int? threads)
     {
     }
@@ -162,4 +155,11 @@ public class Window
     {
         // no-op
     }
+    private Keyhole[] CaptureSnapshot()
+    {
+        using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
+
+        return windowBuilder.Html.CreateSnapshot();
+    }
+
 }
