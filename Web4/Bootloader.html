@@ -65,6 +65,14 @@
       document.addEventListener('DOMContentLoaded', () => this.#registerKeyholes(document));
     }
 
+    get elements() {
+      let e = {};
+      for (let key in this.all) {
+        e[key] = this.all[key];
+      }
+      return e;
+    }
+
     dump() {
       this.#transport.dump();
     }
