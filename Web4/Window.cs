@@ -155,6 +155,12 @@ public class Window
     {
         // no-op
     }
+
+    public void SetRefreshRate(int milliseconds)
+    {
+        UpdateInterval = TimeSpan.FromMilliseconds(milliseconds);
+    }
+
     private Keyhole[] CaptureSnapshot()
     {
         using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
