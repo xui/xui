@@ -141,7 +141,7 @@ public static class Debug
             : inlined;
     }
 
-    public static void Benchmark(WebSocket webSocket, Window window)
+    public static void Benchmark(WebSocket webSocket, Web4App app)
     {
 
     }

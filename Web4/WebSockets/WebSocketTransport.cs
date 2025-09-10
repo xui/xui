@@ -9,7 +9,7 @@ namespace Web4.WebSockets;
 public class WebSocketTransport : IWeb4Transport, IDisposable
 {
     private const int RECEIVE_BUFFER_LENGTH = 1024;
-    private static readonly ConcurrentDictionary<string, Window> windows = [];
+    private static readonly ConcurrentDictionary<string, Web4App> apps = [];
 
     private readonly HttpContext http;
     private readonly WebSocket webSocket;
@@ -52,21 +52,21 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     public static void DisconnectAll()
     {
         Parallel.ForEach(
-            windows.Values,
-            async (window, cancel) => await (window.Transport as WebSocketTransport)!.Disconnect()
+            apps.Values,
+            async (app, cancel) => await (app.Transport as WebSocketTransport)!.Disconnect()
         );
     }
 
-    public Window GetOrCreateWindow(WindowBuilder builder)
+    public Web4App GetOrCreateApp(WindowBuilder builder)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
-        if (!windows.TryGetValue(key, out var window))
+        if (!apps.TryGetValue(key, out var app))
         {
-            window = new Window(this, builder, http.RequestAborted);
-            windows[key] = window;
+            app = new Web4App(this, builder, http.RequestAborted);
+            apps[key] = app;
         }
-        return window;
+        return app;
     }
 
     public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
@@ -109,13 +109,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         JsonRpcWriter.Pool.Return(writer);
     }
 
-    public async Task ListenForRpcMessages(Window app)
+    public async Task ListenForRpcMessages(Web4App app)
     {
         await foreach (var sequence in GetNextMessage())
         {
             // TODO: This doesn't belong here.
-            foreach (var w in windows.Values)
-                w.Invalidate();
+            foreach (var a in apps.Values)
+                a.Invalidate();
 
             try
             {
@@ -156,8 +156,8 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
             }
 
             // TODO: This doesn't belong here.
-            foreach (var w in windows.Values)
-                w.Update();
+            foreach (var a in apps.Values)
+                a.Update();
         }
     }
 

@@ -4,7 +4,7 @@ using Web4.Composers;
 
 namespace Web4;
 
-public class Window
+public class Web4App
 {
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
     public bool IsInvalidated { get; private set; } = false;
@@ -14,7 +14,7 @@ public class Window
     private readonly Channel<int> updateDebouncer;
     private Keyhole[]? snapshot = null;
 
-    public Window(IWeb4Transport transport, WindowBuilder windowBuilder, CancellationToken cancel)
+    public Web4App(IWeb4Transport transport, WindowBuilder windowBuilder, CancellationToken cancel)
     {
         this.Transport = transport;
         this.windowBuilder = windowBuilder;
@@ -49,7 +49,7 @@ public class Window
                     await Task.Delay(timeUntilNextUpdate, cancel);
                 lastUpdate.Restart();
 
-                // If here, this window has a green light to do work again 
+                // If here, this app has a green light to do work again 
                 // so await until an update is requested.  
                 _ = await updateDebouncer.Reader.ReadAsync(cancel);
                 await UpdateAsync();
@@ -81,7 +81,7 @@ public class Window
     {
         if (!IsInvalidated)
         {
-            Console.WriteLine($"Cancelling Update() this window has not been invalidated.");
+            Console.WriteLine($"Cancelling Update() this app has not been invalidated.");
             return;
         }
 
