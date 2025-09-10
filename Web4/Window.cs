@@ -31,7 +31,31 @@ public class Window
             SingleWriter = false,
             FullMode = BoundedChannelFullMode.DropWrite
         });
-        ReadFromUpdateDebouncer(cancel);
+
+        Task.Run(async () =>
+        {
+            // TODO: I don't like how it awaits Task.Delay on the first run.
+
+            var lastUpdate = Stopwatch.StartNew();
+            while (!cancel.IsCancellationRequested)
+            {
+                // Debounce!  If the last update was less than 16 ms ago (60 fps),
+                // then wait until the "next frame" before updating again
+                // (i.e. no need to run Update() more frequently than the screen's refresh rate).
+                // There could be (potentially) millions of state changes every 16 ms
+                // and it'd be wasteful to run diffs or send mutations for each
+                // when most screens can only handle 60 Hz.
+                var timeUntilNextUpdate = UpdateInterval.Subtract(lastUpdate.Elapsed);
+                if (timeUntilNextUpdate > TimeSpan.Zero)
+                    await Task.Delay(timeUntilNextUpdate, cancel);
+                lastUpdate.Restart();
+
+                // If here, this window has a green light to do work again 
+                // so await until an update is requested.  
+                _ = await updateDebouncer.Reader.ReadAsync(cancel);
+                await Update();
+            }
+        }, cancel);
     }
 
     public void Invalidate()
@@ -57,34 +81,6 @@ public class Window
     public async Task Disconnect()
     {
         await transport.Disconnect();
-    }
-
-    private void ReadFromUpdateDebouncer(CancellationToken cancel)
-    {
-        Task.Run(async () =>
-        {
-            // TODO: I don't like how it awaits Task.Delay on the first run.
-
-            var lastUpdate = Stopwatch.StartNew();
-            while (!cancel.IsCancellationRequested)
-            {
-                // Debounce!  If the last update was less than 16 ms ago (60 fps),
-                // then wait until the "next frame" before updating again
-                // (i.e. no need to run Update() more frequently than the screen's refresh rate).
-                // There could be (potentially) millions of state changes every 16 ms
-                // and it'd be wasteful to run diffs or send mutations for each
-                // when most screens can only handle 60 Hz.
-                var timeUntilNextUpdate = UpdateInterval.Subtract(lastUpdate.Elapsed);
-                if (timeUntilNextUpdate > TimeSpan.Zero)
-                    await Task.Delay(timeUntilNextUpdate, cancel);
-                lastUpdate.Restart();
-
-                // If here, this window has a green light to do work again 
-                // so await until an update is requested.  
-                _ = await updateDebouncer.Reader.ReadAsync(cancel);
-                await Update();
-            }
-        }, cancel);
     }
 
     private async ValueTask Update()
