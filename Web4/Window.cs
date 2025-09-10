@@ -52,7 +52,7 @@ public class Window
                 // If here, this window has a green light to do work again 
                 // so await until an update is requested.  
                 _ = await updateDebouncer.Reader.ReadAsync(cancel);
-                await Update();
+                await UpdateAsync();
             }
         }, cancel);
     }
@@ -69,7 +69,7 @@ public class Window
         snapshot ??= CaptureSnapshot();
     }
 
-    public void RequestUpdate()
+    public void Update()
     {
         if (!IsInvalidated)
             return;
@@ -77,7 +77,7 @@ public class Window
         while (!updateDebouncer.Writer.TryWrite(0)) ;
     }
 
-    private async ValueTask Update()
+    private async ValueTask UpdateAsync()
     {
         if (!IsInvalidated)
         {
