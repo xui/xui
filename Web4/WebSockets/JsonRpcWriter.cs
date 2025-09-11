@@ -40,25 +40,40 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
     public void WriteRpc(string method, ref Keyhole keyhole)
     {
         utf8JsonWriter.WriteStartObject();
+
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
-        utf8JsonWriter.WriteString("method", method);
+
+        utf8JsonWriter.WritePropertyName("method");
+        utf8JsonWriter.WriteStringValueSegment("app.keyholes.", false);
+        utf8JsonWriter.WriteStringValueSegment(keyhole.Key, false);
+        utf8JsonWriter.WriteStringValueSegment(".", false);
+        utf8JsonWriter.WriteStringValueSegment(method, true);
+
         utf8JsonWriter.WriteStartArray("params");
-        utf8JsonWriter.WriteStringValue(keyhole.Key);
         WriteKeyholeValue(ref keyhole);
         utf8JsonWriter.WriteEndArray();
+
         utf8JsonWriter.WriteEndObject();
     }
 
     public void WriteRpc(string method, string key, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();
+
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
-        utf8JsonWriter.WriteString("method", method);
+
+        utf8JsonWriter.WritePropertyName("method");
+        utf8JsonWriter.WriteStringValueSegment("app.keyholes.", false);
+        utf8JsonWriter.WriteStringValueSegment(key, false);
+        utf8JsonWriter.WriteStringValueSegment(".", false);
+        utf8JsonWriter.WriteStringValueSegment(method, true);
+
         utf8JsonWriter.WriteStartArray("params");
         utf8JsonWriter.WriteStringValue(key);
         if (transition != null)
             utf8JsonWriter.WriteStringValue(transition);
         utf8JsonWriter.WriteEndArray();
+
         utf8JsonWriter.WriteEndObject();
     }
 
@@ -68,11 +83,17 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
     public void WriteRpc(string method, string key1, string? key2, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();
+
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
-        utf8JsonWriter.WriteString("method", method);
+
+        utf8JsonWriter.WritePropertyName("method");
+        utf8JsonWriter.WriteStringValueSegment("app.keyholes.", false);
+        utf8JsonWriter.WriteStringValueSegment(key1, false);
+        utf8JsonWriter.WriteStringValueSegment(".", false);
+        utf8JsonWriter.WriteStringValueSegment(method, true);
+
         utf8JsonWriter.WriteStartArray("params");
 
-        utf8JsonWriter.WriteStringValue(key1);
         if (key2 is not null)
             utf8JsonWriter.WriteStringValue(key2);
 
@@ -120,6 +141,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         }
 
         utf8JsonWriter.WriteEndArray();
+        
         utf8JsonWriter.WriteEndObject();
     }
 
@@ -160,7 +182,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         }
 
         utf8JsonWriter.Flush();
-        Encoding.UTF8.GetBytes(",\"", this);
+        Encoding.UTF8.GetBytes("\"", this);
         WriteRawWithFormatString(ref keyhole);
         Encoding.UTF8.GetBytes("\"", this);
     }

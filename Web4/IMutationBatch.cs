@@ -2,8 +2,8 @@ namespace Web4;
 
 public interface IMutationBatch : IDisposable
 {
-    void SetTextNode(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole);
-    void SetAttribute(string key, ref Keyhole oldKeyhole, ref Keyhole newKeyhole);
+    void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole);
+    void SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole);
     void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes);
     void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null);
     void AddElement(string parentKey, string priorKey, Span<Keyhole> keyholes, string? transition = null);

@@ -122,11 +122,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         }
                         else if (newKeyhole.IsValueAnAttribute)
                         {
-                            mutationBatch.SetAttribute(key, ref oldKeyhole, ref newKeyhole);
+                            mutationBatch.SetAttribute(ref oldKeyhole, ref newKeyhole);
                         }
                         else
                         {
-                            mutationBatch.SetTextNode(key, ref oldKeyhole, ref newKeyhole);
+                            mutationBatch.SetTextNode(ref oldKeyhole, ref newKeyhole);
                         }
                     }
                     break;
