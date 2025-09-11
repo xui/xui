@@ -82,7 +82,7 @@
     setAttribute = function(key, value) {
       let keyhole = this.all[key];
       if (typeof value !== "boolean") {
-        keyhole.value = value;
+        keyhole.element.value = value;
       } else {
         let attrName = keyhole.booleanAttribute;
         keyhole.element[attrName] = value;
