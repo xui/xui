@@ -98,7 +98,8 @@
             let element = attrs.snapshotItem(i - 1)
             app.keyholes[key] = new Web4Keyhole(key, element);
           } else {
-            app.keyholes[key] = new Web4Keyhole(key, attr.ownerElement, attr.value);
+            app.keyholes[key] = new Web4Keyhole(key, attr.ownerElement);
+            app.keyholes[key].booleanAttributeName = attr.value;
           }
           attr.ownerElement.removeAttribute(attr.name)
         }
@@ -121,13 +122,10 @@
   class Web4Keyhole {
     key;
     element;
-    booleanAttribute;
-    value;
 
-    constructor(key, element, booleanAttribute) {
+    constructor(key, element) {
       this.key = key;
       this.element = element;
-      this.booleanAttribute = booleanAttribute;
     }
     
     setTextNode(value) {
@@ -136,7 +134,7 @@
 
     setAttribute(value) {
       if (typeof value === "boolean") {
-        this.element[this.booleanAttribute] = value;
+        this.element[this.booleanAttributeName] = value;
       } else {
         this.element.value = value;
       }
