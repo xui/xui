@@ -109,13 +109,11 @@
     }
 
     static unregisterKeyholes() {
-      // for (let key in this.all) {
-      //   let element = this.all[key].element;
-      //   if (!(element instanceof Node))
-      //     element = element.owner;
-      //   if (!document.body.contains(element))
-      //     delete this.all[key];
-      // }
+      for (let key in app.keyholes) {
+        let element = app.keyholes[key].element;
+        if (!document.body.contains(element))
+          delete app.keyholes[key];
+      }
     }
   }
 
@@ -148,7 +146,6 @@
         .children[0];
       let parentElement = oldElement.parentElement;
       app.keyholes[this.key] = new Web4Keyhole(this.key, newElement);
-      Web4Keyholes.registerKeyholes(newElement);
 
       // No transition
       let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
@@ -168,6 +165,8 @@
 
       document.startViewTransition(() => {
         oldElement.replaceWith(newElement);
+        Web4Keyholes.registerKeyholes(newElement);
+        Web4Keyholes.unregisterKeyholes();
       })
       .finished.then(() => {
         parentElement.childNodes.forEach(sibling => {
@@ -177,7 +176,7 @@
               sibling.removeAttribute("style");
           }
         });
-
+        Web4Keyholes.registerKeyholes(newElement);
         Web4Keyholes.unregisterKeyholes();
       });
     }
