@@ -29,10 +29,10 @@ public struct WebSocketMutationBatch() : IMutationBatch
         writer.WriteRpc($"setElement", key, newKeyholes, includeSentinels: true, transition);
     }
 
-    public void AddElement(string key, string priorKey, Span<Keyhole> keyholes, string? transition = null)
+    public void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition = null)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"addElement", key, priorKey, keyholes, includeSentinels: true, transition);
+        writer.WriteRpc($"addElement", priorKey, key, keyholes, includeSentinels: true, transition);
     }
 
     public void RemoveElement(string key, string? transition = null)

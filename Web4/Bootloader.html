@@ -116,15 +116,14 @@
       });
     }
 
-
-    addElement(priorKey, rawHtml, transition) {
-      let priorElement = app.keyholes[priorKey].element;
+    addElement(key, rawHtml, transition) {
+      let priorElement = this.element;
       let newElement = document
         .createRange()
         .createContextualFragment(rawHtml)
         .children[0];
       let parentElement = priorElement.parentElement;
-      app.keyholes[this.key] = new Web4Keyhole(this.key, newElement);
+      app.keyholes[key] = new Web4Keyhole(key, newElement);
       Web4Keyholes.registerKeyholes(newElement);
 
       // No transition
