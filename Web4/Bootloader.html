@@ -31,7 +31,7 @@
     keyholes = new Web4Keyholes(this.#transport);
 
     getElementByKey(key) {
-      return this.all[key].element;
+      return this.keyholes[key]?.element;
     }
 
     dispatchEvent(event, key) {
