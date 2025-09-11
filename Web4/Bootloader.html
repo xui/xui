@@ -323,6 +323,7 @@
         // A result to return
         if (rpc.id) {
           let promise = this.#promises.get(rpc.id);
+          this.#promises.delete(rpc.id);
           if (rpc.error)
             promise.reject(rpc.error);
           else
