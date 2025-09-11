@@ -52,71 +52,6 @@
     setTitle = title => document.title = title;
   }
 
-  class Web4Keyholes {
-    #transport;
-
-    constructor(transport) {
-      this.#transport = transport;
-      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.registerKeyholes(document));
-    }
-
-    get elements() {
-      let e = {};
-      for (let key in this) {
-        if (key.startsWith("key"))
-          e[key] = this[key].element;
-      }
-      return e;
-    }
-
-    dump() {
-      this.#transport.dump();
-    }
-
-    static registerKeyholes(parentNode) {
-      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-      for (let i = comments.snapshotLength - 1; i >= 0; i--) {
-        let comment = comments.snapshotItem(i);
-        let key = comment.textContent;
-        if (key.startsWith('key')) {
-          let element = comment.previousSibling;
-          if (element.nodeType === Node.COMMENT_NODE) {
-            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
-            element = element.parentNode.insertBefore(document.createTextNode(""), comment);
-          }
-          app.keyholes[key] = new Web4Keyhole(key, element);
-        }
-        comment.parentElement.removeChild(comment);
-      }
-      
-      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-      for (let i = 0; i < attrs.snapshotLength; i++) {
-        let attr = attrs.snapshotItem(i);
-        let key = attr.name;
-        if (key.startsWith('key')) {
-          if (attr.value === "") {
-            let element = attrs.snapshotItem(i - 1)
-            app.keyholes[key] = new Web4Keyhole(key, element);
-          } else {
-            app.keyholes[key] = new Web4Keyhole(key, attr.ownerElement);
-            app.keyholes[key].booleanAttributeName = attr.value;
-          }
-          attr.ownerElement.removeAttribute(attr.name)
-        }
-      }
-
-      Web4Keyholes.unregisterKeyholes();
-    }
-
-    static unregisterKeyholes() {
-      for (let key in app.keyholes) {
-        let element = app.keyholes[key].element;
-        if (!document.body.contains(element))
-          delete app.keyholes[key];
-      }
-    }
-  }
-
   class Web4Keyhole {
     key;
     element;
@@ -181,12 +116,6 @@
       });
     }
 
-
-    // TODO: HERE'S WHERE I LEFT OFF:
-    // addElement logic is now nonsensical. Since keyaac doesn't yet exist,
-    // I cannot call its function addElement.  
-    // To fix, gonna need to call the function off of priorKey?
-    // What about zero-length parents though (not a new problem)?
 
     addElement(priorKey, rawHtml, transition) {
       let priorElement = app.keyholes[priorKey].element;
@@ -256,6 +185,71 @@
 
         Web4Keyholes.unregisterKeyholes();
       });
+    }
+  }
+
+  class Web4Keyholes {
+    #transport;
+
+    constructor(transport) {
+      this.#transport = transport;
+      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.registerKeyholes(document));
+    }
+
+    get elements() {
+      let e = {};
+      for (let key in this) {
+        if (key.startsWith("key"))
+          e[key] = this[key].element;
+      }
+      return e;
+    }
+
+    dump() {
+      this.#transport.dump();
+    }
+
+    static registerKeyholes(parentNode) {
+      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = comments.snapshotLength - 1; i >= 0; i--) {
+        let comment = comments.snapshotItem(i);
+        let key = comment.textContent;
+        if (key.startsWith('key')) {
+          let element = comment.previousSibling;
+          if (element.nodeType === Node.COMMENT_NODE) {
+            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
+            element = element.parentNode.insertBefore(document.createTextNode(""), comment);
+          }
+          app.keyholes[key] = new Web4Keyhole(key, element);
+        }
+        comment.parentElement.removeChild(comment);
+      }
+      
+      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = 0; i < attrs.snapshotLength; i++) {
+        let attr = attrs.snapshotItem(i);
+        let key = attr.name;
+        if (key.startsWith('key')) {
+          if (attr.value === "") {
+            let element = attrs.snapshotItem(i - 1)
+            app.keyholes[key] = new Web4Keyhole(key, element);
+          } else {
+            app.keyholes[key] = new Web4Keyhole(key, attr.ownerElement);
+            app.keyholes[key].booleanAttributeName = attr.value;
+          }
+          attr.ownerElement.removeAttribute(attr.name)
+        }
+      }
+
+      Web4Keyholes.unregisterKeyholes();
+    }
+
+    static unregisterKeyholes() {
+      for (let key in app.keyholes) {
+        let element = app.keyholes[key].element;
+        if (!document.body.contains(element))
+          delete app.keyholes[key];
+      }
     }
   }
 
