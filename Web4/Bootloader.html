@@ -78,21 +78,16 @@
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       Web4Keyholes.registerKeyholes(newElement, this.key);
 
-      Web4Keyhole.#mutate(
-        this.element.parentElement,
-        () => {
-          oldElement.replaceWith(newElement);          
-          Web4Keyholes.unregisterKeyholes();
-        },
-        {
-          name: transition,
-          init: () => {
-            let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-            oldElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-            newElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-          },
-          finish: () => Web4Keyholes.unregisterKeyholes()
-        }
+      if (this.#shoudUseTransition(transition)) {
+          let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+          oldElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
+          newElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
+      }
+
+      this.#mutate(
+        transition,
+        () => oldElement.replaceWith(newElement),
+        () => Web4Keyholes.unregisterKeyholes()
       )
     }
 
@@ -101,48 +96,38 @@
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       Web4Keyholes.registerKeyholes(newElement, key);
 
-      Web4Keyhole.#mutate(
-        this.element.parentElement,
-        () => priorElement.after(newElement),
-        {
-          name: transition,
-          init: null,
-          finish: null
-        }
+      this.#mutate(
+        transition,
+        () => priorElement.after(newElement)
       )
     }
 
     removeElement(transition) {
-      Web4Keyhole.#mutate(
-        this.element.parentElement,
+      if (this.#shoudUseTransition(transition)) {
+        this.element.style.viewTransitionName = `web4-${this.key}`;
+      }
+
+      this.#mutate(
+        transition,
         () => this.element.parentNode.removeChild(this.element),
-        {
-          name: transition,
-          init: () => this.element.style.viewTransitionName = `web4-${this.key}`,
-          finish: () => Web4Keyholes.unregisterKeyholes()
-        }
+        () => Web4Keyholes.unregisterKeyholes()
       )
     }
 
-    static #mutate(parentElement, mutate, transitionOptions) {
+    #mutate(transition, mutate, finish) {
       // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
-      if (!document.startViewTransition || !isInTransitionContainer || !transitionOptions || !transitionOptions.name) {
+      if (!this.#shoudUseTransition(transition)) {
         mutate();
+        if (finish) finish();
         return;
       }
 
-      // View Transition API:
-
-      if (transitionOptions?.init) {
-        transitionOptions.init();
-      }
-
+      // View Transition API
+      let parentElement = this.element.parentElement;
       parentElement.childNodes.forEach((sibling, i) => {
         if (sibling.style && !sibling.style.viewTransitionName)
           sibling.style.viewTransitionName = `web4-sibling-${i}`
       });
-
       document.startViewTransition(() => {
         mutate();
       })
@@ -154,11 +139,13 @@
               sibling.removeAttribute("style");
           }
         });
-
-        if (transitionOptions?.finish) {
-          transitionOptions.finish();
-        }
+        if (finish) finish();
       });
+    }
+
+    #shoudUseTransition(transition) {
+      let doesParentSupportTransition = ["ROW", "COL", "LIST", "BODY"].includes(this.element.parentElement.tagName);
+      return transition && document.startViewTransition && doesParentSupportTransition;
     }
   }
 
