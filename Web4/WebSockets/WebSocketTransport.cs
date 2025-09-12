@@ -83,7 +83,7 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                     messageType: WebSocketMessageType.Text,
                     endOfMessage: true,
                     cancellationToken: http.RequestAborted);
-            }        
+            }
         }
         catch (Exception e)
         {
