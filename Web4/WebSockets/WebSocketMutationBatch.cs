@@ -8,37 +8,37 @@ public struct WebSocketMutationBatch() : IMutationBatch
     public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"setTextNode", ref newKeyhole);
+        writer.WriteRpc("setTextNode", ref newKeyhole);
     }
 
     public void SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"setAttribute", ref newKeyhole);
+        writer.WriteRpc("setAttribute", ref newKeyhole);
     }
 
     public void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"setAttribute", key, newKeyholes, includeSentinels: false);
+        writer.WriteRpc("setAttribute", key, newKeyholes, includeSentinels: false);
     }
 
     public void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition = null)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"setElement", key, newKeyholes, includeSentinels: true, transition);
+        writer.WriteRpc("setElement", key, newKeyholes, includeSentinels: true, transition);
     }
 
     public void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition = null)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"addElement", priorKey, key, keyholes, includeSentinels: true, transition);
+        writer.WriteRpc("addElement", priorKey, key, keyholes, includeSentinels: true, transition);
     }
 
     public void RemoveElement(string key, string? transition = null)
     {
         writer ??= JsonRpcWriter.Pool.Get().BeginBatch();
-        writer.WriteRpc($"removeElement", key, transition);
+        writer.WriteRpc("removeElement", key, transition);
     }
 
     public void Commit()
