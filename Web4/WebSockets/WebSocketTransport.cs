@@ -73,20 +73,19 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
     {
         try
         {
-        using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);
-        using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
+            using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);
+            using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
 
-        if (mutationBatch.Buffer is ReadOnlyMemory<byte> buffer)
-        {
-            await webSocket.SendAsync(
-                buffer: buffer,
-                messageType: WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: http.RequestAborted);
+            if (mutationBatch.Buffer is ReadOnlyMemory<byte> buffer)
+            {
+                await webSocket.SendAsync(
+                    buffer: buffer,
+                    messageType: WebSocketMessageType.Text,
+                    endOfMessage: true,
+                    cancellationToken: http.RequestAborted);
+            }        
         }
-        
-        }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine(e);
         }
