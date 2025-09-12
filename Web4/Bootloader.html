@@ -91,7 +91,7 @@
     }
 
     setAttribute(value) {
-      if (typeof value === "boolean") {
+      if (this.booleanAttributeName) {
         this.element[this.booleanAttributeName] = value;
       } else {
         this.element.value = value;
