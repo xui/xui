@@ -52,9 +52,33 @@
     setTitle = title => document.title = title;
   }
 
+  class Web4Keyholes {
+    #transport;
+
+    constructor(transport) {
+      this.#transport = transport;
+    }
+
+    get elements() {
+      return Object.fromEntries(Object
+        .values(app.keyholes)
+        .filter(k => k.key.startsWith("key"))
+        .map(k => [k.key, k.element]
+      ));
+    }
+
+    dump() {
+      this.#transport.dump();
+    }
+  }
+  
   class Web4Keyhole {
     key;
     element;
+
+    static {
+      document.addEventListener('DOMContentLoaded', () => Web4Keyhole.#registerKeyholes());
+    }
 
     constructor(key, element) {
       this.key = key;
@@ -76,7 +100,7 @@
     setElement(rawHtml, transition) {
       let oldElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
-      Web4Keyholes.registerKeyholes(newElement, this.key);
+      Web4Keyhole.#registerKeyholes(newElement, this.key);
 
       if (this.#shoudUseTransition(transition)) {
           let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
@@ -87,14 +111,14 @@
       this.#mutate(
         transition,
         () => oldElement.replaceWith(newElement),
-        () => Web4Keyholes.unregisterKeyholes()
+        () => Web4Keyhole.#unregisterKeyholes()
       )
     }
 
     addElement(key, rawHtml, transition) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
-      Web4Keyholes.registerKeyholes(newElement, key);
+      Web4Keyhole.#registerKeyholes(newElement, key);
 
       this.#mutate(
         transition,
@@ -110,7 +134,7 @@
       this.#mutate(
         transition,
         () => this.element.parentNode.removeChild(this.element),
-        () => Web4Keyholes.unregisterKeyholes()
+        () => Web4Keyhole.#unregisterKeyholes()
       )
     }
 
@@ -147,29 +171,8 @@
       let doesParentSupportTransition = ["ROW", "COL", "LIST", "BODY"].includes(this.element.parentElement.tagName);
       return transition && document.startViewTransition && doesParentSupportTransition;
     }
-  }
 
-  class Web4Keyholes {
-    #transport;
-
-    constructor(transport) {
-      this.#transport = transport;
-      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.registerKeyholes());
-    }
-
-    get elements() {
-      return Object.fromEntries(Object
-        .values(app.keyholes)
-        .filter(k => k.key.startsWith("key"))
-        .map(k => [k.key, k.element]
-      ));
-    }
-
-    dump() {
-      this.#transport.dump();
-    }
-
-    static registerKeyholes(node, key) {
+    static #registerKeyholes(node, key) {
       if (node) {
         app.keyholes[key] = new Web4Keyhole(key, node);
       } else {
@@ -207,7 +210,7 @@
       }
     }
 
-    static unregisterKeyholes() {
+    static #unregisterKeyholes() {
       for (let key in app.keyholes) {
         let element = app.keyholes[key].element;
         if (element.nodeType == Node.ATTRIBUTE_NODE)
