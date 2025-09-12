@@ -48,8 +48,9 @@
       });
     }
 
-    // Proxied from window.document
-    setTitle = title => document.title = title;
+    setTitle(title) {
+      document.title = title;
+    }
   }
 
   class Web4Keyholes {
@@ -71,7 +72,7 @@
       this.#transport.dump();
     }
   }
-  
+
   class Web4Keyhole {
     key;
     element;
