@@ -75,103 +75,76 @@
 
     setElement(rawHtml, transition) {
       let oldElement = this.element;
-      let newElement = document
-        .createRange()
-        .createContextualFragment(rawHtml)
-        .children[0];
-      let parentElement = oldElement.parentElement;
-      app.keyholes[this.key] = new Web4Keyhole(this.key, newElement);
+      let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
+      Web4Keyholes.registerKeyholes(newElement, this.key);
 
-      // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
-      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-        oldElement.replaceWith(newElement);
-        return;
-      }
-      
-      // View Transition API
-      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-      parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style)
-          sibling.style.viewTransitionName = `web4-sibling-${i}`
-      });
-      oldElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-      newElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-
-      document.startViewTransition(() => {
-        oldElement.replaceWith(newElement);
-        Web4Keyholes.registerKeyholes(newElement);
-        Web4Keyholes.unregisterKeyholes();
-      })
-      .finished.then(() => {
-        parentElement.childNodes.forEach(sibling => {
-          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-            sibling.style.removeProperty("view-transition-name");
-            if (sibling.style.length == 0)
-              sibling.removeAttribute("style");
-          }
-        });
-        Web4Keyholes.registerKeyholes(newElement);
-        Web4Keyholes.unregisterKeyholes();
-      });
+      Web4Keyhole.#mutate(
+        this.element.parentElement,
+        () => {
+          oldElement.replaceWith(newElement);          
+          Web4Keyholes.unregisterKeyholes();
+        },
+        {
+          name: transition,
+          init: () => {
+            let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
+            oldElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
+            newElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
+          },
+          finish: () => Web4Keyholes.unregisterKeyholes()
+        }
+      )
     }
 
     addElement(key, rawHtml, transition) {
       let priorElement = this.element;
-      let newElement = document
-        .createRange()
-        .createContextualFragment(rawHtml)
-        .children[0];
-      let parentElement = priorElement.parentElement;
-      app.keyholes[key] = new Web4Keyhole(key, newElement);
-      Web4Keyholes.registerKeyholes(newElement);
+      let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
+      Web4Keyholes.registerKeyholes(newElement, key);
 
-      // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
-      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-        priorElement.after(newElement);
-        return;
-      }
-      
-      // View Transition API
-      let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-      parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style)
-          sibling.style.viewTransitionName = `web4-sibling-${i}`
-      });
-
-      document.startViewTransition(() => {
-        priorElement.after(newElement);
-      })
-      .finished.then(() => {
-        parentElement.childNodes.forEach(sibling => {
-          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-            sibling.style.removeProperty("view-transition-name");
-            if (sibling.style.length == 0)
-              sibling.removeAttribute("style");
-          }
-        });
-      });
+      Web4Keyhole.#mutate(
+        this.element.parentElement,
+        () => priorElement.after(newElement),
+        {
+          name: transition,
+          init: null,
+          finish: null
+        }
+      )
     }
 
     removeElement(transition) {
+      Web4Keyhole.#mutate(
+        this.element.parentElement,
+        () => this.element.parentNode.removeChild(this.element),
+        {
+          name: transition,
+          init: () => this.element.style.viewTransitionName = `web4-${this.key}`,
+          finish: () => Web4Keyholes.unregisterKeyholes()
+        }
+      )
+    }
+
+    static #mutate(parentElement, mutate, transitionOptions) {
       // No transition
-      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(this.element.parentElement.tagName);
-      if (!document.startViewTransition || !transition || !isInTransitionContainer) {
-        this.element.parentNode.removeChild(this.element);
+      let isInTransitionContainer = ["ROW", "COL", "LIST", "BODY"].includes(parentElement.tagName);
+      if (!document.startViewTransition || !isInTransitionContainer || !transitionOptions || !transitionOptions.name) {
+        mutate();
         return;
       }
 
-      // View Transition API
-      let parentElement = this.element.parentElement;
+      // View Transition API:
+
+      if (transitionOptions?.init) {
+        transitionOptions.init();
+      }
+
       parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style)
+        if (sibling.style && !sibling.style.viewTransitionName)
           sibling.style.viewTransitionName = `web4-sibling-${i}`
       });
-      this.element.style.viewTransitionName = `web4-${this.key}`;
 
       document.startViewTransition(() => {
-        this.element.parentNode.removeChild(this.element);
+        mutate();
       })
       .finished.then(() => {
         parentElement.childNodes.forEach(sibling => {
@@ -182,7 +155,9 @@
           }
         });
 
-        Web4Keyholes.unregisterKeyholes();
+        if (transitionOptions?.finish) {
+          transitionOptions.finish();
+        }
       });
     }
   }
@@ -192,24 +167,28 @@
 
     constructor(transport) {
       this.#transport = transport;
-      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.registerKeyholes(document));
+      document.addEventListener('DOMContentLoaded', () => Web4Keyholes.registerKeyholes());
     }
 
     get elements() {
-      let e = {};
-      for (let key in this) {
-        if (key.startsWith("key"))
-          e[key] = this[key].element;
-      }
-      return e;
+      return Object.fromEntries(Object
+        .values(app.keyholes)
+        .filter(k => k.key.startsWith("key"))
+        .map(k => [k.key, k.element]
+      ));
     }
 
     dump() {
       this.#transport.dump();
     }
 
-    static registerKeyholes(parentNode) {
-      let comments = document.evaluate('//comment()', parentNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    static registerKeyholes(node, key) {
+      if (node) {
+        app.keyholes[key] = new Web4Keyhole(key, node);
+      } else {
+        node = document;
+      }
+      let comments = document.evaluate('//comment()', node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (let i = comments.snapshotLength - 1; i >= 0; i--) {
         let comment = comments.snapshotItem(i);
         let key = comment.textContent;
@@ -224,7 +203,7 @@
         comment.parentElement.removeChild(comment);
       }
       
-      let attrs = document.evaluate('//*/attribute::*', parentNode, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+      let attrs = document.evaluate('//*/attribute::*', node, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
       for (let i = 0; i < attrs.snapshotLength; i++) {
         let attr = attrs.snapshotItem(i);
         let key = attr.name;
@@ -239,13 +218,13 @@
           attr.ownerElement.removeAttribute(attr.name)
         }
       }
-
-      Web4Keyholes.unregisterKeyholes();
     }
 
     static unregisterKeyholes() {
       for (let key in app.keyholes) {
         let element = app.keyholes[key].element;
+        if (element.nodeType == Node.ATTRIBUTE_NODE)
+          element = element.ownerElement;
         if (!document.body.contains(element))
           delete app.keyholes[key];
       }

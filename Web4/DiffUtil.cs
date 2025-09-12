@@ -176,7 +176,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             ref var newItem = ref newItems[d];
                             var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
-                            mutationBatch.AddElement(newItem.Key, priorItem.Key, newItemSpan, transition);
+                            mutationBatch.AddElement(priorItem.Key, newItem.Key, newItemSpan, transition);
                         }
                     }
                     else if (oldItems.Length > newItems.Length)
