@@ -1,10 +1,10 @@
 namespace Web4.Proxies;
 
-public struct WindowProxy()
+public struct WindowProxy(IWeb4Transport transport)
 {
-    public WindowProxy Window { get => this; }
-    public DocumentProxy Document { get; } = new();
-    public ConsoleProxy Console { get; } = new();
+    public readonly WindowProxy Window { get => this; }
+    public readonly DocumentProxy Document { get => new(transport); }
+    public readonly ConsoleProxy Console { get => new(transport); }
 
     public float DevicePixelRatio { get; } = 2;
     public int InnerWidth { get; } = 786;
@@ -45,9 +45,9 @@ public struct WindowProxy()
     public void PostMessage() { }
     public void Print() { }
 
-    public async Task<string> Prompt()
+    public async Task<string> Prompt(string? message = null, string? defaultValue = null)
     {
-        await Task.Yield();
+        // return await transport.RpcRequest<string?, string?, string>("window.prompt", message, defaultValue);
         return "";
     }
 
