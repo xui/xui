@@ -2,7 +2,9 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text.Json;
+using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
+using Web4.Proxies;
 
 namespace Web4.WebSockets;
 
@@ -108,8 +110,27 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
         JsonRpcWriter.Pool.Return(writer);
     }
 
-    public async Task ListenForRpcMessages(Web4App app)
+    private async ValueTask SendResult(int id, string? result)
     {
+        var writer = JsonRpcWriter.Pool.Get();
+        writer.WriteResult(id, result);
+
+        if (writer.Result is ReadOnlyMemory<byte> buffer)
+        {
+            await webSocket.SendAsync(
+                buffer: buffer,
+                messageType: WebSocketMessageType.Text,
+                endOfMessage: true,
+                cancellationToken: http.RequestAborted);
+        }
+
+        JsonRpcWriter.Pool.Return(writer);
+    }
+
+    public async Task ListenForRpcMessages(WindowBuilder windowBuilder)
+    {
+        var app = GetOrCreateApp(windowBuilder);
+
         await foreach (var sequence in GetNextMessage())
         {
             // TODO: This doesn't belong here.
@@ -124,11 +145,24 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
                 switch (message)
                 {
+                    case JsonRpcMessage { Method: "console.log" }:
+                        new GlobalThis(this).Console.Log(
+                            message: @params.GetNextString()
+                        );
+                        break;
+                    
+                    case JsonRpcMessage { Method: "window.prompt", ID: int requestID }:
+                        var result = await new GlobalThis(this)
+                            .Window.Prompt();
+                        await SendResult(requestID, result);
+                        break;
+                    
                     case JsonRpcMessage { Method: "app.dispatchEvent" }:
-                        var @event          = @params.GetNextEvent();
-                        var key             = @params.GetNextString();
-                        var propagationID   = @params.GetNextInt();
-                        app.DispatchEvent(@event, key, propagationID);
+                        app.DispatchEvent(
+                            @event: @params.GetNextEvent(),
+                            key: @params.GetNextString(),
+                            propagationID: @params.GetNextInt()
+                        );
                         break;
 
                     case JsonRpcMessage { Method: "app.keyholes.dump" }:
