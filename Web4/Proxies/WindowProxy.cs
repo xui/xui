@@ -2,8 +2,9 @@ using Web4.WebApis;
 
 namespace Web4.Proxies;
 
-public struct WindowProxy(IWeb4Transport transport)
+public ref struct WindowProxy(IWeb4Transport transport)
 {
+    public Web4App App { get; init; }
     public readonly WindowProxy Window { get => this; }
     public readonly DocumentProxy Document { get => new(transport); }
     public readonly IConsole Console { get => null; }

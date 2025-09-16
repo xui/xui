@@ -146,13 +146,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                 switch (message)
                 {
                     case JsonRpcMessage { Method: "console.log" }:
-                        new GlobalThis(this).Console.Log(
+                        new WindowProxy(this).Console.Log(
                             message: @params.GetNextString()
                         );
                         break;
 
                     case JsonRpcMessage { Method: "window.prompt", ID: int requestID }:
-                        var result = await new GlobalThis(this)
+                        var result = await new WindowProxy(this)
                             .Window.Prompt();
                         await SendResult(requestID, result);
                         break;
