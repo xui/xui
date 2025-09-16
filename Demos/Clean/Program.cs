@@ -1,5 +1,6 @@
 global using Web4;
 global using Web4.Proxies;
+global using Web4.WebApis;
 using System.Collections;
 using System.Drawing;
 using System.Security.Cryptography;

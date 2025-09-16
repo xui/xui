@@ -1,10 +1,12 @@
+using Web4.WebApis;
+
 namespace Web4.Proxies;
 
 public struct WindowProxy(IWeb4Transport transport)
 {
     public readonly WindowProxy Window { get => this; }
     public readonly DocumentProxy Document { get => new(transport); }
-    public readonly ConsoleProxy Console { get => new(transport); }
+    public readonly IConsole Console { get => null; }
 
     public float DevicePixelRatio { get; } = 2;
     public int InnerWidth { get; } = 786;

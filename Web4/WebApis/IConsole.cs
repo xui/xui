@@ -1,0 +1,53 @@
+namespace Web4.WebApis;
+
+public interface IConsole
+{
+    void Assert(bool assertion, string message);
+    void Assert(bool assertion, string message, params Span<string> substitutions);
+    void Assert(bool assertion, object value);
+    void Assert(bool assertion, object value, params Span<object> values);
+    void Clear();
+    void Count();
+    void Count(object label);
+    void CountReset();
+    void CountReset(object label);
+    void Debug(string message);
+    void Debug(string message, params Span<string> substitutions);
+    void Debug(object value);
+    void Debug(object value, params Span<object> values);
+    void Dir(object obj);
+    void Dir(object obj, DirOptions options);
+    void Error(string message);
+    void Error(string message, params Span<string> substitutions);
+    void Error(object value);
+    void Error(object value, params Span<object> values);
+    void Group();
+    void Group(object label);
+    void GroupCollapsed();
+    void GroupCollapsed(object label);
+    void GroupEnd();
+    void Info(string message);
+    void Info(string message, params Span<string> substitutions);
+    void Info(object value);
+    void Info(object value, params Span<object> values);
+    void Log(string message);
+    void Log(string message, params Span<string> substitutions);
+    void Log(object value);
+    void Log(object value, params Span<object> values);
+    void Table(object obj);
+    void Table(object obj, string[] columns);
+    void Time();
+    void Time(object label);
+    void TimeEnd();
+    void TimeEnd(object label);
+    void TimeLog();
+    void TimeLog(object label);
+    void TimeLog(object label, params Span<object> values);
+    void Trace();
+    void Tract(params Span<object> objects);
+    void Warn(string message);
+    void Warn(string message, params Span<string> substitutions);
+    void Warn(object value);
+    void Warn(object value, params Span<object> values);
+    record struct DirOptions(bool? Colors = null, int? Depth = null, bool? ShowHidden = null);
+}

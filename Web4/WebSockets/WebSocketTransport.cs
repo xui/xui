@@ -150,13 +150,13 @@ public class WebSocketTransport : IWeb4Transport, IDisposable
                             message: @params.GetNextString()
                         );
                         break;
-                    
+
                     case JsonRpcMessage { Method: "window.prompt", ID: int requestID }:
                         var result = await new GlobalThis(this)
                             .Window.Prompt();
                         await SendResult(requestID, result);
                         break;
-                    
+
                     case JsonRpcMessage { Method: "app.dispatchEvent" }:
                         app.DispatchEvent(
                             @event: @params.GetNextEvent(),
