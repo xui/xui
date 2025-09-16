@@ -4,6 +4,14 @@ namespace Web4.Proxies;
 
 public ref struct WindowProxy(IWeb4Transport transport)
 {
+    internal static WindowProxy Current
+    {
+        get
+        {
+            return default;
+        }
+    }
+
     public Web4App App { get; init; }
     public readonly WindowProxy Window { get => this; }
     public readonly DocumentProxy Document { get => new(transport); }
@@ -35,7 +43,7 @@ public ref struct WindowProxy(IWeb4Transport transport)
     //parent: Window
     //top
 
-    public async Task Alert(string message) { await Task.Delay(1); }
+    public void Alert(string message) { }
     public void Close() { }
     public void Confirm() { }
     public void Focus() { }
