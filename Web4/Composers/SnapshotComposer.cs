@@ -279,14 +279,19 @@ public class SnapshotComposer : BaseComposer
 
         // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
         // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
-        foreach (var partial in partials)
+        var enumerator = partials.GetEnumerator();
+        while (enumerator.MoveNext())
         {
+            var (selector, item) = enumerator.CurrentDeconstructed;
+            var partial = selector(item);
+
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             ref var itemKeyhole = ref Snapshot[index + i];
             itemKeyhole.Key = keyGenerator.GetNextKey();
             itemKeyhole.Type = KeyholeType.Html;
-            itemKeyhole.Expression = expression;
+            itemKeyhole.Format = format;
+            itemKeyhole.Tag = item; // TODO: Memory allocation?
             itemKeyhole.SequenceStart = partial.Index;
             itemKeyhole.SequenceLength = partial.Length;
 

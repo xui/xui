@@ -25,6 +25,20 @@ public ref partial struct Html
             _ => selector(enumerator!.Current),
         };
 
+        public readonly (Func<T, Html> selector, T) CurrentDeconstructed
+        {
+            get
+            {
+                T item = source switch
+                {
+                    IList<T> list => list[index],
+                    _ => enumerator!.Current,
+                };
+
+                return (selector, item);
+            }
+        }
+
         public bool MoveNext() => source switch
         {
             IList<T> list => ++index < list.Count,

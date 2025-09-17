@@ -164,6 +164,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         }
                     }
                     
+                    // TODO: Handle when oldItems.Length = 0.  
+                    // Looks like it will need to resemble <if> where it drops in a placeholder.
+
                     if (oldItems.Length < newItems.Length)
                     {
                         // The new enumerable has more items than the old one. 
