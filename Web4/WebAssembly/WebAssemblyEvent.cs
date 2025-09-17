@@ -5,7 +5,7 @@ using Web4.Events.Subsets;
 
 namespace Web4.WebAssembly;
 
-internal partial record class WebAssemblyEvent(
+internal partial record struct WebAssemblyEvent(
     bool? Absolute = null,
     XYZ? Acceleration = null,
     XYZ? AccelerationIncludingGravity = null,

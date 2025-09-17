@@ -118,7 +118,7 @@ public class Web4App
     {
     }
 
-    public void DispatchEvent(Event @event, string key, int propagationID)
+    public void DispatchEvent<T>(T @event, string key, int propagationID) where T : struct, Event
     {
         try
         {
@@ -127,7 +127,7 @@ public class Web4App
             // - it may or may not be async but clearly does not await here
             // - it disposes the event after the method completes
             var listener = windowBuilder.GetEventListener(key);
-            listener.Invoke(@event, propagationID);
+            listener.Invoke(this, @event, propagationID);
         }
         catch (Exception ex)
         {

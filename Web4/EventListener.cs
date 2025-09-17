@@ -13,7 +13,7 @@ public record struct EventListener(
     public EventListener(Func<Task> listener) : this(Func: listener) { }
     public EventListener(Func<Event, Task> listener) : this(FuncEvent: listener) { }
 
-    public readonly void Invoke(Event @event, int propagationID)
+    public readonly void Invoke<T>(Web4App app, T @event, int propagationID) where T : struct, Event
     {
         using var perf = Debug.PerfCheck("Invoke"); // TODO: Remove PerfCheck
 
