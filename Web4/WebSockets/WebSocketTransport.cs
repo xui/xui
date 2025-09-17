@@ -8,7 +8,7 @@ using Web4.Proxies;
 
 namespace Web4.WebSockets;
 
-public class WebSocketTransport : IWeb4Transport, IDisposable
+public partial class WebSocketTransport : IWeb4Transport, IDisposable
 {
     private const int RECEIVE_BUFFER_LENGTH = 1024;
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
