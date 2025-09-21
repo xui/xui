@@ -89,9 +89,9 @@ public abstract class BaseComposer
     public virtual bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
 
-    public virtual bool WriteMutableElement<TComponent>(ref Html parent, ref TComponent component, string? format = null, string? expression = null) where TComponent : struct, IComponent
+    public virtual bool WriteMutableElement<TRender>(ref Html parent, ref TRender renderer, string? format = null, string? expression = null) where TRender : struct, IRender
     {
-        var partial = component.Render();
+        var partial = renderer.Render();
         return OnHtmlPartialEnds(ref parent, ref partial, format, expression);
     }
 

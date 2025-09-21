@@ -1,4 +1,4 @@
-readonly record struct Blocking() : IComponent
+readonly record struct Blocking() : IRender
 {
     public Html Render() => $"""
         <section>

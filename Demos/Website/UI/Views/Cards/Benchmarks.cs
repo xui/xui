@@ -1,4 +1,4 @@
-readonly record struct Benchmarks() : IComponent
+readonly record struct Benchmarks() : IRender
 {
     public Html Render() => $"""
         <section>

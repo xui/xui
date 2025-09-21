@@ -1,4 +1,4 @@
-readonly record struct VirtualDom() : IComponent
+readonly record struct VirtualDom() : IRender
 {
     public Html Render() => $"""
         <section id="zero-virtual-dom">

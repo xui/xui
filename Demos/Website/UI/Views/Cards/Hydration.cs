@@ -1,4 +1,4 @@
-readonly record struct Hydration() : IComponent
+readonly record struct Hydration() : IRender
 {
     public Html Render() => $"""
         <section id="zero-hydration">

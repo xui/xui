@@ -1,4 +1,4 @@
-readonly record struct Syntax() : IComponent
+readonly record struct Syntax() : IRender
 {
     public Html Render() => $"""
         <section id="zero-syntax">

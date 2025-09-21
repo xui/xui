@@ -184,12 +184,12 @@ public ref partial struct Html
     }
 
     // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public bool AppendFormatted<TComponent>(TComponent component, string? format = null, [CallerArgumentExpression(nameof(component))] string? expression = null) where TComponent : struct, IComponent
+    public bool AppendFormatted<TRender>(TRender renderer, string? format = null, [CallerArgumentExpression(nameof(renderer))] string? expression = null) where TRender : struct, IRender
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableElement(ref this, ref component, format, expression);
+        var @continue = composer.WriteMutableElement(ref this, ref renderer, format, expression);
         Cursor++;
         return @continue;
     }

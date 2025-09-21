@@ -1,4 +1,4 @@
-readonly record struct VSCode() : IComponent
+readonly record struct VSCode() : IRender
 {
     public Html Render() => $"""
         <section class="vscode">
