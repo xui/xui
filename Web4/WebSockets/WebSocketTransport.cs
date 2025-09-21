@@ -15,6 +15,7 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     private readonly HttpContext http;
     private readonly WebSocket webSocket;
+    private EventListenerSynchronizationContext? syncContext;
 
     static WebSocketTransport()
     {
@@ -127,6 +128,15 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
         JsonRpcWriter.Pool.Return(writer);
     }
 
+    public void RequestFlush()
+    {
+    }
+
+    public async ValueTask Flush()
+    {
+
+    }
+
     public async Task ListenForRpcMessages(WindowBuilder windowBuilder)
     {
         var app = GetOrCreateApp(windowBuilder);
@@ -145,26 +155,6 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
                 switch (message)
                 {
-                    case JsonRpcMessage { Method: "console.log" }:
-                        new WindowProxy(this).Console.Log(
-                            message: @params.GetNextString()
-                        );
-                        break;
-
-                    case JsonRpcMessage { Method: "window.prompt", ID: int requestID }:
-                        var result = await new WindowProxy(this)
-                            .Window.Prompt();
-                        await SendResult(requestID, result);
-                        break;
-
-                    case JsonRpcMessage { Method: "app.dispatchEvent" }:
-                        app.DispatchEvent(
-                            @event: @params.GetNextEvent(),
-                            key: @params.GetNextString(),
-                            propagationID: @params.GetNextInt()
-                        );
-                        break;
-
                     case JsonRpcMessage { Method: "app.keyholes.dump" }:
                         app.DumpKeyholes(webSocket);
                         break;
@@ -177,6 +167,47 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
                     case JsonRpcMessage { Method: "app.ping", ID: int requestID }:
                         app.Ping();
                         await SendResult(requestID);
+                        break;
+
+                    case JsonRpcMessage { Method: "app.dispatchEvent" }:
+                        var @event = @params.GetNextEvent();
+                        var key = @params.GetNextString();
+                        var propagationID = @params.GetNextInt();
+                        var listener = windowBuilder.GetEventListener(key);
+
+                        if (listener.Action is Action noEventSync)
+                        {
+                            @event.Dispose(); // Event is not being used, dispose early.
+                            app.DispatchEvent(noEventSync);
+                        }
+                        else if (listener.ActionEvent is Action<Event> withEventSync)
+                        {
+                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                            app.DispatchEvent(withEventSync, @event);
+                            @event.Dispose();
+                        }
+                        else if (listener.Func is Func<Task> noEventSyncAsync)
+                        {
+                            @event.Dispose(); // Event is not being used, dispose early.
+                            SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
+                            _ = app.DispatchEvent(noEventSyncAsync);
+                            SynchronizationContext.SetSynchronizationContext(null);
+                        }
+                        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
+                        {
+                            SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
+                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                            _ = app.DispatchEvent(withEventAsync, @event)
+                                .ContinueWith(t => t.Result.Dispose());
+                            SynchronizationContext.SetSynchronizationContext(null);
+                        }
+                        else
+                        {
+                            Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
+                            continue;
+                        }
+
+                        app.Update();
                         break;
 
                     default:

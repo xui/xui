@@ -118,77 +118,27 @@ public class Web4App
     {
     }
 
-    public void DispatchEvent<T>(T @event, string key, int propagationID) where T : struct, Event
+    public void DispatchEvent(Action listener)
     {
-        try
-        {
-            var listener = windowBuilder.GetEventListener(key);
-
-            using var perf = Debug.PerfCheck("DispatchEvent"); // TODO: Remove PerfCheck
-
-            // TODO: Set window-specific values here?
-            // event.View = app.Window;
-            // event.PropagationID = propagationID; // Is this WebSocket-specific?
-            // component.Window = app.Window;
-
-            var found = listener switch
-            {
-                _ when listener.Action is Action noEventSync => HandleEventListener(noEventSync, @event),
-                _ when listener.ActionEvent is Action<Event> withEventSync => HandleEventListener(withEventSync, @event),
-                _ when listener.Func is Func<Task> noEventAsync => HandleEventListener(noEventAsync, @event),
-                _ when listener.FuncEvent is Func<Event, Task> withEventAsync => HandleEventListener(withEventAsync, @event),
-                _ => false
-            };
-
-            if (found)
-                Update();
-            else
-                Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private bool HandleEventListener<T>(Action listener, T @event) where T : struct, Event
-    {
-        @event.Dispose(); // Event is not being used, dispose early.
         listener();
-        return true;
     }
 
-    private bool HandleEventListener<T>(Action<Event> listener, T @event) where T : struct, Event
+    public void DispatchEvent<T>(Action<Event> listener, T @event)
+        where T : struct, Event
     {
-        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
         listener(@event);
-        @event.Dispose();
-        return true;
     }
 
-    private bool HandleEventListener<T>(Func<Task> listener, T @event) where T : struct, Event
+    public async Task DispatchEvent(Func<Task> listener)
     {
-        @event.Dispose(); // Event is not being used, dispose early.
-
-        // TODO: Fix memory allocation
-        // TODO: Can this be WebSocket only please?
-        // SynchronizationContext.SetSynchronizationContext(new EventListenerSynchronizationContext(app));
-        listener();
-        // SynchronizationContext.SetSynchronizationContext(null);
-        return true;
+        await listener();
     }
 
-    private bool HandleEventListener<T>(Func<Event, Task> listener, T @event) where T : struct, Event
+    public async Task<T> DispatchEvent<T>(Func<Event, Task> listener, T @event)
+        where T : struct, Event
     {
-        // TODO: Fix memory allocation
-        // TODO: Can this be WebSocket only please?
-        // SynchronizationContext.SetSynchronizationContext(new EventListenerSynchronizationContext(app));
-        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-        listener(@event)
-            // TODO: Memory alloation from capturing.
-            .ContinueWith(t => @event.Dispose());
-        // SynchronizationContext.SetSynchronizationContext(null);
-        return true;
+        await listener(@event);
+        return @event;
     }
 
     public void DumpKeyholes(System.Net.WebSockets.WebSocket webSocket) // TODO: Remove webSocket once ConsoleProxy is in place.
