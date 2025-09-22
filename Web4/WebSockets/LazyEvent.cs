@@ -118,7 +118,7 @@ internal record struct LazyEvent : Event, IDisposable
                                 }
                                 else if (type == typeof(EventTarget))
                                 {
-                                    ParseEventTarget(reader);
+                                    ParseEventTarget(reader, propertyName);
                                 }
                                 else if (type == typeof(TouchPoint[]))
                                 {
@@ -177,10 +177,10 @@ internal record struct LazyEvent : Event, IDisposable
     private EventTarget? GetTarget(string propName)
     {
         LazyParse(canIgnoreRefTypes: false);
-        return references!.GetValueOrDefault("target") as EventTarget;
+        return references!.GetValueOrDefault(propName) as EventTarget;
     }
 
-    private void ParseEventTarget(Utf8JsonReader reader)
+    private void ParseEventTarget(Utf8JsonReader reader, string propertyName)
     {
         string id = "", type = "", value = "", name = "";
         bool @checked = false;
@@ -189,7 +189,7 @@ internal record struct LazyEvent : Event, IDisposable
             if (reader.TokenType == JsonTokenType.EndObject)
             {
                 references ??= [];
-                references["target"] = new EventTarget(id, name, type, @checked, value);
+                references[propertyName] = new EventTarget(id, name, type, @checked, value);
                 return;
             }
 
@@ -431,7 +431,7 @@ internal record struct LazyEvent : Event, IDisposable
     public bool? CtrlKey => GetBool("ctrlKey");
     bool IModifierCtrl.CtrlKey => CtrlKey ?? default;
 
-    public EventTarget? CurrentTarget { get; private set; } = null; // TODO:
+    public EventTarget? CurrentTarget => GetTarget("currentTarget");
     EventTarget IEvent.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
 
     public string? Data => GetReference("data") as string;
@@ -595,7 +595,7 @@ internal record struct LazyEvent : Event, IDisposable
     public bool? Skipped => GetBool("skipped");
     bool ISkipped.Skipped => Skipped ?? default;
 
-    public EventTarget? Submitter { get; private set; } = null; // TODO:
+    public EventTarget? Submitter => GetTarget("submitter");
     EventTarget ISubmitter.Submitter => Submitter ?? EventTarget.Empty;
 
     public double? TangentialPressure => GetDouble("tangentialPressure");
