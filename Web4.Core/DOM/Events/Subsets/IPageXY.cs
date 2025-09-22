@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPageXY : ISubset
+        public interface IPageXY : ISubset, IView
         {
-            const string Format = "pageX,pageY";
+            new const string Format = "pageX,pageY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the whole document.

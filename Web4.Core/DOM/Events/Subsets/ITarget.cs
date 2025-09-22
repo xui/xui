@@ -19,7 +19,8 @@ namespace Web4
             Target<DateOnly>,
             Target<TimeOnly>,
             Target<Color>,
-            Target<Uri>
+            Target<Uri>,
+            IView
         {
             new const string Format = "target";
 

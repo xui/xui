@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IMovementXY : ISubset
+        public interface IMovementXY : ISubset, IView
         {
-            const string Format = "movementX,movementY";
+            new const string Format = "movementX,movementY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the last mousemove event.

@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDataTransfer : ISubset
+        public interface IDataTransfer : ISubset, IView
         {
-            const string Format = "dataTransfer";
+            new const string Format = "dataTransfer";
 
             /// <summary>
             /// Returns a DataTransfer object containing contextual information.

@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IAnimation : ISubset
+        public interface IAnimation : ISubset, IView
         {
-            const string Format = "animationName,elapsedTime,propertyName,pseudoElement";
+            new const string Format = "animationName,elapsedTime,propertyName,pseudoElement";
 
             /// <summary>
             /// A string containing the value of the animation-name that generated the animation.

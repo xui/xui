@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IStates : ISubset
+        public interface IStates : ISubset, IView
         {
-            const string Format = "newState,oldState";
+            new const string Format = "newState,oldState";
 
             /// <summary>
             /// A string (either "open" or "closed"), representing the state the element is transitioning to.

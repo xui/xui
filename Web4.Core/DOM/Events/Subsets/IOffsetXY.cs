@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IOffsetXY : ISubset
+        public interface IOffsetXY : ISubset, IView
         {
-            const string Format = "offsetX,offsetY";
+            new const string Format = "offsetX,offsetY";
             
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the padding edge of the target node.

@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITilts : ISubset
+        public interface ITilts : ISubset, IView
         {
-            const string Format = "tiltX,tiltY";
+            new const string Format = "tiltX,tiltY";
 
             /// <summary>
             /// The plane angle (in degrees, in the range of -90 to 90) between 

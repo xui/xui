@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPersisted : ISubset
+        public interface IPersisted : ISubset, IView
         {
-            const string Format = "persisted";
+            new const string Format = "persisted";
 
             /// <summary>
             /// Indicates if the document is loading from a cache.

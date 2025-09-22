@@ -6,9 +6,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITarget<T> : ISubset
+        public interface ITarget<T> : ISubset, IView
         {
-            const string Format = "target";
+            new const string Format = "target";
 
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.

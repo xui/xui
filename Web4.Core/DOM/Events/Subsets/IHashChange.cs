@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IHashChange : ISubset
+        public interface IHashChange : ISubset, IView
         {
-            const string Format = "newUrl,oldUrl";
+            new const string Format = "newUrl,oldUrl";
 
             /// <summary>
             /// The new URL to which the window is navigating.

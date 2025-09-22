@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IAngles : ISubset
+        public interface IAngles : ISubset, IView
         {
-            const string Format = "altitudeAngle,azimuthAngle";
+            new const string Format = "altitudeAngle,azimuthAngle";
 
             /// <summary>
             /// Represents the angle between a transducer (a pointer or stylus) axis 

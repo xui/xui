@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IKeys : ISubset
+        public interface IKeys : ISubset, IView
         {
-            const string Format = "code,key,location,repeat";
+            new const string Format = "code,key,location,repeat";
 
             /// <summary>
             /// Returns a string with the code value of the physical key represented by the event.

@@ -5,7 +5,7 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifiers : ISubset, ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift
+        public interface IModifiers : ISubset, ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift, IView
         {
             new const string Format = 
                 ModifierAlt.Format + "," + 

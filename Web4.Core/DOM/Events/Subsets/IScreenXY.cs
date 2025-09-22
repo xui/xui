@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IScreenXY : ISubset
+        public interface IScreenXY : ISubset, IView
         {
-            const string Format = "screenX,screenY";
+            new const string Format = "screenX,screenY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer in screen coordinates.

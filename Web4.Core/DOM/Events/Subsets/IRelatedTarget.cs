@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IRelatedTarget : ISubset
+        public interface IRelatedTarget : ISubset, IView
         {
-            const string Format = "relatedTarget";
+            new const string Format = "relatedTarget";
 
             /// <summary>
             /// The secondary target for the event, if there is one.

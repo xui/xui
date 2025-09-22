@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IButtons : ISubset
+        public interface IButtons : ISubset, IView
         {
-            const string Format = "button,buttons";
+            new const string Format = "button,buttons";
 
             /// <summary>
             /// The button number that was pressed (if applicable) when the mouse event was fired.

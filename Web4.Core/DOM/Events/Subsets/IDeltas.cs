@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDeltas : ISubset
+        public interface IDeltas : ISubset, IView
         {
-            const string Format = "deltaX,deltaY,deltaZ,deltaMode";
+            new const string Format = "deltaX,deltaY,deltaZ,deltaMode";
 
             /// <summary>
             /// Returns a double representing the horizontal scroll amount.

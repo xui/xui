@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierMeta : ISubset
+        public interface IModifierMeta : ISubset, IView
         {
-            const string Format = "metaKey";
+            new const string Format = "metaKey";
 
             /// <summary>
             /// Returns true if the meta key was down when the event was fired.

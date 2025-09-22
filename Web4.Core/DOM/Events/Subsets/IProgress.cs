@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IProgress : ISubset
+        public interface IProgress : ISubset, IView
         {
-            const string Format = "lengthComputable,loaded,total";
+            new const string Format = "lengthComputable,loaded,total";
 
             /// <summary>
             /// A boolean flag indicating if the ratio between the size of the data 

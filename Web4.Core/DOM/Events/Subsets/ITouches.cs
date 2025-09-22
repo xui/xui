@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ITouches : ISubset
+        public interface ITouches : ISubset, IView
         {
-            const string Format = "changedTouches,targetTouches,touches";
+            new const string Format = "changedTouches,targetTouches,touches";
 
             /// <summary>
             /// A TouchList of all the Touch objects representing individual points of contact 

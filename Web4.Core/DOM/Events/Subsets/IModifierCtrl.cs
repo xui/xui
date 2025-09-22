@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierCtrl : ISubset
+        public interface IModifierCtrl : ISubset, IView
         {
-            const string Format = "ctrlKey";
+            new const string Format = "ctrlKey";
 
             /// <summary>
             /// Returns true if the control key was down when the event was fired.

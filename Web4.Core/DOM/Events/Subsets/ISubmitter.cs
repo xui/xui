@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ISubmitter : ISubset
+        public interface ISubmitter : ISubset, IView
         {
-            const string Format = "submitter";
+            new const string Format = "submitter";
 
             /// <summary>
             /// An HTMLElement object which identifies the button or other element 

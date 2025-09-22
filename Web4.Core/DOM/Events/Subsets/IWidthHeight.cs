@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IWidthHeight : ISubset
+        public interface IWidthHeight : ISubset, IView
         {
-            const string Format = "width,height";
+            new const string Format = "width,height";
 
             /// <summary>
             /// The width (magnitude on the X axis), in CSS pixels, 

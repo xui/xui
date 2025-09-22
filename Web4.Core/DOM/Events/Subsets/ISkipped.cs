@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ISkipped : ISubset
+        public interface ISkipped : ISubset, IView
         {
-            const string Format = "skipped";
+            new const string Format = "skipped";
 
             /// <summary>
             /// Returns true if the user agent is skipping the element's rendering, or false otherwise.

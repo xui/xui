@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPointer : ISubset
+        public interface IPointer : ISubset, IView
         {
-            const string Format = "pointerID,twist,pointerType,isPrimary";
+            new const string Format = "pointerID,twist,pointerType,isPrimary";
 
             /// <summary>
             /// A unique identifier for the pointer causing the event.

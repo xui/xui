@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IXY : ISubset
+        public interface IXY : ISubset, IView
         {
-            const string Format = "x,y";
+            new const string Format = "x,y";
 
             /// <summary>
             /// Alias for MouseEvent.clientX.

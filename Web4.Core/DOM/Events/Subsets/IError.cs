@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IError : ISubset
+        public interface IError : ISubset, IView
         {
-            const string Format = "error";
+            new const string Format = "error";
 
             string Message { get; }
             string FileName { get; }

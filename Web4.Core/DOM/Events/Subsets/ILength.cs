@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface ILength : ISubset
+        public interface ILength : ISubset, IView
         {
-            const string Format = "length";
+            new const string Format = "length";
 
             /// <summary>
             /// Returns an integer representing the number of data items stored in the Storage object.

@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IClientXY : ISubset
+        public interface IClientXY : ISubset, IView
         {
-            const string Format = "clientX,clientY";
+            new const string Format = "clientX,clientY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer in viewport coordinates.

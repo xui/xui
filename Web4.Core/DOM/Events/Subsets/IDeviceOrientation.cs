@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IDeviceOrientation : ISubset
+        public interface IDeviceOrientation : ISubset, IView
         {
-            const string Format = "absolute,alpha,beta,gamma";
+            new const string Format = "absolute,alpha,beta,gamma";
 
             /// <summary>
             /// A boolean that indicates whether or not the device is providing 

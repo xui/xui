@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IIsComposing : ISubset
+        public interface IIsComposing : ISubset, IView
         {
-            const string Format = "isComposing";
+            new const string Format = "isComposing";
 
             /// <summary>
             /// Returns a boolean value that is true if the event is fired between after compositionstart and before compositionend.

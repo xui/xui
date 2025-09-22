@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IPressures : ISubset
+        public interface IPressures : ISubset, IView
         {
-            const string Format = "pressure,tangentialPressure";
+            new const string Format = "pressure,tangentialPressure";
 
             /// <summary>
             /// The normalized pressure of the pointer input in the range 0 to 1, 

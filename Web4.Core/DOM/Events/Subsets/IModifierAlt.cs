@@ -5,9 +5,9 @@ namespace Web4
 {
     namespace Events.Subsets
     {
-        public interface IModifierAlt : ISubset
+        public interface IModifierAlt : ISubset, IView
         {
-            const string Format = "altKey";
+            new const string Format = "altKey";
 
             /// <summary>
             /// Returns true if the alt key was down when the event was fired.
