@@ -1,5 +1,6 @@
 
 using System.Drawing;
+using Web4.Core.DOM;
 using Web4.Events;
 using Web4.Events.Subsets;
 
@@ -210,6 +211,7 @@ internal partial record struct WebAssemblyEvent(
     TouchPoint[] ITouches.Touches => Touches ?? [];
     double IPointer.Twist => Twist ?? default;
     string IEvent.Type => Type ?? string.Empty;
+    public IWindow View => null; // TODO: Implement
     int IWidthHeight.Width => Width ?? default;
     double IXY.X => X ?? default;
     double IXY.Y => Y ?? default;

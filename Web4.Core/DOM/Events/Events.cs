@@ -13,7 +13,7 @@ public interface IFocusEvent                : IUIEvent, RelatedTarget { }
 public interface IKeyboardEvent             : IUIEvent, Modifiers, IsComposing, Keys { }
 public interface ITouchEvent                : IUIEvent, Modifiers, Touches { }
 
-public interface IUIEvent                   : IEvent, Detail { }
+public interface IUIEvent                   : IEvent, Detail, View { }
 public interface IAnimationEvent            : IEvent, Animation { }
 public interface IBeforeUnloadEvent         : IEvent { }
 public interface IContentVisibilityAutoStateChangeEvent : IEvent, Skipped { }

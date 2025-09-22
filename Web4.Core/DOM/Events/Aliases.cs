@@ -75,6 +75,7 @@ public interface Aliases
         public interface Target<T> : ITarget<T> { }
         public interface Tilts : ITilts { }
         public interface Touches : ITouches { }
+        public interface View : IView { }
         public interface WidthHeight : IWidthHeight { }
         public interface XY : IXY { }
     }

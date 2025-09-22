@@ -183,6 +183,7 @@ public class DocumentBuilder(WindowBuilder window) :
     public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.Target<Uri>> listener) => AddEventListener(type, listener, Event.Subsets.Target.Format);
     public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.Tilts> listener) => AddEventListener(type, listener, Event.Subsets.Tilts.Format);
     public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.Touches> listener) => AddEventListener(type, listener, Event.Subsets.Touches.Format);
+    public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.View> listener) => AddEventListener(type, listener, Event.Subsets.View.Format);
     public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.WidthHeight> listener) => AddEventListener(type, listener, Event.Subsets.WidthHeight.Format);
     public DocumentBuilder AddEventListener(string type, Action<Event.Subsets.XY> listener) => AddEventListener(type, listener, Event.Subsets.XY.Format);
 

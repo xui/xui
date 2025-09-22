@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Text.Json;
+using Web4.Core.DOM;
 
 namespace Web4.WebSockets;
 
@@ -95,11 +96,11 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
         return reader.GetString()!;
     }
 
-    public LazyEvent GetNextEvent()
+    public LazyEvent GetNextEvent(IWindow window)
     {
         ParseToParams();
         reader.Read();
         reader.Skip();
-        return new(sequence);
+        return new(sequence, window);
     }
 }

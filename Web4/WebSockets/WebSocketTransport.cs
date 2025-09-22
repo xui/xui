@@ -1,14 +1,12 @@
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
-using System.Text.Json;
-using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
-using Web4.Proxies;
+using Web4.Core.DOM;
 
 namespace Web4.WebSockets;
 
-public partial class WebSocketTransport : IWeb4Transport, IDisposable
+partial class WebSocketTransport : IWeb4Transport, IDisposable
 {
     private const int RECEIVE_BUFFER_LENGTH = 1024;
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
@@ -16,6 +14,9 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
     private readonly HttpContext http;
     private readonly WebSocket webSocket;
     private EventListenerSynchronizationContext? syncContext;
+
+    public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
+    public IWindow Window => (IWindow)this;
 
     static WebSocketTransport()
     {
@@ -60,7 +61,7 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
         );
     }
 
-    public Web4App GetOrCreateApp(WindowBuilder builder)
+    private Web4App GetOrCreateApp(WindowBuilder builder)
     {
         // TODO: Move to header approach?
         var key = http.Connection.Id;
@@ -139,7 +140,7 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     public async Task ListenForRpcMessages(WindowBuilder windowBuilder)
     {
-        var app = GetOrCreateApp(windowBuilder);
+        App = GetOrCreateApp(windowBuilder);
 
         await foreach (var sequence in GetNextMessage())
         {
@@ -156,21 +157,21 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
                 switch (message)
                 {
                     case JsonRpcMessage { Method: "app.keyholes.dump" }:
-                        app.DumpKeyholes(webSocket);
+                        App.DumpKeyholes(webSocket);
                         break;
 
                     case JsonRpcMessage { Method: "app.benchmark" }:
                         var threads = @params.GetNextNullableInt();
-                        app.Benchmark(threads);
+                        App.Benchmark(threads);
                         break;
 
                     case JsonRpcMessage { Method: "app.ping", ID: int requestID }:
-                        app.Ping();
+                        App.Ping();
                         await SendResult(requestID);
                         break;
 
                     case JsonRpcMessage { Method: "app.dispatchEvent" }:
-                        var @event = @params.GetNextEvent();
+                        var @event = @params.GetNextEvent(Window);
                         var key = @params.GetNextString();
                         var propagationID = @params.GetNextInt();
                         var listener = windowBuilder.GetEventListener(key);
@@ -178,26 +179,26 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
                         if (listener.Action is Action noEventSync)
                         {
                             @event.Dispose(); // Event is not being used, dispose early.
-                            app.DispatchEvent(noEventSync);
+                            App.DispatchEvent(noEventSync);
                         }
                         else if (listener.ActionEvent is Action<Event> withEventSync)
                         {
                             // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            app.DispatchEvent(withEventSync, @event);
+                            App.DispatchEvent(withEventSync, @event);
                             @event.Dispose();
                         }
                         else if (listener.Func is Func<Task> noEventSyncAsync)
                         {
                             @event.Dispose(); // Event is not being used, dispose early.
                             SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
-                            _ = app.DispatchEvent(noEventSyncAsync);
+                            _ = App.DispatchEvent(noEventSyncAsync);
                             SynchronizationContext.SetSynchronizationContext(null);
                         }
                         else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
                         {
                             SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
                             // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            _ = app.DispatchEvent(withEventAsync, @event)
+                            _ = App.DispatchEvent(withEventAsync, @event)
                                 .ContinueWith(t => t.Result.Dispose());
                             SynchronizationContext.SetSynchronizationContext(null);
                         }
@@ -207,7 +208,7 @@ public partial class WebSocketTransport : IWeb4Transport, IDisposable
                             continue;
                         }
 
-                        app.Update();
+                        App.Update();
                         break;
 
                     default:

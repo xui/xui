@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
+using Web4.Core.DOM;
 using Web4.Events;
 using Web4.Events.Subsets;
 
@@ -23,12 +24,14 @@ internal record struct LazyEvent : Event, IDisposable
 {
     private static readonly ObjectPool<Dictionary<string, long>> valueDictionaryPool = ObjectPool.Create<Dictionary<string, long>>();
 
+    private readonly IWindow window;
     private readonly ReadOnlySequence<byte> message;
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public LazyEvent(ReadOnlySequence<byte> message)
+    public LazyEvent(ReadOnlySequence<byte> message, IWindow window)
     {
+        this.window = window;
         this.message = message;
     }
 
@@ -648,6 +651,9 @@ internal record struct LazyEvent : Event, IDisposable
 
     public string? Type => GetReference("type") as string;
     string IEvent.Type => Type ?? string.Empty;
+
+    public IWindow? View => this.window;
+    IWindow IView.View => View!;
 
     public int? Width => GetInt("width");
     int IWidthHeight.Width => Width ?? default;
