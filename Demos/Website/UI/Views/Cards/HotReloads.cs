@@ -1,4 +1,4 @@
-readonly record struct HotReloads() : IRender
+readonly record struct HotReloads() : IRenderable
 {
     public Html Render() => $"""
         <section id="hot-reload">

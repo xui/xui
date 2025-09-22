@@ -1,4 +1,4 @@
-readonly record struct Repl() : IRender
+readonly record struct Repl() : IRenderable
 {
     public Html Render() => $"""
         <section>

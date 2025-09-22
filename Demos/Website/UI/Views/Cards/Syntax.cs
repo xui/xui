@@ -1,4 +1,4 @@
-readonly record struct Syntax() : IRender
+readonly record struct Syntax() : IRenderable
 {
     public Html Render() => $"""
         <section id="zero-syntax">

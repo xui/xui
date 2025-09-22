@@ -1,4 +1,4 @@
-readonly record struct Sense() : IRender
+readonly record struct Sense() : IRenderable
 {
     public Html Render() => $"""
         <section id="zero-sense">

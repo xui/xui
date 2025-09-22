@@ -1,4 +1,4 @@
-readonly record struct Pages() : IRender
+readonly record struct Pages() : IRenderable
 {
     public Html Render() => $"""
         <section id="zero-pages">

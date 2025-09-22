@@ -1,4 +1,4 @@
-readonly record struct Seo() : IRender
+readonly record struct Seo() : IRenderable
 {
     public Html Render() => $"""
         <section>

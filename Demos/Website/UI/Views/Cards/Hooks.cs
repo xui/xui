@@ -1,4 +1,4 @@
-readonly record struct Hooks() : IRender
+readonly record struct Hooks() : IRenderable
 {
     public Html Render() => $$"""
         <section id="zero-hooks">
