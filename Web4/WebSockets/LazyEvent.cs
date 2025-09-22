@@ -24,15 +24,15 @@ internal record struct LazyEvent : Event, IDisposable
 {
     private static readonly ObjectPool<Dictionary<string, long>> valueDictionaryPool = ObjectPool.Create<Dictionary<string, long>>();
 
-    private readonly IWindow window;
+    private readonly WebSocketTransport transport;
     private readonly ReadOnlySequence<byte> message;
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public LazyEvent(ReadOnlySequence<byte> message, IWindow window)
+    public LazyEvent(ReadOnlySequence<byte> message, WebSocketTransport transport)
     {
-        this.window = window;
         this.message = message;
+        this.transport = transport;
     }
 
     public void Dispose()
@@ -652,7 +652,7 @@ internal record struct LazyEvent : Event, IDisposable
     public string? Type => GetReference("type") as string;
     string IEvent.Type => Type ?? string.Empty;
 
-    public IWindow? View => this.window;
+    public IWindow? View => this.transport;
     IWindow IView.View => View!;
 
     public int? Width => GetInt("width");
@@ -663,4 +663,8 @@ internal record struct LazyEvent : Event, IDisposable
 
     public double? Y => GetDouble("y");
     double IXY.Y => Y ?? default;
+
+    public void StopPropagation() => transport.StopPropagation();
+
+    public void StopImmediatePropagation() => transport.StopImmediatePropagation();
 }

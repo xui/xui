@@ -13,6 +13,12 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     private readonly HttpContext http;
     private readonly WebSocket webSocket;
+
+    private int currentPropagationID = 0;
+    private int currentPropagationLevel = 0;
+    private int suppressPropagationID = 0;
+    private int suppressPropagationLevel = 0;
+
     private EventListenerSynchronizationContext? syncContext;
 
     public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
@@ -171,9 +177,13 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                         break;
 
                     case JsonRpcMessage { Method: "app.dispatchEvent" }:
-                        var @event = @params.GetNextEvent(Window);
+                        var @event = @params.GetNextEvent(this);
                         var key = @params.GetNextString();
-                        var propagationID = @params.GetNextInt();
+                        currentPropagationID = @params.GetNextInt();
+                        currentPropagationLevel = @params.GetNextNullableInt() ?? 0;
+                        if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
+                            continue;
+
                         var listener = windowBuilder.GetEventListener(key);
 
                         if (listener.Action is Action noEventSync)
@@ -271,6 +281,18 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
             yield return sequence;
         }
+    }
+
+    internal void StopPropagation()
+    {
+        suppressPropagationID = currentPropagationID;
+        suppressPropagationLevel = currentPropagationLevel + 1;
+    }
+
+    internal void StopImmediatePropagation()
+    {
+        suppressPropagationID = currentPropagationID;
+        suppressPropagationLevel = 0;
     }
 
     internal class Segment : ReadOnlySequenceSegment<byte>

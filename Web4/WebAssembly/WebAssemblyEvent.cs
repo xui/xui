@@ -216,6 +216,16 @@ internal partial record struct WebAssemblyEvent(
     double IXY.X => X ?? default;
     double IXY.Y => Y ?? default;
 
+    public void StopPropagation()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void StopImmediatePropagation()
+    {
+        throw new NotImplementedException();
+    }
+
     public void Dispose()
     {
     }

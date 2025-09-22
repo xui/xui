@@ -84,7 +84,7 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
     {
         ParseToParams();
         reader.Read();
-        if (reader.TryGetInt32(out int value))
+        if (reader.TokenType != JsonTokenType.EndArray && reader.TryGetInt32(out int value))
             return value;
         return null;
     }
@@ -96,11 +96,11 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
         return reader.GetString()!;
     }
 
-    public LazyEvent GetNextEvent(IWindow window)
+    public LazyEvent GetNextEvent(WebSocketTransport transport)
     {
         ParseToParams();
         reader.Read();
         reader.Skip();
-        return new(sequence, window);
+        return new(sequence, transport);
     }
 }
