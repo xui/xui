@@ -120,24 +120,52 @@ public class Web4App
 
     public void DispatchEvent(Action listener)
     {
-        listener();
+        try
+        {
+            listener();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Bad event listener:\n{ex}");
+        }
     }
 
     public void DispatchEvent<T>(Action<Event> listener, T @event)
         where T : struct, Event
     {
-        listener(@event);
+        try
+        {
+            listener(@event);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Bad event listener:\n{ex}");
+        }
     }
 
     public async Task DispatchEvent(Func<Task> listener)
     {
-        await listener();
+        try
+        {
+            await listener();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Bad event listener:\n{ex}");
+        }
     }
 
     public async Task<T> DispatchEvent<T>(Func<Event, Task> listener, T @event)
         where T : struct, Event
     {
-        await listener(@event);
+        try
+        {
+            await listener(@event);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Bad event listener:\n{ex}");
+        }
         return @event;
     }
 
