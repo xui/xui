@@ -301,7 +301,7 @@ internal record struct LazyEvent : Event, IDisposable
         ["pressure"] = typeof(double),
         ["propertyName"] = typeof(string),
         ["pseudoElement"] = typeof(string),
-        ["telatedTarget"] = typeof(EventTarget),
+        ["relatedTarget"] = typeof(EventTarget),
         ["repeat"] = typeof(bool),
         ["rotationRate"] = typeof(ABG),
         ["screenX"] = typeof(double),
@@ -432,7 +432,7 @@ internal record struct LazyEvent : Event, IDisposable
     bool IModifierCtrl.CtrlKey => CtrlKey ?? default;
 
     public EventTarget? CurrentTarget => GetTarget("currentTarget");
-    EventTarget IEvent.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
+    EventTarget ICurrentTarget.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
 
     public string? Data => GetReference("data") as string;
     string IData.Data => Data ?? string.Empty;
@@ -574,7 +574,7 @@ internal record struct LazyEvent : Event, IDisposable
     public string? PseudoElement => GetReference("pseudoElement") as string;
     string IAnimation.PseudoElement => PseudoElement ?? string.Empty;
 
-    public EventTarget? RelatedTarget { get; private set; } = null; // TODO:
+    public EventTarget? RelatedTarget => GetTarget("relatedTarget");
     EventTarget IRelatedTarget.RelatedTarget => RelatedTarget ?? EventTarget.Empty;
 
     public bool? Repeat => GetBool("repeat");

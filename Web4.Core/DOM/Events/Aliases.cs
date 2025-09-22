@@ -42,6 +42,7 @@ public interface Aliases
         public interface Buttons : IButtons { }
         public interface ClientXY : IClientXY { }
         public interface Coordinates : ICoordinates { }
+        public interface CurrentTarget: ICurrentTarget { }
         public interface Data : IData { }
         public interface DataTransfer : IDataTransfer { }
         public interface Deltas : IDeltas { }

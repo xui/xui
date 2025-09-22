@@ -114,7 +114,7 @@ internal partial record struct WebAssemblyEvent(
     int IError.ColNo => ColNo ?? default;
     bool IEvent.Composed => Composed ?? default;
     bool IModifierCtrl.CtrlKey => CtrlKey ?? default;
-    EventTarget IEvent.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
+    EventTarget ICurrentTarget.CurrentTarget => CurrentTarget ?? EventTarget.Empty;
     string IData.Data => Data ?? string.Empty;
     DataTransferContainer IDataTransfer.DataTransfer => DataTransfer ?? DataTransferContainer.Empty;
     bool IEvent.DefaultPrevented => DefaultPrevented ?? default;

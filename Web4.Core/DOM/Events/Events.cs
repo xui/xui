@@ -36,7 +36,7 @@ public interface IMessageEvent              : IEvent { }
 public interface IPopStateEvent             : IEvent { }
 public interface IPromiseRejectionEvent     : IEvent { }
 
-public interface IEvent : Target
+public interface IEvent : Target, CurrentTarget
 {
     /// <summary>
     /// A boolean value indicating whether or not the event bubbles up through the DOM.
@@ -53,13 +53,6 @@ public interface IEvent : Target
     /// between the shadow DOM and the regular DOM.
     /// </summary>
     bool Composed { get; }
-
-    /// <summary>
-    /// A reference to the currently registered target for the event. This is the 
-    /// object to which the event is currently slated to be sent. It's possible 
-    /// this has been changed along the way through retargeting.
-    /// </summary>
-    EventTarget CurrentTarget { get; }
 
     /// <summary>
     /// Indicates whether or not the call to event.preventDefault() canceled the 
