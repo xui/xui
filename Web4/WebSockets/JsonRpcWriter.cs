@@ -28,66 +28,84 @@ public struct JsonRpcWriter(): IDisposable, IResettable
         return this;
     }
 
-    public void WriteNotification(string method, string key, string? transition = null)
+    public void WriteNotification(string method)
     {
         JsonWriter.WriteStartObject();
-
         JsonWriter.WriteString("jsonrpc", "2.0");
 
-        JsonWriter.WritePropertyName("method");
-        JsonWriter.WriteStringValueSegment("app.keyholes.", false);
-        JsonWriter.WriteStringValueSegment(key, false);
-        JsonWriter.WriteStringValueSegment(".", false);
-        JsonWriter.WriteStringValueSegment(method, true);
+        WriteMethod(method);
+
+        JsonWriter.WriteEndObject();
+    }
+
+    public void WriteNotification(ValueTuple<string, string, string> method)
+    {
+        JsonWriter.WriteStartObject();
+        JsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        JsonWriter.WriteEndObject();
+    }
+
+    public void WriteNotification<T>(string method, T param)
+    {
+        JsonWriter.WriteStartObject();
+        JsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
 
         JsonWriter.WriteStartArray("params");
-        JsonWriter.WriteStringValue(key);
-        if (transition != null)
-            JsonWriter.WriteStringValue(transition);
+        WriteTValue(param);
         JsonWriter.WriteEndArray();
 
         JsonWriter.WriteEndObject();
     }
 
-    public void WriteNotification(string method, ref Keyhole keyhole)
+    public void WriteNotification<T>(ValueTuple<string, string, string> method, T param)
     {
         JsonWriter.WriteStartObject();
-
         JsonWriter.WriteString("jsonrpc", "2.0");
 
-        JsonWriter.WritePropertyName("method");
-        JsonWriter.WriteStringValueSegment("app.keyholes.", false);
-        JsonWriter.WriteStringValueSegment(keyhole.Key, false);
-        JsonWriter.WriteStringValueSegment(".", false);
-        JsonWriter.WriteStringValueSegment(method, true);
+        WriteMethod(method);
 
         JsonWriter.WriteStartArray("params");
-        WriteKeyholeValue(ref keyhole);
+        WriteTValue(param);
         JsonWriter.WriteEndArray();
 
         JsonWriter.WriteEndObject();
     }
 
-    public void WriteNotification(string method, string key, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
-        => WriteNotification(method, key, null, keyholes, includeSentinels, transition);
+    public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param)
+    {
+        JsonWriter.WriteStartObject();
+        JsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        JsonWriter.WriteStartArray("params");
+        WriteKeyholeValue(ref param);
+        JsonWriter.WriteEndArray();
+
+        JsonWriter.WriteEndObject();
+    }
+
+    public void WriteNotification(ValueTuple<string, string, string> method, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
+        => WriteNotification(method, null, keyholes, includeSentinels, transition);
         
-    public void WriteNotification(string method, string key1, string? key2, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
+    public void WriteNotification(ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, bool includeSentinels, string? transition = null)
     {
         JsonWriter.WriteStartObject();
-
         JsonWriter.WriteString("jsonrpc", "2.0");
 
-        JsonWriter.WritePropertyName("method");
-        JsonWriter.WriteStringValueSegment("app.keyholes.", false);
-        JsonWriter.WriteStringValueSegment(key1, false);
-        JsonWriter.WriteStringValueSegment(".", false);
-        JsonWriter.WriteStringValueSegment(method, true);
+        WriteMethod(method);
 
         JsonWriter.WriteStartArray("params");
 
-        if (key2 is not null)
-            JsonWriter.WriteStringValue(key2);
+        if (param1 is not null)
+            JsonWriter.WriteStringValue(param1);
 
+        Span<Keyhole> keyholes = param2; // TODO: Start here
         for (int i = 0; i < keyholes.Length; i++)
         {
             ref var keyhole = ref keyholes[i];
@@ -151,17 +169,51 @@ public struct JsonRpcWriter(): IDisposable, IResettable
         JsonWriter.Flush();
     }
 
-    public void WriteResponse(int id, string? result)
+    public void WriteResponse<T>(int id, T result)
     {
         JsonWriter.WriteStartObject();
         JsonWriter.WriteString("jsonrpc", "2.0");
-        if (result is not null)
-            JsonWriter.WriteString("result", result);
-        else
-            JsonWriter.WriteNull("result");
+        JsonWriter.WritePropertyName("result");
+        WriteTValue(result);
         JsonWriter.WriteNumber("id", id);
         JsonWriter.WriteEndObject();
         JsonWriter.Flush();
+    }
+
+    private void WriteMethod(string method)
+    {
+        JsonWriter.WritePropertyName("method");
+        JsonWriter.WriteStringValue(method);
+    }
+
+    private void WriteMethod(ValueTuple<string, string, string> method)
+    {
+        JsonWriter.WritePropertyName("method");
+        JsonWriter.WriteStringValueSegment(method.Item1, false);
+        JsonWriter.WriteStringValueSegment(".", false);
+        JsonWriter.WriteStringValueSegment(method.Item2, false);
+        JsonWriter.WriteStringValueSegment(".", false);
+        JsonWriter.WriteStringValueSegment(method.Item3, true);
+    }
+
+    private void WriteTValue<T>(T value)
+    {
+        switch (value)
+        {
+            case string s:
+                JsonWriter.WriteStringValue(s);
+                break;
+            case int i:
+                JsonWriter.WriteNumberValue(i);
+                break;
+            case bool b:
+                JsonWriter.WriteBooleanValue(b);
+                break;
+            // TODO: Support the rest.
+            default:
+                JsonWriter.WriteNullValue();
+                break;
+        }
     }
 
     private void WriteKeyholeValue(ref Keyhole keyhole)

@@ -105,6 +105,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     {
         using var writer = new JsonRpcWriter();
         writer.WriteResponse(id);
+
         await webSocket.SendAsync(
             buffer: writer.AsMemory(),
             messageType: WebSocketMessageType.Text,
@@ -116,6 +117,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     {
         using var writer = new JsonRpcWriter();
         writer.WriteResponse(id, result);
+        
         await webSocket.SendAsync(
             buffer: writer.AsMemory(),
             messageType: WebSocketMessageType.Text,
