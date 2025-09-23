@@ -36,26 +36,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         return this;
     }
 
-    public void WriteRpc(string method, ref Keyhole keyhole)
-    {
-        utf8JsonWriter.WriteStartObject();
-
-        utf8JsonWriter.WriteString("jsonrpc", "2.0");
-
-        utf8JsonWriter.WritePropertyName("method");
-        utf8JsonWriter.WriteStringValueSegment("app.keyholes.", false);
-        utf8JsonWriter.WriteStringValueSegment(keyhole.Key, false);
-        utf8JsonWriter.WriteStringValueSegment(".", false);
-        utf8JsonWriter.WriteStringValueSegment(method, true);
-
-        utf8JsonWriter.WriteStartArray("params");
-        WriteKeyholeValue(ref keyhole);
-        utf8JsonWriter.WriteEndArray();
-
-        utf8JsonWriter.WriteEndObject();
-    }
-
-    public void WriteRpc(string method, string key, string? transition = null)
+    public void WriteNotification(string method, string key, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();
 
@@ -76,10 +57,29 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         utf8JsonWriter.WriteEndObject();
     }
 
-    public void WriteRpc(string method, string key, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
-        => WriteRpc(method, key, null, keyholes, includeSentinels, transition);
+    public void WriteNotification(string method, ref Keyhole keyhole)
+    {
+        utf8JsonWriter.WriteStartObject();
+
+        utf8JsonWriter.WriteString("jsonrpc", "2.0");
+
+        utf8JsonWriter.WritePropertyName("method");
+        utf8JsonWriter.WriteStringValueSegment("app.keyholes.", false);
+        utf8JsonWriter.WriteStringValueSegment(keyhole.Key, false);
+        utf8JsonWriter.WriteStringValueSegment(".", false);
+        utf8JsonWriter.WriteStringValueSegment(method, true);
+
+        utf8JsonWriter.WriteStartArray("params");
+        WriteKeyholeValue(ref keyhole);
+        utf8JsonWriter.WriteEndArray();
+
+        utf8JsonWriter.WriteEndObject();
+    }
+
+    public void WriteNotification(string method, string key, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
+        => WriteNotification(method, key, null, keyholes, includeSentinels, transition);
         
-    public void WriteRpc(string method, string key1, string? key2, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
+    public void WriteNotification(string method, string key1, string? key2, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
     {
         utf8JsonWriter.WriteStartObject();
 
@@ -122,7 +122,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
                     break;
                 default:
                     utf8JsonWriter.Flush();
-                    WriteRawWithFormatString(ref keyhole);
+                    WriteKeyholeToRawBuffer(ref keyhole);
                     break;
             }
 
@@ -144,7 +144,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         utf8JsonWriter.WriteEndObject();
     }
 
-    public void WriteResult(int id)
+    public void WriteResponse(int id)
     {
         utf8JsonWriter.WriteStartObject();
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
@@ -154,7 +154,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         utf8JsonWriter.Flush();
     }
 
-    public void WriteResult(int id, string? result)
+    public void WriteResponse(int id, string? result)
     {
         utf8JsonWriter.WriteStartObject();
         utf8JsonWriter.WriteString("jsonrpc", "2.0");
@@ -182,62 +182,82 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
 
         utf8JsonWriter.Flush();
         Encoding.UTF8.GetBytes("\"", this);
-        WriteRawWithFormatString(ref keyhole);
+        WriteKeyholeToRawBuffer(ref keyhole);
         Encoding.UTF8.GetBytes("\"", this);
     }
 
-    private void WriteRawWithFormatString(ref Keyhole keyhole)
+    private void WriteKeyholeToRawBuffer(ref Keyhole keyhole)
     {
         // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
         int length = 0;
+        IBufferWriter<byte> rawWriter = this;
         switch (keyhole.Type)
         {
+            case KeyholeType.Integer:
+                while (!keyhole.Integer.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Long:
+                while (!keyhole.Long.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Float:
+                while (!keyhole.Float.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Double:
+                while (!keyhole.Double.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.Decimal:
+                while (!keyhole.Decimal.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.DateTime:
+                while (!keyhole.DateTime.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.DateOnly:
+                while (!keyhole.DateOnly.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.TimeSpan:
+                while (!keyhole.TimeSpan.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
+            case KeyholeType.TimeOnly:
+                while (!keyhole.TimeOnly.TryFormat(rawWriter.GetSpan(), out length, keyhole.Format))
+                    GrowBuffer();
+                break;
             case KeyholeType.Color:
-                while (!keyhole.Color.TryFormat(GetSpan(9), out length, keyhole.Format))
+                while (!keyhole.Color.TryFormat(rawWriter.GetSpan(9), out length, keyhole.Format))
                     GrowBuffer();
                 break;
             case KeyholeType.Uri:
                 // TODO: Fix memory allocation and support format string?
                 Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), this);
                 break;
-            case KeyholeType.Integer:
-                while (!keyhole.Integer.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.Long:
-                while (!keyhole.Long.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.Float:
-                while (!keyhole.Float.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.Double:
-                while (!keyhole.Double.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.Decimal:
-                while (!keyhole.Decimal.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.DateTime:
-                while (!keyhole.DateTime.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.DateOnly:
-                while (!keyhole.DateOnly.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.TimeSpan:
-                while (!keyhole.TimeSpan.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
-            case KeyholeType.TimeOnly:
-                while (!keyhole.TimeOnly.TryFormat(GetSpan(), out length, keyhole.Format))
-                    GrowBuffer();
-                break;
         }
-        Advance(length);
+        rawWriter.Advance(length);
+    }
+
+    void IBufferWriter<byte>.Advance(int count)
+    {
+        cursor += count;
+    }
+
+    Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint = 0)
+    {
+        if (cursor + sizeHint > buffer.Length)
+            GrowBuffer();
+        return buffer.AsMemory(cursor..);
+    }
+
+    Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint = 0)
+    {
+        if (cursor + sizeHint > buffer.Length)
+            GrowBuffer();
+        return buffer.AsSpan(cursor..);
     }
 
     private void GrowBuffer(int sizeHint = 1)
@@ -247,6 +267,8 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         // Growing by small increments is wasteful.  Buffer-growth should at least double.
         // Skip the gradual doubling if we know it won't be enough.
         int newLength = Math.Max(sizeHint, buffer.Length) + buffer.Length;
+
+        Console.WriteLine($"⚠️ Had to grow buffer from {buffer.Length} to {newLength}");
 
         // TODO: Should this be a configuration somewhere?
         if (newLength > 100_000_000)
@@ -259,26 +281,7 @@ public class JsonRpcWriter : IBufferWriter<byte>, IResettable, IDisposable
         ArrayPool<byte>.Shared.Return(oldBuffer);
     }
 
-    public void Advance(int count)
-    {
-        cursor += count;
-    }
-
-    public Memory<byte> GetMemory(int sizeHint = 0)
-    {
-        if (cursor + sizeHint > buffer.Length)
-            GrowBuffer();
-        return buffer.AsMemory(cursor..);
-    }
-
-    public Span<byte> GetSpan(int sizeHint = 0)
-    {
-        if (cursor + sizeHint > buffer.Length)
-            GrowBuffer();
-        return buffer.AsSpan(cursor..);
-    }
-
-    public bool TryReset()
+    bool IResettable.TryReset()
     {
         cursor = 0;
         utf8JsonWriter.Reset(this);
