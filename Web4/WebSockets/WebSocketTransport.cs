@@ -103,36 +103,24 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     private async ValueTask SendResult(int id)
     {
-        var writer = JsonRpcWriter.Pool.Get();
+        using var writer = new JsonRpcWriter();
         writer.WriteResponse(id);
-
-        if (writer.Result is ReadOnlyMemory<byte> buffer)
-        {
-            await webSocket.SendAsync(
-                buffer: buffer,
-                messageType: WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: http.RequestAborted);
-        }
-
-        JsonRpcWriter.Pool.Return(writer);
+        await webSocket.SendAsync(
+            buffer: writer.AsMemory(),
+            messageType: WebSocketMessageType.Text,
+            endOfMessage: true,
+            cancellationToken: http.RequestAborted);
     }
 
     private async ValueTask SendResult(int id, string? result)
     {
-        var writer = JsonRpcWriter.Pool.Get();
+        using var writer = new JsonRpcWriter();
         writer.WriteResponse(id, result);
-
-        if (writer.Result is ReadOnlyMemory<byte> buffer)
-        {
-            await webSocket.SendAsync(
-                buffer: buffer,
-                messageType: WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: http.RequestAborted);
-        }
-
-        JsonRpcWriter.Pool.Return(writer);
+        await webSocket.SendAsync(
+            buffer: writer.AsMemory(),
+            messageType: WebSocketMessageType.Text,
+            endOfMessage: true,
+            cancellationToken: http.RequestAborted);
     }
 
     public void RequestFlush()
