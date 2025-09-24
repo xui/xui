@@ -19,6 +19,9 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     private int suppressPropagationID = 0;
     private int suppressPropagationLevel = 0;
 
+    private JsonRpcWriter? batchWriter = null;
+    private JsonRpcWriter BatchWriter { get => batchWriter ??= new JsonRpcWriter().BeginBatch(); }
+
     private EventListenerSynchronizationContext? syncContext;
 
     public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
@@ -127,11 +130,26 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     public void RequestFlush()
     {
+        // TODO: Fix next...
+        _ = Flush();
     }
 
     public async ValueTask Flush()
     {
+        // TODO: Think on where I might need locks.
+        if (batchWriter.HasValue)
+        {
+            var writer = batchWriter.Value;
+            batchWriter = null;
+            writer.EndBatch();
 
+            await webSocket.SendAsync(
+                buffer: writer.AsMemory(),
+                messageType: WebSocketMessageType.Text,
+                endOfMessage: true,
+                cancellationToken: http.RequestAborted
+            );
+        }
     }
 
     public async Task ListenForRpcMessages(WindowBuilder windowBuilder)
@@ -208,7 +226,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                             continue;
                         }
 
-                        App.Update();
+                        await Flush();
                         break;
 
                     default:

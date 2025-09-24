@@ -146,7 +146,7 @@ public partial class WebSocketTransport : IConsole
 
     void IConsole.Log(string message)
     {
-        throw new NotImplementedException();
+        BatchWriter.WriteNotification("console.log", message);
     }
 
     void IConsole.Log(string message, params scoped Span<string> substitutions)
