@@ -104,39 +104,9 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
         }
     }
 
-    private async ValueTask SendResult(int id)
-    {
-        using var writer = new JsonRpcWriter();
-        writer.WriteResponse(id);
-
-        await webSocket.SendAsync(
-            buffer: writer.AsMemory(),
-            messageType: WebSocketMessageType.Text,
-            endOfMessage: true,
-            cancellationToken: http.RequestAborted);
-    }
-
-    private async ValueTask SendResult(int id, string? result)
-    {
-        using var writer = new JsonRpcWriter();
-        writer.WriteResponse(id, result);
-        
-        await webSocket.SendAsync(
-            buffer: writer.AsMemory(),
-            messageType: WebSocketMessageType.Text,
-            endOfMessage: true,
-            cancellationToken: http.RequestAborted);
-    }
-
-    public void RequestFlush()
-    {
-        // TODO: Fix next...
-        _ = Flush();
-    }
-
     public async ValueTask Flush()
     {
-        // TODO: Think on where I might need locks.
+        // TODO: Think on where I might need locks.  Switch BatchWriter from nullable to BatchCount?
         if (batchWriter.HasValue)
         {
             var writer = batchWriter.Value;
