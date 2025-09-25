@@ -1,6 +1,10 @@
 using System.Buffers;
-using System.Text.Json;
 
 namespace Web4.WebSockets;
 
-record struct JsonRpcMessage(string Method, int? ID);
+struct JsonRpcMessage(ReadOnlySequence<byte> sequence, string method, int? id)
+{
+    public string Method => method;
+    public int? ID => id;
+    public JsonRpcReader GetParams() => new(sequence);
+}

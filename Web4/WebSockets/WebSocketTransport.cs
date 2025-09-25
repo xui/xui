@@ -135,7 +135,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
             try
             {
                 var message = JsonRpcReader.ParseMessage(sequence);
-                var @params = JsonRpcReader.LazyParseParams(sequence);
+                var @params = message.GetParams();
 
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
                 switch (message)
@@ -151,12 +151,12 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
                     case JsonRpcMessage { Method: "app.ping", ID: int requestID }:
                         App.Ping();
-                        await SendResult(requestID);
+                        BatchWriter.WriteResponse(requestID);
                         break;
 
                     case JsonRpcMessage { Method: "app.dispatchEvent" }:
                         var @event = @params.GetNextEvent(this);
-                        var key = @params.GetNextString();
+                        var key = @params.GetNextKey();
                         currentPropagationID = @params.GetNextInt();
                         currentPropagationLevel = @params.GetNextNullableInt() ?? 0;
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)

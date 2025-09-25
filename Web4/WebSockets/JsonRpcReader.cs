@@ -41,10 +41,8 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
             }
         }
 
-        return new(method ?? "error", id);
+        return new(sequence, method ?? "error", id);
     }
-
-    public static JsonRpcReader LazyParseParams(ReadOnlySequence<byte> sequence) => new(sequence);
 
     private void ParseToParams()
     {
@@ -76,6 +74,7 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
     public int GetNextInt()
     {
         ParseToParams();
+        using var perf = Debug.PerfCheck("JsonRpcReader.GetNextInt"); // TODO: Remove PerfCheck        
         reader.Read();
         return reader.GetInt32();
     }
@@ -83,6 +82,7 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
     public int? GetNextNullableInt()
     {
         ParseToParams();
+        using var perf = Debug.PerfCheck("JsonRpcReader.GetNextNullableInt"); // TODO: Remove PerfCheck        
         reader.Read();
         if (reader.TokenType != JsonTokenType.EndArray && reader.TryGetInt32(out int value))
             return value;
@@ -92,13 +92,25 @@ ref struct JsonRpcReader(ReadOnlySequence<byte> sequence)
     public string GetNextString()
     {
         ParseToParams();
+        using var perf = Debug.PerfCheck("JsonRpcReader.GetNextString"); // TODO: Remove PerfCheck        
         reader.Read();
         return reader.GetString()!;
+    }
+
+    public string? GetNextKey()
+    {
+        ParseToParams();
+        using var perf = Debug.PerfCheck("JsonRpcReader.GetNextKey"); // TODO: Remove PerfCheck        
+        reader.Read();
+        return reader.HasValueSequence
+            ? Keymaker.GetKeyIfCached(reader.ValueSequence)
+            : Keymaker.GetKeyIfCached(reader.ValueSpan);
     }
 
     public LazyEvent GetNextEvent(WebSocketTransport transport)
     {
         ParseToParams();
+        using var perf = Debug.PerfCheck("JsonRpcReader.GetNextEvent"); // TODO: Remove PerfCheck        
         reader.Read();
         reader.Skip();
         return new(sequence, transport);
