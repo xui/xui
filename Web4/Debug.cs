@@ -157,7 +157,7 @@ public static class Debug
         {
             var elapsed = Stopwatch.GetElapsedTime(sw1);
             long gc2 = GC.GetAllocatedBytesForCurrentThread();
-            Console.WriteLine($"{$"🚥 Perf({name}):",-38} elapsed:{$"{elapsed.TotalNanoseconds:n0} ns",-15} {$"allocations: {(gc2 - gc1):n0} bytes",-25}   thread:{Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{$"🚥 Perf({name}):",-45} elapsed:{$"{elapsed.TotalNanoseconds:n0} ns",-15} {$"allocations: {(gc2 - gc1):n0} bytes",-25}   thread:{Thread.CurrentThread.ManagedThreadId}");
         }
     }
 }
