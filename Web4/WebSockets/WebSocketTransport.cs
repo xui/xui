@@ -139,21 +139,21 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
                 switch (jsonRpcMessage)
                 {
-                    case JsonRpcMessage { Method: "app.keyholes.dump" }:
+                    case { Method: "app.keyholes.dump" }:
                         App.DumpKeyholes(webSocket);
                         break;
 
-                    case JsonRpcMessage { Method: "app.benchmark" }:
+                    case { Method: "app.benchmark" }:
                         var threads = @params.GetNextNullableInt();
                         App.Benchmark(threads);
                         break;
 
-                    case JsonRpcMessage { Method: "app.ping", ID: int requestID }:
+                    case { Method: "app.ping", ID: int requestID }:
                         App.Ping();
                         BatchWriter.WriteResponse(requestID);
                         break;
 
-                    case JsonRpcMessage { Method: "app.dispatchEvent" }:
+                    case { Method: "app.dispatchEvent" }:
                         var @event = @params.GetNextEvent(this);
                         var key = @params.GetNextKey();
                         currentPropagationID = @params.GetNextInt();
