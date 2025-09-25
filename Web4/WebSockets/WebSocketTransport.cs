@@ -126,7 +126,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     {
         App = GetOrCreateApp(windowBuilder);
 
-        await foreach (var sequence in GetNextMessage())
+        await foreach (var jsonRpcMessage in GetNextMessage())
         {
             // TODO: This doesn't belong here.
             foreach (var a in apps.Values)
@@ -134,11 +134,10 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
             try
             {
-                var message = JsonRpcReader.ParseMessage(sequence);
-                var @params = message.GetParams();
+                var @params = jsonRpcMessage.GetParams();
 
                 // No awaiting.  This event loop shouldn't be blocked by RPCs.
-                switch (message)
+                switch (jsonRpcMessage)
                 {
                     case JsonRpcMessage { Method: "app.keyholes.dump" }:
                         App.DumpKeyholes(webSocket);
@@ -214,7 +213,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
         }
     }
 
-    private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage()
+    private async IAsyncEnumerable<JsonRpcMessage> GetNextMessage()
     {
         ReadOnlySequence<byte> sequence;
         while (true)
@@ -257,7 +256,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 break;
             }
 
-            yield return sequence;
+            yield return JsonRpcReader.ParseMessage(sequence);
         }
     }
 
