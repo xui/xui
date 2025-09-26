@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Web4.Core.DOM;
+using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
@@ -26,14 +27,6 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
     public IWindow Window => (IWindow)this;
-
-    static WebSocketTransport()
-    {
-        Keymaker.CacheKey("app.dispatchEvent");
-        Keymaker.CacheKey("app.keyholes.dump");
-        Keymaker.CacheKey("app.benchmark");
-        Keymaker.CacheKey("app.ping");
-    }
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
     {
@@ -126,7 +119,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     {
         App = GetOrCreateApp(windowBuilder);
 
-        await foreach (var jsonRpcMessage in GetNextMessage())
+        await foreach (var sequence in GetNextMessage())
         {
             // TODO: This doesn't belong here.
             foreach (var a in apps.Values)
@@ -134,30 +127,31 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
             try
             {
-                var @params = jsonRpcMessage.GetParams();
+                var rpc = new JsonRpcMessage(sequence);
+                var @params = rpc.GetPositionalParams();
 
-                // No awaiting.  This event loop shouldn't be blocked by RPCs.
-                switch (jsonRpcMessage)
+                switch (rpc.Method)
                 {
-                    case { Method: "app.keyholes.dump" }:
+                    case var method when method.SequenceEqual("app.keyholes.dump"u8):
                         App.DumpKeyholes(webSocket);
                         break;
 
-                    case { Method: "app.benchmark" }:
-                        var threads = @params.GetNextNullableInt();
+                    case var method when method.SequenceEqual("app.benchmark"u8):
+                        var threads = @params.GetNextAsNullableInt();
                         App.Benchmark(threads);
                         break;
 
-                    case { Method: "app.ping", ID: int requestID }:
+                    case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
                         App.Ping();
-                        BatchWriter.WriteResponse(requestID);
+                        BatchWriter.WriteResponse(id);
                         break;
 
-                    case { Method: "app.dispatchEvent" }:
-                        var @event = @params.GetNextEvent(this);
-                        var key = @params.GetNextKey();
-                        currentPropagationID = @params.GetNextInt();
-                        currentPropagationLevel = @params.GetNextNullableInt() ?? 0;
+                    case var method when method.SequenceEqual("app.dispatchEvent"u8):
+                        var @event = @params.GetNextAsEvent(this);
+                        var key = @params.GetNextAsKey(); // TODO: Move to method path?
+                        this.currentPropagationID = @params.GetNextAsInt();
+                        this.currentPropagationLevel = @params.GetNextAsNullableInt() ?? 0;
+
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
                             continue;
 
@@ -194,13 +188,14 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                             Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
                             continue;
                         }
-
-                        await Flush();
                         break;
 
                     default:
                         break;
                 }
+
+                // TODO: Wait, you said no awaiting!
+                await Flush();
             }
             catch (Exception ex)
             {
@@ -213,7 +208,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
         }
     }
 
-    private async IAsyncEnumerable<JsonRpcMessage> GetNextMessage()
+    private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage()
     {
         ReadOnlySequence<byte> sequence;
         while (true)
@@ -256,7 +251,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 break;
             }
 
-            yield return JsonRpcReader.ParseMessage(sequence);
+            yield return sequence;
         }
     }
 

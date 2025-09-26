@@ -105,6 +105,7 @@ internal readonly struct Keymaker
         if (key.Length > 1024)
             return null;
         
+        // TODO: Malicious users could include a huge key in a JsonRpc request.  If too big, rent a buffer.
         Span<byte> bytes = stackalloc byte[(int)key.Length];
         key.CopyTo(bytes);
 
