@@ -6,14 +6,14 @@ namespace Web4.JsonRpc;
 
 public readonly ref struct JsonRpcMessage
 {
-    public ReadOnlySpan<byte> Version { get; init; } = default;
-    public ReadOnlySpan<byte> Method { get; init; } = default;
-    public ReadOnlySpan<byte> Id { get; init; } = default;
+    public ReadOnlySpan<byte> Version { get; init; }
+    public ReadOnlySpan<byte> Method { get; init; }
+    public ReadOnlySpan<byte> Id { get; init; }
     public int? IdAsInt => int.TryParse(Id, out int result) ? result : null;
-    private ReadOnlySequence<byte> Params { get; init; } = default;
-    public PositionalParams GetPositionalParams() => new PositionalParams(Params);
-    public ReadOnlySequence<byte> Result { get; init; } = default;
-    public ReadOnlySequence<byte> Error { get; init; } = default;
+    private readonly ReadOnlySequence<byte> @params;
+    public PositionalParams GetPositionalParams() => new PositionalParams(@params);
+    public ReadOnlySequence<byte> Result { get; init; }
+    public ReadOnlySequence<byte> Error { get; init; }
 
     public JsonRpcMessage(ReadOnlySequence<byte> sequence)
     {
@@ -41,7 +41,7 @@ public readonly ref struct JsonRpcMessage
                 else if (reader.ValueTextEquals("params"u8))
                 {
                     reader.Read();
-                    Params = ReadSequence(sequence, ref reader);
+                    @params = ReadSequence(sequence, ref reader);
                 }
                 else if (reader.ValueTextEquals("result"u8))
                 {
