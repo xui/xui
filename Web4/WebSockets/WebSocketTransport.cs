@@ -137,7 +137,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                         break;
 
                     case var method when method.SequenceEqual("app.benchmark"u8):
-                        var threads = @params.GetNextAsNullableInt();
+                        var threads = @params.GetNextOptionalAsInt();
                         App.Benchmark(threads);
                         break;
 
@@ -150,7 +150,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                         var @event = @params.GetNextAsEvent(this);
                         var key = @params.GetNextAsKey(); // TODO: Move to method path?
                         this.currentPropagationID = @params.GetNextAsInt();
-                        this.currentPropagationLevel = @params.GetNextAsNullableInt() ?? 0;
+                        this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
 
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
                             continue;

@@ -86,7 +86,7 @@ public readonly ref struct JsonRpcMessage
         }
 
         // Nullable since it might not be included at the end.
-        public int? GetNextAsNullableInt()
+        public int? GetNextOptionalAsInt()
         {
             using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsNullableInt"); // TODO: Remove PerfCheck        
             reader.Read();
