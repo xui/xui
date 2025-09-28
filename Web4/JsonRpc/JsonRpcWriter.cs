@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
 
-namespace Web4.WebSockets;
+namespace Web4.JsonRpc;
 
 public struct JsonRpcWriter(): IDisposable, IResettable
 {
