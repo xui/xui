@@ -38,7 +38,6 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     private EventListenerSynchronizationContext? syncContext;
 
     public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
-    public IWindow Window => (IWindow)this;
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
     {
