@@ -2,9 +2,9 @@ using Web4.Core.DOM;
 
 namespace Web4.WebSockets;
 
-public partial class WebSocketTransport : IApp
+public partial class WebSocketTransport : IKeyholes
 {
-    void IApp.SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    void IKeyholes.SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         BatchWriter.WriteNotification(
             method: ("app.keyholes", newKeyhole.Key, "setTextNode"),
@@ -12,7 +12,7 @@ public partial class WebSocketTransport : IApp
         );
     }
 
-    void IApp.SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    void IKeyholes.SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         BatchWriter.WriteNotification(
             method: ("app.keyholes", newKeyhole.Key, "setAttribute"),
@@ -20,7 +20,7 @@ public partial class WebSocketTransport : IApp
         );
     }
 
-    void IApp.SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
+    void IKeyholes.SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         BatchWriter.WriteNotification(
             method: ("app.keyholes", key, "setAttribute"),
@@ -29,7 +29,7 @@ public partial class WebSocketTransport : IApp
         );
     }
 
-    void IApp.SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
+    void IKeyholes.SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
     {
         BatchWriter.WriteNotification(
             method: ("app.keyholes", key, "setElement"),
@@ -39,7 +39,7 @@ public partial class WebSocketTransport : IApp
         );
     }
 
-    void IApp.AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
+    void IKeyholes.AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
     {
         BatchWriter.WriteNotification(
             method: ("app.keyholes", priorKey, "addElement"),
@@ -50,7 +50,7 @@ public partial class WebSocketTransport : IApp
         );
     }
 
-    void IApp.RemoveElement(string key, string? transition)
+    void IKeyholes.RemoveElement(string key, string? transition)
     {
         if (transition is null)
             BatchWriter.WriteNotification(

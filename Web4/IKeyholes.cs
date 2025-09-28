@@ -1,7 +1,7 @@
 namespace Web4;
 
 // TODO: It is awkward that this interface is here and not in the core project, thanks to Keyholes.
-public interface IApp
+public interface IKeyholes
 {
     public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole);
 
