@@ -20,8 +20,20 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     private int suppressPropagationID = 0;
     private int suppressPropagationLevel = 0;
 
-    private JsonRpcWriter? batchWriter = null;
-    private JsonRpcWriter BatchWriter { get => batchWriter ??= new JsonRpcWriter().BeginBatch(); }
+    bool isNewBatch = true; // TODO: Temporary until the move to Pipelines.
+    private readonly JsonRpcWriter batchWriter = new();
+    private JsonRpcWriter BatchWriter
+    {
+        get
+        {
+            if (isNewBatch)
+            {
+                isNewBatch = false;
+                batchWriter.BeginBatch();
+            }
+            return batchWriter;
+        }
+    }
 
     private EventListenerSynchronizationContext? syncContext;
 
@@ -79,17 +91,8 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     {
         try
         {
-            using var mutationBatch = DiffUtil.CreateBatch<WebSocketMutationBatch>(oldBuffer, newBuffer);
-            using var perf = Debug.PerfCheck("webSocket.SendAsync"); // TODO: Remove PerfCheck
-
-            if (mutationBatch.Buffer is ReadOnlyMemory<byte> buffer)
-            {
-                await webSocket.SendAsync(
-                    buffer: buffer,
-                    messageType: WebSocketMessageType.Text,
-                    endOfMessage: true,
-                    cancellationToken: http.RequestAborted);
-            }
+            DiffUtil.Diff(this, oldBuffer, newBuffer);
+            await Flush();
         }
         catch (Exception e)
         {
@@ -100,18 +103,19 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     public async ValueTask Flush()
     {
         // TODO: Think on where I might need locks.  Switch BatchWriter from nullable to BatchCount?
-        if (batchWriter.HasValue)
+        if (!isNewBatch)
         {
-            var writer = batchWriter.Value;
-            batchWriter = null;
-            writer.EndBatch();
+            batchWriter.EndBatch();
 
             await webSocket.SendAsync(
-                buffer: writer.AsMemory(),
+                buffer: batchWriter.AsMemory(),
                 messageType: WebSocketMessageType.Text,
                 endOfMessage: true,
                 cancellationToken: http.RequestAborted
             );
+
+            isNewBatch = true;
+            batchWriter.TryReset();
         }
     }
 

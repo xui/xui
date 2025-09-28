@@ -2,32 +2,26 @@ namespace Web4;
 
 public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
-    public static T CreateBatch<T>(Keyhole[] oldBuffer, Keyhole[] newBuffer)
-        where T : struct, IMutationBatch, allows ref struct
+    public static void Diff(IApp app, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
-        using var perf = Debug.PerfCheck("DiffUtil.CreateBatch"); // TODO: Remove PerfCheck
+        using var perf = Debug.PerfCheck("DiffUtil.Diff"); // TODO: Remove PerfCheck
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
         Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.SequenceLength);
         Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.SequenceLength);
 
-        T mutationBatch = default(T);
         var diffUtil = new DiffUtil(oldBuffer, newBuffer);
-        diffUtil.DiffKeyholeSpans(ref mutationBatch, string.Empty, oldSpan, newSpan);
-        mutationBatch.Commit();
-
-        return mutationBatch;
+        diffUtil.DiffKeyholeSpans(app, string.Empty, oldSpan, newSpan);
     }
 
-    private readonly void DiffKeyholeSpans<T>(
-        ref T mutationBatch,
+    private readonly void DiffKeyholeSpans(
+        IApp app,
         string key,
         Span<Keyhole> oldSpan,
         Span<Keyhole> newSpan,
         bool isSpanAnAttribute = false,
         string? transition = null)
-            where T : struct, IMutationBatch, allows ref struct
     {
         // The first thing to compare is the easiest (and fastest).
         // If the two spans have a different quantity of keyholes, 
@@ -36,9 +30,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         if (oldSpan.Length != newSpan.Length)
         {
             if (isSpanAnAttribute)
-                mutationBatch.SetAttribute(key, oldSpan, newSpan);
+                app.SetAttribute(key, oldSpan, newSpan);
             else
-                mutationBatch.SetElement(key, oldSpan, newSpan, transition);
+                app.SetElement(key, oldSpan, newSpan, transition);
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -68,9 +62,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (isSpanAnAttribute)
-                    mutationBatch.SetAttribute(key, oldSpan, newSpan);
+                    app.SetAttribute(key, oldSpan, newSpan);
                 else
-                    mutationBatch.SetElement(key, oldSpan, newSpan, transition);
+                    app.SetElement(key, oldSpan, newSpan, transition);
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -110,7 +104,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             // Find the start of this sequence, then grab the sequence's full span.
                             ref var oldStart = ref oldBuffer[oldKeyhole.SequenceStart];
                             ref var newStart = ref newBuffer[newKeyhole.SequenceStart];
-                            mutationBatch.SetAttribute(
+                            app.SetAttribute(
                                 key,
                                 oldKeyholes: oldBuffer.AsSpan(oldStart.Sequence),
                                 newKeyholes: newBuffer.AsSpan(newStart.Sequence)
@@ -122,11 +116,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         }
                         else if (newKeyhole.IsValueAnAttribute)
                         {
-                            mutationBatch.SetAttribute(ref oldKeyhole, ref newKeyhole);
+                            app.SetAttribute(ref oldKeyhole, ref newKeyhole);
                         }
                         else
                         {
-                            mutationBatch.SetTextNode(ref oldKeyhole, ref newKeyhole);
+                            app.SetTextNode(ref oldKeyhole, ref newKeyhole);
                         }
                     }
                     break;
@@ -134,7 +128,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                 case KeyholeType.Attribute:
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffKeyholeSpans(
-                        ref mutationBatch,
+                        app,
                         key: newKeyhole.Key,
                         oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
                         newSpan: newBuffer.AsSpan(newKeyhole.Sequence),
@@ -179,7 +173,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             ref var newItem = ref newItems[d];
                             var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
-                            mutationBatch.AddElement(priorItem.Key, newItem.Key, newItemSpan, transition);
+                            app.AddElement(priorItem.Key, newItem.Key, newItemSpan, transition);
                         }
                     }
                     else if (oldItems.Length > newItems.Length)
@@ -190,7 +184,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         for (int d = minLength; d < oldItems.Length; d++)
                         {
                             ref var item = ref oldItems[d];
-                            mutationBatch.RemoveElement(item.Key, transition);
+                            app.RemoveElement(item.Key, transition);
                         }
                     }
                     
