@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Text.Json;
-using Web4.WebSockets;
 
 namespace Web4.JsonRpc;
 
