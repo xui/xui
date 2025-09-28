@@ -3,18 +3,18 @@ using System.Text.Json;
 
 namespace Web4.JsonRpc;
 
-public readonly ref struct JsonRpcMessage
+public readonly ref struct JsonRpcReader
 {
     public ReadOnlySpan<byte> Version { get; init; }
     public ReadOnlySpan<byte> Method { get; init; }
     public ReadOnlySpan<byte> Id { get; init; }
     public int? IdAsInt => int.TryParse(Id, out int result) ? result : null;
     private readonly ReadOnlySequence<byte> paramsSequence;
-    public PositionalParams GetPositionalParams() => new(paramsSequence);
+    public PositionalParams ReadPositionalParams() => new(paramsSequence);
     public ReadOnlySequence<byte> Result { get; init; }
     public ReadOnlySequence<byte> Error { get; init; }
 
-    public JsonRpcMessage(ReadOnlySequence<byte> sequence)
+    public JsonRpcReader(ReadOnlySequence<byte> sequence)
     {
         using var perf = Debug.PerfCheck("JsonRpcReader.Parse"); // TODO: Remove PerfCheck
         var reader = new Utf8JsonReader(sequence);
@@ -113,7 +113,7 @@ public readonly ref struct JsonRpcMessage
         {
             using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsSequence"); // TODO: Remove PerfCheck        
             reader.Read();
-            return JsonRpcMessage.ReadSequence(sequence, ref reader);
+            return JsonRpcReader.ReadSequence(sequence, ref reader);
         }
     }
 }

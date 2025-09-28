@@ -127,8 +127,8 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
             try
             {
-                var rpc = new JsonRpcMessage(sequence);
-                var @params = rpc.GetPositionalParams();
+                var rpc = new JsonRpcReader(sequence);
+                var @params = rpc.ReadPositionalParams();
 
                 switch (rpc.Method)
                 {
