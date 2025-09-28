@@ -147,8 +147,8 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                         break;
 
                     case var method when method.SequenceEqual("app.dispatchEvent"u8):
-                        var @event = @params.GetNextAsEvent(this);
-                        var key = @params.GetNextAsKey(); // TODO: Move to method path?
+                        var @event = new LazyEvent(@params.GetNextAsSequence(), this);
+                        var key = @params.GetNextAsSpan(); // TODO: Move to method path?
                         this.currentPropagationID = @params.GetNextAsInt();
                         this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
 

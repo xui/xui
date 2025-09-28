@@ -10,8 +10,8 @@ public readonly ref struct JsonRpcMessage
     public ReadOnlySpan<byte> Method { get; init; }
     public ReadOnlySpan<byte> Id { get; init; }
     public int? IdAsInt => int.TryParse(Id, out int result) ? result : null;
-    private readonly ReadOnlySequence<byte> @params;
-    public PositionalParams GetPositionalParams() => new PositionalParams(@params);
+    private readonly ReadOnlySequence<byte> paramsSequence;
+    public PositionalParams GetPositionalParams() => new PositionalParams(paramsSequence);
     public ReadOnlySequence<byte> Result { get; init; }
     public ReadOnlySequence<byte> Error { get; init; }
 
@@ -41,21 +41,23 @@ public readonly ref struct JsonRpcMessage
                 else if (reader.ValueTextEquals("params"u8))
                 {
                     reader.Read();
-                    @params = ReadSequence(sequence, ref reader);
+                    paramsSequence = ReadSequence(sequence, ref reader);
                 }
                 else if (reader.ValueTextEquals("result"u8))
                 {
+                    reader.Read();
                     Result = ReadSequence(sequence, ref reader);
                 }
                 else if (reader.ValueTextEquals("error"u8))
                 {
+                    reader.Read();
                     Error = ReadSequence(sequence, ref reader);
                 }
             }
         }
     }
 
-    private static ReadOnlySequence<byte> ReadSequence(ReadOnlySequence<byte> sequence, ref Utf8JsonReader reader)
+    internal static ReadOnlySequence<byte> ReadSequence(ReadOnlySequence<byte> sequence, ref Utf8JsonReader reader)
     {
         var start = reader.TokenStartIndex;
         reader.Skip();
@@ -85,7 +87,6 @@ public readonly ref struct JsonRpcMessage
             return reader.GetInt32();
         }
 
-        // Nullable since it might not be included at the end.
         public int? GetNextOptionalAsInt()
         {
             using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsNullableInt"); // TODO: Remove PerfCheck        
@@ -102,21 +103,18 @@ public readonly ref struct JsonRpcMessage
             return reader.GetString()!;
         }
 
-        public string? GetNextAsKey()
+        public ReadOnlySpan<byte> GetNextAsSpan()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsKey"); // TODO: Remove PerfCheck        
+            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsSpan"); // TODO: Remove PerfCheck        
             reader.Read();
-            return reader.HasValueSequence
-                ? Keymaker.GetKeyIfCached(reader.ValueSequence)
-                : Keymaker.GetKeyIfCached(reader.ValueSpan);
+            return reader.SafeValueSpan;
         }
 
-        public LazyEvent GetNextAsEvent(WebSocketTransport transport)
+        public ReadOnlySequence<byte> GetNextAsSequence()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsEvent"); // TODO: Remove PerfCheck        
+            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsSequence"); // TODO: Remove PerfCheck        
             reader.Read();
-            reader.Skip();
-            return new(sequence, transport);
+            return JsonRpcMessage.ReadSequence(sequence, ref reader);
         }
     }
 }
