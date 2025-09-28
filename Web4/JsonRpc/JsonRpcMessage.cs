@@ -10,7 +10,7 @@ public readonly ref struct JsonRpcMessage
     public ReadOnlySpan<byte> Id { get; init; }
     public int? IdAsInt => int.TryParse(Id, out int result) ? result : null;
     private readonly ReadOnlySequence<byte> paramsSequence;
-    public PositionalParams GetPositionalParams() => new PositionalParams(paramsSequence);
+    public PositionalParams GetPositionalParams() => new(paramsSequence);
     public ReadOnlySequence<byte> Result { get; init; }
     public ReadOnlySequence<byte> Error { get; init; }
 
