@@ -7,121 +7,121 @@ namespace Web4.JsonRpc;
 
 public class JsonRpcWriter: IDisposable, IResettable
 {
-    private readonly CopyToGrowBufferWriter BufferWriter;
-    private readonly Utf8JsonWriter JsonWriter;
+    private readonly CopyToGrowBufferWriter bufferWriter;
+    private readonly Utf8JsonWriter jsonWriter;
 
-    public ReadOnlyMemory<byte> AsMemory() => BufferWriter.AsMemory();
+    public ReadOnlyMemory<byte> AsMemory() => bufferWriter.AsMemory();
 
     public JsonRpcWriter(int bufferSize = 1024)
     {
-        BufferWriter = new(bufferSize);
-        JsonWriter = new(BufferWriter);
+        bufferWriter = new(bufferSize);
+        jsonWriter = new(bufferWriter);
     }
 
     public JsonRpcWriter BeginBatch()
     {
-        JsonWriter.WriteStartArray();
+        jsonWriter.WriteStartArray();
         return this;
     }
 
     public JsonRpcWriter EndBatch()
     {
-        JsonWriter.WriteEndArray();
-        JsonWriter.Flush();
+        jsonWriter.WriteEndArray();
+        jsonWriter.Flush();
         return this;
     }
 
     public void WriteNotification(string method)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification<T>(string method, T param)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStartArray("params");
         WriteTValue(param);
-        JsonWriter.WriteEndArray();
+        jsonWriter.WriteEndArray();
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification<T>(ValueTuple<string, string, string> method, T param)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStartArray("params");
         WriteTValue(param);
-        JsonWriter.WriteEndArray();
+        jsonWriter.WriteEndArray();
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification(string method, string value1, params Span<string> @values)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
-        JsonWriter.WriteStringValue(value1);
+        jsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStringValue(value1);
         foreach (var value in values)
-            JsonWriter.WriteStringValue(value);
-        JsonWriter.WriteEndArray();
+            jsonWriter.WriteStringValue(value);
+        jsonWriter.WriteEndArray();
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification(string method, params Span<object> @values)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStartArray("params");
         foreach (var value in values)
-            JsonWriter.WriteStringValue(value.ToString());
-        JsonWriter.WriteEndArray();
+            jsonWriter.WriteStringValue(value.ToString());
+        jsonWriter.WriteEndArray();
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStartArray("params");
         WriteKeyholeValue(ref param);
-        JsonWriter.WriteEndArray();
+        jsonWriter.WriteEndArray();
 
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
@@ -129,15 +129,15 @@ public class JsonRpcWriter: IDisposable, IResettable
         
     public void WriteNotification(ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, bool includeSentinels, string? transition = null)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
 
         WriteMethod(method);
 
-        JsonWriter.WriteStartArray("params");
+        jsonWriter.WriteStartArray("params");
 
         if (param1 is not null)
-            JsonWriter.WriteStringValue(param1);
+            jsonWriter.WriteStringValue(param1);
 
         Span<Keyhole> keyholes = param2; // TODO: Start here
         for (int i = 0; i < keyholes.Length; i++)
@@ -147,45 +147,45 @@ public class JsonRpcWriter: IDisposable, IResettable
             if (keyhole.Type == KeyholeType.StringLiteral)
             {
                 var isLast = i == keyholes.Length - 1;
-                JsonWriter.WriteStringValueSegment(keyhole.StringLiteral, isLast);
+                jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, isLast);
                 continue;
             }
 
             if (includeSentinels)
             {
-                JsonWriter.WriteStringValueSegment("<!-- -->", false);
+                jsonWriter.WriteStringValueSegment("<!-- -->", false);
             }
 
             switch (keyhole.Type)
             {
                 case KeyholeType.String:
-                    JsonWriter.WriteStringValueSegment(keyhole.String, false);
+                    jsonWriter.WriteStringValueSegment(keyhole.String, false);
                     break;
                 case KeyholeType.Boolean:
-                    JsonWriter.WriteStringValueSegment(keyhole.Boolean ? "true" : "false", false);
+                    jsonWriter.WriteStringValueSegment(keyhole.Boolean ? "true" : "false", false);
                     break;
                 default:
-                    JsonWriter.Flush();
+                    jsonWriter.Flush();
                     WriteKeyholeToRawBuffer(ref keyhole);
                     break;
             }
 
             if (includeSentinels)
             {
-                JsonWriter.WriteStringValueSegment("<!--", false);
-                JsonWriter.WriteStringValueSegment(keyhole.Key, false);
-                JsonWriter.WriteStringValueSegment("-->", false);
+                jsonWriter.WriteStringValueSegment("<!--", false);
+                jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                jsonWriter.WriteStringValueSegment("-->", false);
             }
         }
 
         if (transition is not null)
         {
-            JsonWriter.WriteStringValue(transition);
+            jsonWriter.WriteStringValue(transition);
         }
 
-        JsonWriter.WriteEndArray();
+        jsonWriter.WriteEndArray();
         
-        JsonWriter.WriteEndObject();
+        jsonWriter.WriteEndObject();
     }
 
     public void WriteRequest(int id)
@@ -195,39 +195,39 @@ public class JsonRpcWriter: IDisposable, IResettable
 
     public void WriteResponse(int id)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
-        JsonWriter.WriteNull("result");
-        JsonWriter.WriteNumber("id", id);
-        JsonWriter.WriteEndObject();
-        JsonWriter.Flush();
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WriteNull("result");
+        jsonWriter.WriteNumber("id", id);
+        jsonWriter.WriteEndObject();
+        jsonWriter.Flush();
     }
 
     public void WriteResponse<T>(int id, T result)
     {
-        JsonWriter.WriteStartObject();
-        JsonWriter.WriteString("jsonrpc", "2.0");
-        JsonWriter.WritePropertyName("result");
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+        jsonWriter.WritePropertyName("result");
         WriteTValue(result);
-        JsonWriter.WriteNumber("id", id);
-        JsonWriter.WriteEndObject();
-        JsonWriter.Flush();
+        jsonWriter.WriteNumber("id", id);
+        jsonWriter.WriteEndObject();
+        jsonWriter.Flush();
     }
 
     private void WriteMethod(string method)
     {
-        JsonWriter.WritePropertyName("method");
-        JsonWriter.WriteStringValue(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValue(method);
     }
 
     private void WriteMethod(ValueTuple<string, string, string> method)
     {
-        JsonWriter.WritePropertyName("method");
-        JsonWriter.WriteStringValueSegment(method.Item1, false);
-        JsonWriter.WriteStringValueSegment(".", false);
-        JsonWriter.WriteStringValueSegment(method.Item2, false);
-        JsonWriter.WriteStringValueSegment(".", false);
-        JsonWriter.WriteStringValueSegment(method.Item3, true);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(".", false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(".", false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
     }
 
     private void WriteTValue<T>(T value)
@@ -235,17 +235,17 @@ public class JsonRpcWriter: IDisposable, IResettable
         switch (value)
         {
             case string s:
-                JsonWriter.WriteStringValue(s);
+                jsonWriter.WriteStringValue(s);
                 break;
             case int i:
-                JsonWriter.WriteNumberValue(i);
+                jsonWriter.WriteNumberValue(i);
                 break;
             case bool b:
-                JsonWriter.WriteBooleanValue(b);
+                jsonWriter.WriteBooleanValue(b);
                 break;
             // TODO: Support the rest.
             default:
-                JsonWriter.WriteNullValue();
+                jsonWriter.WriteNullValue();
                 break;
         }
     }
@@ -256,17 +256,17 @@ public class JsonRpcWriter: IDisposable, IResettable
         switch (keyhole.Type)
         {
             case KeyholeType.String:
-                JsonWriter.WriteStringValue(keyhole.String);
+                jsonWriter.WriteStringValue(keyhole.String);
                 return;
             case KeyholeType.Boolean:
-                JsonWriter.WriteBooleanValue(keyhole.Boolean);
+                jsonWriter.WriteBooleanValue(keyhole.Boolean);
                 return;
         }
 
-        JsonWriter.Flush();
-        Encoding.UTF8.GetBytes("\"", BufferWriter);
+        jsonWriter.Flush();
+        Encoding.UTF8.GetBytes("\"", bufferWriter);
         WriteKeyholeToRawBuffer(ref keyhole);
-        Encoding.UTF8.GetBytes("\"", BufferWriter);
+        Encoding.UTF8.GetBytes("\"", bufferWriter);
     }
 
     private void WriteKeyholeToRawBuffer(ref Keyhole keyhole)
@@ -276,64 +276,64 @@ public class JsonRpcWriter: IDisposable, IResettable
         switch (keyhole.Type)
         {
             case KeyholeType.Integer:
-                while (!keyhole.Integer.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Integer.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Long:
-                while (!keyhole.Long.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Long.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Float:
-                while (!keyhole.Float.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Float.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Double:
-                while (!keyhole.Double.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Double.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Decimal:
-                while (!keyhole.Decimal.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Decimal.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.DateTime:
-                while (!keyhole.DateTime.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.DateTime.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.DateOnly:
-                while (!keyhole.DateOnly.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.DateOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.TimeSpan:
-                while (!keyhole.TimeSpan.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.TimeSpan.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.TimeOnly:
-                while (!keyhole.TimeOnly.TryFormat(BufferWriter.GetSpan(), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.TimeOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Color:
-                while (!keyhole.Color.TryFormat(BufferWriter.GetSpan(9), out length, keyhole.Format))
-                    BufferWriter.GrowBuffer();
+                while (!keyhole.Color.TryFormat(bufferWriter.GetSpan(9), out length, keyhole.Format))
+                    bufferWriter.GrowBuffer();
                 break;
             case KeyholeType.Uri:
                 // TODO: Fix memory allocation and support format string?
-                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), BufferWriter);
+                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), bufferWriter);
                 break;
         }
-        BufferWriter.Advance(length);
+        bufferWriter.Advance(length);
     }
 
     public bool TryReset()
     {
-        BufferWriter.TryReset();
-        JsonWriter.Reset(BufferWriter);
+        bufferWriter.TryReset();
+        jsonWriter.Reset(bufferWriter);
         return true;
     }
 
     public void Dispose()
     {
-        BufferWriter.Dispose();
-        JsonWriter.Dispose();
+        bufferWriter.Dispose();
+        jsonWriter.Dispose();
     }
 
     private class CopyToGrowBufferWriter(int bufferSize) : IBufferWriter<byte>, IResettable, IDisposable
