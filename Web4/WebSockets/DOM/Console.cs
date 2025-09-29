@@ -51,6 +51,8 @@ public partial class WebSocketTransport : IConsole
         => BatchWriter.WriteNotification("console.groupCollapsed");
     void IConsole.GroupCollapsed(object label)
         => BatchWriter.WriteNotification("console.groupCollapsed", label);
+    void IConsole.GroupCollapsed(string message, params Span<string> substitutions)
+        => BatchWriter.WriteNotification("console.group", message, substitutions);
     void IConsole.GroupEnd()
         => BatchWriter.WriteNotification("console.groupEnd");
     void IConsole.Info(string message)

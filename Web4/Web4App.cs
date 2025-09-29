@@ -169,12 +169,6 @@ public class Web4App
         return @event;
     }
 
-    public void DumpKeyholes(System.Net.WebSockets.WebSocket webSocket) // TODO: Remove webSocket once ConsoleProxy is in place.
-    {
-        var snapshot = this.snapshot ?? CaptureSnapshot();
-        Debug.Dump(webSocket, snapshot);
-    }
-
     public void Ping()
     {
         // no-op
@@ -185,7 +179,7 @@ public class Web4App
         UpdateInterval = TimeSpan.FromMilliseconds(milliseconds);
     }
 
-    private Keyhole[] CaptureSnapshot()
+    internal Keyhole[] CaptureSnapshot()
     {
         using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
 

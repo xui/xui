@@ -25,6 +25,7 @@ public interface IConsole
     void Group(object label);
     void GroupCollapsed();
     void GroupCollapsed(object label);
+    void GroupCollapsed(string message, params Span<string> substitutions);
     void GroupEnd();
     void Info(string message);
     void Info(string message, params Span<string> substitutions);

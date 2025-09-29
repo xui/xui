@@ -14,4 +14,6 @@ public interface IKeyholes
     void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition = null);
 
     void RemoveElement(string key, string? transition = null);
+
+    void Dump();
 }

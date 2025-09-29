@@ -38,6 +38,10 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
     private EventListenerSynchronizationContext? syncContext;
 
     public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
+    public IWindow Window => this;
+    public IDocument Document => this;
+    public IConsole Console => this;
+    public IKeyholes Keyholes => this;
 
     private WebSocketTransport(HttpContext http, WebSocket webSocket)
     {
@@ -95,7 +99,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            System.Console.WriteLine(e);
         }
     }
 
@@ -136,7 +140,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 switch (rpc.Method)
                 {
                     case var method when method.SequenceEqual("app.keyholes.dump"u8):
-                        App.DumpKeyholes(webSocket);
+                        Keyholes.Dump();
                         break;
 
                     case var method when method.SequenceEqual("app.benchmark"u8):
@@ -188,7 +192,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                         }
                         else
                         {
-                            Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
+                            System.Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
                             continue;
                         }
                         break;
@@ -202,7 +206,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error parsing JsonRpc message:\n{ex}");
+                System.Console.WriteLine($"Error parsing JsonRpc message:\n{ex}");
             }
 
             // TODO: This doesn't belong here.
@@ -221,7 +225,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 var buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
                 var result = await webSocket.ReceiveAsync(buffer, http.RequestAborted);
 
-                Console.WriteLine();
+                System.Console.WriteLine();
                 using var perf = Debug.PerfCheck("GetNextMessage"); // TODO: Remove PerfCheck
 
                 if (result.MessageType == WebSocketMessageType.Close)

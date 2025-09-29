@@ -1,3 +1,4 @@
+using System.Text;
 using Web4.Core.DOM;
 
 namespace Web4.WebSockets;
@@ -63,5 +64,9 @@ public partial class WebSocketTransport : IKeyholes
                 method: ("app.keyholes", key, "removeElement"),
                 param: transition
             );
+    }
+
+    void IKeyholes.Dump()
+    {
     }
 }
