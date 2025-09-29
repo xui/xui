@@ -206,7 +206,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"Error parsing JsonRpc message:\n{ex}");
+                System.Console.WriteLine($"Error handling JsonRpc message:\n{ex}");
             }
 
             // TODO: This doesn't belong here.
