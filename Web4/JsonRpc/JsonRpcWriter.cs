@@ -5,15 +5,18 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Web4.JsonRpc;
 
-public struct JsonRpcWriter(): IDisposable, IResettable
+public class JsonRpcWriter: IDisposable, IResettable
 {
-    private static readonly ObjectPool<WritersHolder> pool = ObjectPool.Create<WritersHolder>();
+    private readonly CopyToGrowBufferWriter BufferWriter;
+    private readonly Utf8JsonWriter JsonWriter;
 
-    private readonly WritersHolder writers = pool.Get();
-    private CopyToGrowBufferWriter BufferWriter => writers.BufferWriter;
-    private Utf8JsonWriter JsonWriter => writers.JsonWriter;
+    public ReadOnlyMemory<byte> AsMemory() => BufferWriter.AsMemory();
 
-    public ReadOnlyMemory<byte> AsMemory() => writers.BufferWriter.AsMemory();
+    public JsonRpcWriter(int bufferSize = 1024)
+    {
+        BufferWriter = new(bufferSize);
+        JsonWriter = new(BufferWriter);
+    }
 
     public JsonRpcWriter BeginBatch()
     {
@@ -322,38 +325,15 @@ public struct JsonRpcWriter(): IDisposable, IResettable
 
     public bool TryReset()
     {
-        writers.TryReset();
+        BufferWriter.TryReset();
+        JsonWriter.Reset(BufferWriter);
         return true;
     }
 
     public void Dispose()
     {
-        pool.Return(writers);
-    }
-
-    private class WritersHolder : IDisposable, IResettable
-    {
-        public CopyToGrowBufferWriter BufferWriter { get; init; }
-        public Utf8JsonWriter JsonWriter { get; init; } 
-
-        public WritersHolder()
-        {
-            BufferWriter = new CopyToGrowBufferWriter(bufferSize: 1024);
-            JsonWriter = new Utf8JsonWriter(BufferWriter);
-        }
-
-        public bool TryReset()
-        {
-            BufferWriter.TryReset();
-            JsonWriter.Reset(BufferWriter);
-            return true;
-        }
-
-        public void Dispose()
-        {
-            BufferWriter.Dispose();
-            JsonWriter.Dispose();
-        }
+        BufferWriter.Dispose();
+        JsonWriter.Dispose();
     }
 
     private class CopyToGrowBufferWriter(int bufferSize) : IBufferWriter<byte>, IResettable, IDisposable
