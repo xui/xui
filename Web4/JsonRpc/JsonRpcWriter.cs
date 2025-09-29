@@ -76,6 +76,37 @@ public struct JsonRpcWriter(): IDisposable, IResettable
         JsonWriter.WriteEndObject();
     }
 
+    public void WriteNotification(string method, string value1, params Span<string> @values)
+    {
+        JsonWriter.WriteStartObject();
+        JsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        JsonWriter.WriteStartArray("params");
+        JsonWriter.WriteStringValue(value1);
+        foreach (var value in values)
+            JsonWriter.WriteStringValue(value);
+        JsonWriter.WriteEndArray();
+
+        JsonWriter.WriteEndObject();
+    }
+
+    public void WriteNotification(string method, params Span<object> @values)
+    {
+        JsonWriter.WriteStartObject();
+        JsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        JsonWriter.WriteStartArray("params");
+        foreach (var value in values)
+            JsonWriter.WriteStringValue(value.ToString());
+        JsonWriter.WriteEndArray();
+
+        JsonWriter.WriteEndObject();
+    }
+
     public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param)
     {
         JsonWriter.WriteStartObject();

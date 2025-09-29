@@ -5,7 +5,7 @@ public interface IConsole
     void Assert(bool assertion, string message);
     void Assert(bool assertion, string message, params Span<string> substitutions);
     void Assert(bool assertion, object value);
-    void Assert(bool assertion, object value, params Span<object> values);
+    void Assert(bool assertion, params Span<object> values);
     void Clear();
     void Count();
     void Count(object label);
@@ -14,7 +14,7 @@ public interface IConsole
     void Debug(string message);
     void Debug(string message, params Span<string> substitutions);
     void Debug(object value);
-    void Debug(object value, params Span<object> values);
+    void Debug(params Span<object> values);
     void Dir(object obj);
     void Dir(object obj, DirOptions options);
     void Error(string message);
@@ -44,7 +44,7 @@ public interface IConsole
     void TimeLog(object label);
     void TimeLog(object label, params Span<object> values);
     void Trace();
-    void Tract(params Span<object> objects);
+    void Trace(params Span<object> objects);
     void Warn(string message);
     void Warn(string message, params Span<string> substitutions);
     void Warn(object value);
