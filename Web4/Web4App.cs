@@ -94,7 +94,7 @@ public class Web4App
         Keyhole[] oldBuffer = snapshot;
         Keyhole[] newBuffer = CaptureSnapshot();
 
-        await Transport.ApplyMutations(oldBuffer, newBuffer);
+        DiffUtil.Diff(Transport, oldBuffer, newBuffer);
 
         switch (SnapshotStrategy)
         {

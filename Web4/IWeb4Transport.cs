@@ -5,6 +5,4 @@ namespace Web4;
 public interface IWeb4Transport : IWindow, IDocument, IConsole, IKeyholes
 {
     Web4App App { get; }
-    // Web4App GetOrCreateApp(WindowBuilder builder);
-    ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer);
 }
