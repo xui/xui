@@ -9,7 +9,6 @@ namespace Web4.WebSockets;
 
 partial class WebSocketTransport : IWeb4Transport, IDisposable
 {
-    private const int RECEIVE_BUFFER_LENGTH = 1024;
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
 
     private readonly HttpContext http;
@@ -217,6 +216,7 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
 
     private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage()
     {
+        const int RECEIVE_BUFFER_LENGTH = 1024;
         ReadOnlySequence<byte> sequence;
         while (true)
         {
