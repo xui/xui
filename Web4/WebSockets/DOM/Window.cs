@@ -15,12 +15,12 @@ partial class WebSocketTransport : IWindow
 
     void IWindow.Alert(string message)
     {
-        BatchWriter.WriteNotification("window.alert", message);
+        Output.WriteNotification("window.alert", message);
     }
 
     void IWindow.Focus()
     {
-        BatchWriter.WriteNotification("window.focus");
+        Output.WriteNotification("window.focus");
     }
 
     Task<string> IWindow.Prompt(string? message, string? defaultValue)

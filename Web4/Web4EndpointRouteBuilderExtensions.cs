@@ -88,8 +88,7 @@ public static class Web4EndpointRouteBuilderExtensions
         {
             if (http.WebSockets.IsWebSocketRequest)
             {
-                using var transport = await WebSocketTransport.Connect(http);
-                await transport.ListenForRpcMessages(windowBuilder);
+                await WebSocketTransport.Bind(http, windowBuilder);
             }
         });
 

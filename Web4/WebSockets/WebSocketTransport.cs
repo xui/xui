@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.IO.Pipelines;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Web4.Core.DOM;
@@ -7,49 +8,43 @@ using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
-partial class WebSocketTransport : IWeb4Transport, IDisposable
+partial class WebSocketTransport : IWeb4Transport
 {
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
-
-    private readonly HttpContext http;
-    private readonly WebSocket webSocket;
-
+    private readonly Pipe pipe = new();
+    private readonly WindowBuilder windowBuilder;
+    private EventListenerSynchronizationContext? syncContext = null;
     private int currentPropagationID = 0;
     private int currentPropagationLevel = 0;
     private int suppressPropagationID = 0;
     private int suppressPropagationLevel = 0;
 
-    bool isNewBatch = true; // TODO: Temporary until the move to Pipelines.
-    private readonly JsonRpcWriter batchWriter = new();
-    private JsonRpcWriter BatchWriter
-    {
-        get
-        {
-            if (isNewBatch)
-            {
-                isNewBatch = false;
-                batchWriter.BeginBatch();
-            }
-            return batchWriter;
-        }
-    }
-
-    private EventListenerSynchronizationContext? syncContext;
-
-    public Web4App App { get; private set; } // TODO: change `private set` to `init` if Web4App ever stop referencing ITransport.
+    public JsonRpcWriter Output { get; init; }
+    public Web4App App { get; init; }
     public IWindow Window => this;
     public IDocument Document => this;
     public IConsole Console => this;
     public IKeyholes Keyholes => this;
 
-    private WebSocketTransport(HttpContext http, WebSocket webSocket)
+    private WebSocketTransport(string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
     {
-        this.http = http;
-        this.webSocket = webSocket;
+        this.Output = new JsonRpcWriter(pipe.Writer);
+        this.windowBuilder = windowBuilder;
+
+        if (!apps.TryGetValue(windowID, out var app))
+        {
+            app = new Web4App(this, windowBuilder, cancel);
+            apps[windowID] = app;
+        }
+        App = app;
     }
 
-    public static async Task<WebSocketTransport> Connect(HttpContext http)
+    public static async Task Bind(HttpContext http, WindowBuilder windowBuilder)
     {
+        // TODO: Move to header approach?
+        var windowID = http.Connection.Id;
+        var transport = new WebSocketTransport(windowID, windowBuilder, http.RequestAborted);
+
         // TODO: Move to config
         var context = new WebSocketAcceptContext
         {
@@ -57,164 +52,45 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
             KeepAliveTimeout = TimeSpan.FromSeconds(20)
         };
         var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
-        return new WebSocketTransport(http, webSocket);
+
+        var sendTask = transport.PipeToWebSocket(webSocket, transport.pipe.Reader, http.RequestAborted);
+        var recvTask = transport.WebSocketToTransport(webSocket, http.RequestAborted);
+        await Task.WhenAny(sendTask, recvTask);
     }
 
-    public async Task Disconnect()
+    public void Flush()
     {
-        await webSocket.CloseAsync(
-            WebSocketCloseStatus.NormalClosure,
-            "Application ended...",
-            CancellationToken.None
-        );
+        var flushTask = Output.Flush();
     }
 
-    public static void DisconnectAll()
+    private async Task PipeToWebSocket(WebSocket webSocket, PipeReader reader, CancellationToken cancel)
     {
-        Parallel.ForEach(
-            apps.Values,
-            async (app, cancel) => await (app.Transport as WebSocketTransport)!.Disconnect()
-        );
-    }
-
-    private Web4App GetOrCreateApp(WindowBuilder builder)
-    {
-        // TODO: Move to header approach?
-        var key = http.Connection.Id;
-        if (!apps.TryGetValue(key, out var app))
+        while (!cancel.IsCancellationRequested && webSocket.State == WebSocketState.Open)
         {
-            app = new Web4App(this, builder, http.RequestAborted);
-            apps[key] = app;
-        }
-        return app;
-    }
-
-    public async ValueTask ApplyMutations(Keyhole[] oldBuffer, Keyhole[] newBuffer)
-    {
-        try
-        {
-            DiffUtil.Diff(this, oldBuffer, newBuffer);
-            await Flush();
-        }
-        catch (Exception e)
-        {
-            System.Console.WriteLine(e);
-        }
-    }
-
-    public async ValueTask Flush()
-    {
-        // TODO: Think on where I might need locks.  Switch BatchWriter from nullable to BatchCount?
-        if (!isNewBatch)
-        {
-            batchWriter.EndBatch();
-
-            await webSocket.SendAsync(
-                buffer: batchWriter.AsMemory(),
-                messageType: WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: http.RequestAborted
-            );
-
-            isNewBatch = true;
-            batchWriter.TryReset();
-        }
-    }
-
-    public async Task ListenForRpcMessages(WindowBuilder windowBuilder)
-    {
-        App = GetOrCreateApp(windowBuilder);
-
-        await foreach (var sequence in GetNextMessage())
-        {
-            // TODO: This doesn't belong here.
-            foreach (var a in apps.Values)
-                a.Invalidate();
-
             try
             {
-                var rpc = new JsonRpcReader(sequence);
-                var @params = rpc.ReadPositionalParams();
-
-                switch (rpc.Method)
+                var jsonRpcBatch = await reader.ReadAsync(cancel);
+                var bytesRemaining = jsonRpcBatch.Buffer.Length;
+                foreach (var memory in jsonRpcBatch.Buffer)
                 {
-                    case var method when method.SequenceEqual("app.keyholes.dump"u8):
-                        Keyholes.Dump();
-                        break;
-
-                    case var method when method.SequenceEqual("app.benchmark"u8):
-                        var threads = @params.GetNextOptionalAsInt();
-                        App.Benchmark(threads);
-                        break;
-
-                    case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
-                        App.Ping();
-                        BatchWriter.WriteResponse(id);
-                        break;
-
-                    case var method when method.SequenceEqual("app.dispatchEvent"u8):
-                        var @event = new LazyEvent(@params.GetNextAsSequence(), this);
-                        var key = @params.GetNextAsSpan(); // TODO: Move to method path?
-                        this.currentPropagationID = @params.GetNextAsInt();
-                        this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
-
-                        if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
-                            continue;
-
-                        var listener = windowBuilder.GetEventListener(key);
-
-                        if (listener.Action is Action noEventSync)
-                        {
-                            @event.Dispose(); // Event is not being used, dispose early.
-                            App.DispatchEvent(noEventSync);
-                        }
-                        else if (listener.ActionEvent is Action<Event> withEventSync)
-                        {
-                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            App.DispatchEvent(withEventSync, @event);
-                            @event.Dispose();
-                        }
-                        else if (listener.Func is Func<Task> noEventSyncAsync)
-                        {
-                            @event.Dispose(); // Event is not being used, dispose early.
-                            SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
-                            _ = App.DispatchEvent(noEventSyncAsync);
-                            SynchronizationContext.SetSynchronizationContext(null);
-                        }
-                        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
-                        {
-                            SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
-                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            _ = App.DispatchEvent(withEventAsync, @event)
-                                .ContinueWith(t => t.Result.Dispose());
-                            SynchronizationContext.SetSynchronizationContext(null);
-                        }
-                        else
-                        {
-                            System.Console.WriteLine("🔴 No event listener to invoke.  You need to investigate this.");
-                            continue;
-                        }
-                        break;
-
-                    default:
-                        break;
+                    bytesRemaining -= memory.Length;
+                    await webSocket.SendAsync(
+                            buffer: memory,
+                            messageType: WebSocketMessageType.Text,
+                            endOfMessage: bytesRemaining == 0,
+                            cancellationToken: cancel
+                        );
                 }
-
-                // TODO: Wait, you said no awaiting!
-                await Flush();
+                reader.AdvanceTo(jsonRpcBatch.Buffer.End);
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"Error handling JsonRpc message:\n{ex}");
+                System.Console.WriteLine($"🛑 Unexpected error writing to the WebSocket.\n{ex}");
             }
-
-            // TODO: This doesn't belong here.
-            foreach (var a in apps.Values)
-                a.Update();
         }
     }
 
-    private async IAsyncEnumerable<ReadOnlySequence<byte>> GetNextMessage()
+    private async Task WebSocketToTransport(WebSocket webSocket, CancellationToken cancel)
     {
         const int RECEIVE_BUFFER_LENGTH = 1024;
         ReadOnlySequence<byte> sequence;
@@ -223,10 +99,10 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
             try
             {
                 var buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
-                var result = await webSocket.ReceiveAsync(buffer, http.RequestAborted);
+                var result = await webSocket.ReceiveAsync(buffer, cancel);
 
                 System.Console.WriteLine();
-                using var perf = Debug.PerfCheck("GetNextMessage"); // TODO: Remove PerfCheck
+                using var perf = Debug.PerfCheck("WebSocketToTransport (loop)"); // TODO: Remove PerfCheck
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -242,12 +118,13 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                     // TODO: Debug through this to verify that it works the way you think it does.
                     // Pay particularly close attention to Segment.Return – does it return buffers
                     // to the pool like you think it does?
+                    // TODO: This jank is motivation to move to an IDuplexPipe with a custom reader that defers buffer-return-responsibilities?
                     var segmentStart = new Segment(buffer, 0..result.Count);
                     var segmentEnd = segmentStart;
                     while (!result.EndOfMessage)
                     {
                         buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
-                        result = await webSocket.ReceiveAsync(buffer, http.RequestAborted);
+                        result = await webSocket.ReceiveAsync(buffer, cancel);
                         segmentEnd = segmentEnd.Append(buffer, 0..result.Count);
                     }
                     sequence = new ReadOnlySequence<byte>(segmentStart, 0, segmentEnd, result.Count);
@@ -258,8 +135,116 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 break;
             }
 
-            yield return sequence;
+            if (HandleJsonRpcMessage(sequence))
+            {
+                await Output.Flush(cancel);
+            }
         }
+    }
+
+    private bool HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
+    {
+        // TODO: This doesn't belong here.
+        foreach (var a in apps.Values)
+            a.Invalidate();
+
+        try
+        {
+            var rpc = new JsonRpcReader(sequence);
+            var @params = rpc.ReadPositionalParams();
+
+            switch (rpc.Method)
+            {
+                case var method when method.SequenceEqual("app.keyholes.dump"u8):
+                    Keyholes.Dump();
+                    break;
+
+                case var method when method.SequenceEqual("app.benchmark"u8):
+                    var threads = @params.GetNextOptionalAsInt();
+                    App.Benchmark(threads);
+                    break;
+
+                case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
+                    App.Ping();
+                    Output.WriteResponse(id);
+                    break;
+
+                case var method when method.SequenceEqual("app.dispatchEvent"u8):
+                    var @event = new LazyEvent(@params.GetNextAsSequence(), this);
+                    var key = @params.GetNextAsSpan(); // TODO: Move to method path?
+                    this.currentPropagationID = @params.GetNextAsInt();
+                    this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
+
+                    if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
+                        return true;
+
+                    var listener = windowBuilder.GetEventListener(key);
+
+                    if (listener.Action is Action noEventSync)
+                    {
+                        @event.Dispose(); // Event is not being used, dispose early.
+                        App.DispatchEvent(noEventSync);
+                    }
+                    else if (listener.ActionEvent is Action<Event> withEventSync)
+                    {
+                        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                        App.DispatchEvent(withEventSync, @event);
+                        @event.Dispose();
+                    }
+                    else if (listener.Func is Func<Task> noEventSyncAsync)
+                    {
+                        @event.Dispose(); // Event is not being used, dispose early.
+                        SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
+                        _ = App.DispatchEvent(noEventSyncAsync);
+                        SynchronizationContext.SetSynchronizationContext(null);
+                    }
+                    else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
+                    {
+                        SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
+                        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                        _ = App.DispatchEvent(withEventAsync, @event)
+                            .ContinueWith(t => t.Result.Dispose());
+                        SynchronizationContext.SetSynchronizationContext(null);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("🛑 No event listener to invoke.  You need to investigate this.");
+                        return false;
+                    }
+                    break;
+
+                default:
+                    System.Console.WriteLine("🛑 Unrecognized method.  This requires investigation.");
+                    return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"🛑 Error handling JsonRpc message:\n{ex}");
+            return false;
+        }
+
+        // TODO: This doesn't belong here.
+        foreach (var a in apps.Values)
+            a.Update();
+
+        return true;
+    }
+
+    public async Task Disconnect()
+    {
+        // TODO: Reimplement
+
+        // await webSocket.CloseAsync(
+        //     WebSocketCloseStatus.NormalClosure,
+        //     "Application ended...",
+        //     CancellationToken.None
+        // );
+    }
+
+    public static void DisconnectAll()
+    {
+        // TODO: Implement
     }
 
     internal void StopPropagation()
@@ -315,10 +300,5 @@ partial class WebSocketTransport : IWeb4Transport, IDisposable
                 } while (sequence.TryGet(ref position, out var memory, advance: true));
             }
         }
-    }
-    
-    public void Dispose()
-    {
-        webSocket.Dispose();
     }
 }
