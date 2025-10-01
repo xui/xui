@@ -78,11 +78,11 @@ partial class WebSocketTransport : IWeb4Transport
                 {
                     bytesRemaining -= memory.Length;
                     await webSocket.SendAsync(
-                            buffer: memory,
-                            messageType: WebSocketMessageType.Text,
-                            endOfMessage: bytesRemaining == 0,
-                            cancellationToken: cancel
-                        );
+                        buffer: memory,
+                        messageType: WebSocketMessageType.Text,
+                        endOfMessage: bytesRemaining == 0,
+                        cancellationToken: cancel
+                    );
                 }
                 reader.AdvanceTo(jsonRpcBatch.Buffer.End);
             }
