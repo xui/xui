@@ -73,7 +73,6 @@ public static class Web4EndpointRouteBuilderExtensions
         Func<Html> html)
     {
         app.UseWebSockets();
-        app.Lifetime.ApplicationStopping.Register(WebSocketTransport.DisconnectAll);
         var group = app.MapGroup(pattern);
         var windowBuilder = new WindowBuilder(group, html);
 
@@ -88,7 +87,7 @@ public static class Web4EndpointRouteBuilderExtensions
         {
             if (http.WebSockets.IsWebSocketRequest)
             {
-                await WebSocketTransport.Bind(http, windowBuilder);
+                await WebSocketTransport.Bind(http, windowBuilder, app.Lifetime.ApplicationStopping);
             }
         });
 

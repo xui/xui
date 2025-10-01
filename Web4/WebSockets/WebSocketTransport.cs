@@ -39,11 +39,11 @@ partial class WebSocketTransport : IWeb4Transport
         App = app;
     }
 
-    public static async Task Bind(HttpContext http, WindowBuilder windowBuilder)
+    public static async Task Bind(HttpContext http, WindowBuilder windowBuilder, CancellationToken cancelProcess)
     {
         // TODO: Move to header approach?
         var windowID = http.Connection.Id;
-        var transport = new WebSocketTransport(windowID, windowBuilder, http.RequestAborted);
+        var transport = new WebSocketTransport(windowID, windowBuilder, cancelProcess);
 
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -52,10 +52,13 @@ partial class WebSocketTransport : IWeb4Transport
             KeepAliveTimeout = TimeSpan.FromSeconds(20)
         };
         var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
+        var cancelProcessRegistration = cancelProcess.Register(async () => await Disconnect(webSocket));
 
         var sendTask = transport.PipeToWebSocket(webSocket, transport.pipe.Reader, http.RequestAborted);
         var recvTask = transport.WebSocketToTransport(webSocket, http.RequestAborted);
         await Task.WhenAny(sendTask, recvTask);
+        
+        cancelProcessRegistration.Unregister();
     }
 
     public void Flush()
@@ -231,22 +234,6 @@ partial class WebSocketTransport : IWeb4Transport
         return true;
     }
 
-    public async Task Disconnect()
-    {
-        // TODO: Reimplement
-
-        // await webSocket.CloseAsync(
-        //     WebSocketCloseStatus.NormalClosure,
-        //     "Application ended...",
-        //     CancellationToken.None
-        // );
-    }
-
-    public static void DisconnectAll()
-    {
-        // TODO: Implement
-    }
-
     internal void StopPropagation()
     {
         suppressPropagationID = currentPropagationID;
@@ -257,6 +244,15 @@ partial class WebSocketTransport : IWeb4Transport
     {
         suppressPropagationID = currentPropagationID;
         suppressPropagationLevel = 0;
+    }
+
+    private static async Task Disconnect(WebSocket webSocket)
+    {
+        await webSocket.CloseAsync(
+            WebSocketCloseStatus.NormalClosure,
+            "Application ended...",
+            CancellationToken.None
+        );
     }
 
     internal class Segment : ReadOnlySequenceSegment<byte>
