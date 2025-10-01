@@ -7,9 +7,9 @@ internal class EventListenerSynchronizationContext(WebSocketTransport transport)
     {
         base.Post(s =>
         {
-            SetSynchronizationContext(this);
+            SetSynchronizationContext(this); // because AspNetWebSocket uses ConfigureAwait(false)
             d(s);
-            transport.RequestFlush();
+            transport.Flush();
         }, state);
     }
 }
