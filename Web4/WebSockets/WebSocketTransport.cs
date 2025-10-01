@@ -51,7 +51,7 @@ partial class WebSocketTransport : IWeb4Transport
             KeepAliveInterval = TimeSpan.FromSeconds(60),
             KeepAliveTimeout = TimeSpan.FromSeconds(20)
         };
-        var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
+        using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         var cancelProcessRegistration = cancelProcess.Register(async () => await Disconnect(webSocket));
 
         var sendTask = transport.PipeToWebSocket(webSocket, transport.pipe.Reader, http.RequestAborted);
