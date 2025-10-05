@@ -1,39 +1,87 @@
-using System.IO.Pipelines;
+using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Web4.JsonRpc;
 
-public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
+public partial class JsonRpcWriter : IDisposable
 {
-    private readonly Utf8JsonWriter jsonWriter = new(pipeWriter);
-    private bool isBatchStarted = false;
-    private static FlushResult noFlushNeededResult = new(isCanceled: false, isCompleted: true);
+    [ThreadStatic]
+    private static JsonRpcWriter? threadStaticWriter;
+    private readonly ArrayBufferWriter<byte> bufferWriter; // TODO: Build a custom BufferWriter that constructs a ReadOnlySequence<T>
+    private readonly Utf8JsonWriter jsonWriter;
+    private ChannelWriter<ReadOnlySequence<byte>>? flusher = null;
+    private BatchFlusher? batchFlusher;
+    private bool isBatch = false;
 
-    private void LazyBeginBatch()
+    private JsonRpcWriter()
     {
-        if (isBatchStarted)
-            return;
-
-        isBatchStarted = true;
-        jsonWriter.WriteStartArray();
+        bufferWriter = new();
+        jsonWriter = new(bufferWriter);
     }
 
-    public ValueTask<FlushResult> Flush(CancellationToken cancel = default)
+    public static JsonRpcWriter Current(ChannelWriter<ReadOnlySequence<byte>> flusher)
     {
-        if (!isBatchStarted)
-            return ValueTask.FromResult(noFlushNeededResult);
+        var writer = threadStaticWriter ??= new();
+        writer.flusher = flusher;
 
-        isBatchStarted = false;
-        jsonWriter.WriteEndArray();
+        if (SynchronizationContext.Current is BatchFlusher)
+            writer.isBatch = true;
+
+        return writer;
+    }
+
+    public FlushOnDispose UseBatchForThisScope(bool continueOnCapturedContext = false)
+    {
+        if (continueOnCapturedContext)
+        {
+            batchFlusher ??= new();
+            batchFlusher.Flusher = flusher;
+            SynchronizationContext.SetSynchronizationContext(batchFlusher);
+        }
+
+        if (!isBatch)
+        {
+            if (bufferWriter.WrittenCount > 0)
+                throw new InvalidOperationException("Cannot switch to batch.  Buffer already written to.");
+            isBatch = true;
+        }
+
+        return new FlushOnDispose(this, continueOnCapturedContext);
+    }
+
+    public void Flush()
+    {
         jsonWriter.Flush();
-        jsonWriter.Reset(pipeWriter);
-        return pipeWriter.FlushAsync(cancel);
+
+        if (isBatch && bufferWriter.WrittenCount > 0)
+        {
+            jsonWriter.WriteEndArray();
+            jsonWriter.Flush();
+        }
+
+        isBatch = false;
+
+        if (bufferWriter.WrittenCount == 0)
+            return;
+
+        // TODO: This line will be replaced when ArrayBufferWriter is swapped for PooledBufferWriter.
+        var buffer = new ReadOnlySequence<byte>(bufferWriter.WrittenMemory);
+
+        bufferWriter.ResetWrittenCount();
+        jsonWriter.Reset(bufferWriter);
+
+        if (flusher is null)
+            throw new InvalidOperationException("🛑 Trying to flush when flusher is null.  This should be impossible.  Needs investigating.");
+        while (!flusher.TryWrite(buffer)) ;
     }
 
     public void WriteNotification(string method)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -41,11 +89,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         WriteMethod(method);
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -53,11 +103,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         WriteMethod(method);
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification<T>(string method, T param)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -69,11 +121,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification<T>(ValueTuple<string, string, string> method, T param)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -85,11 +139,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification(string method, string value1, params Span<string> @values)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -103,11 +159,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification(string method, params Span<object> @values)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -120,11 +178,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -136,14 +196,16 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteNotification(ValueTuple<string, string, string> method, Span<Keyhole> keyholes, bool includeSentinels, string? transition = null)
         => WriteNotification(method, null, keyholes, includeSentinels, transition);
-        
+
     public void WriteNotification(ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, bool includeSentinels, string? transition = null)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -200,8 +262,10 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         }
 
         jsonWriter.WriteEndArray();
-        
+
         jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
     }
 
     public void WriteRequest(int id)
@@ -211,7 +275,7 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
 
     public void WriteResponse(int id)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -219,11 +283,13 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteNumber("id", id);
         jsonWriter.WriteEndObject();
         jsonWriter.Flush();
+
+        OnMessageEnd();
     }
 
     public void WriteResponse<T>(int id, T result)
     {
-        LazyBeginBatch();
+        OnMessageBegin();
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
@@ -232,6 +298,20 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         jsonWriter.WriteNumber("id", id);
         jsonWriter.WriteEndObject();
         jsonWriter.Flush();
+
+        OnMessageEnd();
+    }
+
+    private void OnMessageBegin()
+    {
+        if (isBatch && jsonWriter.BytesCommitted + jsonWriter.BytesPending + bufferWriter.WrittenCount == 0)
+            jsonWriter.WriteStartArray();
+    }
+
+    private void OnMessageEnd()
+    {
+        if (!isBatch)
+            Flush();
     }
 
     private void WriteMethod(string method)
@@ -284,9 +364,9 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         }
 
         jsonWriter.Flush();
-        Encoding.UTF8.GetBytes("\"", pipeWriter);
+        Encoding.UTF8.GetBytes("\"", bufferWriter);
         WriteKeyholeToRawBuffer(ref keyhole);
-        Encoding.UTF8.GetBytes("\"", pipeWriter);
+        Encoding.UTF8.GetBytes("\"", bufferWriter);
     }
 
     private void WriteKeyholeToRawBuffer(ref Keyhole keyhole)
@@ -296,51 +376,51 @@ public class JsonRpcWriter(PipeWriter pipeWriter) : IDisposable
         switch (keyhole.Type)
         {
             case KeyholeType.Integer:
-                while (!keyhole.Integer.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Integer.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Long:
-                while (!keyhole.Long.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Long.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Float:
-                while (!keyhole.Float.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Float.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Double:
-                while (!keyhole.Double.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Double.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Decimal:
-                while (!keyhole.Decimal.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Decimal.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.DateTime:
-                while (!keyhole.DateTime.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.DateTime.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.DateOnly:
-                while (!keyhole.DateOnly.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.DateOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.TimeSpan:
-                while (!keyhole.TimeSpan.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.TimeSpan.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.TimeOnly:
-                while (!keyhole.TimeOnly.TryFormat(pipeWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.TimeOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Color:
-                while (!keyhole.Color.TryFormat(pipeWriter.GetSpan(9), out length, keyhole.Format))
+                while (!keyhole.Color.TryFormat(bufferWriter.GetSpan(9), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Uri:
                 // TODO: Fix memory allocation and support format string?
-                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), pipeWriter);
+                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), bufferWriter);
                 break;
         }
-        pipeWriter.Advance(length);
+        bufferWriter.Advance(length);
     }
 
     private static void GrowSizeHint(ref int sizeHint)

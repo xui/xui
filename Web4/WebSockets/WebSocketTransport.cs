@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.IO.Pipelines;
 using System.Net.WebSockets;
+using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
 using Web4.Core.DOM;
 using Web4.JsonRpc;
@@ -11,15 +12,27 @@ namespace Web4.WebSockets;
 partial class WebSocketTransport : IWeb4Transport
 {
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
-    private readonly Pipe pipe = new();
     private readonly WindowBuilder windowBuilder;
-    private EventListenerSynchronizationContext? syncContext = null;
     private int currentPropagationID = 0;
     private int currentPropagationLevel = 0;
     private int suppressPropagationID = 0;
     private int suppressPropagationLevel = 0;
+    private readonly Channel<ReadOnlySequence<byte>> channel = Channel.CreateBounded<ReadOnlySequence<byte>>(
+        options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
+        {
+            AllowSynchronousContinuations = true,
+            FullMode = BoundedChannelFullMode.DropWrite,
+            SingleReader = true,
+            SingleWriter = false,
+        },
+        itemDropped: sequence =>
+        {
+            // TODO: WebSocket is borked?  Handle:
+            // - Skip the line and gracefully close it.
+            // - Signal this transport to unregister itself everywhere.
+        });
 
-    public JsonRpcWriter Output { get; init; }
+    public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
     public Web4App App { get; init; }
     public IWindow Window => this;
     public IDocument Document => this;
@@ -28,7 +41,6 @@ partial class WebSocketTransport : IWeb4Transport
 
     private WebSocketTransport(string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
     {
-        this.Output = new JsonRpcWriter(pipe.Writer);
         this.windowBuilder = windowBuilder;
 
         if (!apps.TryGetValue(windowID, out var app))
@@ -54,27 +66,22 @@ partial class WebSocketTransport : IWeb4Transport
         using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         var cancelProcessRegistration = cancelProcess.Register(async () => await Disconnect(webSocket));
 
-        var sendTask = transport.PipeToWebSocket(webSocket, transport.pipe.Reader, http.RequestAborted);
+        var sendTask = transport.ChannelToWebSocket(webSocket, http.RequestAborted);
         var recvTask = transport.WebSocketToTransport(webSocket, http.RequestAborted);
         await Task.WhenAny(sendTask, recvTask);
         
         cancelProcessRegistration.Unregister();
     }
 
-    public void Flush()
-    {
-        var flushTask = Output.Flush();
-    }
-
-    private async Task PipeToWebSocket(WebSocket webSocket, PipeReader reader, CancellationToken cancel)
+    private async Task ChannelToWebSocket(WebSocket webSocket, CancellationToken cancel)
     {
         while (!cancel.IsCancellationRequested && webSocket.State == WebSocketState.Open)
         {
             try
             {
-                var jsonRpcBatch = await reader.ReadAsync(cancel);
-                var bytesRemaining = jsonRpcBatch.Buffer.Length;
-                foreach (var memory in jsonRpcBatch.Buffer)
+                var sequence = await channel.Reader.ReadAsync(cancel);
+                var bytesRemaining = sequence.Length;
+                foreach (var memory in sequence)
                 {
                     bytesRemaining -= memory.Length;
                     await webSocket.SendAsync(
@@ -84,7 +91,6 @@ partial class WebSocketTransport : IWeb4Transport
                         cancellationToken: cancel
                     );
                 }
-                reader.AdvanceTo(jsonRpcBatch.Buffer.End);
             }
             catch (Exception ex)
             {
@@ -121,7 +127,8 @@ partial class WebSocketTransport : IWeb4Transport
                     // TODO: Debug through this to verify that it works the way you think it does.
                     // Pay particularly close attention to Segment.Return – does it return buffers
                     // to the pool like you think it does?
-                    // TODO: This jank is motivation to move to an IDuplexPipe with a custom reader that defers buffer-return-responsibilities?
+                    // TODO: This jank is motivation to a custom reader that defers buffer-return-responsibilities?
+                    //   CustomBufferWriter can be used for ws.reading (here), ws.writing, and ALSO Keyhole buffers!!!
                     var segmentStart = new Segment(buffer, 0..result.Count);
                     var segmentEnd = segmentStart;
                     while (!result.EndOfMessage)
@@ -138,14 +145,11 @@ partial class WebSocketTransport : IWeb4Transport
                 break;
             }
 
-            if (HandleJsonRpcMessage(sequence))
-            {
-                await Output.Flush(cancel);
-            }
+            HandleJsonRpcMessage(sequence);
         }
     }
 
-    private bool HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
+    private void HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
     {
         // TODO: This doesn't belong here.
         foreach (var a in apps.Values)
@@ -159,79 +163,90 @@ partial class WebSocketTransport : IWeb4Transport
             switch (rpc.Method)
             {
                 case var method when method.SequenceEqual("app.keyholes.dump"u8):
-                    Keyholes.Dump();
-                    break;
+                    {
+                        using var batchOutput = Output.UseBatchForThisScope();
+                        Keyholes.Dump();
+                        break;
+                    }
 
                 case var method when method.SequenceEqual("app.benchmark"u8):
-                    var threads = @params.GetNextOptionalAsInt();
-                    App.Benchmark(threads);
-                    break;
+                    {
+                        using var batchOutput = Output.UseBatchForThisScope();
+                        var threads = @params.GetNextOptionalAsInt();
+                        App.Benchmark(threads);
+                        break;
+                    }
 
                 case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
-                    App.Ping();
-                    Output.WriteResponse(id);
-                    break;
+                    {
+                        App.Ping();
+                        Output.WriteResponse(id);
+                        break;
+                    }
 
                 case var method when method.SequenceEqual("app.dispatchEvent"u8):
-                    var @event = new LazyEvent(@params.GetNextAsSequence(), this);
-                    var key = @params.GetNextAsSpan(); // TODO: Move to method path?
-                    this.currentPropagationID = @params.GetNextAsInt();
-                    this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
+                    {
+                        var @event = new LazyEvent(@params.GetNextAsSequence(), this);
+                        var key = @params.GetNextAsSpan(); // TODO: Move to method path?
+                        this.currentPropagationID = @params.GetNextAsInt();
+                        this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
 
-                    if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
-                        return true;
+                        if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
+                            return;
 
-                    var listener = windowBuilder.GetEventListener(key);
+                        var listener = windowBuilder.GetEventListener(key);
 
-                    if (listener.Action is Action noEventSync)
-                    {
-                        @event.Dispose(); // Event is not being used, dispose early.
-                        App.DispatchEvent(noEventSync);
+                        if (listener.Action is Action noEventSync)
+                        {
+                            using var batchOutput = Output.UseBatchForThisScope();
+                            @event.Dispose(); // Event is not being used, dispose early.
+                            App.DispatchEvent(noEventSync);
+                        }
+                        else if (listener.ActionEvent is Action<Event> withEventSync)
+                        {
+                            using var batchOutput = Output.UseBatchForThisScope();
+                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                            App.DispatchEvent(withEventSync, @event);
+                            @event.Dispose();
+                        }
+                        else if (listener.Func is Func<Task> noEventSyncAsync)
+                        {
+                            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+                            @event.Dispose(); // Event is not being used, dispose early.
+                            _ = App.DispatchEvent(noEventSyncAsync);
+                        }
+                        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
+                        {
+                            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+                            _ = App.DispatchEvent(withEventAsync, @event)
+                                .ContinueWith(t => t.Result.Dispose());
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("🛑 No event listener to invoke.  You need to investigate this.");
+                        }
+                        break;
                     }
-                    else if (listener.ActionEvent is Action<Event> withEventSync)
-                    {
-                        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                        App.DispatchEvent(withEventSync, @event);
-                        @event.Dispose();
-                    }
-                    else if (listener.Func is Func<Task> noEventSyncAsync)
-                    {
-                        @event.Dispose(); // Event is not being used, dispose early.
-                        SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
-                        _ = App.DispatchEvent(noEventSyncAsync);
-                        SynchronizationContext.SetSynchronizationContext(null);
-                    }
-                    else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
-                    {
-                        SynchronizationContext.SetSynchronizationContext(syncContext ??= new(this));
-                        // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                        _ = App.DispatchEvent(withEventAsync, @event)
-                            .ContinueWith(t => t.Result.Dispose());
-                        SynchronizationContext.SetSynchronizationContext(null);
-                    }
-                    else
-                    {
-                        System.Console.WriteLine("🛑 No event listener to invoke.  You need to investigate this.");
-                        return false;
-                    }
-                    break;
 
                 default:
-                    System.Console.WriteLine("🛑 Unrecognized method.  This requires investigation.");
-                    return false;
+                    throw new InvalidOperationException("🛑 Unrecognized method.  This requires investigation.");
             }
         }
         catch (Exception ex)
         {
             System.Console.WriteLine($"🛑 Error handling JsonRpc message:\n{ex}");
-            return false;
         }
 
         // TODO: This doesn't belong here.
         foreach (var a in apps.Values)
             a.Update();
+    }
 
-        return true;
+    public void Diff(Keyhole[] oldBuffer, Keyhole[] newBuffer)
+    {
+        using var batchOutput = Output.UseBatchForThisScope();
+        DiffUtil.Diff(this, oldBuffer, newBuffer);
     }
 
     internal void StopPropagation()

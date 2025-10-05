@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Threading.Channels;
 using Web4.Composers;
+using Web4.WebSockets;
 
 namespace Web4;
 
@@ -52,7 +53,7 @@ public class Web4App
                 // If here, this app has a green light to do work again 
                 // so await until an update is requested.  
                 _ = await updateDebouncer.Reader.ReadAsync(cancel);
-                await UpdateAsync();
+                Reconcile();
             }
         }, cancel);
     }
@@ -77,7 +78,7 @@ public class Web4App
         while (!updateDebouncer.Writer.TryWrite(0)) ;
     }
 
-    private async ValueTask UpdateAsync()
+    private void Reconcile()
     {
         if (!IsInvalidated)
         {
@@ -93,8 +94,7 @@ public class Web4App
 
         Keyhole[] oldBuffer = snapshot;
         Keyhole[] newBuffer = CaptureSnapshot();
-
-        DiffUtil.Diff(Transport, oldBuffer, newBuffer);
+        Transport.Diff(oldBuffer, newBuffer);
 
         switch (SnapshotStrategy)
         {
