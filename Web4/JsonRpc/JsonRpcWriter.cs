@@ -14,7 +14,7 @@ public partial class JsonRpcWriter : IDisposable
     private readonly ArrayBufferWriter<byte> bufferWriter; // TODO: Build a custom BufferWriter that constructs a ReadOnlySequence<T>
     private readonly Utf8JsonWriter jsonWriter;
     private ChannelWriter<ReadOnlySequence<byte>>? flusher = null;
-    private BatchFlusher? batchFlusher;
+    private FlushOnAwait? flushOnAwait;
     private bool isBatch = false;
 
     private JsonRpcWriter()
@@ -28,7 +28,7 @@ public partial class JsonRpcWriter : IDisposable
         var writer = threadStaticWriter ??= new();
         writer.flusher = flusher;
 
-        if (SynchronizationContext.Current is BatchFlusher)
+        if (SynchronizationContext.Current is FlushOnAwait)
             writer.isBatch = true;
 
         return writer;
@@ -38,9 +38,9 @@ public partial class JsonRpcWriter : IDisposable
     {
         if (continueOnCapturedContext)
         {
-            batchFlusher ??= new();
-            batchFlusher.Flusher = flusher;
-            SynchronizationContext.SetSynchronizationContext(batchFlusher);
+            flushOnAwait ??= new();
+            flushOnAwait.Flusher = flusher;
+            SynchronizationContext.SetSynchronizationContext(flushOnAwait);
         }
 
         if (!isBatch)
