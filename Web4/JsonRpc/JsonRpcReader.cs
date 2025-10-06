@@ -88,7 +88,7 @@ public readonly ref struct JsonRpcReader
 
         public int? GetNextOptionalAsInt()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsNullableInt"); // TODO: Remove PerfCheck        
+            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextOptionalAsInt"); // TODO: Remove PerfCheck        
             reader.Read();
             return reader.TokenType != JsonTokenType.EndArray && reader.TryGetInt32(out int value)
                 ? value
