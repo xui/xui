@@ -1,9 +1,8 @@
 using System.Buffers;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Web4.WebSockets;
 
 namespace Web4.JsonRpc;
 
@@ -11,7 +10,7 @@ public partial class JsonRpcWriter : IDisposable
 {
     [ThreadStatic]
     private static JsonRpcWriter? threadStaticWriter;
-    private readonly ArrayBufferWriter<byte> bufferWriter; // TODO: Build a custom BufferWriter that constructs a ReadOnlySequence<T>
+    private readonly PooledSequenceBufferWriter<byte> bufferWriter;
     private readonly Utf8JsonWriter jsonWriter;
     private ChannelWriter<ReadOnlySequence<byte>>? flusher = null;
     private FlushOnAwait? flushOnAwait;
@@ -68,10 +67,7 @@ public partial class JsonRpcWriter : IDisposable
         if (bufferWriter.WrittenCount == 0)
             return;
 
-        // TODO: This line will be replaced when ArrayBufferWriter is swapped for PooledBufferWriter.
-        var buffer = new ReadOnlySequence<byte>(bufferWriter.WrittenMemory);
-
-        bufferWriter.ResetWrittenCount();
+        var buffer = bufferWriter.Sequence;
         jsonWriter.Reset(bufferWriter);
 
         if (flusher is null)

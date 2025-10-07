@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Collections.Concurrent;
-using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
@@ -91,6 +90,8 @@ partial class WebSocketTransport : IWeb4Transport
                         cancellationToken: cancel
                     );
                 }
+
+                sequence.ReturnToPool();
             }
             catch (Exception ex)
             {
@@ -124,12 +125,8 @@ partial class WebSocketTransport : IWeb4Transport
                 }
                 else
                 {
-                    // TODO: Debug through this to verify that it works the way you think it does.
-                    // Pay particularly close attention to Segment.Return – does it return buffers
-                    // to the pool like you think it does?
-                    // TODO: This jank is motivation to a custom reader that defers buffer-return-responsibilities?
-                    //   CustomBufferWriter can be used for ws.reading (here), ws.writing, and ALSO Keyhole buffers!!!
-                    var segmentStart = new Segment(buffer, 0..result.Count);
+                    // TODO: new SequenceSegment() allocates memory
+                    var segmentStart = new SequenceSegment<byte>(buffer, 0..result.Count);
                     var segmentEnd = segmentStart;
                     while (!result.EndOfMessage)
                     {
@@ -145,11 +142,12 @@ partial class WebSocketTransport : IWeb4Transport
                 break;
             }
 
-            HandleJsonRpcMessage(sequence);
+            if (HandleJsonRpcMessage(sequence) is ReadOnlySequence<byte> toReturn)
+                toReturn.ReturnToPool();
         }
     }
 
-    private void HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
+    private ReadOnlySequence<byte>? HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
     {
         // TODO: This doesn't belong here.
         foreach (var a in apps.Values)
@@ -186,14 +184,15 @@ partial class WebSocketTransport : IWeb4Transport
 
                 case var method when method.SequenceEqual("app.dispatchEvent"u8):
                     {
-                        var @event = new LazyEvent(@params.GetNextAsSequence(), this);
-                        var key = @params.GetNextAsSpan(); // TODO: Move to method path?
-                        this.currentPropagationID = @params.GetNextAsInt();
-                        this.currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
+                        var eventSequence               = @params.GetNextAsSequence();
+                        var key                         = @params.GetNextAsSpan(); // TODO: Move to method path?
+                        this.currentPropagationID       = @params.GetNextAsInt();
+                        this.currentPropagationLevel    = @params.GetNextOptionalAsInt() ?? 0;
 
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
-                            return;
+                            return sequence;
 
+                        var @event = new LazyEvent(sequence, eventSequence, this);
                         var listener = windowBuilder.GetEventListener(key);
 
                         if (listener.Action is Action noEventSync)
@@ -226,7 +225,10 @@ partial class WebSocketTransport : IWeb4Transport
                         {
                             throw new InvalidOperationException("🛑 No event listener to invoke.  You need to investigate this.");
                         }
-                        break;
+
+                        // Do not return the sequence.  LazyEvent will be responsible for returning the 
+                        // buffer(s) to the pool when the event handler is done using the event.
+                        return null;
                     }
 
                 default:
@@ -237,10 +239,13 @@ partial class WebSocketTransport : IWeb4Transport
         {
             System.Console.WriteLine($"🛑 Error handling JsonRpc message:\n{ex}");
         }
-
-        // TODO: This doesn't belong here.
-        foreach (var a in apps.Values)
-            a.Update();
+        finally
+        {
+            // TODO: This doesn't belong here.
+            foreach (var a in apps.Values)
+                a.Update();
+        }
+        return sequence;
     }
 
     public void Diff(Keyhole[] oldBuffer, Keyhole[] newBuffer)
@@ -268,48 +273,5 @@ partial class WebSocketTransport : IWeb4Transport
             "Application ended...",
             CancellationToken.None
         );
-    }
-
-    internal class Segment : ReadOnlySequenceSegment<byte>
-    {
-        private readonly byte[] buffer;
-
-        public Segment(byte[] buffer, Range range)
-        {
-            this.buffer = buffer;
-            Memory = buffer.AsMemory()[range];
-        }
-
-        public Segment Append(byte[] buffer, Range range)
-        {
-            var segment = new Segment(buffer, range)
-            {
-                RunningIndex = RunningIndex + Memory.Length
-            };
-            Next = segment;
-            return segment;
-        }
-
-        public static void Return(ReadOnlySequence<byte> sequence)
-        {
-            // TODO: I've never verified with my own eyes that this works as expected.
-            // So create both types here, verify they don't allocate, don't leak, and
-            // verify they are of the type you are expecting such that they Return().
-
-            if (sequence.IsSingleSegment)
-            {
-                if (sequence.Start.GetObject() is byte[] buffer)
-                    ArrayPool<byte>.Shared.Return(buffer);
-            }
-            else
-            {
-                var position = sequence.Start;
-                do
-                {
-                    if (position.GetObject() is Segment segment)
-                        ArrayPool<byte>.Shared.Return(segment.buffer);
-                } while (sequence.TryGet(ref position, out var memory, advance: true));
-            }
-        }
     }
 }

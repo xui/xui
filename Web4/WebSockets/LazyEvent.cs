@@ -24,14 +24,16 @@ public record struct LazyEvent : Event, IDisposable
 {
     private static readonly ObjectPool<Dictionary<string, long>> valueDictionaryPool = ObjectPool.Create<Dictionary<string, long>>();
 
+    private readonly ReadOnlySequence<byte> rpcMessage;
+    private readonly ReadOnlySequence<byte> eventParam;
     private readonly WebSocketTransport transport;
-    private readonly ReadOnlySequence<byte> message;
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public LazyEvent(ReadOnlySequence<byte> message, WebSocketTransport transport)
+    public LazyEvent(ReadOnlySequence<byte> rpcMessage, ReadOnlySequence<byte> eventParam, WebSocketTransport transport)
     {
-        this.message = message;
+        this.rpcMessage = rpcMessage;
+        this.eventParam = eventParam;
         this.transport = transport;
     }
 
@@ -40,11 +42,8 @@ public record struct LazyEvent : Event, IDisposable
         values?.Clear();
         references?.Clear();
         if (values is not null)
-        {
             valueDictionaryPool.Return(values);
-        }
-
-        WebSocketTransport.Segment.Return(message);
+        rpcMessage.ReturnToPool();
     }
 
     private void LazyParse(bool canIgnoreRefTypes = false)
@@ -64,7 +63,7 @@ public record struct LazyEvent : Event, IDisposable
     {
         try
         {
-            var reader = new Utf8JsonReader(message);
+            var reader = new Utf8JsonReader(eventParam);
             while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
