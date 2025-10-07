@@ -14,6 +14,7 @@ internal class SequenceSegment<T> : ReadOnlySequenceSegment<T>
 
     public SequenceSegment<T> Append(T[] buffer, Range range)
     {
+        // TODO: new SequenceSegment() allocates memory
         var segment = new SequenceSegment<T>(buffer, range)
         {
             RunningIndex = RunningIndex + Memory.Length

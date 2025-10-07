@@ -102,7 +102,7 @@ partial class WebSocketTransport : IWeb4Transport
 
     private async Task WebSocketToTransport(WebSocket webSocket, CancellationToken cancel)
     {
-        const int RECEIVE_BUFFER_LENGTH = 1024;
+        const int RECEIVE_BUFFER_LENGTH = 4096;
         ReadOnlySequence<byte> sequence;
         while (true)
         {
