@@ -194,11 +194,9 @@ partial class WebSocketTransport : IWeb4Transport
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
                             return sequence;
 
-                        var @event = new LazyEvent(sequence, eventSequence, this);
-                        DispatchEvent(ref @event, key);
+                        DispatchEvent(sequence, eventSequence, key);
 
-                        // Do not return the sequence.  LazyEvent will be responsible for returning the 
-                        // buffer(s) to the pool when the event handler is done using the event.
+                        // Return nothing.  DispatchEvent is responsible for returning the buffer(s) to the pool.
                         return null;
                     }
 
@@ -219,39 +217,54 @@ partial class WebSocketTransport : IWeb4Transport
         return sequence;
     }
 
-    private void DispatchEvent(ref LazyEvent @event, ReadOnlySpan<byte> key)
+    private void DispatchEvent(ReadOnlySequence<byte> sequence, ReadOnlySequence<byte> eventSequence, ReadOnlySpan<byte> key)
     {
-        var listener = windowBuilder.GetEventListener(key);
+        var eventListener = windowBuilder.GetEventListener(key);
 
-        if (listener.Action is Action noEventSync)
+        if (eventListener.Action is Action listener)
         {
             using var batchOutput = Output.UseBatchForThisScope();
-            @event.Dispose(); // Event is not being used, dispose early.
-            App.DispatchEvent(noEventSync);
+
+            // Done with buffer(s), return to pool early.
+            sequence.ReturnToPool();
+
+            App.DispatchEvent(listener);
         }
-        else if (listener.ActionEvent is Action<Event> withEventSync)
+        else if (eventListener.ActionEvent is Action<Event> listenerWithEvent)
         {
             using var batchOutput = Output.UseBatchForThisScope();
-            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-            App.DispatchEvent(withEventSync, @event);
-            @event.Dispose();
+
+            App.DispatchEvent(
+                listenerWithEvent,
+                new LazyEvent(sequence, eventSequence, this)
+                // LazyEvent will return buffer(s) to the pool after it completes.
+            );
         }
-        else if (listener.Func is Func<Task> noEventSyncAsync)
+        else if (eventListener.Func is Func<Task> listenerAsync)
         {
             using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
-            @event.Dispose(); // Event is not being used, dispose early.
-            _ = App.DispatchEvent(noEventSyncAsync);
+
+            // Done with buffer(s), return to pool early.
+            sequence.ReturnToPool();
+
+            // Do not await event listeners here!  That would block the WebSocket reader.
+            _ = App.DispatchEvent(listenerAsync);
         }
-        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
+        else if (eventListener.FuncEvent is Func<Event, Task> listenerWithEventAsync)
         {
             using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
-            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-            _ = App.DispatchEvent(withEventAsync, @event)
-                .ContinueWith(t => t.Result.Dispose());
+            
+            // Do not await event listeners here!  That would block the WebSocket reader.
+            _ = App.DispatchEvent(
+                listenerWithEventAsync,
+                new LazyEvent(sequence, eventSequence, this)
+                // LazyEvent will return buffer(s) to the pool after it completes.
+            );
         }
         else
         {
-            throw new InvalidOperationException("🛑 No event listener to invoke.  You need to investigate this.");
+            sequence.ReturnToPool();
+            System.Console.WriteLine("🛑 Event listener not found.  Possible race condition.");
         }
     }
 

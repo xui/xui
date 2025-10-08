@@ -126,7 +126,7 @@ public class Web4App
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Bad event listener:\n{ex}");
+            Console.WriteLine($"Exception from event listener:\n{ex}");
         }
     }
 
@@ -135,11 +135,17 @@ public class Web4App
     {
         try
         {
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
             listener(@event);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Bad event listener:\n{ex}");
+            Console.WriteLine($"Exception from event listener:\n{ex}");
+        }
+        finally
+        {
+            // Return buffer(s) to the pool
+            @event.Dispose();
         }
     }
 
@@ -151,22 +157,27 @@ public class Web4App
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Bad event listener:\n{ex}");
+            Console.WriteLine($"Exception from event listener:\n{ex}");
         }
     }
 
-    public async Task<T> DispatchEvent<T>(Func<Event, Task> listener, T @event)
+    public async Task DispatchEvent<T>(Func<Event, Task> listener, T @event)
         where T : struct, Event
     {
         try
         {
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
             await listener(@event);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Bad event listener:\n{ex}");
+            Console.WriteLine($"Exception from event listener:\n{ex}");
         }
-        return @event;
+        finally
+        {
+            // Return buffer(s) to the pool
+            @event.Dispose();
+        }
     }
 
     public void Ping()
