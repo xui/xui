@@ -90,16 +90,16 @@ public partial class WebSocketTransport : IKeyholes
     {
         const string CSS_DEFAULT = "font-weight:normal;font-family:monospace,monospace;";
         const string CSS_VARIABLE = "color:#aadbfb;font-weight:normal;font-family:monospace,monospace;";
-        const string CSS_FUNCTION = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
-        const string CSS_HTML = "font-weight:normal;font-family:monospace,monospace;";
         const string CSS_NUMBER = "color:#9581f7;font-weight:normal;font-family:monospace,monospace;";
         const string CSS_STRING = "color:#79c8ea;font-weight:normal;font-family:monospace,monospace;";
         const string CSS_TYPE = "color:#6fc3a7;font-weight:normal;font-family:monospace,monospace;";
         const string CSS_OPERATOR = "font-weight:normal;font-family:monospace,monospace;";
         const string CSS_LITERAL = "color:#666666;font-weight:normal;font-family:monospace,monospace;";
-        const string CSS_NOTES = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
         const string CSS_LINK = "font-size:9px;color:#aadbfb;text-decoration:underline;font-weight:normal;font-family:monospace,monospace;";
         const string CSS_BRACE = "color:#ff6600;font-weight:normal;font-family:monospace,monospace;";
+        // const string CSS_FUNCTION = "color:#f3c349;font-weight:normal;font-family:monospace,monospace;";
+        // const string CSS_HTML = "font-weight:normal;font-family:monospace,monospace;";
+        // const string CSS_NOTES = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
                 
         switch (keyhole.Type)
         {
