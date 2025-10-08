@@ -228,13 +228,13 @@ partial class WebSocketTransport : IWeb4Transport
             // Done with buffer(s), return to pool early.
             sequence.ReturnToPool();
 
-            App.DispatchEvent(listener);
+            Keyholes.DispatchEvent(listener);
         }
         else if (eventListener.ActionEvent is Action<Event> listenerWithEvent)
         {
             using var batchOutput = Output.UseBatchForThisScope();
 
-            App.DispatchEvent(
+            Keyholes.DispatchEvent(
                 listenerWithEvent,
                 new LazyEvent(sequence, eventSequence, this)
                 // LazyEvent will return buffer(s) to the pool after it completes.
@@ -248,14 +248,14 @@ partial class WebSocketTransport : IWeb4Transport
             sequence.ReturnToPool();
 
             // Do not await event listeners here!  That would block the WebSocket reader.
-            _ = App.DispatchEvent(listenerAsync);
+            _ = Keyholes.DispatchEvent(listenerAsync);
         }
         else if (eventListener.FuncEvent is Func<Event, Task> listenerWithEventAsync)
         {
             using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
             
             // Do not await event listeners here!  That would block the WebSocket reader.
-            _ = App.DispatchEvent(
+            _ = Keyholes.DispatchEvent(
                 listenerWithEventAsync,
                 new LazyEvent(sequence, eventSequence, this)
                 // LazyEvent will return buffer(s) to the pool after it completes.

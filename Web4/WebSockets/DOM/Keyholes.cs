@@ -66,6 +66,72 @@ public partial class WebSocketTransport : IKeyholes
             );
     }
 
+    public void DispatchEvent(Action listener)
+    {
+        try
+        {
+            listener();
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            Console.Error(ex);
+        }
+    }
+
+    public void DispatchEvent<T>(Action<Event> listener, T @event)
+        where T : struct, Event
+    {
+        try
+        {
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+            listener(@event);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            Console.Error(ex);
+        }
+        finally
+        {
+            // Return buffer(s) to the pool
+            @event.Dispose();
+        }
+    }
+
+    public async Task DispatchEvent(Func<Task> listener)
+    {
+        try
+        {
+            await listener();
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            Console.Error(ex);
+        }
+    }
+
+    public async Task DispatchEvent<T>(Func<Event, Task> listener, T @event)
+        where T : struct, Event
+    {
+        try
+        {
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+            await listener(@event);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            Console.Error(ex);
+        }
+        finally
+        {
+            // Return buffer(s) to the pool
+            @event.Dispose();
+        }
+    }
+
     void IKeyholes.Dump()
     {
         const string CSS_NOTES = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";

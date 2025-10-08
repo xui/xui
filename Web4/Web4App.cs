@@ -118,68 +118,6 @@ public class Web4App
     {
     }
 
-    public void DispatchEvent(Action listener)
-    {
-        try
-        {
-            listener();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception from event listener:\n{ex}");
-        }
-    }
-
-    public void DispatchEvent<T>(Action<Event> listener, T @event)
-        where T : struct, Event
-    {
-        try
-        {
-            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-            listener(@event);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception from event listener:\n{ex}");
-        }
-        finally
-        {
-            // Return buffer(s) to the pool
-            @event.Dispose();
-        }
-    }
-
-    public async Task DispatchEvent(Func<Task> listener)
-    {
-        try
-        {
-            await listener();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception from event listener:\n{ex}");
-        }
-    }
-
-    public async Task DispatchEvent<T>(Func<Event, Task> listener, T @event)
-        where T : struct, Event
-    {
-        try
-        {
-            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-            await listener(@event);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception from event listener:\n{ex}");
-        }
-        finally
-        {
-            // Return buffer(s) to the pool
-            @event.Dispose();
-        }
-    }
-
     public void Ping()
     {
         // no-op

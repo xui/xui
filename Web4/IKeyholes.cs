@@ -14,6 +14,9 @@ public interface IKeyholes
     void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition = null);
 
     void RemoveElement(string key, string? transition = null);
-
+    void DispatchEvent(Action listener);
+    void DispatchEvent<T>(Action<Event> listener, T @event) where T : struct, Event;
+    Task DispatchEvent(Func<Task> listener);
+    Task DispatchEvent<T>(Func<Event, Task> listener, T @event) where T : struct, Event;
     void Dump();
 }
