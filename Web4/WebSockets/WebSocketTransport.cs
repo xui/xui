@@ -184,47 +184,18 @@ partial class WebSocketTransport : IWeb4Transport
 
                 case var method when method.SequenceEqual("app.dispatchEvent"u8):
                     {
-                        var eventSequence               = @params.GetNextAsSequence();
-                        var key                         = @params.GetNextAsSpan(); // TODO: Move to method path?
-                        this.currentPropagationID       = @params.GetNextAsInt();
-                        this.currentPropagationLevel    = @params.GetNextOptionalAsInt() ?? 0;
+                        var eventSequence       = @params.GetNextAsSequence();
+                        var key                 = @params.GetNextAsSpan(); // TODO: Move to method path?
+                        currentPropagationID    = @params.GetNextAsInt();
+                        currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
 
+                        // Do not handle this event if `stopPropagation()` or `stopImmediatePropagation()`
+                        // has previously been called on the browser's same event instance.
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
                             return sequence;
 
                         var @event = new LazyEvent(sequence, eventSequence, this);
-                        var listener = windowBuilder.GetEventListener(key);
-
-                        if (listener.Action is Action noEventSync)
-                        {
-                            using var batchOutput = Output.UseBatchForThisScope();
-                            @event.Dispose(); // Event is not being used, dispose early.
-                            App.DispatchEvent(noEventSync);
-                        }
-                        else if (listener.ActionEvent is Action<Event> withEventSync)
-                        {
-                            using var batchOutput = Output.UseBatchForThisScope();
-                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            App.DispatchEvent(withEventSync, @event);
-                            @event.Dispose();
-                        }
-                        else if (listener.Func is Func<Task> noEventSyncAsync)
-                        {
-                            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
-                            @event.Dispose(); // Event is not being used, dispose early.
-                            _ = App.DispatchEvent(noEventSyncAsync);
-                        }
-                        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
-                        {
-                            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
-                            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
-                            _ = App.DispatchEvent(withEventAsync, @event)
-                                .ContinueWith(t => t.Result.Dispose());
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("🛑 No event listener to invoke.  You need to investigate this.");
-                        }
+                        DispatchEvent(ref @event, key);
 
                         // Do not return the sequence.  LazyEvent will be responsible for returning the 
                         // buffer(s) to the pool when the event handler is done using the event.
@@ -246,6 +217,42 @@ partial class WebSocketTransport : IWeb4Transport
                 a.Update();
         }
         return sequence;
+    }
+
+    private void DispatchEvent(ref LazyEvent @event, ReadOnlySpan<byte> key)
+    {
+        var listener = windowBuilder.GetEventListener(key);
+
+        if (listener.Action is Action noEventSync)
+        {
+            using var batchOutput = Output.UseBatchForThisScope();
+            @event.Dispose(); // Event is not being used, dispose early.
+            App.DispatchEvent(noEventSync);
+        }
+        else if (listener.ActionEvent is Action<Event> withEventSync)
+        {
+            using var batchOutput = Output.UseBatchForThisScope();
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+            App.DispatchEvent(withEventSync, @event);
+            @event.Dispose();
+        }
+        else if (listener.Func is Func<Task> noEventSyncAsync)
+        {
+            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+            @event.Dispose(); // Event is not being used, dispose early.
+            _ = App.DispatchEvent(noEventSyncAsync);
+        }
+        else if (listener.FuncEvent is Func<Event, Task> withEventAsync)
+        {
+            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+            // TODO: Memory allocation casting from TEvent (struct) to Event interface.
+            _ = App.DispatchEvent(withEventAsync, @event)
+                .ContinueWith(t => t.Result.Dispose());
+        }
+        else
+        {
+            throw new InvalidOperationException("🛑 No event listener to invoke.  You need to investigate this.");
+        }
     }
 
     public void Diff(Keyhole[] oldBuffer, Keyhole[] newBuffer)
