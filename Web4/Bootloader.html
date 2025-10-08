@@ -63,7 +63,6 @@
     get elements() {
       return Object.fromEntries(Object
         .values(app.keyholes)
-        .filter(k => k.key.startsWith("key"))
         .map(k => [k.key, k.element]
       ));
     }

@@ -307,12 +307,12 @@ public class WindowBuilder :
     private string CreateListenerString(string? format, string type, string target, string key, string options) => format switch
     {
         // Serialize nothing – the event object is never used
-        "" => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('')), {options});",
+        "" => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('')), {options}); app.keyholes['{key}'] = new Web4Keyhole('{key}', {target});",
 
         // Serialize the event – the event object is needed
-        null => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('*')), {options});",
+        null => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('*')), {options}); app.keyholes['{key}'] = new Web4Keyhole('{key}', {target});",
 
         // Serialize selectively – only a few properties are ever used
-        _ => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('{format}')), {options});",
+        _ => $"{target}.addEventListener('{type}', e => app.keyholes.{key}.dispatchEvent(e.trim('{format}')), {options}); app.keyholes['{key}'] = new Web4Keyhole('{key}', {target});",
     };
 }
