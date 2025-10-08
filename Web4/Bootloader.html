@@ -34,10 +34,6 @@
       return this.keyholes[key]?.element;
     }
 
-    dispatchEvent(event, key) {
-      this.#transport.dispatchEvent(event, key);
-    }
-
     ping(repeat) {
       repeat = repeat ?? 1;
       console.time("ping");
@@ -58,6 +54,10 @@
 
     constructor(transport) {
       this.#transport = transport;
+    }
+
+    dispatchEvent(event, key) {
+      this.#transport.dispatchEvent(event, key);
     }
 
     get elements() {
@@ -137,6 +137,10 @@
         () => this.element.parentNode.removeChild(this.element),
         () => Web4Keyhole.#unregisterKeyholes()
       )
+    }
+
+    dispatchEvent(event) {
+      app.keyholes.dispatchEvent(event, this.key);
     }
 
     #mutate(transition, mutate, finish) {
@@ -240,13 +244,13 @@
     }
 
     dispatchEvent(event, key) {
-      let params = [event, key, Event.prototype.NEXT_PROPAGATION_ID];
+      let params = [event, Event.prototype.NEXT_PROPAGATION_ID];
       if (Event.prototype.NEXT_PROPAGATION_LEVEL)
         params.push(Event.prototype.NEXT_PROPAGATION_LEVEL)
 
       let message = {
         jsonrpc: "2.0", 
-        method: "app.dispatchEvent", 
+        method: `app.keyholes.${key}.dispatchEvent`, 
         params: params
       };
       this.#webSocket.send(JSON.stringify(message));

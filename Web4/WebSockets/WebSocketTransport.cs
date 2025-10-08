@@ -182,10 +182,9 @@ partial class WebSocketTransport : IWeb4Transport
                         break;
                     }
 
-                case var method when method.SequenceEqual("app.dispatchEvent"u8):
+                case var method when method.EndsWith("dispatchEvent"u8):
                     {
                         var eventSequence       = @params.GetNextAsSequence();
-                        var key                 = @params.GetNextAsSpan(); // TODO: Move to method path?
                         currentPropagationID    = @params.GetNextAsInt();
                         currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
 
@@ -194,7 +193,7 @@ partial class WebSocketTransport : IWeb4Transport
                         if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
                             return sequence;
 
-                        DispatchEvent(sequence, eventSequence, key);
+                        DispatchEvent(sequence, eventSequence, GetKey(method));
 
                         // Return nothing.  DispatchEvent is responsible for returning the buffer(s) to the pool.
                         return null;
@@ -215,6 +214,14 @@ partial class WebSocketTransport : IWeb4Transport
                 a.Update();
         }
         return sequence;
+    }
+
+    private static ReadOnlySpan<byte> GetKey(ReadOnlySpan<byte> method)
+    {
+        var split = method.Split((byte)'.');
+        return split.MoveNext() && split.MoveNext() && split.MoveNext()
+            ? method[split.Current]
+            : [];
     }
 
     private void DispatchEvent(ReadOnlySequence<byte> sequence, ReadOnlySequence<byte> eventSequence, ReadOnlySpan<byte> key)
@@ -253,7 +260,7 @@ partial class WebSocketTransport : IWeb4Transport
         else if (eventListener.FuncEvent is Func<Event, Task> listenerWithEventAsync)
         {
             using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
-            
+
             // Do not await event listeners here!  That would block the WebSocket reader.
             _ = Keyholes.DispatchEvent(
                 listenerWithEventAsync,
@@ -264,7 +271,7 @@ partial class WebSocketTransport : IWeb4Transport
         else
         {
             sequence.ReturnToPool();
-            System.Console.WriteLine("🛑 Event listener not found.  Possible race condition.");
+            System.Console.WriteLine($"🛑 Event listener not found for key: `{System.Text.Encoding.UTF8.GetString(key)}`.  Possible race condition.");
         }
     }
 
