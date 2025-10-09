@@ -11,11 +11,6 @@ namespace Web4.WebSockets;
 partial class WebSocketTransport : IWeb4Transport
 {
     private static readonly ConcurrentDictionary<string, Web4App> apps = [];
-    private readonly WindowBuilder windowBuilder;
-    private int currentPropagationID = 0;
-    private int currentPropagationLevel = 0;
-    private int suppressPropagationID = 0;
-    private int suppressPropagationLevel = 0;
     private readonly Channel<ReadOnlySequence<byte>> channel = Channel.CreateBounded<ReadOnlySequence<byte>>(
         options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
         {
@@ -30,6 +25,8 @@ partial class WebSocketTransport : IWeb4Transport
             // - Skip the line and gracefully close it.
             // - Signal this transport to unregister itself everywhere.
         });
+    private readonly WindowBuilder windowBuilder;
+    private readonly Propagation propagation = new();
 
     public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
     public Web4App App { get; init; }
@@ -184,13 +181,13 @@ partial class WebSocketTransport : IWeb4Transport
 
                 case var method when method.EndsWith("dispatchEvent"u8):
                     {
-                        var eventSequence       = @params.GetNextAsSequence();
-                        currentPropagationID    = @params.GetNextAsInt();
-                        currentPropagationLevel = @params.GetNextOptionalAsInt() ?? 0;
+                        var eventSequence        = @params.GetNextAsSequence();
+                        propagation.CurrentID    = @params.GetNextAsInt();
+                        propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
 
                         // Do not handle this event if `stopPropagation()` or `stopImmediatePropagation()`
                         // has previously been called on the browser's same event instance.
-                        if (currentPropagationID == suppressPropagationID && currentPropagationLevel >= suppressPropagationLevel)
+                        if (propagation.CurrentID == propagation.SuppressID && propagation.CurrentLevel >= propagation.SuppressLevel)
                             return sequence;
 
                         DispatchEvent(sequence, eventSequence, GetKey(method));
@@ -283,14 +280,14 @@ partial class WebSocketTransport : IWeb4Transport
 
     internal void StopPropagation()
     {
-        suppressPropagationID = currentPropagationID;
-        suppressPropagationLevel = currentPropagationLevel + 1;
+        propagation.SuppressID = propagation.CurrentID;
+        propagation.SuppressLevel = propagation.CurrentLevel + 1;
     }
 
     internal void StopImmediatePropagation()
     {
-        suppressPropagationID = currentPropagationID;
-        suppressPropagationLevel = 0;
+        propagation.SuppressID = propagation.CurrentID;
+        propagation.SuppressLevel = 0;
     }
 
     private static async Task Disconnect(WebSocket webSocket)
