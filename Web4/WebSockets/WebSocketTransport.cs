@@ -33,7 +33,10 @@ partial class WebSocketTransport : IWeb4Transport
 
     public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
     public Web4App App { get; init; }
-    public IKeyholes Keyholes { get; init; }
+    public IWindow Window => this;
+    public IDocument Document => this;
+    public IConsole Console => this;
+    public IKeyholes Keyholes => this;
 
     private WebSocketTransport(string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
     {
@@ -45,7 +48,6 @@ partial class WebSocketTransport : IWeb4Transport
             apps[windowID] = app;
         }
         App = app;
-        Keyholes = new Keyholes(this);
     }
 
     public static async Task Bind(HttpContext http, WindowBuilder windowBuilder, CancellationToken cancelProcess)

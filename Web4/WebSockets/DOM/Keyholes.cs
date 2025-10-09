@@ -1,14 +1,12 @@
-using System.Text;
 using Web4.Core.DOM;
 using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
-public class Keyholes(WebSocketTransport transport) : IKeyholes
+// Instead of a new-ing up another class, save an instantiation 
+// and explicitly implement on WebSocketTransport.
+partial class WebSocketTransport : IKeyholes
 {
-    private JsonRpcWriter Output => transport.Output;
-    private IConsole Console => transport;
-
     public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         Output.WriteNotification(
@@ -136,7 +134,7 @@ public class Keyholes(WebSocketTransport transport) : IKeyholes
 
     public void Dump()
     {
-        var buffer = transport.App.CaptureSnapshot();
+        var buffer = App.CaptureSnapshot();
         new KeyholeDumper(Console, buffer).Dump();
     }
 }
