@@ -26,7 +26,7 @@
 
 <script>
 
-  class Web4App {
+  class Web4UI {
     #transport = new WebSocketTransport();
     keyholes = new Web4Keyholes(this.#transport);
 
@@ -66,7 +66,7 @@
 
     get elements() {
       return Object.fromEntries(Object
-        .values(app.keyholes)
+        .values(ui.keyholes)
         .map(k => [k.key, k.element]
       ));
     }
@@ -184,7 +184,7 @@
 
     static #registerKeyholes(node, key) {
       if (node) {
-        app.keyholes.set(key, node);
+        ui.keyholes.set(key, node);
       } else {
         node = document;
       }
@@ -198,7 +198,7 @@
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
             element = element.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          app.keyholes.set(key, element);
+          ui.keyholes.set(key, element);
         }
         comment.parentElement.removeChild(comment);
       }
@@ -210,9 +210,9 @@
         if (key.startsWith('key')) {
           if (attr.value === "") {
             let element = attrs.snapshotItem(i - 1)
-            app.keyholes.set(key, element);
+            ui.keyholes.set(key, element);
           } else {
-            app.keyholes.set(key, attr.ownerElement, attr.value);
+            ui.keyholes.set(key, attr.ownerElement, attr.value);
           }
           attr.ownerElement.removeAttribute(attr.name)
         }
@@ -220,12 +220,12 @@
     }
 
     static #unregisterKeyholes() {
-      for (let key in app.keyholes) {
-        let element = app.keyholes[key].element;
+      for (let key in ui.keyholes) {
+        let element = ui.keyholes[key].element;
         if (element.nodeType == Node.ATTRIBUTE_NODE)
           element = element.ownerElement;
         if (!document.body.contains(element))
-          delete app.keyholes[key];
+          delete ui.keyholes[key];
       }
     }
   }
@@ -254,7 +254,7 @@
 
       let message = {
         jsonrpc: "2.0", 
-        method: `app.keyholes.${key}.dispatchEvent`, 
+        method: `ui.keyholes.${key}.dispatchEvent`, 
         params: params
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -263,7 +263,7 @@
     ping() {
       let message = { 
         jsonrpc: "2.0", 
-        method: "app.ping", 
+        method: "ui.ping", 
         id: ++this.#messageID,
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -276,7 +276,7 @@
     dump() {
       let message = {
         jsonrpc: "2.0", 
-        method: "app.keyholes.dump", 
+        method: "ui.keyholes.dump", 
       };
       this.#webSocket.send(JSON.stringify(message));
     }
@@ -341,7 +341,7 @@
     }
   }
 
-  this.app = new Web4App();
+  this.ui = new Web4UI();
 
   Event.prototype.trim = function(members) {
     const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];

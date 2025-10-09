@@ -10,7 +10,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         Output.WriteNotification(
-            method: ("app.keyholes", newKeyhole.Key, "setTextNode"),
+            method: ("ui.keyholes", newKeyhole.Key, "setTextNode"),
             param: ref newKeyhole
         );
     }
@@ -18,7 +18,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         Output.WriteNotification(
-            method: ("app.keyholes", newKeyhole.Key, "setAttribute"),
+            method: ("ui.keyholes", newKeyhole.Key, "setAttribute"),
             param: ref newKeyhole
         );
     }
@@ -26,7 +26,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         Output.WriteNotification(
-            method: ("app.keyholes", key, "setAttribute"),
+            method: ("ui.keyholes", key, "setAttribute"),
             newKeyholes,
             includeSentinels: false
         );
@@ -35,7 +35,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
     {
         Output.WriteNotification(
-            method: ("app.keyholes", key, "setElement"),
+            method: ("ui.keyholes", key, "setElement"),
             newKeyholes,
             includeSentinels: true,
             transition: transition
@@ -45,7 +45,7 @@ partial class WebSocketTransport : IKeyholes
     public void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
     {
         Output.WriteNotification(
-            method: ("app.keyholes", priorKey, "addElement"),
+            method: ("ui.keyholes", priorKey, "addElement"),
             param1: key,
             param2: keyholes,
             includeSentinels: true,
@@ -57,11 +57,11 @@ partial class WebSocketTransport : IKeyholes
     {
         if (transition is null)
             Output.WriteNotification(
-                method: ("app.keyholes", key, "removeElement")
+                method: ("ui.keyholes", key, "removeElement")
             );
         else
             Output.WriteNotification(
-                method: ("app.keyholes", key, "removeElement"),
+                method: ("ui.keyholes", key, "removeElement"),
                 param: transition
             );
     }

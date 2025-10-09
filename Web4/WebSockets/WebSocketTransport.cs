@@ -212,7 +212,7 @@ partial class WebSocketTransport
 
             switch (rpc.Method)
             {
-                case var method when method.SequenceEqual("app.keyholes.dump"u8):
+                case var method when method.SequenceEqual("ui.keyholes.dump"u8):
                     {
                         using var batchOutput = Output.UseBatchForThisScope();
                         Keyholes.Dump();
