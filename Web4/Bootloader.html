@@ -56,8 +56,12 @@
       this.#transport = transport;
     }
 
-    dispatchEvent(event, key) {
-      this.#transport.dispatchEvent(event, key);
+    set(key, node, booleanAttributeName) {
+      this[key] = new Web4Keyhole(this.#transport, key, node);
+      if (booleanAttributeName)
+        this[key].booleanAttributeName = booleanAttributeName;
+      else
+        delete this.booleanAttributeName;
     }
 
     get elements() {
@@ -73,6 +77,7 @@
   }
 
   class Web4Keyhole {
+    #transport;
     key;
     element;
 
@@ -80,7 +85,8 @@
       document.addEventListener('DOMContentLoaded', () => Web4Keyhole.#registerKeyholes());
     }
 
-    constructor(key, element) {
+    constructor(transport, key, element) {
+      this.#transport = transport;
       this.key = key;
       this.element = element;
     }
@@ -139,7 +145,7 @@
     }
 
     dispatchEvent(event) {
-      app.keyholes.dispatchEvent(event, this.key);
+      this.#transport.dispatchEvent(event, this.key);
     }
 
     #mutate(transition, mutate, finish) {
@@ -178,7 +184,7 @@
 
     static #registerKeyholes(node, key) {
       if (node) {
-        app.keyholes[key] = new Web4Keyhole(key, node);
+        app.keyholes.set(key, node);
       } else {
         node = document;
       }
@@ -192,7 +198,7 @@
             // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
             element = element.parentNode.insertBefore(document.createTextNode(""), comment);
           }
-          app.keyholes[key] = new Web4Keyhole(key, element);
+          app.keyholes.set(key, element);
         }
         comment.parentElement.removeChild(comment);
       }
@@ -204,10 +210,9 @@
         if (key.startsWith('key')) {
           if (attr.value === "") {
             let element = attrs.snapshotItem(i - 1)
-            app.keyholes[key] = new Web4Keyhole(key, element);
+            app.keyholes.set(key, element);
           } else {
-            app.keyholes[key] = new Web4Keyhole(key, attr.ownerElement);
-            app.keyholes[key].booleanAttributeName = attr.value;
+            app.keyholes.set(key, attr.ownerElement, attr.value);
           }
           attr.ownerElement.removeAttribute(attr.name)
         }
