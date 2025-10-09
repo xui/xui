@@ -183,16 +183,16 @@ public ref partial struct Html
         return @continue;
     }
 
-    // EX: <div>{ new MyComponent(name: "Rylan") }</div>
-    public bool AppendFormatted<TRender>(TRender renderer, string? format = null, [CallerArgumentExpression(nameof(renderer))] string? expression = null) where TRender : struct, IRender
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
+    // // EX: <div>{ new MyComponent(name: "Rylan") }</div>
+    // public bool AppendFormatted<TRender>(TRender renderer, string? format = null, [CallerArgumentExpression(nameof(renderer))] string? expression = null) where TRender : struct, IRender
+    // {
+    //     if (IsEven(Cursor))
+    //         AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableElement(ref this, ref renderer, format, expression);
-        Cursor++;
-        return @continue;
-    }
+    //     var @continue = composer.WriteMutableElement(ref this, ref renderer, format, expression);
+    //     Cursor++;
+    //     return @continue;
+    // }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsEven(int number) => number % 2 == 0;
