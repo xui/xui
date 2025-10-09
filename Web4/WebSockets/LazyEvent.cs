@@ -663,7 +663,7 @@ public record struct LazyEvent : Event, IDisposable
     public double? Y => GetDouble("y");
     double IXY.Y => Y ?? default;
 
-    public void StopPropagation() => transport.StopPropagation();
+    public void StopPropagation() => transport.Propagation.Stop();
 
-    public void StopImmediatePropagation() => transport.StopImmediatePropagation();
+    public void StopImmediatePropagation() => transport.Propagation.StopImmediate();
 }

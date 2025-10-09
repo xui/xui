@@ -26,8 +26,8 @@ partial class WebSocketTransport : IWeb4Transport
             // - Signal this transport to unregister itself everywhere.
         });
     private readonly WindowBuilder windowBuilder;
-    private Propagation propagation = new();
 
+    public Propagation Propagation { get; } = new();
     public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
     public Web4App App { get; init; }
     public IWindow Window => this;
@@ -182,12 +182,12 @@ partial class WebSocketTransport : IWeb4Transport
                 case var method when method.EndsWith("dispatchEvent"u8):
                     {
                         var eventSequence        = @params.GetNextAsSequence();
-                        propagation.CurrentID    = @params.GetNextAsInt();
-                        propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
+                        Propagation.CurrentID    = @params.GetNextAsInt();
+                        Propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
 
                         // Do not handle this event if `stopPropagation()` or `stopImmediatePropagation()`
                         // has previously been called on the browser's same event instance.
-                        if (propagation.CurrentID == propagation.SuppressID && propagation.CurrentLevel >= propagation.SuppressLevel)
+                        if (Propagation.IsStopped)
                             return sequence;
 
                         DispatchEvent(sequence, eventSequence, GetKey(method));
@@ -276,18 +276,6 @@ partial class WebSocketTransport : IWeb4Transport
     {
         using var batchOutput = Output.UseBatchForThisScope();
         DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
-    }
-
-    internal void StopPropagation()
-    {
-        propagation.SuppressID = propagation.CurrentID;
-        propagation.SuppressLevel = propagation.CurrentLevel + 1;
-    }
-
-    internal void StopImmediatePropagation()
-    {
-        propagation.SuppressID = propagation.CurrentID;
-        propagation.SuppressLevel = 0;
     }
 
     private static async Task Disconnect(WebSocket webSocket)
