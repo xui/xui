@@ -1,13 +1,15 @@
 using System.Text;
 using Web4.Core.DOM;
+using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
-// Instead of a new-ing up another class, save an instantiation 
-// and explicitly implement on WebSocketTransport.
-public partial class WebSocketTransport : IKeyholes
+public class Keyholes(WebSocketTransport transport) : IKeyholes
 {
-    void IKeyholes.SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    private JsonRpcWriter Output => transport.Output;
+    private IConsole Console => transport;
+
+    public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         Output.WriteNotification(
             method: ("app.keyholes", newKeyhole.Key, "setTextNode"),
@@ -15,7 +17,7 @@ public partial class WebSocketTransport : IKeyholes
         );
     }
 
-    void IKeyholes.SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    public void SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         Output.WriteNotification(
             method: ("app.keyholes", newKeyhole.Key, "setAttribute"),
@@ -23,7 +25,7 @@ public partial class WebSocketTransport : IKeyholes
         );
     }
 
-    void IKeyholes.SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
+    public void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
     {
         Output.WriteNotification(
             method: ("app.keyholes", key, "setAttribute"),
@@ -32,7 +34,7 @@ public partial class WebSocketTransport : IKeyholes
         );
     }
 
-    void IKeyholes.SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
+    public void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
     {
         Output.WriteNotification(
             method: ("app.keyholes", key, "setElement"),
@@ -42,7 +44,7 @@ public partial class WebSocketTransport : IKeyholes
         );
     }
 
-    void IKeyholes.AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
+    public void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
     {
         Output.WriteNotification(
             method: ("app.keyholes", priorKey, "addElement"),
@@ -53,7 +55,7 @@ public partial class WebSocketTransport : IKeyholes
         );
     }
 
-    void IKeyholes.RemoveElement(string key, string? transition)
+    public void RemoveElement(string key, string? transition)
     {
         if (transition is null)
             Output.WriteNotification(
@@ -132,9 +134,9 @@ public partial class WebSocketTransport : IKeyholes
         }
     }
 
-    void IKeyholes.Dump()
+    public void Dump()
     {
-        var buffer = App.CaptureSnapshot();
+        var buffer = transport.App.CaptureSnapshot();
         new KeyholeDumper(Console, buffer).Dump();
     }
 }
