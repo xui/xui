@@ -26,7 +26,7 @@ partial class WebSocketTransport : IWeb4Transport
             // - Signal this transport to unregister itself everywhere.
         });
     private readonly WindowBuilder windowBuilder;
-    private readonly Propagation propagation = new();
+    private Propagation propagation = new();
 
     public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
     public Web4App App { get; init; }
