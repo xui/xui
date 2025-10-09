@@ -1,35 +1,29 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
+using Web4.Composers;
 using Web4.Core.DOM;
 using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
-partial class WebSocketTransport : IWeb4Transport
+partial class WebSocketTransport
 {
-    private static readonly ConcurrentDictionary<string, Web4App> apps = [];
-    private readonly Channel<ReadOnlySequence<byte>> channel = Channel.CreateBounded<ReadOnlySequence<byte>>(
-        options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
-        {
-            AllowSynchronousContinuations = true,
-            FullMode = BoundedChannelFullMode.DropWrite,
-            SingleReader = true,
-            SingleWriter = false,
-        },
-        itemDropped: sequence =>
-        {
-            // TODO: WebSocket is borked?  Handle:
-            // - Skip the line and gracefully close it.
-            // - Signal this transport to unregister itself everywhere.
-        });
+    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
+    private static readonly ConcurrentDictionary<string, WebSocketTransport> transports = [];
     private readonly WindowBuilder windowBuilder;
+    private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
+    private readonly Channel<int> diffChannel;
+    private readonly Channel<ReadOnlySequence<byte>> outputChannel;
+    private Keyhole[]? snapshot = null;
 
+
+    public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
-    public JsonRpcWriter Output => JsonRpcWriter.Current(channel.Writer);
-    public Web4App App { get; init; }
+    public JsonRpcWriter Output => JsonRpcWriter.Current(outputChannel.Writer);
     public IWindow Window => this;
     public IDocument Document => this;
     public IConsole Console => this;
@@ -39,12 +33,37 @@ partial class WebSocketTransport : IWeb4Transport
     {
         this.windowBuilder = windowBuilder;
 
-        if (!apps.TryGetValue(windowID, out var app))
-        {
-            app = new Web4App(this, windowBuilder, cancel);
-            apps[windowID] = app;
-        }
-        App = app;
+        diffChannel = Channel.CreateBounded<int>(
+            new BoundedChannelOptions(1)
+            {
+                AllowSynchronousContinuations = true,
+                SingleReader = true,
+                SingleWriter = false,
+                FullMode = BoundedChannelFullMode.DropWrite
+            }
+        );
+
+        outputChannel = Channel.CreateBounded<ReadOnlySequence<byte>>(
+            options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
+            {
+                AllowSynchronousContinuations = true,
+                FullMode = BoundedChannelFullMode.DropWrite,
+                SingleReader = true,
+                SingleWriter = false,
+            },
+            itemDropped: sequence =>
+            {
+                // TODO: WebSocket is borked?  Handle:
+                // - Skip the line and gracefully close it.
+                // - Signal this transport to unregister itself everywhere.
+            }
+        );
+
+        // if (!apps.TryGetValue(windowID, out var transport))
+        // {
+        //     apps[windowID] = app;
+        // }
+        // App = app;
     }
 
     public static async Task Bind(HttpContext http, WindowBuilder windowBuilder, CancellationToken cancelProcess)
@@ -62,20 +81,27 @@ partial class WebSocketTransport : IWeb4Transport
         using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         var cancelProcessRegistration = cancelProcess.Register(async () => await Disconnect(webSocket));
 
-        var sendTask = transport.ChannelToWebSocket(webSocket, http.RequestAborted);
-        var recvTask = transport.WebSocketToTransport(webSocket, http.RequestAborted);
-        await Task.WhenAny(sendTask, recvTask);
-        
+        transports[windowID] = transport;
+
+        await Task.WhenAny(
+            transport.OutputToWebSocket(webSocket, http.RequestAborted),
+            transport.WebSocketToMethod(webSocket, http.RequestAborted),
+            transport.DebounceDiffs(http.RequestAborted)
+        );
+
+        System.Console.WriteLine($"👋 Goodbye, `{windowID}`!");
+
+        transports.Remove(windowID, out var _);
         cancelProcessRegistration.Unregister();
     }
 
-    private async Task ChannelToWebSocket(WebSocket webSocket, CancellationToken cancel)
+    private async Task OutputToWebSocket(WebSocket webSocket, CancellationToken cancel)
     {
         while (!cancel.IsCancellationRequested && webSocket.State == WebSocketState.Open)
         {
             try
             {
-                var sequence = await channel.Reader.ReadAsync(cancel);
+                var sequence = await outputChannel.Reader.ReadAsync(cancel);
                 var bytesRemaining = sequence.Length;
                 foreach (var memory in sequence)
                 {
@@ -90,6 +116,10 @@ partial class WebSocketTransport : IWeb4Transport
 
                 sequence.ReturnToPool();
             }
+            catch (OperationCanceledException)
+            {
+                System.Console.WriteLine($"Connection severed.");
+            }
             catch (Exception ex)
             {
                 System.Console.WriteLine($"🛑 Unexpected error writing to the WebSocket.\n{ex}");
@@ -97,7 +127,7 @@ partial class WebSocketTransport : IWeb4Transport
         }
     }
 
-    private async Task WebSocketToTransport(WebSocket webSocket, CancellationToken cancel)
+    private async Task WebSocketToMethod(WebSocket webSocket, CancellationToken cancel)
     {
         const int RECEIVE_BUFFER_LENGTH = 4096;
         ReadOnlySequence<byte> sequence;
@@ -144,11 +174,36 @@ partial class WebSocketTransport : IWeb4Transport
         }
     }
 
+    private async Task DebounceDiffs(CancellationToken cancel)
+    {
+        // TODO: I don't like how it awaits Task.Delay on the first run.
+
+        var lastUpdate = Stopwatch.StartNew();
+        while (!cancel.IsCancellationRequested)
+        {
+            // Debounce!  If the last update was less than 16 ms ago (60 fps),
+            // then wait until the "next frame" before updating again
+            // (i.e. no need to run Update() more frequently than the screen's refresh rate).
+            // There could be (potentially) millions of state changes every 16 ms
+            // and it'd be wasteful to run diffs or send mutations for each
+            // when most screens can only handle 60 Hz.
+            var timeUntilNextUpdate = diffInterval.Subtract(lastUpdate.Elapsed);
+            if (timeUntilNextUpdate > TimeSpan.Zero)
+                await Task.Delay(timeUntilNextUpdate, cancel);
+            lastUpdate.Restart();
+
+            // If here, this app has a green light to do work again 
+            // so await until an update is requested.  
+            _ = await diffChannel.Reader.ReadAsync(cancel);
+            Reconcile();
+        }
+    }
+
     private ReadOnlySequence<byte>? HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
     {
         // TODO: This doesn't belong here.
-        foreach (var a in apps.Values)
-            a.Invalidate();
+        foreach (var t in transports.Values)
+            t.Invalidate();
 
         try
         {
@@ -168,21 +223,21 @@ partial class WebSocketTransport : IWeb4Transport
                     {
                         using var batchOutput = Output.UseBatchForThisScope();
                         var threads = @params.GetNextOptionalAsInt();
-                        App.Benchmark(threads);
+                        // App.Benchmark(threads);
                         break;
                     }
 
                 case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
                     {
-                        App.Ping();
+                        // App.Ping();
                         Output.WriteResponse(id);
                         break;
                     }
 
                 case var method when method.EndsWith("dispatchEvent"u8):
                     {
-                        var eventSequence        = @params.GetNextAsSequence();
-                        Propagation.CurrentID    = @params.GetNextAsInt();
+                        var eventSequence = @params.GetNextAsSequence();
+                        Propagation.CurrentID = @params.GetNextAsInt();
                         Propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
 
                         // Do not handle this event if `stopPropagation()` or `stopImmediatePropagation()`
@@ -207,8 +262,8 @@ partial class WebSocketTransport : IWeb4Transport
         finally
         {
             // TODO: This doesn't belong here.
-            foreach (var a in apps.Values)
-                a.Update();
+            foreach (var t in transports.Values)
+                t.Update();
         }
         return sequence;
     }
@@ -241,7 +296,7 @@ partial class WebSocketTransport : IWeb4Transport
             Keyholes.DispatchEvent(
                 listenerWithEvent,
                 new LazyEvent(sequence, eventSequence, this)
-                // LazyEvent will return buffer(s) to the pool after it completes.
+            // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }
         else if (eventListener.Func is Func<Task> listenerAsync)
@@ -262,7 +317,7 @@ partial class WebSocketTransport : IWeb4Transport
             _ = Keyholes.DispatchEvent(
                 listenerWithEventAsync,
                 new LazyEvent(sequence, eventSequence, this)
-                // LazyEvent will return buffer(s) to the pool after it completes.
+            // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }
         else
@@ -272,12 +327,6 @@ partial class WebSocketTransport : IWeb4Transport
         }
     }
 
-    public void Diff(Keyhole[] oldBuffer, Keyhole[] newBuffer)
-    {
-        using var batchOutput = Output.UseBatchForThisScope();
-        DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
-    }
-
     private static async Task Disconnect(WebSocket webSocket)
     {
         await webSocket.CloseAsync(
@@ -285,5 +334,76 @@ partial class WebSocketTransport : IWeb4Transport
             "Application ended...",
             CancellationToken.None
         );
+    }
+
+    public void SetRefreshRate(int milliseconds)
+    {
+        diffInterval = TimeSpan.FromMilliseconds(milliseconds);
+    }
+
+    private Keyhole[] CaptureSnapshot()
+    {
+        using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
+
+        return windowBuilder.Html.CreateSnapshot();
+    }
+
+    public void Invalidate()
+    {
+        if (IsInvalidated)
+            return;
+
+        IsInvalidated = true;
+
+        // This only does work when SnapshotStrategy is in "Recapture" mode
+        // since snapshot is never set to null while operating in "Retain" mode.
+        snapshot ??= CaptureSnapshot();
+    }
+
+    public void Update()
+    {
+        if (!IsInvalidated)
+            return;
+
+        while (!diffChannel.Writer.TryWrite(0)) ;
+    }
+
+    private void Reconcile()
+    {
+        if (!IsInvalidated)
+        {
+            System.Console.WriteLine($"Cancelling Update() this app has not been invalidated.");
+            return;
+        }
+
+        if (snapshot is null)
+        {
+            System.Console.WriteLine($"Cancelling Update() because snapshot is null (which is unexpected and should be investigated).");
+            return;
+        }
+
+        Keyhole[] oldBuffer = snapshot;
+        Keyhole[] newBuffer = CaptureSnapshot();
+        using (var batchOutput = Output.UseBatchForThisScope())
+        {
+            DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
+        }
+
+        switch (SnapshotStrategy)
+        {
+            case SnapshotStrategy.Recapture:
+                // Do not keep this snapshot buffer for later.
+                snapshot = null;
+                oldBuffer.Return();
+                newBuffer.Return();
+                break;
+            case SnapshotStrategy.Retain:
+                // Keep this snapshot buffer around to use as the "before" next time.
+                snapshot = newBuffer;
+                oldBuffer.Return();
+                break;
+        }
+
+        IsInvalidated = false;
     }
 }

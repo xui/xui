@@ -134,7 +134,7 @@ partial class WebSocketTransport : IKeyholes
 
     public void Dump()
     {
-        var buffer = App.CaptureSnapshot();
+        var buffer = CaptureSnapshot();
         new KeyholeDumper(Console, buffer).Dump();
     }
 }
