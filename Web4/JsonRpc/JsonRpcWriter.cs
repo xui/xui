@@ -33,7 +33,7 @@ public partial class JsonRpcWriter : IDisposable
         return writer;
     }
 
-    public FlushOnDispose UseBatchForThisScope(bool continueOnCapturedContext = false)
+    public FlushOnDispose BatchThisScope(bool continueOnCapturedContext = false)
     {
         if (continueOnCapturedContext)
         {

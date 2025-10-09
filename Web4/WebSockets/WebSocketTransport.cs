@@ -214,14 +214,14 @@ partial class WebSocketTransport
             {
                 case var method when method.SequenceEqual("ui.keyholes.dump"u8):
                     {
-                        using var batchOutput = Output.UseBatchForThisScope();
+                        using var batchOutput = Output.BatchThisScope();
                         Keyholes.Dump();
                         break;
                     }
 
                 case var method when method.SequenceEqual("app.benchmark"u8):
                     {
-                        using var batchOutput = Output.UseBatchForThisScope();
+                        using var batchOutput = Output.BatchThisScope();
                         var threads = @params.GetNextOptionalAsInt();
                         // App.Benchmark(threads);
                         break;
@@ -282,7 +282,7 @@ partial class WebSocketTransport
 
         if (eventListener.Action is Action listener)
         {
-            using var batchOutput = Output.UseBatchForThisScope();
+            using var batchOutput = Output.BatchThisScope();
 
             // Done with buffer(s), return to pool early.
             sequence.ReturnToPool();
@@ -291,7 +291,7 @@ partial class WebSocketTransport
         }
         else if (eventListener.ActionEvent is Action<Event> listenerWithEvent)
         {
-            using var batchOutput = Output.UseBatchForThisScope();
+            using var batchOutput = Output.BatchThisScope();
 
             Keyholes.DispatchEvent(
                 listenerWithEvent,
@@ -301,7 +301,7 @@ partial class WebSocketTransport
         }
         else if (eventListener.Func is Func<Task> listenerAsync)
         {
-            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+            using var batchOutput = Output.BatchThisScope(continueOnCapturedContext: true);
 
             // Done with buffer(s), return to pool early.
             sequence.ReturnToPool();
@@ -311,7 +311,7 @@ partial class WebSocketTransport
         }
         else if (eventListener.FuncEvent is Func<Event, Task> listenerWithEventAsync)
         {
-            using var batchOutput = Output.UseBatchForThisScope(continueOnCapturedContext: true);
+            using var batchOutput = Output.BatchThisScope(continueOnCapturedContext: true);
 
             // Do not await event listeners here!  That would block the WebSocket reader.
             _ = Keyholes.DispatchEvent(
@@ -384,7 +384,7 @@ partial class WebSocketTransport
 
         Keyhole[] oldBuffer = snapshot;
         Keyhole[] newBuffer = CaptureSnapshot();
-        using (var batchOutput = Output.UseBatchForThisScope())
+        using (var batchOutput = Output.BatchThisScope())
         {
             DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
         }
