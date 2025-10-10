@@ -1,6 +1,3 @@
-using Web4.Core.DOM;
-using Web4.JsonRpc;
-
 namespace Web4.WebSockets;
 
 // Instead of a new-ing up another class, save an instantiation 
