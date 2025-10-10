@@ -4,49 +4,46 @@ namespace Web4.WebSockets;
 // and explicitly implement on WebSocketTransport.
 partial class WebSocketTransport : IKeyholes
 {
-    public void SetTextNode(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    public void SetTextNode(string key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("ui.keyholes", newKeyhole.Key, "setTextNode"),
-            param: ref newKeyhole
+            method: ("ui.keyholes", key, "setTextNode"),
+            param1: ref keyhole
         );
     }
 
-    public void SetAttribute(ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
-    {
-        Output.WriteNotification(
-            method: ("ui.keyholes", newKeyhole.Key, "setAttribute"),
-            param: ref newKeyhole
-        );
-    }
-
-    public void SetAttribute(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes)
+    public void SetAttribute(string key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
             method: ("ui.keyholes", key, "setAttribute"),
-            newKeyholes,
-            includeSentinels: false
+            param1: ref keyhole
         );
     }
 
-    public void SetElement(string key, Span<Keyhole> oldKeyholes, Span<Keyhole> newKeyholes, string? transition)
+    public void SetAttribute(string key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(
+            method: ("ui.keyholes", key, "setAttribute"),
+            param1: keyholes
+        );
+    }
+
+    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string? transition)
+    {
+        Output.WriteNotification(buffer,
             method: ("ui.keyholes", key, "setElement"),
-            newKeyholes,
-            includeSentinels: true,
-            transition: transition
+            param1: keyholes,
+            param2: transition
         );
     }
 
-    public void AddElement(string priorKey, string key, Span<Keyhole> keyholes, string? transition)
+    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, string? transition)
     {
-        Output.WriteNotification(
+        Output.WriteNotification(buffer,
             method: ("ui.keyholes", priorKey, "addElement"),
             param1: key,
             param2: keyholes,
-            includeSentinels: true,
-            transition: transition
+            param3: transition
         );
     }
 
@@ -59,7 +56,7 @@ partial class WebSocketTransport : IKeyholes
         else
             Output.WriteNotification(
                 method: ("ui.keyholes", key, "removeElement"),
-                param: transition
+                param1: transition
             );
     }
 

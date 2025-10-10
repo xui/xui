@@ -30,9 +30,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         if (oldSpan.Length != newSpan.Length)
         {
             if (isSpanAnAttribute)
-                keyholes.SetAttribute(key, oldSpan, newSpan);
+                keyholes.SetAttribute(key, newSpan);
             else
-                keyholes.SetElement(key, oldSpan, newSpan, transition);
+                keyholes.SetElement(newBuffer, key, newSpan, transition);
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -62,9 +62,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (isSpanAnAttribute)
-                    keyholes.SetAttribute(key, oldSpan, newSpan);
+                    keyholes.SetAttribute(key, newSpan);
                 else
-                    keyholes.SetElement(key, oldSpan, newSpan, transition);
+                    keyholes.SetElement(newBuffer, key, newSpan, transition);
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -102,13 +102,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         {
                             // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                             // Find the start of this sequence, then grab the sequence's full span.
-                            ref var oldStart = ref oldBuffer[oldKeyhole.SequenceStart];
-                            ref var newStart = ref newBuffer[newKeyhole.SequenceStart];
-                            keyholes.SetAttribute(
-                                key,
-                                oldKeyholes: oldBuffer.AsSpan(oldStart.Sequence),
-                                newKeyholes: newBuffer.AsSpan(newStart.Sequence)
-                            );
+                            ref var startKeyhole = ref newBuffer[newKeyhole.SequenceStart];
+                            keyholes.SetAttribute(key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                             // Shortcircuit.  No need to diff the rest of this span.
                             // This whole attribute sequence will be updated.
@@ -116,11 +111,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         }
                         else if (newKeyhole.IsValueAnAttribute)
                         {
-                            keyholes.SetAttribute(ref oldKeyhole, ref newKeyhole);
+                            keyholes.SetAttribute(newKeyhole.Key, ref newKeyhole);
                         }
                         else
                         {
-                            keyholes.SetTextNode(ref oldKeyhole, ref newKeyhole);
+                            keyholes.SetTextNode(newKeyhole.Key, ref newKeyhole);
                         }
                     }
                     break;
@@ -173,7 +168,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             ref var newItem = ref newItems[d];
                             var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
-                            keyholes.AddElement(priorItem.Key, newItem.Key, newItemSpan, transition);
+                            keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, transition);
                         }
                     }
                     else if (oldItems.Length > newItems.Length)
