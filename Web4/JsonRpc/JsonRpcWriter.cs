@@ -423,43 +423,43 @@ public partial class JsonRpcWriter : IDisposable
         switch (keyhole.Type)
         {
             case KeyholeType.Integer:
-                while (!keyhole.Integer.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Integer.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Long:
-                while (!keyhole.Long.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Long.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Float:
-                while (!keyhole.Float.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Float.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Double:
-                while (!keyhole.Double.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Double.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Decimal:
-                while (!keyhole.Decimal.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.Decimal.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.DateTime:
-                while (!keyhole.DateTime.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.DateTime.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.DateOnly:
-                while (!keyhole.DateOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.DateOnly.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.TimeSpan:
-                while (!keyhole.TimeSpan.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.TimeSpan.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.TimeOnly:
-                while (!keyhole.TimeOnly.TryFormat(bufferWriter.GetSpan(), out length, keyhole.Format))
+                while (!keyhole.TimeOnly.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Color:
-                while (!keyhole.Color.TryFormat(bufferWriter.GetSpan(9), out length, keyhole.Format))
+                while (!keyhole.Color.TryFormat(bufferWriter.GetSpan(sizeHint), out length, keyhole.Format))
                     GrowSizeHint(ref sizeHint);
                 break;
             case KeyholeType.Uri:
