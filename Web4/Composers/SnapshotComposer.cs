@@ -242,16 +242,17 @@ public class SnapshotComposer : BaseComposer
         return base.WriteMutableValue(ref parent, value, format);
     }
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, expression);
-    private bool WriteEventListener(ref Html parent, string? expression = null)
+    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
+    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
+    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
+    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
+    private bool WriteEventListener(ref Html parent, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
         keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = KeyholeType.EventListener;
+        keyhole.Format = format;
         keyhole.Expression = expression;
 
         return CompleteFormattedValue();
