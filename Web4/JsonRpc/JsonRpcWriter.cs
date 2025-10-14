@@ -188,7 +188,19 @@ public partial class JsonRpcWriter : IDisposable
         WriteMethod(method);
 
         jsonWriter.WriteStartArray("params");
-        WriteKeyholeValue(ref param1);
+
+        if (method.Item3 == "setAttribute" && param1.Type == KeyholeType.Boolean)
+        {
+            // HTML treats boolean attributes differently.  Send without quotes.
+            jsonWriter.WriteBooleanValue(param1.Boolean);
+        }
+        else
+        {
+            jsonWriter.WriteStringValueSegment("", false);
+            WriteMutableKeyholeValue(ref param1);
+            jsonWriter.WriteStringValueSegment("", true);
+        }
+
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
@@ -207,7 +219,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartArray("params");
 
-        WriteHtmlPartial([], param1, includeSentinels: false);
+        WriteAttributeSequence(param1);
         jsonWriter.WriteStringValueSegment("", true);
 
         jsonWriter.WriteEndArray();
@@ -274,43 +286,85 @@ public partial class JsonRpcWriter : IDisposable
         {
             ref var keyhole = ref keyholes[i];
 
-            if (keyhole.Type == KeyholeType.StringLiteral)
+            switch (keyhole.Type)
             {
-                jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, false);
-                continue;
-            }
+                case KeyholeType.StringLiteral:
+                    jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, false);
+                    break;
+                case KeyholeType.Html:
+                    Span<Keyhole> partialHtml = buffer.AsSpan(keyhole.SequenceStart, keyhole.SequenceLength);
+                    WriteHtmlPartial(buffer, partialHtml, includeSentinels);
+                    if (includeSentinels)
+                    {
+                        jsonWriter.WriteStringValueSegment("<!--", false);
+                        jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                        jsonWriter.WriteStringValueSegment("-->", false);
+                    }
+                    break;
+                case KeyholeType.Attribute:
+                    Span<Keyhole> partialAttr = buffer.AsSpan(keyhole.SequenceStart, keyhole.SequenceLength);
+                    WriteAttributeSequence(partialAttr);
+                    jsonWriter.WriteStringValueSegment("", true);
+                    break;
+                case KeyholeType.EventListener:
+                    jsonWriter.WriteStringValueSegment("\"ui.keyholes.", false);
+                    jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                    jsonWriter.WriteStringValueSegment(".dispatchEvent(event.trim('", false);
+                    jsonWriter.WriteStringValueSegment(keyhole.Format ?? "*", false);
+                    jsonWriter.WriteStringValueSegment("'))\" ", false);
+                    jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                    break;
+                case KeyholeType.Enumerable:
+                    int start = keyhole.SequenceStart;
+                    int end = keyhole.SequenceLength + start;
+                    for (int i2 = start; i2 < end; i2++)
+                    {
+                        ref var k = ref buffer[i2];
+                        Span<Keyhole> partialEnumerable = buffer.AsSpan(k.SequenceStart, k.SequenceLength);
+                        WriteHtmlPartial(buffer, partialEnumerable, true);
+                        if (includeSentinels)
+                        {
+                            jsonWriter.WriteStringValueSegment("<!--", false);
+                            jsonWriter.WriteStringValueSegment(k.Key, false);
+                            jsonWriter.WriteStringValueSegment("-->", false);
+                        }
+                    }
+                    break;
+                // The rest are the mutable keyhole values.  They might use format strings.
+                default:
+                    if (includeSentinels)
+                    {
+                        jsonWriter.WriteStringValueSegment("<!-- -->", false);
+                    }
 
-            if (includeSentinels)
-            {
-                jsonWriter.WriteStringValueSegment("<!-- -->", false);
+                    WriteMutableKeyholeValue(ref keyhole);
+
+                    if (includeSentinels)
+                    {
+                        jsonWriter.WriteStringValueSegment("<!--", false);
+                        jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                        jsonWriter.WriteStringValueSegment("-->", false);
+                    }
+                    break;
             }
+        }
+    }
+
+    private void WriteAttributeSequence(Span<Keyhole> keyholes)
+    {
+        for (int i = 0; i < keyholes.Length; i++)
+        {
+            ref var keyhole = ref keyholes[i];
 
             switch (keyhole.Type)
             {
-                case KeyholeType.String:
-                    jsonWriter.WriteStringValueSegment(keyhole.String, false);
+                case KeyholeType.StringLiteral:
+                    jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, false);
                     break;
-                case KeyholeType.Boolean:
-                    jsonWriter.WriteStringValueSegment(keyhole.Boolean ? "true" : "false", false);
-                    break;
-                case KeyholeType.Html:
-                case KeyholeType.Attribute:
-                    int start = keyhole.SequenceStart;
-                    int length = keyhole.SequenceLength;
-                    Span<Keyhole> partial = buffer.AsSpan(start, length);
-                    WriteHtmlPartial(buffer, partial, includeSentinels);
-                    break;
+                // The rest are the mutable keyhole values.  They might use format strings.
                 default:
-                    jsonWriter.Flush();
-                    WriteKeyholeToRawBuffer(ref keyhole);
+                    WriteMutableKeyholeValue(ref keyhole);
                     break;
-            }
-
-            if (includeSentinels)
-            {
-                jsonWriter.WriteStringValueSegment("<!--", false);
-                jsonWriter.WriteStringValueSegment(keyhole.Key, false);
-                jsonWriter.WriteStringValueSegment("-->", false);
             }
         }
     }
@@ -397,27 +451,25 @@ public partial class JsonRpcWriter : IDisposable
         }
     }
 
-    private void WriteKeyholeValue(ref Keyhole keyhole)
+    private void WriteMutableKeyholeValue(ref Keyhole keyhole)
     {
         // String and Boolean do not use format strings.
         switch (keyhole.Type)
         {
             case KeyholeType.String:
-                jsonWriter.WriteStringValue(keyhole.String);
+                // Must use jsonWriter to write this string with the proper json encoding.
+                jsonWriter.WriteStringValueSegment(keyhole.String, false);
                 return;
             case KeyholeType.Boolean:
-                jsonWriter.WriteBooleanValue(keyhole.Boolean);
+                jsonWriter.WriteStringValueSegment(keyhole.Boolean ? "true" : "false", false);
                 return;
         }
 
-        jsonWriter.Flush();
-        Encoding.UTF8.GetBytes("\"", bufferWriter);
-        WriteKeyholeToRawBuffer(ref keyhole);
-        Encoding.UTF8.GetBytes("\"", bufferWriter);
-    }
+        // All other mutable values might make use of a format string.  
+        // Flush the JSON writer and switch to the raw buffer writer.
+        // Use IUtf8SpanFormattable.TryFormat() to write without allocating memory.
 
-    private void WriteKeyholeToRawBuffer(ref Keyhole keyhole)
-    {
+        jsonWriter.Flush();
         int length = 0;
         int sizeHint = 30;
         switch (keyhole.Type)

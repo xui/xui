@@ -1,3 +1,5 @@
+using Web4.WebSockets;
+
 namespace Web4;
 
 public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
@@ -140,19 +142,33 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     {
                         ref var oldItem = ref oldItems[d];
                         ref var newItem = ref newItems[d];
-                        if (oldItem.Tag != newItem.Tag)
-                        {
-                            // Resend all items.  Tags not matching could be an indication of 
-                            // something added, something removed, or something moved.  
-                            // Instead of running Myers diff algorithm (costly) and manually
-                            // re-mapping every keyhole (which must remain positionally stable), 
-                            // this work can be offloaded to the browser via its View Transitions API.
-
-                            // mutationBatch.SetElement(key, oldSpan, newSpan, transition);
-                            return;
-                        }
+                        DiffKeyholeSpans(
+                            keyholes,
+                            newItem.Key,
+                            oldBuffer.AsSpan(oldItem.Sequence),
+                            newBuffer.AsSpan(newItem.Sequence),
+                            isSpanAnAttribute: false,
+                            transition: null
+                        );
                     }
-                    
+
+                    // for (int d = 0; d < minLength; d++)
+                    // {
+                    //     ref var oldItem = ref oldItems[d];
+                    //     ref var newItem = ref newItems[d];
+                    //     if (oldItem.Tag != newItem.Tag)
+                    //     {
+                    //         // Resend all items.  Tags not matching could be an indication of 
+                    //         // something added, something removed, or something moved.  
+                    //         // Instead of running Myers diff algorithm (costly) and manually
+                    //         // re-mapping every keyhole (which must remain positionally stable), 
+                    //         // this work can be offloaded to the browser via its View Transitions API.
+
+                    //         keyholes.SetElement(newBuffer, key, newSpan, transition);
+                    //         return;
+                    //     }
+                    // }
+
                     // TODO: Handle when oldItems.Length = 0.  
                     // Looks like it will need to resemble <if> where it drops in a placeholder.
 
