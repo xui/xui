@@ -176,7 +176,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         // These items can simply be appended to the end.  
                         // This will not violate any keyhole's positional stability
                         // or cause any keyname collisions.
-                        for (int d = minLength; d < newItems.Length; d++)
+                        for (var d = minLength; d < newItems.Length; d++)
                         {
                             ref var priorItem = ref newItems[d - 1];
                             ref var newItem = ref newItems[d];
@@ -190,7 +190,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         // The old enumerable has more items than the new one. 
                         // These items can simply be removed.  
                         // This will not violate any keyhole's positional stability.
-                        for (int d = minLength; d < oldItems.Length; d++)
+                        for (var d = minLength; d < oldItems.Length; d++)
                         {
                             ref var item = ref oldItems[d];
                             keyholes.RemoveElement(item.Key, transition);
