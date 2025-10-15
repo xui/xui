@@ -132,11 +132,38 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     );
                     break;
                 case KeyholeType.Enumerable:
+                    transition = newKeyhole.Format;
                     var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
                     var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
-                    transition = newKeyhole.Format;
-                    int minLength = Math.Min(oldItems.Length, newItems.Length);
-                    for (int d = 0; d < minLength; d++)
+                    var minLength = Math.Min(oldItems.Length, newItems.Length);
+
+                    // Myers diff algorithm is overkill here since the browser's View Transition API
+                    // can do the heavy lifting instead.  Not to mention, keys must remain
+                    // positionally stable, and the resulting re-mapping logic would be cumbersome.
+                    // The best approach is to detect if at least one item has moved indexes, and if so,
+                    // call SetElement for the whole enumerable-keyhole.
+                    // If there's no "index movement" it is free to diff each item one by one.
+                    for (var d = 0; d < minLength; d++)
+                    {
+                        ref var oldItem = ref oldItems[d];
+                        ref var newItem = ref newItems[d];
+                        if (oldItem.Tag != newItem.Tag)
+                        {
+                            for (int dd = d + 1; dd < newItems.Length; dd++)
+                            {
+                                ref var compare = ref newItems[dd];
+                                if (oldItem.Tag == compare.Tag)
+                                {
+                                    // Item movement detected!  No need to diff any more siblings or traverse deeper down this tree,
+                                    // but the whole enumerable must be rendered and sent.
+                                    keyholes.SetElement(newBuffer, key, newSpan, transition);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    for (var d = 0; d < minLength; d++)
                     {
                         ref var oldItem = ref oldItems[d];
                         ref var newItem = ref newItems[d];
@@ -149,23 +176,6 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             transition: null
                         );
                     }
-
-                    // for (int d = 0; d < minLength; d++)
-                    // {
-                    //     ref var oldItem = ref oldItems[d];
-                    //     ref var newItem = ref newItems[d];
-                    //     if (oldItem.Tag != newItem.Tag)
-                    //     {
-                    //         // Resend all items.  Tags not matching could be an indication of 
-                    //         // something added, something removed, or something moved.  
-                    //         // Instead of running Myers diff algorithm (costly) and manually
-                    //         // re-mapping every keyhole (which must remain positionally stable), 
-                    //         // this work can be offloaded to the browser via its View Transitions API.
-
-                    //         keyholes.SetElement(newBuffer, key, newSpan, transition);
-                    //         return;
-                    //     }
-                    // }
 
                     // TODO: Handle when oldItems.Length = 0.  
                     // Looks like it will need to resemble <if> where it drops in a placeholder.
