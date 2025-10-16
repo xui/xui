@@ -1,9 +1,7 @@
 global using Web4;
-global using Web4.Proxies;
-global using Web4.WebApis;
-using System.Collections;
+global using Web4.Core.DOM;
+global using static Clean.Factories.Factory;
 using System.Drawing;
-using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
@@ -32,8 +30,20 @@ Html GetList() => $"""
             </lr>
         """):zoom-fade}
 
+        <button onclick={DoThingAsync}>
+            Async
+        </button>
+
         <button onclick={EditRandom}>
             Edit Random
+        </button>
+
+        <button onclick={Move1}>
+            Move 1
+        </button>
+
+        <button onclick={Swap2}>
+            Swap 2
         </button>
 
         <button onclick={Shuffle}>
@@ -51,10 +61,59 @@ Html GetList() => $"""
     </list>
     """;
 
-void EditRandom()
+async Task DoThingAsync(Event.Subsets.XY e)
 {
+    var window = e.View;
+    var console = window.Console;
+    console.Log("one");
+    console.Log("two");
+    await Task.Delay(2000);
+    console.Log("three");
+    console.Log("four");
+    await Task.Delay(2000);
+    console.Log("five");
+    console.Log("six");
+
+    int i = 1;
+    i--;
+    i /= i;
+    
+    window.Alert("Neato");
+    console.Log("seven");
+
+    // Console.WriteLine($"one... x:{e.X}, y:{e.Y} thread:{Thread.CurrentThread.ManagedThreadId} {SynchronizationContext.Current?.ToString() ?? "null"}");
+    // await Task.Delay(2000);
+    // Console.WriteLine($"two... x:{e.X}, y:{e.Y} thread:{Thread.CurrentThread.ManagedThreadId} {SynchronizationContext.Current?.ToString() ?? "null"}");
+    // await Task.Delay(2000);
+    // Console.WriteLine($"three... x:{e.X}, y:{e.Y} thread:{Thread.CurrentThread.ManagedThreadId} {SynchronizationContext.Current?.ToString() ?? "null"}");
+    // await Task.Delay(2000);
+    // Console.WriteLine($"four... x:{e.X}, y:{e.Y} thread:{Thread.CurrentThread.ManagedThreadId} {SynchronizationContext.Current?.ToString() ?? "null"}");
+}
+
+void EditRandom(Event e)
+{
+    e.StopPropagation();
+
     var index = Random.Shared.Next(names.Count);
-    names[index] = names[index] + " &#128514;";
+    names[index] = names[index] + " 😀";
+}
+
+void Move1()
+{
+    int i1 = Random.Shared.Next(names.Count);
+    int i2 = Random.Shared.Next(names.Count);
+    var item = names[i1];
+    names.RemoveAt(i1);
+    names.Insert(i2, item);
+}
+
+void Swap2()
+{
+    var i1 = Random.Shared.Next(names.Count);
+    var i2 = Random.Shared.Next(names.Count);
+    var tmp = names[i1];
+    names[i1] = names[i2];
+    names[i2] = tmp;
 }
 
 void Shuffle()
@@ -139,15 +198,15 @@ var window = app.MapWeb4("/app", () => $"""
             <br/>
 
             <h2>Click on the buttons</h2>
-            <div>
+            <div id="outer-div" onclick={OnDivClicked}>
             outer div<br />
-                <div>
+                <div id="middle-div" onclick={OnDivClicked}>
                     middle div<br />
-                    <div>
+                    <div id="inner-div" onclick={OnDivClicked}>
                         inner div<br />
-                        <button>allow propagation</button><br />
-                        <button id="stopPropagation">stop propagation</button><br />
-                        <button id="stopImmediatePropagation">immediate stop propagation</button>
+                        <button id="allowPropagation" onclick={OnAllowPropagation}>allow propagation</button><br />
+                        <button id="stopPropagation" onclick={OnStopPropagation}>stop propagation</button><br />
+                        <button id="stopImmediatePropagation" onclick={OnStopImmediatePropagation}>immediate stop propagation</button>
                     </div>
                 </div>
             </div>
@@ -160,6 +219,36 @@ var window = app.MapWeb4("/app", () => $"""
         </body>
     </html>
     """);
+
+void OnDivClicked(Event.Subsets.CurrentTarget e)
+{
+    Console.WriteLine($"Click event process on {e.CurrentTarget.ID}");
+}
+
+void OnAllowPropagation(Event.Subsets.Target e)
+{
+    Console.WriteLine($"Click event processed on '{e?.Target?.ID ?? "null"}' button");
+}
+
+void OnStopPropagation(Event e)
+{
+    e.StopPropagation();
+    Console.WriteLine($"Click event processed on '{e?.Target?.ID ?? "null"}' button");
+}
+
+void OnStopImmediatePropagation(Event.Subsets.Target e)
+{
+    e.StopImmediatePropagation();
+    Console.WriteLine($"Click event processed on '{e?.Target?.ID ?? "null"}' button");
+}
+
+// window.Document.AddEventListener("click", () => Console.WriteLine($"Click event 1 process on document"));
+// window.Document.AddEventListener("click", (Event.Subsets.XY e) => { Console.WriteLine($"Click event 2 process on document"); /*e.StopImmediatePropagation();*/ });
+// window.Document.AddEventListener("click", () => Console.WriteLine($"Click event 3 process on document"));
+
+// window.AddEventListener("click", () => Console.WriteLine($"Click event 1 process on window"));
+// window.AddEventListener("click", () => Console.WriteLine($"Click event 2 process on window"));
+// window.AddEventListener("click", () => Console.WriteLine($"Click event 3 process on window"));
 
 Html MyButton(string text, Action<Event>? onClick = null) => $"""
     <button onclick={onClick ?? OnClick}>
