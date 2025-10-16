@@ -137,36 +137,16 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
                     var minLength = Math.Min(oldItems.Length, newItems.Length);
 
-                    // Myers diff algorithm is overkill here since the browser's View Transition API
-                    // can do the heavy lifting instead.  Not to mention, keys must remain
-                    // positionally stable, and the resulting re-mapping logic would be cumbersome.
-                    // The best approach is to detect if at least one item has moved indexes, and if so,
-                    // call SetElement for the whole enumerable-keyhole.
-                    // If there's no "index movement" it is free to diff each item one by one.
                     for (var d = 0; d < minLength; d++)
                     {
                         ref var oldItem = ref oldItems[d];
                         ref var newItem = ref newItems[d];
-                        if (oldItem.Tag != newItem.Tag)
-                        {
-                            for (int dd = d + 1; dd < newItems.Length; dd++)
-                            {
-                                ref var compare = ref newItems[dd];
-                                if (oldItem.Tag == compare.Tag)
-                                {
-                                    // Item movement detected!  No need to diff any more siblings or traverse deeper down this tree,
-                                    // but the whole enumerable must be rendered and sent.
-                                    keyholes.SetElement(newBuffer, key, newSpan, transition);
-                                    return;
-                                }
-                            }
-                        }
-                    }
 
-                    for (var d = 0; d < minLength; d++)
-                    {
-                        ref var oldItem = ref oldItems[d];
-                        ref var newItem = ref newItems[d];
+                        // if (oldItem.Tag != newItem.Tag)
+                        // {
+                        //     var newPartial = newBuffer.AsSpan(newItem.Sequence);
+                        //     keyholes.SetElement(newBuffer, newItem.Key, newPartial, newKeyhole.Format);
+                        // }
                         DiffKeyholeSpans(
                             keyholes,
                             newItem.Key,
@@ -176,9 +156,6 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             transition: null
                         );
                     }
-
-                    // TODO: Handle when oldItems.Length = 0.  
-                    // Looks like it will need to resemble <if> where it drops in a placeholder.
 
                     if (oldItems.Length < newItems.Length)
                     {
@@ -206,7 +183,10 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                             keyholes.RemoveElement(item.Key, transition);
                         }
                     }
-                    
+
+                    // TODO: Handle when oldItems.Length = 0.  
+                    // Looks like it will need to resemble <if> where it drops in a placeholder.
+
                     break;
                 case KeyholeType.EventListener:
                     // Event listeners never need to be diff'd.  
