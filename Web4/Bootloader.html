@@ -134,10 +134,6 @@
     }
 
     removeElement(transition) {
-      if (this.#shoudUseTransition(transition)) {
-        this.element.style.viewTransitionName = `web4-${this.key}`;
-      }
-
       this.#mutate(
         transition,
         () => this.element.parentNode.removeChild(this.element),
