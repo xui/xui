@@ -61,8 +61,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                             <style>
                                 ::view-transition-group(web4-{{partial.Key}}-fwd, web4-{{partial.Key}}-rev) { animation: none; }
                                 ::view-transition-new(web4-{{partial.Key}}-fwd) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
-                                ::view-transition-new(web4-{{partial.Key}}-rev) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
                                 ::view-transition-old(web4-{{partial.Key}}-fwd) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out; }
+                                ::view-transition-new(web4-{{partial.Key}}-rev) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
                                 ::view-transition-old(web4-{{partial.Key}}-rev) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in reverse; }
                             </style>
                             """);
