@@ -175,16 +175,19 @@
 
     static flushTransitionBatch() {
       let mutations = Web4Keyhole.#transitionBatch.mutations;
+      let elements = Web4Keyhole.#transitionBatch.elements;
+
       if (!document.startViewTransition || mutations.length == 0)
         return;
 
       Web4Keyhole.#transitionBatch.mutations = [];
+      Web4Keyhole.#transitionBatch.elements = [];
 
       document.startViewTransition(() => {
         mutations.forEach(mutation => mutation());
       })
       .finished.then(() => {
-        Web4Keyhole.#transitionBatch.elements.forEach(element => {
+        elements.forEach(element => {
           if (element.style?.viewTransitionName?.startsWith("web4")) {
             element.style.removeProperty("view-transition-name");
             if (element.style.length == 0)
