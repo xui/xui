@@ -115,9 +115,9 @@
       if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        Web4Keyhole.#transitionBatch.addElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName, true);
-        Web4Keyhole.#transitionBatch.addElement(newElement, viewTransitionName, true);
-        Web4Keyhole.#transitionBatch.addMutation(mutation);
+        this.#batchMutation(mutation);
+        this.#prepareElement(newElement, viewTransitionName);
+        this.#prepareElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName);
       }
     }
 
@@ -131,28 +131,45 @@
       if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.element.parentElement.childNodes.forEach((sibling, i) => {
-          Web4Keyhole.#transitionBatch.addElement(sibling, `web4-sibling-${i}`);
-        });
-        Web4Keyhole.#transitionBatch.addMutation(mutation);
+        this.#batchMutation(mutation);
+        this.#prepareSiblings();
       }
     }
 
     removeElement(transition) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
-      
+
       if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.element.parentElement.childNodes.forEach((sibling, i) => {
-          Web4Keyhole.#transitionBatch.addElement(sibling, `web4-sibling-${i}`);
-        });
-        Web4Keyhole.#transitionBatch.addMutation(mutation);
+        this.#batchMutation(mutation);
+        this.#prepareSiblings();
       }
     }
 
     dispatchEvent(event) {
       this.#transport.dispatchEvent(event, this.key);
+    }
+
+    #batchMutation(mutation) {
+      Web4Keyhole.#transitionBatch.mutations.push(mutation);
+    }
+
+    #prepareElement(element, viewTransitionName) {
+      if (!Web4Keyhole.#transitionBatch.elements.includes(element))
+        Web4Keyhole.#transitionBatch.elements.push(element);
+      element.style.viewTransitionName = viewTransitionName;
+    }
+
+    #prepareSiblings() {
+      this.element.parentElement.childNodes.forEach((sibling, i) => {
+        if (!Web4Keyhole.#transitionBatch.elements.includes(sibling))
+          Web4Keyhole.#transitionBatch.elements.push(sibling);
+        
+        let viewTransitionName = `web4-${this.key}-sibling-${i}`;
+        if (sibling.style && !sibling.style.viewTransitionName)
+          sibling.style.viewTransitionName = viewTransitionName;
+      });
     }
 
     static flushTransitionBatch() {
@@ -162,18 +179,6 @@
     static #transitionBatch = {
       mutations: [],
       elements: [],
-
-      addMutation: function(mutation) {
-        this.mutations.push(mutation);
-      },
-
-      addElement: function(element, viewTransitionName, override) {
-        if (!this.elements.includes(element))
-          this.elements.push(element);
-
-        if (element.style && (!element.style.viewTransitionName || override))
-          element.style.viewTransitionName = viewTransitionName;
-      },
 
       flush: function() {
         let mutations = this.mutations;
