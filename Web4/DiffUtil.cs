@@ -31,8 +31,10 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         {
             if (isSpanAnAttribute)
                 keyholes.SetAttribute(key, newSpan);
+            else if (transition == null)
+                keyholes.SetElement(newBuffer, key, newSpan);
             else
-                keyholes.SetElement(newBuffer, key, newSpan, transition);
+                keyholes.SetElement(newBuffer, key, newSpan, false); // TODO: lineNumber logic here!
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -63,8 +65,10 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             {
                 if (isSpanAnAttribute)
                     keyholes.SetAttribute(key, newSpan);
+                else if (transition == null)
+                    keyholes.SetElement(newBuffer, key, newSpan);
                 else
-                    keyholes.SetElement(newBuffer, key, newSpan, transition);
+                    keyholes.SetElement(newBuffer, key, newSpan, false); // TODO: lineNumber logic here!
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -136,25 +140,36 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
                     var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
                     var minLength = Math.Min(oldItems.Length, newItems.Length);
+                    var tagChanges = 0;
+                    for (var d = 0; d < minLength; d++)
+                    {
+                        ref var oldItem = ref oldItems[d];
+                        ref var newItem = ref newItems[d];
+                        if (oldItem.Tag != newItem.Tag)
+                            tagChanges++;
+                    }
 
                     for (var d = 0; d < minLength; d++)
                     {
                         ref var oldItem = ref oldItems[d];
                         ref var newItem = ref newItems[d];
 
-                        // if (oldItem.Tag != newItem.Tag)
-                        // {
-                        //     var newPartial = newBuffer.AsSpan(newItem.Sequence);
-                        //     keyholes.SetElement(newBuffer, newItem.Key, newPartial, newKeyhole.Format);
-                        // }
-                        DiffKeyholeSpans(
-                            keyholes,
-                            newItem.Key,
-                            oldBuffer.AsSpan(oldItem.Sequence),
-                            newBuffer.AsSpan(newItem.Sequence),
-                            isSpanAnAttribute: false,
-                            transition: null
-                        );
+                        if (tagChanges > 1 && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
+                        {
+                            var newPartial = newBuffer.AsSpan(newItem.Sequence);
+                            keyholes.SetElement(newBuffer, newItem.Key, newPartial, newItem.Tag, oldItem.Tag);
+                        }
+                        else
+                        {
+                            DiffKeyholeSpans(
+                                keyholes,
+                                newItem.Key,
+                                oldBuffer.AsSpan(oldItem.Sequence),
+                                newBuffer.AsSpan(newItem.Sequence),
+                                isSpanAnAttribute: false,
+                                transition: null
+                            );
+                        }
                     }
 
                     if (oldItems.Length < newItems.Length)

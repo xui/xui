@@ -92,7 +92,7 @@
       this.key = key;
       this.element = element;
     }
-    
+
     setTextNode(value) {
       this.element.nodeValue = value;
     }
@@ -105,22 +105,20 @@
       }
     }
 
-    setElement(rawHtml, transition) {
+    setElement(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
       let oldElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       Web4Keyhole.#registerKeyholes(newElement, this.key);
 
-      if (this.#shoudUseTransition(transition)) {
-          let direction = !rawHtml.includes("World") ? "fwd" : "rev"; // TODO: FAKE!!!
-          oldElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-          newElement.style.viewTransitionName = `web4-${this.key}-${direction}`;
-      }
+      let mutation = () => oldElement.replaceWith(newElement);
 
-      this.#mutate(
-        transition,
-        () => oldElement.replaceWith(newElement),
-        () => Web4Keyhole.#unregisterKeyholes()
-      )
+      if (!this.element.shouldAnimate(viewTransitionName)) {
+        mutation();
+      } else {
+        Web4Keyhole.#transitionBatch.addElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName, true);
+        Web4Keyhole.#transitionBatch.addElement(newElement, viewTransitionName, true);
+        Web4Keyhole.#transitionBatch.addMutation(mutation);
+      }
     }
 
     addElement(key, rawHtml, transition) {
@@ -128,58 +126,78 @@
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       Web4Keyhole.#registerKeyholes(newElement, key);
 
-      this.#mutate(
-        transition,
-        () => priorElement.after(newElement)
-      )
+      let mutation = () => priorElement.after(newElement);
+
+      if (!this.element.shouldAnimate(transition)) {
+        mutation();
+      } else {
+        this.element.parentElement.childNodes.forEach((sibling, i) => {
+          Web4Keyhole.#transitionBatch.addElement(sibling, `web4-sibling-${i}`);
+        });
+        Web4Keyhole.#transitionBatch.addMutation(mutation);
+      }
     }
 
     removeElement(transition) {
-      this.#mutate(
-        transition,
-        () => this.element.parentNode.removeChild(this.element),
-        () => Web4Keyhole.#unregisterKeyholes()
-      )
+      let mutation = () => this.element.parentNode.removeChild(this.element);
+      if (!this.element.shouldAnimate(transition)) {
+        mutation();
+      } else {
+        this.element.parentElement.childNodes.forEach((sibling, i) => {
+          Web4Keyhole.#transitionBatch.addElement(sibling, `web4-sibling-${i}`);
+        });
+        Web4Keyhole.#transitionBatch.addMutation(mutation);
+      }
     }
 
     dispatchEvent(event) {
       this.#transport.dispatchEvent(event, this.key);
     }
 
-    #mutate(transition, mutate, finish) {
-      // No transition
-      if (!this.#shoudUseTransition(transition)) {
-        mutate();
-        if (finish) finish();
-        return;
-      }
+    static flushTransitionBatch() {
+      Web4Keyhole.#transitionBatch.flush();
+    }
+    
+    static #transitionBatch = {
+      mutations: [],
+      elements: [],
 
-      // View Transition API
-      let parentElement = this.element.parentElement;
-      parentElement.childNodes.forEach((sibling, i) => {
-        if (sibling.style && !sibling.style.viewTransitionName)
-          sibling.style.viewTransitionName = `web4-sibling-${i}`
-      });
-      document.startViewTransition(() => {
-        mutate();
-      })
-      .finished.then(() => {
-        parentElement.childNodes.forEach(sibling => {
-          if (sibling.style?.viewTransitionName?.startsWith("web4")) {
-            sibling.style.removeProperty("view-transition-name");
-            if (sibling.style.length == 0)
-              sibling.removeAttribute("style");
-          }
+      addMutation: function(mutation) {
+        this.mutations.push(mutation);
+      },
+
+      addElement: function(element, viewTransitionName, override) {
+        if (!this.elements.includes(element))
+          this.elements.push(element);
+
+        if (element.style && (!element.style.viewTransitionName || override))
+          element.style.viewTransitionName = viewTransitionName;
+      },
+
+      flush: function() {
+        let mutations = this.mutations;
+        if (!document.startViewTransition || mutations.length == 0)
+          return;
+
+        this.mutations = [];
+
+        document.startViewTransition(() => {
+          mutations.forEach(mutation => mutation());
+        })
+        .finished.then(() => {
+          this.elements.forEach(element => {
+            if (element.style?.viewTransitionName?.startsWith("web4")) {
+              element.style.removeProperty("view-transition-name");
+              if (element.style.length == 0)
+                element.removeAttribute("style");
+            }
+          });
         });
-        if (finish) finish();
-      });
+        
+        // TODO: Web4Keyhole.#unregisterKeyholes(); but only if array was non-empty?
+      }
     }
-
-    #shoudUseTransition(transition) {
-      let doesParentSupportTransition = ["ROW", "COL", "LIST", "BODY"].includes(this.element.parentElement.tagName);
-      return transition && document.startViewTransition && doesParentSupportTransition;
-    }
-
+    
     static #registerKeyholes(node, key) {
       if (node) {
         ui.keyholes.set(key, node);
@@ -302,6 +320,8 @@
             promise.resolve(rpc.result);
         }
       });
+
+      Web4Keyhole.flushTransitionBatch();
     }
 
     async #updateConnectionState(e) {

@@ -28,13 +28,31 @@ partial class WebSocketTransport : IKeyholes
         );
     }
 
-    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string? transition)
+    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes)
+    {
+        Output.WriteNotification(buffer,
+            method: ("ui.keyholes", key, "setElement"),
+            param1: keyholes
+        );
+    }
+
+    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, bool reverseTransition)
     {
         Output.WriteNotification(buffer,
             method: ("ui.keyholes", key, "setElement"),
             param1: keyholes,
-            param2: transition
+            param2: reverseTransition ? ("web4-rev-", key) : ("web4-fwd-", key)
         );
+    }
+
+    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, object oldTag, object newTag)
+    {
+        Output.WriteNotification(buffer,
+            method: ("ui.keyholes", key, "setElement"),
+            param1: keyholes,
+            param2: ("web4-move-", oldTag.GetHashCode()),
+            param3: ("web4-move-", newTag.GetHashCode())
+          );
     }
 
     public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, string? transition)

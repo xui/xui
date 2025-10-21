@@ -280,6 +280,63 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, string> param2)
+    {
+        OnMessageBegin();
+
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        jsonWriter.WriteStartArray("params");
+
+        WriteHtmlPartial(buffer, param1, includeSentinels: true);
+        jsonWriter.WriteStringValueSegment("", true);
+
+        jsonWriter.WriteStringValueSegment(param2.Item1, false);
+        jsonWriter.WriteStringValueSegment(param2.Item2, true);
+ 
+        jsonWriter.WriteEndArray();
+
+        jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
+    }
+
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, int> param2, ValueTuple<string, int> param3)
+    {
+        OnMessageBegin();
+
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+
+        WriteMethod(method);
+
+        jsonWriter.WriteStartArray("params");
+
+        WriteHtmlPartial(buffer, param1, includeSentinels: true);
+        jsonWriter.WriteStringValueSegment("", true);
+
+        Span<char> strInt = stackalloc char[11]; // max int length
+
+        jsonWriter.WriteStringValueSegment(param2.Item1, false);
+        if (param2.Item2.TryFormat(strInt, out int length))
+            jsonWriter.WriteStringValueSegment(strInt[..length], false);
+        jsonWriter.WriteStringValueSegment("", true);
+
+        jsonWriter.WriteStringValueSegment(param3.Item1, false);
+        if (param3.Item2.TryFormat(strInt, out length))
+            jsonWriter.WriteStringValueSegment(strInt[..length], false);
+        jsonWriter.WriteStringValueSegment("", true);
+ 
+        jsonWriter.WriteEndArray();
+
+        jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
+    }
+
     private void WriteHtmlPartial(Keyhole[] buffer, Span<Keyhole> keyholes, bool includeSentinels)
     {
         for (int i = 0; i < keyholes.Length; i++)

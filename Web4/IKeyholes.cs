@@ -6,7 +6,9 @@ public interface IKeyholes
     void SetTextNode(string key, ref Keyhole keyhole);
     void SetAttribute(string key, ref Keyhole keyhole);
     void SetAttribute(string key, Span<Keyhole> keyholes);
-    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string? transition = null);
+    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes);
+    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, bool reverseTransition);
+    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, object oldTag, object newTag);
     void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, string? transition = null);
     void RemoveElement(string key, string? transition = null);
     void DispatchEvent(Action listener);
