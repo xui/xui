@@ -219,7 +219,7 @@ partial class WebSocketTransport
                         break;
                     }
 
-                case var method when method.SequenceEqual("app.benchmark"u8):
+                case var method when method.SequenceEqual("ui.benchmark"u8):
                     {
                         using var batchOutput = Output.BatchThisScope();
                         var threads = @params.GetNextOptionalAsInt();
@@ -227,7 +227,7 @@ partial class WebSocketTransport
                         break;
                     }
 
-                case var method when method.SequenceEqual("app.ping"u8) && rpc.IdAsInt is int id:
+                case var method when method.SequenceEqual("ui.ping"u8) && rpc.IdAsInt is int id:
                     {
                         // App.Ping();
                         Output.WriteResponse(id);
