@@ -392,6 +392,12 @@
   Event.prototype.NEXT_PROPAGATION_ID = 0;
   Event.prototype.NEXT_PROPAGATION_LEVEL = 0;
 
+  HTMLElement.prototype.shouldAnimate = function(viewTransitionName) {
+    // TODO: Not sure about BODY tag.  Perhaps better to verify by CSS props instead?
+    let isInAnimationContainer =  ["ROW", "COL", "LIST", "BODY"].includes(this.parentElement.tagName);
+    return document.startViewTransition && viewTransitionName && isInAnimationContainer;
+  }
+
 </script>
 
 <template id="web4ModalTemplate">
