@@ -82,6 +82,7 @@
     #transport;
     key;
     element;
+    static #transitionBatch = { mutations: [], elements: [] };
 
     static {
       document.addEventListener('DOMContentLoaded', () => Web4Keyhole.#registerKeyholes());
@@ -173,37 +174,28 @@
     }
 
     static flushTransitionBatch() {
-      Web4Keyhole.#transitionBatch.flush();
-    }
-    
-    static #transitionBatch = {
-      mutations: [],
-      elements: [],
+      let mutations = Web4Keyhole.#transitionBatch.mutations;
+      if (!document.startViewTransition || mutations.length == 0)
+        return;
 
-      flush: function() {
-        let mutations = this.mutations;
-        if (!document.startViewTransition || mutations.length == 0)
-          return;
+      Web4Keyhole.#transitionBatch.mutations = [];
 
-        this.mutations = [];
-
-        document.startViewTransition(() => {
-          mutations.forEach(mutation => mutation());
-        })
-        .finished.then(() => {
-          this.elements.forEach(element => {
-            if (element.style?.viewTransitionName?.startsWith("web4")) {
-              element.style.removeProperty("view-transition-name");
-              if (element.style.length == 0)
-                element.removeAttribute("style");
-            }
-          });
+      document.startViewTransition(() => {
+        mutations.forEach(mutation => mutation());
+      })
+      .finished.then(() => {
+        Web4Keyhole.#transitionBatch.elements.forEach(element => {
+          if (element.style?.viewTransitionName?.startsWith("web4")) {
+            element.style.removeProperty("view-transition-name");
+            if (element.style.length == 0)
+              element.removeAttribute("style");
+          }
         });
-        
-        // TODO: Web4Keyhole.#unregisterKeyholes(); but only if array was non-empty?
-      }
+      });
+      
+      // TODO: Web4Keyhole.#unregisterKeyholes(); but only if array was non-empty?
     }
-    
+        
     static #registerKeyholes(node, key) {
       if (node) {
         ui.keyholes.set(key, node);
