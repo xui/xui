@@ -191,9 +191,8 @@
               element.removeAttribute("style");
           }
         });
+        Web4Keyhole.#unregisterKeyholes();
       });
-      
-      // TODO: Web4Keyhole.#unregisterKeyholes(); but only if array was non-empty?
     }
         
     static #registerKeyholes(node, key) {
