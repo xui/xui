@@ -82,7 +82,7 @@
     #transport;
     key;
     element;
-    static #transitionBatch = { mutations: [], elements: [] };
+    static #transitionBatch = { mutations: [], elements: [], keyholesInvalidated: false };
 
     static {
       document.addEventListener('DOMContentLoaded', () => document.registerKeyholes());
@@ -116,7 +116,7 @@
       if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#batchMutation(mutation);
+        this.#batchMutation(mutation, true);
         this.#prepareElement(newElement, viewTransitionName);
         this.#prepareElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName);
       }
@@ -132,7 +132,7 @@
       if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.#batchMutation(mutation);
+        this.#batchMutation(mutation, false);
         this.#prepareSiblings();
       }
     }
@@ -143,7 +143,7 @@
       if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.#batchMutation(mutation);
+        this.#batchMutation(mutation, true);
         this.#prepareSiblings();
       }
     }
@@ -152,8 +152,11 @@
       this.#transport.dispatchEvent(event, this.key);
     }
 
-    #batchMutation(mutation) {
+    #batchMutation(mutation, invalidatesKeyholes) {
       Web4Keyhole.#transitionBatch.mutations.push(mutation);
+
+      if (invalidatesKeyholes)
+        Web4Keyhole.#transitionBatch.keyholesInvalidated = true;
     }
 
     #prepareElement(element, viewTransitionName) {
@@ -176,14 +179,17 @@
     static flushTransitionBatch() {
       let mutations = Web4Keyhole.#transitionBatch.mutations;
       let elements = Web4Keyhole.#transitionBatch.elements;
+      let keyholesInvalidated = Web4Keyhole.#transitionBatch.keyholesInvalidated;
 
       if (!document.startViewTransition || mutations.length == 0) {
-        document.unregisterKeyholes();
+        if (keyholesInvalidated)
+          document.unregisterKeyholes();
         return;
       }
 
       Web4Keyhole.#transitionBatch.mutations = [];
       Web4Keyhole.#transitionBatch.elements = [];
+      Web4Keyhole.#transitionBatch.keyholesInvalidated = false;
 
       document.startViewTransition(() => {
         mutations.forEach(mutation => mutation());
@@ -196,7 +202,8 @@
               element.removeAttribute("style");
           }
         });
-        document.unregisterKeyholes();
+        if (keyholesInvalidated)
+          document.unregisterKeyholes();
       });
     }
   }
