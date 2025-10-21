@@ -140,6 +140,7 @@
 
     removeElement(transition) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
+      
       if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
