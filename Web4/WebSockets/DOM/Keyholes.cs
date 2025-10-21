@@ -7,7 +7,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetTextNode(string key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("ui.keyholes", key, "setTextNode"),
+            method: ("ui.keyholes.", key, ".setTextNode"),
             param1: ref keyhole
         );
     }
@@ -15,7 +15,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(string key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("ui.keyholes", key, "setAttribute"),
+            method: ("ui.keyholes.", key, ".setAttribute"),
             param1: ref keyhole
         );
     }
@@ -23,7 +23,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(string key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(
-            method: ("ui.keyholes", key, "setAttribute"),
+            method: ("ui.keyholes.", key, ".setAttribute"),
             param1: keyholes
         );
     }
@@ -31,7 +31,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(buffer,
-            method: ("ui.keyholes", key, "setElement"),
+            method: ("ui.keyholes.", key, ".setElement"),
             param1: keyholes
         );
     }
@@ -39,7 +39,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, bool reverseTransition)
     {
         Output.WriteNotification(buffer,
-            method: ("ui.keyholes", key, "setElement"),
+            method: ("ui.keyholes.", key, ".setElement"),
             param1: keyholes,
             param2: reverseTransition ? ("web4-rev-", key) : ("web4-fwd-", key)
         );
@@ -48,7 +48,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, object oldTag, object newTag)
     {
         Output.WriteNotification(buffer,
-            method: ("ui.keyholes", key, "setElement"),
+            method: ("ui.keyholes.", key, ".setElement"),
             param1: keyholes,
             param2: ("web4-move-", oldTag.GetHashCode()),
             param3: ("web4-move-", newTag.GetHashCode())
@@ -58,7 +58,7 @@ partial class WebSocketTransport : IKeyholes
     public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, string? transition)
     {
         Output.WriteNotification(buffer,
-            method: ("ui.keyholes", priorKey, "addElement"),
+            method: ("ui.keyholes.", priorKey, ".addElement"),
             param1: key,
             param2: keyholes,
             param3: transition
@@ -69,11 +69,11 @@ partial class WebSocketTransport : IKeyholes
     {
         if (transition is null)
             Output.WriteNotification(
-                method: ("ui.keyholes", key, "removeElement")
+                method: ("ui.keyholes.", key, ".removeElement")
             );
         else
             Output.WriteNotification(
-                method: ("ui.keyholes", key, "removeElement"),
+                method: ("ui.keyholes.", key, ".removeElement"),
                 param1: transition
             );
     }

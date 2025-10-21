@@ -81,9 +81,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
-
-        WriteMethod(method);
-
+        jsonWriter.WriteString("method", method);
         jsonWriter.WriteEndObject();
 
         OnMessageEnd();
@@ -96,7 +94,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteEndObject();
 
@@ -110,7 +111,7 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WriteString("method", method);
 
         jsonWriter.WriteStartArray("params");
         WriteTValue(param1);
@@ -128,7 +129,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
         WriteTValue(param1);
@@ -146,7 +150,7 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WriteString("method", method);
 
         jsonWriter.WriteStartArray("params");
         jsonWriter.WriteStringValue(param1);
@@ -166,7 +170,7 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WriteString("method", method);
 
         jsonWriter.WriteStartArray("params");
         foreach (var param in @params)
@@ -185,7 +189,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -215,7 +222,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -236,7 +246,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -260,7 +273,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -287,7 +303,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -311,7 +330,10 @@ public partial class JsonRpcWriter : IDisposable
         jsonWriter.WriteStartObject();
         jsonWriter.WriteString("jsonrpc", "2.0");
 
-        WriteMethod(method);
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
 
@@ -470,22 +492,6 @@ public partial class JsonRpcWriter : IDisposable
     {
         if (!isBatch)
             Flush();
-    }
-
-    private void WriteMethod(string method)
-    {
-        jsonWriter.WritePropertyName("method");
-        jsonWriter.WriteStringValue(method);
-    }
-
-    private void WriteMethod(ValueTuple<string, string, string> method)
-    {
-        jsonWriter.WritePropertyName("method");
-        jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(".", false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
-        jsonWriter.WriteStringValueSegment(".", false);
-        jsonWriter.WriteStringValueSegment(method.Item3, true);
     }
 
     private void WriteTValue<T>(T value)
