@@ -26,37 +26,17 @@ Html GetList() => $"""
         {names.Select(n => $"""
             <lr>
                 <ld>{ Icons.Globe }</ld>
-                <ld>Hello, { n }!</ld>
+                <ld>Hello { name }, { n }!</ld>
             </lr>
         """):zoom-fade}
 
-        <button onclick={DoThingAsync}>
-            Async
-        </button>
-
-        <button onclick={EditRandom}>
-            Edit Random
-        </button>
-
-        <button onclick={Move1}>
-            Move 1
-        </button>
-
-        <button onclick={Swap2}>
-            Swap 2
-        </button>
-
-        <button onclick={Shuffle}>
-            Shuffle
-        </button>
-
-        <button onclick={AddOne}>
-            Add One
-        </button>
-
-        <button onclick={RemoveOne}>
-            Remove One
-        </button>
+        <button onclick={ DoThingAsync }>Async</button>
+        <button onclick={ EditRandom }>Edit Random</button>
+        <button onclick={ Move1 }>Move 1</button>
+        <button onclick={ Swap2 }>Swap 2</button>
+        <button onclick={ Shuffle }>Shuffle</button>
+        <button onclick={ AddOne }>Add One</button>
+        <button onclick={ RemoveOne }>Remove One</button>
         
     </list>
     """;
