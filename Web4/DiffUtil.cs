@@ -31,7 +31,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         {
             if (isSpanAnAttribute)
                 keyholes.SetAttribute(key, newSpan);
-            else if (transition == null)
+            else if (transition is null)
                 keyholes.SetElement(newBuffer, key, newSpan);
             else
                 keyholes.SetElement(newBuffer, key, newSpan, false); // TODO: lineNumber logic here!
