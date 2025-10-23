@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wasm", "Demos\Wasm\Wasm.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering", "Benchmarks\Rendering\Rendering.csproj", "{CC08E709-D6ED-44E6-967B-1D0F19201FA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "List", "Demos\List\List.csproj", "{EF4D2E96-5869-499A-AEFA-A122279960B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{CC08E709-D6ED-44E6-967B-1D0F19201FA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC08E709-D6ED-44E6-967B-1D0F19201FA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC08E709-D6ED-44E6-967B-1D0F19201FA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF4D2E96-5869-499A-AEFA-A122279960B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF4D2E96-5869-499A-AEFA-A122279960B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF4D2E96-5869-499A-AEFA-A122279960B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF4D2E96-5869-499A-AEFA-A122279960B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{A057E78A-294B-459F-8F1F-2BBFBF23D4C9} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
 		{F3828F30-BC51-4AB1-85CE-01F957BDEB22} = {9D577A44-8CF8-4503-84F9-357AE3ED9DF4}
 		{CC08E709-D6ED-44E6-967B-1D0F19201FA4} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
+		{EF4D2E96-5869-499A-AEFA-A122279960B1} = {9D577A44-8CF8-4503-84F9-357AE3ED9DF4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2AB88655-08C0-4023-A819-0E2A6FC2FC37}
