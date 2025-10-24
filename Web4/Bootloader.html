@@ -82,7 +82,13 @@
     #transport;
     key;
     element;
-    static #transitionBatch = { mutations: [], elements: [], keyholesInvalidated: false };
+    static #transitionBatch = {
+      mutations: [],
+      elements: [],
+      duplicatesOld: {},
+      duplicatesNew: {},
+      keyholesInvalidated: false
+    };
 
     static {
       document.addEventListener('DOMContentLoaded', () => document.registerKeyholes());
@@ -110,6 +116,7 @@
       let oldElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(this.key);
+      [ viewTransitionName, viewTransitionNameSecondary ] = this.#fixDuplicates(viewTransitionName, viewTransitionNameSecondary);
 
       let mutation = () => oldElement.replaceWith(newElement);
 
@@ -122,14 +129,14 @@
       }
     }
 
-    addElement(key, rawHtml, transition) {
+    addElement(key, rawHtml, viewTransitionName) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);
 
       let mutation = () => priorElement.after(newElement);
 
-      if (!this.element.shouldAnimate(transition)) {
+      if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
         this.#batchMutation(mutation, false);
@@ -137,10 +144,10 @@
       }
     }
 
-    removeElement(transition) {
+    removeElement(viewTransitionName) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
 
-      if (!this.element.shouldAnimate(transition)) {
+      if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
         this.#batchMutation(mutation, true);
@@ -176,6 +183,21 @@
       });
     }
 
+    #fixDuplicates(nameNew, nameOld) {
+      let nameNewDupes = Web4Keyhole.#transitionBatch.duplicatesNew[nameNew];
+      if (!nameNewDupes) { nameNewDupes = 1; } else { nameNewDupes++; }
+      Web4Keyhole.#transitionBatch.duplicatesNew[nameNew] = nameNewDupes;
+
+      let nameOldDupes = Web4Keyhole.#transitionBatch.duplicatesOld[nameOld];
+      if (!nameOldDupes) { nameOldDupes = 1; } else { nameOldDupes++; }
+      Web4Keyhole.#transitionBatch.duplicatesOld[nameOld] = nameOldDupes;
+
+      return [
+        nameNewDupes <= 1 ? nameNew : `${nameNew}-${nameNewDupes}`,
+        nameOldDupes <= 1 ? nameOld : `${nameOld}-${nameOldDupes}`
+      ];
+    }
+
     static flushTransitionBatch() {
       let mutations = Web4Keyhole.#transitionBatch.mutations;
       let elements = Web4Keyhole.#transitionBatch.elements;
@@ -189,6 +211,8 @@
 
       Web4Keyhole.#transitionBatch.mutations = [];
       Web4Keyhole.#transitionBatch.elements = [];
+      Web4Keyhole.#transitionBatch.duplicatesNew = {};
+      Web4Keyhole.#transitionBatch.duplicatesOld = {};
       Web4Keyhole.#transitionBatch.keyholesInvalidated = false;
 
       document.startViewTransition(() => {
