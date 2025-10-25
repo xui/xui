@@ -179,7 +179,7 @@ var window = app.MapWeb4("/app", () => $"""
 
             <h2>Click on the buttons</h2>
             <div id="outer-div" onclick={OnDivClicked}>
-            outer div<br />
+                outer div<br />
                 <div id="middle-div" onclick={OnDivClicked}>
                     middle div<br />
                     <div id="inner-div" onclick={OnDivClicked}>
