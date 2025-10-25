@@ -444,7 +444,7 @@
       let element = ui.keyholes[key].element;
       if (element.nodeType == Node.ATTRIBUTE_NODE)
         element = element.ownerElement;
-      if (!document.body.contains(element))
+      if (element instanceof Node && element != document && !document.body.contains(element))
         delete ui.keyholes[key];
     }
   }
