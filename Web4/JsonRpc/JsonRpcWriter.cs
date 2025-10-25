@@ -196,7 +196,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartArray("params");
 
-        if (method.Item3 == "setAttribute" && param1.Type == KeyholeType.Boolean)
+        if (method.Item3 == ".setAttribute" && param1.Type == KeyholeType.Boolean)
         {
             // HTML treats boolean attributes differently.  Send without quotes.
             jsonWriter.WriteBooleanValue(param1.Boolean);
