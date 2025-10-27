@@ -59,7 +59,7 @@ public class WindowBuilder :
 
     public EventListener GetEventListener(ReadOnlySpan<byte> key)
     {
-        using var perf = Debug.PerfCheck("GetEventListener"); // TODO: Remove PerfCheck
+        using var perf = Perf.Measure("GetEventListener"); // TODO: Remove PerfCheck
 
         return key switch
         {

@@ -139,7 +139,7 @@ partial class WebSocketTransport
                 var result = await webSocket.ReceiveAsync(buffer, cancel);
 
                 System.Console.WriteLine();
-                using var perf = Debug.PerfCheck("WebSocketToTransport (loop)"); // TODO: Remove PerfCheck
+                using var perf = Perf.Measure("WebSocketToTransport (loop)"); // TODO: Remove PerfCheck
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -343,7 +343,7 @@ partial class WebSocketTransport
 
     private Keyhole[] CaptureSnapshot()
     {
-        using var perf = Debug.PerfCheck("CaptureSnapshot"); // TODO: Remove PerfCheck
+        using var perf = Perf.Measure("CaptureSnapshot"); // TODO: Remove PerfCheck
 
         return windowBuilder.Html.CreateSnapshot();
     }

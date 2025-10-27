@@ -4,7 +4,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
     public static void Diff(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
-        using var perf = Debug.PerfCheck("DiffUtil.Diff"); // TODO: Remove PerfCheck
+        using var perf = Perf.Measure("DiffUtil.Diff"); // TODO: Remove PerfCheck
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];

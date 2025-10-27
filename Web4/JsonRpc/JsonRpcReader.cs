@@ -16,7 +16,7 @@ public readonly ref struct JsonRpcReader
 
     public JsonRpcReader(ReadOnlySequence<byte> sequence)
     {
-        using var perf = Debug.PerfCheck("JsonRpcReader.Parse"); // TODO: Remove PerfCheck
+        using var perf = Perf.Measure("JsonRpcReader.Parse"); // TODO: Remove PerfCheck
         var reader = new Utf8JsonReader(sequence);
         while (reader.Read())
         {
@@ -81,14 +81,14 @@ public readonly ref struct JsonRpcReader
 
         public int GetNextAsInt()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsInt"); // TODO: Remove PerfCheck        
+            using var perf = Perf.Measure("JsonRpcMessage.GetNextAsInt"); // TODO: Remove PerfCheck        
             reader.Read();
             return reader.GetInt32();
         }
 
         public int? GetNextOptionalAsInt()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextOptionalAsInt"); // TODO: Remove PerfCheck        
+            using var perf = Perf.Measure("JsonRpcMessage.GetNextOptionalAsInt"); // TODO: Remove PerfCheck        
             reader.Read();
             return reader.TokenType != JsonTokenType.EndArray && reader.TryGetInt32(out int value)
                 ? value
@@ -97,21 +97,21 @@ public readonly ref struct JsonRpcReader
 
         public string GetNextAsString()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsString"); // TODO: Remove PerfCheck        
+            using var perf = Perf.Measure("JsonRpcMessage.GetNextAsString"); // TODO: Remove PerfCheck        
             reader.Read();
             return reader.GetString()!;
         }
 
         public ReadOnlySpan<byte> GetNextAsSpan()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsSpan"); // TODO: Remove PerfCheck        
+            using var perf = Perf.Measure("JsonRpcMessage.GetNextAsSpan"); // TODO: Remove PerfCheck        
             reader.Read();
             return reader.SafeValueSpan;
         }
 
         public ReadOnlySequence<byte> GetNextAsSequence()
         {
-            using var perf = Debug.PerfCheck("JsonRpcMessage.GetNextAsSequence"); // TODO: Remove PerfCheck        
+            using var perf = Perf.Measure("JsonRpcMessage.GetNextAsSequence"); // TODO: Remove PerfCheck        
             reader.Read();
             return JsonRpcReader.ReadSequence(sequence, ref reader);
         }

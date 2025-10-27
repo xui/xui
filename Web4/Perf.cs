@@ -2,11 +2,11 @@ using System.Diagnostics;
 
 namespace Web4;
 
-public static class Debug
+public static class Perf
 {
-    public static IDisposable PerfCheck(string name = "unnamed") => new Perf(name);
+    public static IDisposable Measure(string name = "unnamed") => new Disposer(name);
 
-    private class Perf(string name) : IDisposable
+    private class Disposer(string name) : IDisposable
     {
         readonly long gc1 = GC.GetAllocatedBytesForCurrentThread();
         readonly long sw1 = Stopwatch.GetTimestamp();

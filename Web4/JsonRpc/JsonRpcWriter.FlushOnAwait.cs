@@ -12,7 +12,7 @@ partial class JsonRpcWriter
 
         public override void Post(SendOrPostCallback callback, object? state)
         {
-            using var perf = Debug.PerfCheck("FlushOnAwait.Post"); // TODO: Remove PerfCheck
+            using var perf = Perf.Measure("FlushOnAwait.Post"); // TODO: Remove PerfCheck
 
             ThreadPool.QueueUserWorkItem<StateHolder>(
                 callBack: static s =>
