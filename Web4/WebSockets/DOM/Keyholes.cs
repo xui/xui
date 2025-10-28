@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace Web4.WebSockets;
 
 // Instead of a new-ing up another class, save an instantiation 
@@ -86,7 +88,7 @@ partial class WebSocketTransport : IKeyholes
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
     }
@@ -101,7 +103,7 @@ partial class WebSocketTransport : IKeyholes
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
         finally
@@ -119,7 +121,7 @@ partial class WebSocketTransport : IKeyholes
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
     }
@@ -134,7 +136,7 @@ partial class WebSocketTransport : IKeyholes
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Exception from event listener:\n{ex}");
+            logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
         finally

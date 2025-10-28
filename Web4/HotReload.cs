@@ -14,6 +14,7 @@ public static class HotReload
 
 #else
 
+using System.Diagnostics;
 using System.Reflection.Metadata;
 
 [assembly: MetadataUpdateHandler(typeof(Web4.HotReload))]
@@ -31,14 +32,14 @@ public static class HotReload
 
     internal static void ClearCache(Type[]? types)
     {
-        types?.ToList().ForEach(type => Console.WriteLine($"Hot Reload (ClearCache): {type.FullName}"));
+        types?.ToList().ForEach(type => Debug.WriteLine($"Hot Reload (ClearCache): {type.FullName}"));
     }
 
     internal static void UpdateApplication(Type[]? types)
     {
         ReloadCount++;
 
-        types?.ToList().ForEach(type => Console.WriteLine($"Hot Reload (UpdateApplication): {type.FullName}"));
+        types?.ToList().ForEach(type => Debug.WriteLine($"Hot Reload (UpdateApplication): {type.FullName}"));
 
         UpdateApplicationEvent?.Invoke(types);
     }

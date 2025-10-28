@@ -2,8 +2,10 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Web4.Composers;
 using Web4.Core.DOM;
 using Web4.JsonRpc;
@@ -14,6 +16,7 @@ partial class WebSocketTransport
 {
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
     private static readonly ConcurrentDictionary<string, WebSocketTransport> transports = [];
+    private readonly ILogger logger;
     private readonly WindowBuilder windowBuilder;
     private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
     private readonly Channel<int> diffChannel;
@@ -29,8 +32,9 @@ partial class WebSocketTransport
     public IConsole Console => this;
     public IKeyholes Keyholes => this;
 
-    private WebSocketTransport(string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
+    private WebSocketTransport(ILogger logger, string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
     {
+        this.logger = logger;
         this.windowBuilder = windowBuilder;
 
         diffChannel = Channel.CreateBounded<int>(
@@ -66,11 +70,15 @@ partial class WebSocketTransport
         // App = app;
     }
 
-    public static async Task Bind(HttpContext http, WindowBuilder windowBuilder, CancellationToken cancelProcess)
+    public static async Task Bind(
+        ILogger logger,
+        HttpContext http,
+        WindowBuilder windowBuilder,
+        CancellationToken cancelProcess)
     {
         // TODO: Move to header approach?
         var windowID = http.Connection.Id;
-        var transport = new WebSocketTransport(windowID, windowBuilder, cancelProcess);
+        var transport = new WebSocketTransport(logger, windowID, windowBuilder, cancelProcess);
 
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -89,7 +97,7 @@ partial class WebSocketTransport
             transport.DebounceDiffs(http.RequestAborted)
         );
 
-        System.Console.WriteLine($"👋 Goodbye, `{windowID}`!");
+        logger.LogInformation("👋 Goodbye, {WindowID}!", windowID);
 
         transports.Remove(windowID, out var _);
         cancelProcessRegistration.Unregister();
@@ -116,13 +124,13 @@ partial class WebSocketTransport
 
                 sequence.ReturnToPool();
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                System.Console.WriteLine($"Connection severed.");
+                logger.LogInformation("HTTP request was aborted: {Message}", ex.Message);
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"🛑 Unexpected error writing to the WebSocket.\n{ex}");
+                logger.LogError(ex, "Unexpected error writing to the WebSocket: {Message}", ex.Message);
             }
         }
     }
@@ -138,7 +146,6 @@ partial class WebSocketTransport
                 var buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
                 var result = await webSocket.ReceiveAsync(buffer, cancel);
 
-                System.Console.WriteLine();
                 using var perf = Perf.Measure("WebSocketToTransport (loop)"); // TODO: Remove PerfCheck
 
                 if (result.MessageType == WebSocketMessageType.Close)
@@ -252,12 +259,13 @@ partial class WebSocketTransport
                     }
 
                 default:
-                    throw new InvalidOperationException("🛑 Unrecognized method.  This requires investigation.");
+                    logger.LogError("Unrecognized method: {Method}.  This should be impossible and needs fixing.", Encoding.UTF8.GetString(rpc.Method));
+                    break;
             }
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"🛑 Error handling JsonRpc message:\n{ex}");
+            logger.LogError(ex, "Unexpected error handling JsonRpc message: {Message}", ex.Message);
         }
         finally
         {
@@ -323,7 +331,7 @@ partial class WebSocketTransport
         else
         {
             sequence.ReturnToPool();
-            System.Console.WriteLine($"🛑 Event listener not found for key: `{System.Text.Encoding.UTF8.GetString(key)}`.  Possible race condition.");
+            logger.LogWarning("Event listener not found for key: {Key}.  Possible race condition.", Encoding.UTF8.GetString(key));
         }
     }
 
@@ -372,13 +380,13 @@ partial class WebSocketTransport
     {
         if (!IsInvalidated)
         {
-            System.Console.WriteLine($"Cancelling Update() this app has not been invalidated.");
+            logger.LogWarning("Cancelling Reconcile() because IsInvalidated is false (which is unexpected and should be investigated).");
             return;
         }
 
         if (snapshot is null)
         {
-            System.Console.WriteLine($"Cancelling Update() because snapshot is null (which is unexpected and should be investigated).");
+            logger.LogWarning("Cancelling Reconcile() because snapshot is null (which is unexpected and should be investigated).");
             return;
         }
 
