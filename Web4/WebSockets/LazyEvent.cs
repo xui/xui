@@ -117,6 +117,7 @@ public record struct LazyEvent : Event, IDisposable
                                 }
                                 else if (type == typeof(EventTarget))
                                 {
+                                    references ??= [];
                                     ParseEventTarget(reader, propertyName);
                                 }
                                 else if (type == typeof(TouchPoint[]))
@@ -187,8 +188,7 @@ public record struct LazyEvent : Event, IDisposable
         {
             if (reader.TokenType == JsonTokenType.EndObject)
             {
-                references ??= [];
-                references[propertyName] = new EventTarget(id, name, type, @checked, value);
+                references![propertyName] = new EventTarget(id, name, type, @checked, value);
                 return;
             }
 
