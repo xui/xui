@@ -39,6 +39,8 @@ public record struct LazyEvent : Event, IDisposable
 
     public void Dispose()
     {
+        // TODO: Custom ObjectDisposedException? It'd be helpful to throw a custom message about trying to use LazyEvent beyond the scope of its event listener.  
+
         values?.Clear();
         references?.Clear();
         if (values is not null)
