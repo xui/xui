@@ -138,7 +138,7 @@ public record struct LazyEvent : Event, IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            throw new ApplicationException("There was an unexpected error parsing this event.", ex);
         }
     }
 
