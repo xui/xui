@@ -194,8 +194,7 @@ public record struct LazyEvent : Event, IDisposable
 
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                var atleastOne =
-                    ParseString(reader, "id", ref id) ||
+                _ = ParseString(reader, "id", ref id) ||
                     ParseString(reader, "type", ref type) ||
                     ParseString(reader, "value", ref value) ||
                     ParseString(reader, "name", ref name) ||
