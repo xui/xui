@@ -390,26 +390,33 @@ partial class WebSocketTransport
             return;
         }
 
-        Keyhole[] oldBuffer = snapshot;
-        Keyhole[] newBuffer = CaptureSnapshot();
-        using (var batchOutput = Output.BatchThisScope())
+        try
         {
-            DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
-        }
+            Keyhole[] oldBuffer = snapshot;
+            Keyhole[] newBuffer = CaptureSnapshot();
+            using (var batchOutput = Output.BatchThisScope())
+            {
+                DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
+            }
 
-        switch (SnapshotStrategy)
+            switch (SnapshotStrategy)
+            {
+                case SnapshotStrategy.Recapture:
+                    // Do not keep this snapshot buffer for later.
+                    snapshot = null;
+                    oldBuffer.Return();
+                    newBuffer.Return();
+                    break;
+                case SnapshotStrategy.Retain:
+                    // Keep this snapshot buffer around to use as the "before" next time.
+                    snapshot = newBuffer;
+                    oldBuffer.Return();
+                    break;
+            }
+        }
+        catch (Exception ex)
         {
-            case SnapshotStrategy.Recapture:
-                // Do not keep this snapshot buffer for later.
-                snapshot = null;
-                oldBuffer.Return();
-                newBuffer.Return();
-                break;
-            case SnapshotStrategy.Retain:
-                // Keep this snapshot buffer around to use as the "before" next time.
-                snapshot = newBuffer;
-                oldBuffer.Return();
-                break;
+            logger.LogError(ex, "Unexpected error reconciling diffs: {Message}", ex.Message);
         }
 
         IsInvalidated = false;
