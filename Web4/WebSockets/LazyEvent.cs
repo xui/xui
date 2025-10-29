@@ -145,39 +145,47 @@ public record struct LazyEvent : Event, IDisposable
     private object? GetReference(string propName)
     {
         LazyParse(canIgnoreRefTypes: false);
-        return references!.GetValueOrDefault(propName);
+        return references?.GetValueOrDefault(propName);
     }
 
     private bool? GetBool(string propName)
     {
         LazyParse(canIgnoreRefTypes: true);
-        return values!.TryGetValue(propName, out long value) ? value != 0 : null;
+        return values is null
+            ? null
+            : values.TryGetValue(propName, out long value) ? value != 0 : null;
     }
 
     private int? GetInt(string propName)
     {
         LazyParse(canIgnoreRefTypes: true);
-        return values!.TryGetValue(propName, out long value) ? (int)value : null;
+        return values is null
+            ? null
+            : values.TryGetValue(propName, out long value) ? (int)value : null;
     }
 
     private long? GetLong(string propName)
     {
         LazyParse(canIgnoreRefTypes: true);
-        return values!.TryGetValue(propName, out long value) ? value : null;
+        return values is null
+            ? null
+            : values.TryGetValue(propName, out long value) ? value : null;
     }
 
     private double? GetDouble(string propName)
     {
         LazyParse(canIgnoreRefTypes: true);
-        return values!.TryGetValue(propName, out long value)
-            ? BitConverter.Int64BitsToDouble(value)
-            : null;
+        return values is null
+            ? null
+            : values.TryGetValue(propName, out long value)
+                ? BitConverter.Int64BitsToDouble(value)
+                : null;
     }
 
     private EventTarget? GetTarget(string propName)
     {
         LazyParse(canIgnoreRefTypes: false);
-        return references!.GetValueOrDefault(propName) as EventTarget;
+        return references?.GetValueOrDefault(propName) as EventTarget;
     }
 
     private void ParseEventTarget(Utf8JsonReader reader, string propertyName)
