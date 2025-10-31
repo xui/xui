@@ -195,5 +195,5 @@ public ref partial struct Html
     // }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEven(int number) => number % 2 == 0;
+    private static bool IsEven(int number) => number % 2 == 0;
 }
