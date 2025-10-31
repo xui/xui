@@ -119,7 +119,7 @@ public ref partial struct Html
         Cursor++;
         return @continue;
     }
-    
+
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
     public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
@@ -132,7 +132,7 @@ public ref partial struct Html
         Cursor++;
         return @continue;
     }
-    
+
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
     public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
