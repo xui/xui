@@ -307,12 +307,12 @@ public class WindowBuilder :
     private string CreateListenerString(string? format, string type, string target, string key, string options) => format switch
     {
         // Serialize nothing – the event object is never used
-        "" => $"{target}.addEventListener('{type}', e => ui.keyholes.{key}.dispatchEvent(e.trim('')), {options}); ui.keyholes.set('{key}', {target});",
+        "" => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('')), {options}); keyholes.set('{key}', {target});",
 
         // Serialize the event – the event object is needed
-        null => $"{target}.addEventListener('{type}', e => ui.keyholes.{key}.dispatchEvent(e.trim('*')), {options}); ui.keyholes.set('{key}', {target});",
+        null => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('*')), {options}); keyholes.set('{key}', {target});",
 
         // Serialize selectively – only a few properties are ever used
-        _ => $"{target}.addEventListener('{type}', e => ui.keyholes.{key}.dispatchEvent(e.trim('{format}')), {options}); ui.keyholes.set('{key}', {target});",
+        _ => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('{format}')), {options}); keyholes.set('{key}', {target});",
     };
 }

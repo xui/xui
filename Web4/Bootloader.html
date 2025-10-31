@@ -28,35 +28,8 @@
 
 <script>
 
-  class Web4UI {
-    #transport = new WebSocketTransport();
-    keyholes = new Web4Keyholes(this.#transport);
-
-    getElementByKey(key) {
-      return this.keyholes[key]?.element;
-    }
-
-    ping(repeat) {
-      repeat = repeat ?? 1;
-      console.time("ping");
-      this.#transport.ping().then(() => {
-        console.timeEnd("ping");
-        if (--repeat > 0)
-          this.ping(repeat);
-      });
-    }
-
-    setTitle(title) {
-      document.title = title;
-    }
-  }
-
   class Web4Keyholes {
-    #transport;
-
-    constructor(transport) {
-      this.#transport = transport;
-    }
+    #transport = new WebSocketTransport();
 
     set(key, node, booleanAttributeName) {
       this[key] = new Web4Keyhole(this.#transport, key, node);
@@ -68,13 +41,27 @@
 
     get elements() {
       return Object.fromEntries(Object
-        .values(ui.keyholes)
+        .values(keyholes)
         .map(k => [k.key, k.element]
       ));
     }
 
+    getElementByKey(key) {
+      return this[key]?.element;
+    }
+
     dump() {
       this.#transport.dump();
+    }
+
+    ping(repeat) {
+      repeat = repeat ?? 1;
+      console.time("ping");
+      this.#transport.ping().then(() => {
+        console.timeEnd("ping");
+        if (--repeat > 0)
+          this.ping(repeat);
+      });
     }
   }
 
@@ -256,7 +243,7 @@
 
       let message = {
         jsonrpc: "2.0", 
-        method: `ui.keyholes.${key}.dispatchEvent`, 
+        method: `keyholes.${key}.dispatchEvent`, 
         params: params
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -265,7 +252,7 @@
     ping() {
       let message = { 
         jsonrpc: "2.0", 
-        method: "ui.ping", 
+        method: "keyholes.ping", 
         id: ++this.#messageID,
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -278,7 +265,7 @@
     dump() {
       let message = {
         jsonrpc: "2.0", 
-        method: "ui.keyholes.dump", 
+        method: "keyholes.dump", 
       };
       this.#webSocket.send(JSON.stringify(message));
     }
@@ -345,7 +332,7 @@
     }
   }
 
-  this.ui = new Web4UI();
+  this.keyholes = new Web4Keyholes();
 
   Event.prototype.trim = function(members) {
     const ALLOWED_EVENT_PROPERTIES = [ "absolute", "acceleration", "accelerationIncludingGravity", "alpha", "altitudeAngle", "altKey", "animationName", "azimuthAngle", "beta", "bubbles", "button", "buttons", "cancelable", "changedTouches", "clientX", "clientY", "code", "colNo", "composed", "ctrlKey", "currentTarget", "data", "dataTransfer", "defaultPrevented", "deltaMode", "deltaX", "deltaY", "deltaZ", "detail", "elapsedTime", "error", "eventPhase", "fileName", "gamma", "height", "inputType", "interval", "isComposing", "isPrimary", "isTrusted", "key", "length", "lengthComputable", "lineNo", "loaded", "location", "message", "metaKey", "movementX", "movementY", "newState", "newUrl", "offsetX", "offsetY", "oldState", "oldUrl", "pageX", "pageY", "persisted", "pointerID", "pointerType", "pressure", "propertyName", "pseudoElement", "relatedTarget", "repeat", "rotationRate", "screenX", "screenY", "shiftKey", "skipped", "submitter", "tangentialPressure", "target", "targetTouches", "timeStamp", "tiltX", "tiltY", "total", "touches", "twist", "type", "width", "x", "y", "id", "name", "value", "checked" ];
@@ -406,7 +393,7 @@
 
   Node.prototype.registerKeyholes = function(key) {
     if (key)
-      ui.keyholes.set(key, this);
+      keyholes.set(key, this);
 
     let comments = document.evaluate('//comment()', this, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     for (let i = comments.snapshotLength - 1; i >= 0; i--) {
@@ -418,7 +405,7 @@
           // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
           element = element.parentNode.insertBefore(document.createTextNode(""), comment);
         }
-        ui.keyholes.set(key, element);
+        keyholes.set(key, element);
       }
       comment.parentElement.removeChild(comment);
     }
@@ -430,9 +417,9 @@
       if (key.startsWith('key')) {
         if (attr.value === "") {
           let element = attrs.snapshotItem(i - 1)
-          ui.keyholes.set(key, element);
+          keyholes.set(key, element);
         } else {
-          ui.keyholes.set(key, attr.ownerElement, attr.value);
+          keyholes.set(key, attr.ownerElement, attr.value);
         }
         attr.ownerElement.removeAttribute(attr.name)
       }
@@ -440,12 +427,12 @@
   }
 
   HTMLDocument.prototype.unregisterKeyholes = function() {
-    for (let key in ui.keyholes) {
-      let element = ui.keyholes[key].element;
+    for (let key in keyholes) {
+      let element = keyholes[key].element;
       if (element.nodeType == Node.ATTRIBUTE_NODE)
         element = element.ownerElement;
       if (element instanceof Node && element != document && !document.body.contains(element))
-        delete ui.keyholes[key];
+        delete keyholes[key];
     }
   }
 

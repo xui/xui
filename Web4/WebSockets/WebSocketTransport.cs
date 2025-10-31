@@ -219,14 +219,14 @@ partial class WebSocketTransport
 
             switch (rpc.Method)
             {
-                case var method when method.SequenceEqual("ui.keyholes.dump"u8):
+                case var method when method.SequenceEqual("keyholes.dump"u8):
                     {
                         using var batchOutput = Output.BatchThisScope();
                         Keyholes.Dump();
                         break;
                     }
 
-                case var method when method.SequenceEqual("ui.benchmark"u8):
+                case var method when method.SequenceEqual("keyholes.benchmark"u8):
                     {
                         using var batchOutput = Output.BatchThisScope();
                         var threads = @params.GetNextOptionalAsInt();
@@ -234,7 +234,7 @@ partial class WebSocketTransport
                         break;
                     }
 
-                case var method when method.SequenceEqual("ui.ping"u8) && rpc.IdAsInt is int id:
+                case var method when method.SequenceEqual("keyholes.ping"u8) && rpc.IdAsInt is int id:
                     {
                         // App.Ping();
                         Output.WriteResponse(id);
@@ -279,7 +279,7 @@ partial class WebSocketTransport
     private static ReadOnlySpan<byte> GetKey(ReadOnlySpan<byte> method)
     {
         var split = method.Split((byte)'.');
-        return split.MoveNext() && split.MoveNext() && split.MoveNext()
+        return split.MoveNext() && split.MoveNext()
             ? method[split.Current]
             : [];
     }

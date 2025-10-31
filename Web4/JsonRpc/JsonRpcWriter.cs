@@ -386,7 +386,7 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment("", true);
                     break;
                 case KeyholeType.EventListener:
-                    jsonWriter.WriteStringValueSegment("\"ui.keyholes.", false);
+                    jsonWriter.WriteStringValueSegment("\"keyholes.", false);
                     jsonWriter.WriteStringValueSegment(keyhole.Key, false);
                     jsonWriter.WriteStringValueSegment(".dispatchEvent(event.trim('", false);
                     jsonWriter.WriteStringValueSegment(keyhole.Format ?? "*", false);

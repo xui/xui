@@ -334,13 +334,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (includeEventArg)
         {
             Writer.Inject($"""
-                "ui.keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}
+                "keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}
                 """);
         }
         else
         {
             Writer.Inject($"""
-                "ui.keyholes.{key}.dispatchEvent(event.trim(''))" {key}
+                "keyholes.{key}.dispatchEvent(event.trim(''))" {key}
                 """);
         }
         
