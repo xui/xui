@@ -20,11 +20,11 @@ public struct Keyhole
     // These properties all use `reference` as their backing field.  Since each keyhole
     // can only represent a single type at a time we can save a great deal of 
     // wasted RAM and boost memory locality of keyhole buffers by sharing a single backing store.
-    public string? StringLiteral { readonly get => reference as string; set => this.reference = value; }
-    public string? String { readonly get => reference as string; set => this.reference = value; }
-    public Uri? Uri { readonly get => reference as Uri; set => this.reference = value; }
-    public string? Expression { readonly get => reference as string; set => this.reference = value; }
-    public object? Tag { readonly get => reference; set => this.reference = value; }
+    public string? StringLiteral    { set => this.reference = value; get => reference as string; }
+    public string? String           { set => this.reference = value; get => reference as string; }
+    public Uri? Uri                 { set => this.reference = value; get => reference as Uri; }
+    public string? Expression       { set => this.reference = value; get => reference as string; }
+    public object? Tag              { set => this.reference = value; get => reference; }
 
     // --- backing field: value1 ---
     // These properties all use `value1` as their backing field.  Since each keyhole
