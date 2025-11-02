@@ -55,8 +55,6 @@ public struct Keyhole
     public int SequenceLength { readonly get => (int)value1; set => value1 = value; }
     public bool IsValueAnAttribute { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }
 
-    public static bool operator ==(Keyhole c1, Keyhole c2) => Equals(ref c1, ref c2);
-    public static bool operator !=(Keyhole left, Keyhole right) => !Equals(ref left, ref right);
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {
@@ -81,14 +79,4 @@ public struct Keyhole
                 => left.value1 == right.value1 && left.Format == right.Format,
             _ => throw new NotSupportedException()
         };
-
-    public override readonly bool Equals(object? obj)
-    {
-        return base.Equals(obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
 }
