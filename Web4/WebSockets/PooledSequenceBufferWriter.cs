@@ -4,7 +4,7 @@ namespace Web4.WebSockets;
 
 public class PooledSequenceBufferWriter<T> : IBufferWriter<T>
 {
-    private const int DEFAULT_BUFFER_SIZE = 4096;
+    private const int DEFAULT_BUFFER_SIZE = 16384;
     private T[]? currentBuffer;
     private int currentIndex;
     private SequenceSegment<T>? segmentStart;
@@ -82,7 +82,8 @@ public class PooledSequenceBufferWriter<T> : IBufferWriter<T>
         // Single-segment is out of space.  Convert this to multi-segment.
         if (currentBuffer is not null)
         {
-            // TODO: new SequenceSegment() allocates memory
+            // SequenceSegment allocates memory 
+            // and evidently there's no way around it short of a grow-copy-buffer approach.
             segmentStart = new SequenceSegment<T>(currentBuffer, 0..currentIndex);
             segmentEnd = segmentStart;
             currentBuffer = ArrayPool<T>.Shared.Rent(bufferLength);
