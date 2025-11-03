@@ -371,7 +371,7 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, false);
                     break;
                 case KeyholeType.Html:
-                    Span<Keyhole> partialHtml = buffer.AsSpan(keyhole.SequenceStart, keyhole.SequenceLength);
+                    Span<Keyhole> partialHtml = buffer.AsSpan(keyhole.Sequence);
                     WriteHtmlPartial(buffer, partialHtml, includeSentinels);
                     if (includeSentinels)
                     {
@@ -381,7 +381,7 @@ public partial class JsonRpcWriter : IDisposable
                     }
                     break;
                 case KeyholeType.Attribute:
-                    Span<Keyhole> partialAttr = buffer.AsSpan(keyhole.SequenceStart, keyhole.SequenceLength);
+                    Span<Keyhole> partialAttr = buffer.AsSpan(keyhole.Sequence);
                     WriteAttributeSequence(partialAttr);
                     jsonWriter.WriteStringValueSegment("", true);
                     break;
