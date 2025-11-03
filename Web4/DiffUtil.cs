@@ -146,7 +146,8 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         ref var oldItem = ref oldItems[d];
                         ref var newItem = ref newItems[d];
                         if (oldItem.Tag != newItem.Tag)
-                            tagChanges++;
+                            if (++tagChanges > 1)
+                                break;
                     }
 
                     for (var d = 0; d < minLength; d++)
