@@ -70,10 +70,8 @@ async Task DoThingAsync(Event.Subsets.XY e)
     // Console.WriteLine($"four... x:{e.X}, y:{e.Y} thread:{Thread.CurrentThread.ManagedThreadId} {SynchronizationContext.Current?.ToString() ?? "null"}");
 }
 
-void EditRandom(Event e)
+void EditRandom()
 {
-    e.StopPropagation();
-
     var index = Random.Shared.Next(names.Count);
     names[index] = names[index] + " 😀";
 }
