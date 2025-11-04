@@ -12,15 +12,24 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.SequenceLength);
 
         var diffUtil = new DiffUtil(keyholes, oldBuffer, newBuffer);
-        diffUtil.DiffKeyholeSpans(ref newFirst, oldSpan, newSpan);
+        diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
     }
 
-    private readonly void DiffKeyholeSpans(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly void Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
-        // The first thing to compare is the easiest (and fastest).
-        // If the two spans have a different quantity of keyholes, 
-        // then it's impossible that they are the same.  
-        // So replace the whole span.
+        if (CompareLengths(ref parent, oldSpan, newSpan)) return;
+        if (CompareImmutables(ref parent, oldSpan, newSpan)) return;
+        if (CompareMutables(ref parent, oldSpan, newSpan)) return;
+    }
+
+    /// <summary>
+    /// The first thing to compare is the easiest (and fastest).
+    /// If the two spans have a different quantity of keyholes, 
+    /// then it's impossible that they are the same.  
+    /// So replace the whole span.
+    /// </summary>
+    private readonly bool CompareLengths(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    {
         if (oldSpan.Length != newSpan.Length)
         {
             if (parent.Type == KeyholeType.Attribute)
@@ -32,19 +41,26 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
-            return;
+            return true;
         }
 
-        // --- IMMUTABLES (string literals) ---
-        // Traverse every even index – these are guaranteed to be string literals only.
-        // If any of the string literals do not match up that means this whole sequence 
-        // and all its children must be replaced.
-        // Usually this is the result of switch-expressions or ternary-conditionals:
-        //   • $"<div>{ value switch { 1 => MyComponent1(), 2 => MyComponent2(), ... } }</div>"
-        //   • $"<div>{ (condition ? MyComponent1() : MyComponent2()) }</div>" 
-        // Caveat: Don't forget about Hot Reload (DEBUG only) which can cheat the
-        // compiler guarantees that InterpolatedStringHandlers gives us where
-        // we can expect the exact same string literals at each keyhole every time.
+        return false;
+    }
+
+    /// <summary>
+    /// IMMUTABLES (string literals)
+    /// Traverse every even index – these are guaranteed to be string literals only.
+    /// If any of the string literals do not match up that means this whole sequence 
+    /// and all its children must be replaced.
+    /// Usually this is the result of switch-expressions or ternary-conditionals:
+    ///   • $"<div>{ value switch { 1 => MyComponent1(), 2 => MyComponent2(), ... } }</div>"
+    ///   • $"<div>{ (condition ? MyComponent1() : MyComponent2()) }</div>" 
+    /// Caveat: Don't forget about Hot Reload (DEBUG only) which can cheat the
+    /// compiler guarantees that InterpolatedStringHandlers gives us where
+    /// we can expect the exact same string literals at each keyhole every time.
+    /// </summary>
+    private readonly bool CompareImmutables(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    {
         for (int i = 0; i < newSpan.Length; i += 2)
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
@@ -63,15 +79,22 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                     keyholes.SetElement(newBuffer, parent.Key, newSpan);
                 else
                     keyholes.SetElement(newBuffer, parent.Key, newSpan, false); // TODO: lineNumber logic here!
-                
+
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
-                return;
+                return true;
             }
         }
 
-        // --- MUTABLES (state) ---
-        // Traverse every odd index – these are guaranteed to be a mutable keyholes only.
+        return false;
+    }
+
+    /// <summary>
+    /// MUTABLES (state)
+    /// Traverse every odd index – these are guaranteed to be a mutable keyhole value, i.e. state.
+    /// </summary>
+    private readonly bool CompareMutables(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    {
         for (int i = 1; i < newSpan.Length; i += 2)
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
@@ -105,7 +128,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
                             // Shortcircuit.  No need to diff the rest of this span.
                             // This whole attribute sequence will be updated.
-                            return;
+                            return true;
                         }
                         else if (newKeyhole.IsValueAnAttribute)
                         {
@@ -120,7 +143,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
                     // Recursively traverse deeper, then come back and continue these siblings.
-                    DiffKeyholeSpans(
+                    Recurse(
                         parent: ref newKeyhole,
                         oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
                         newSpan: newBuffer.AsSpan(newKeyhole.Sequence)
@@ -153,8 +176,8 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                         }
                         else
                         {
-                            DiffKeyholeSpans(
-                                ref newItem,
+                            Recurse(
+                                parent: ref newItem,
                                 oldBuffer.AsSpan(oldItem.Sequence),
                                 newBuffer.AsSpan(newItem.Sequence)
                             );
@@ -202,5 +225,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                     throw new InvalidOperationException("KeyholeType not supported.  This is very unexpected.");
             }
         }
+
+        return false;
     }
 }
