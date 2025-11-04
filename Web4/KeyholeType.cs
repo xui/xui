@@ -17,7 +17,7 @@ public enum KeyholeType
     TimeSpan,
     TimeOnly,
     Attribute,
-    EventListener,
     Html,
+    EventListener,
     Enumerable,
 }
