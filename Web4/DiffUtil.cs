@@ -15,11 +15,12 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
     }
 
-    private readonly void Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
-        if (CompareLengths(ref parent, oldSpan, newSpan)) return;
-        if (CompareImmutables(ref parent, oldSpan, newSpan)) return;
-        if (CompareMutables(ref parent, oldSpan, newSpan)) return;
+        if (CompareLengths(ref parent, oldSpan, newSpan)) return false;
+        if (CompareImmutables(ref parent, oldSpan, newSpan)) return false;
+        if (CompareMutables(ref parent, oldSpan, newSpan)) return false;
+        return false;
     }
 
     /// <summary>
@@ -101,44 +102,38 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
             ref Keyhole newKeyhole = ref newSpan[i];
-
-            // TODO: How much faster is it without the switch?  There's already a switch inside .Equals()!
-
-            switch (newKeyhole.Type)
+            
+            bool shortCircuit = newKeyhole.Type switch
             {
-                case KeyholeType.Html:
-                case KeyholeType.Attribute:
-                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence));
-                    break;
-                case KeyholeType.String:
-                case KeyholeType.Boolean:
-                case KeyholeType.Color:
-                case KeyholeType.Uri:
-                case KeyholeType.Integer:
-                case KeyholeType.Long:
-                case KeyholeType.Float:
-                case KeyholeType.Double:
-                case KeyholeType.Decimal:
-                case KeyholeType.DateTime:
-                case KeyholeType.DateOnly:
-                case KeyholeType.TimeSpan:
-                case KeyholeType.TimeOnly:
-                    if (CompareMutableValues(ref parent, ref oldKeyhole, ref newKeyhole))
-                        return true;
-                    break;
-                case KeyholeType.Enumerable:
-                    if (CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole))
-                        return true;
-                    break;
-                case KeyholeType.EventListener:
-                    // Event listeners never need to be diff'd.  
-                    // Their only purpose is for lookup.
-                    break;
-                case KeyholeType.StringLiteral:
-                    throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index");
-                default:
-                    throw new InvalidOperationException("KeyholeType not supported.  This is very unexpected.");
-            }
+                KeyholeType.Html or
+                KeyholeType.Attribute =>
+                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)),
+                KeyholeType.String or
+                KeyholeType.Boolean or
+                KeyholeType.Color or
+                KeyholeType.Uri or
+                KeyholeType.Integer or
+                KeyholeType.Long or
+                KeyholeType.Float or
+                KeyholeType.Double or
+                KeyholeType.Decimal or
+                KeyholeType.DateTime or
+                KeyholeType.DateOnly or
+                KeyholeType.TimeSpan or
+                KeyholeType.TimeOnly =>
+                    CompareMutableValues(ref parent, ref oldKeyhole, ref newKeyhole),
+                KeyholeType.Enumerable =>
+                    CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole),
+                KeyholeType.EventListener =>
+                    false, // Event listeners never need to be diff'd, their only purpose is for lookup.
+                KeyholeType.StringLiteral =>
+                    throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index"),
+                _ =>
+                    throw new InvalidOperationException("Unnamed enum values are not supported")
+            };
+
+            if (shortCircuit)
+                return true;
         }
 
         // Allow deeper recursion.
