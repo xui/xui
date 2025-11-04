@@ -17,9 +17,6 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
     private readonly void DiffKeyholeSpans(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
-        var key = parent.Key;
-        var transition = parent.Format;
-
         // The first thing to compare is the easiest (and fastest).
         // If the two spans have a different quantity of keyholes, 
         // then it's impossible that they are the same.  
@@ -27,11 +24,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         if (oldSpan.Length != newSpan.Length)
         {
             if (parent.Type == KeyholeType.Attribute)
-                keyholes.SetAttribute(key, newSpan);
-            else if (transition is null)
-                keyholes.SetElement(newBuffer, key, newSpan);
+                keyholes.SetAttribute(parent.Key, newSpan);
+            else if (parent.Format is null)
+                keyholes.SetElement(newBuffer, parent.Key, newSpan);
             else
-                keyholes.SetElement(newBuffer, key, newSpan, false); // TODO: lineNumber logic here!
+                keyholes.SetElement(newBuffer, parent.Key, newSpan, false); // TODO: lineNumber logic here!
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -61,11 +58,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (parent.Type == KeyholeType.Attribute)
-                    keyholes.SetAttribute(key, newSpan);
-                else if (transition == null)
-                    keyholes.SetElement(newBuffer, key, newSpan);
+                    keyholes.SetAttribute(parent.Key, newSpan);
+                else if (parent.Format == null)
+                    keyholes.SetElement(newBuffer, parent.Key, newSpan);
                 else
-                    keyholes.SetElement(newBuffer, key, newSpan, false); // TODO: lineNumber logic here!
+                    keyholes.SetElement(newBuffer, parent.Key, newSpan, false); // TODO: lineNumber logic here!
                 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -104,7 +101,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                             // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                             // Find the start of this sequence, then grab the sequence's full span.
                             ref var startKeyhole = ref newBuffer[newKeyhole.SequenceStart];
-                            keyholes.SetAttribute(key, newBuffer.AsSpan(startKeyhole.Sequence));
+                            keyholes.SetAttribute(parent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                             // Shortcircuit.  No need to diff the rest of this span.
                             // This whole attribute sequence will be updated.
@@ -130,7 +127,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                     );
                     break;
                 case KeyholeType.Enumerable:
-                    transition = newKeyhole.Format;
+                    var transition = newKeyhole.Format;
                     var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
                     var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
                     var minLength = Math.Min(oldItems.Length, newItems.Length);
