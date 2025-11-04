@@ -1,6 +1,6 @@
 namespace Web4;
 
-public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
+public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
     public static void Diff(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
@@ -11,15 +11,11 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.SequenceLength);
         Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.SequenceLength);
 
-        var diffUtil = new DiffUtil(oldBuffer, newBuffer);
-        diffUtil.DiffKeyholeSpans(keyholes, ref newFirst, oldSpan, newSpan);
+        var diffUtil = new DiffUtil(keyholes, oldBuffer, newBuffer);
+        diffUtil.DiffKeyholeSpans(ref newFirst, oldSpan, newSpan);
     }
 
-    private readonly void DiffKeyholeSpans(
-        IKeyholes keyholes,
-        ref Keyhole parent,
-        Span<Keyhole> oldSpan,
-        Span<Keyhole> newSpan)
+    private readonly void DiffKeyholeSpans(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
         var key = parent.Key;
         var transition = parent.Format;
@@ -128,7 +124,6 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                 case KeyholeType.Attribute:
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffKeyholeSpans(
-                        keyholes,
                         parent: ref newKeyhole,
                         oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
                         newSpan: newBuffer.AsSpan(newKeyhole.Sequence)
@@ -162,7 +157,6 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         else
                         {
                             DiffKeyholeSpans(
-                                keyholes,
                                 ref newItem,
                                 oldBuffer.AsSpan(oldItem.Sequence),
                                 newBuffer.AsSpan(newItem.Sequence)
