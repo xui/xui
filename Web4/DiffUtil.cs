@@ -15,11 +15,12 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
     }
 
-    private readonly void Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
-        if (CompareLengths(ref parent, oldSpan, newSpan)) return;
-        if (CompareImmutables(ref parent, oldSpan, newSpan)) return;
-        if (CompareMutables(ref parent, oldSpan, newSpan)) return;
+        if (CompareLengths(ref parent, oldSpan, newSpan)) return true;
+        if (CompareImmutables(ref parent, oldSpan, newSpan)) return true;
+        if (CompareMutables(ref parent, oldSpan, newSpan)) return true;
+        return false;
     }
 
     /// <summary>
@@ -44,6 +45,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             return true;
         }
 
+        // Allow deeper recursion.
         return false;
     }
 
@@ -86,6 +88,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
         }
 
+        // Allow deeper recursion.
         return false;
     }
 
@@ -104,6 +107,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
             switch (newKeyhole.Type)
             {
+                case KeyholeType.Html:
+                case KeyholeType.Attribute:
+                    if (Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)))
+                        return true;
+                    break;
                 case KeyholeType.String:
                 case KeyholeType.Boolean:
                 case KeyholeType.Color:
@@ -117,103 +125,12 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 case KeyholeType.DateOnly:
                 case KeyholeType.TimeSpan:
                 case KeyholeType.TimeOnly:
-                    if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
-                    {
-                        if (parent.Type == KeyholeType.Attribute)
-                        {
-                            // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
-                            // Find the start of this sequence, then grab the sequence's full span.
-                            ref var startKeyhole = ref newBuffer[newKeyhole.SequenceStart];
-                            keyholes.SetAttribute(parent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
-
-                            // Shortcircuit.  No need to diff the rest of this span.
-                            // This whole attribute sequence will be updated.
-                            return true;
-                        }
-                        else if (newKeyhole.IsValueAnAttribute)
-                        {
-                            keyholes.SetAttribute(newKeyhole.Key, ref newKeyhole);
-                        }
-                        else
-                        {
-                            keyholes.SetTextNode(newKeyhole.Key, ref newKeyhole);
-                        }
-                    }
-                    break;
-                case KeyholeType.Html:
-                case KeyholeType.Attribute:
-                    // Recursively traverse deeper, then come back and continue these siblings.
-                    Recurse(
-                        parent: ref newKeyhole,
-                        oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
-                        newSpan: newBuffer.AsSpan(newKeyhole.Sequence)
-                    );
+                    if (CompareMutableValues(ref parent, ref oldKeyhole, ref newKeyhole))
+                        return true;
                     break;
                 case KeyholeType.Enumerable:
-                    var transition = newKeyhole.Format;
-                    var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
-                    var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
-                    var minLength = Math.Min(oldItems.Length, newItems.Length);
-                    var tagChanges = 0;
-                    for (var d = 0; d < minLength; d++)
-                    {
-                        ref var oldItem = ref oldItems[d];
-                        ref var newItem = ref newItems[d];
-                        if (oldItem.Tag != newItem.Tag)
-                            if (++tagChanges > 1)
-                                break;
-                    }
-
-                    for (var d = 0; d < minLength; d++)
-                    {
-                        ref var oldItem = ref oldItems[d];
-                        ref var newItem = ref newItems[d];
-
-                        if (tagChanges > 1 && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
-                        {
-                            var newPartial = newBuffer.AsSpan(newItem.Sequence);
-                            keyholes.SetElement(newBuffer, newItem.Key, newPartial, newItem.Tag, oldItem.Tag);
-                        }
-                        else
-                        {
-                            Recurse(
-                                parent: ref newItem,
-                                oldBuffer.AsSpan(oldItem.Sequence),
-                                newBuffer.AsSpan(newItem.Sequence)
-                            );
-                        }
-                    }
-
-                    if (oldItems.Length < newItems.Length)
-                    {
-                        // The new enumerable has more items than the old one. 
-                        // These items can simply be appended to the end.  
-                        // This will not violate any keyhole's positional stability
-                        // or cause any keyname collisions.
-                        for (var d = minLength; d < newItems.Length; d++)
-                        {
-                            ref var priorItem = ref newItems[d - 1];
-                            ref var newItem = ref newItems[d];
-                            var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
-
-                            keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, transition);
-                        }
-                    }
-                    else if (oldItems.Length > newItems.Length)
-                    {
-                        // The old enumerable has more items than the new one. 
-                        // These items can simply be removed.  
-                        // This will not violate any keyhole's positional stability.
-                        for (var d = minLength; d < oldItems.Length; d++)
-                        {
-                            ref var item = ref oldItems[d];
-                            keyholes.RemoveElement(item.Key, transition);
-                        }
-                    }
-
-                    // TODO: Handle when oldItems.Length = 0.  
-                    // Looks like it will need to resemble <if> where it drops in a placeholder.
-
+                    if (CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole))
+                        return true;
                     break;
                 case KeyholeType.EventListener:
                     // Event listeners never need to be diff'd.  
@@ -226,6 +143,103 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
         }
 
+        // Allow deeper recursion.
+        return false;
+    }
+
+    private readonly bool CompareMutableValues(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    {
+        if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
+        {
+            if (parent.Type == KeyholeType.Attribute)
+            {
+                // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
+                // Find the start of this sequence, then grab the sequence's full span.
+                ref var startKeyhole = ref newBuffer[newKeyhole.SequenceStart];
+                keyholes.SetAttribute(parent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
+
+                // Shortcircuit.  No need to diff the rest of this span.
+                // This whole attribute sequence will be updated.
+                return true;
+            }
+            else if (newKeyhole.IsValueAnAttribute)
+            {
+                keyholes.SetAttribute(newKeyhole.Key, ref newKeyhole);
+            }
+            else
+            {
+                keyholes.SetTextNode(newKeyhole.Key, ref newKeyhole);
+            }
+        }
+
+        // Allow deeper recursion.
+        return false;
+    }
+
+    private readonly bool CompareEnumerable(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    {
+        var transition = newKeyhole.Format;
+        var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
+        var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
+        var minLength = Math.Min(oldItems.Length, newItems.Length);
+        var tagChanges = 0;
+        for (var d = 0; d < minLength; d++)
+        {
+            ref var oldItem = ref oldItems[d];
+            ref var newItem = ref newItems[d];
+            if (oldItem.Tag != newItem.Tag)
+                if (++tagChanges > 1)
+                    break;
+        }
+
+        for (var d = 0; d < minLength; d++)
+        {
+            ref var oldItem = ref oldItems[d];
+            ref var newItem = ref newItems[d];
+
+            if (tagChanges > 1 && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
+            {
+                var newPartial = newBuffer.AsSpan(newItem.Sequence);
+                keyholes.SetElement(newBuffer, newItem.Key, newPartial, newItem.Tag, oldItem.Tag);
+            }
+            else
+            {
+                if (Recurse(ref newItem, oldBuffer.AsSpan(oldItem.Sequence), newBuffer.AsSpan(newItem.Sequence)))
+                    return true;
+            }
+        }
+
+        if (oldItems.Length < newItems.Length)
+        {
+            // The new enumerable has more items than the old one. 
+            // These items can simply be appended to the end.  
+            // This will not violate any keyhole's positional stability
+            // or cause any keyname collisions.
+            for (var d = minLength; d < newItems.Length; d++)
+            {
+                ref var priorItem = ref newItems[d - 1];
+                ref var newItem = ref newItems[d];
+                var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
+
+                keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, transition);
+            }
+        }
+        else if (oldItems.Length > newItems.Length)
+        {
+            // The old enumerable has more items than the new one. 
+            // These items can simply be removed.  
+            // This will not violate any keyhole's positional stability.
+            for (var d = minLength; d < oldItems.Length; d++)
+            {
+                ref var item = ref oldItems[d];
+                keyholes.RemoveElement(item.Key, transition);
+            }
+        }
+
+        // TODO: Handle when oldItems.Length = 0.  
+        // Looks like it will need to resemble <if> where it drops in a placeholder.
+
+        // Allow deeper recursion.
         return false;
     }
 }
