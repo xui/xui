@@ -12,24 +12,25 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
         Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.SequenceLength);
 
         var diffUtil = new DiffUtil(oldBuffer, newBuffer);
-        diffUtil.DiffKeyholeSpans(keyholes, string.Empty, oldSpan, newSpan);
+        diffUtil.DiffKeyholeSpans(keyholes, ref newFirst, oldSpan, newSpan);
     }
 
     private readonly void DiffKeyholeSpans(
         IKeyholes keyholes,
-        string key,
+        ref Keyhole parent,
         Span<Keyhole> oldSpan,
-        Span<Keyhole> newSpan,
-        bool isSpanAnAttribute = false,
-        string? transition = null)
+        Span<Keyhole> newSpan)
     {
+        var key = parent.Key;
+        var transition = parent.Format;
+
         // The first thing to compare is the easiest (and fastest).
         // If the two spans have a different quantity of keyholes, 
         // then it's impossible that they are the same.  
         // So replace the whole span.
         if (oldSpan.Length != newSpan.Length)
         {
-            if (isSpanAnAttribute)
+            if (parent.Type == KeyholeType.Attribute)
                 keyholes.SetAttribute(key, newSpan);
             else if (transition is null)
                 keyholes.SetElement(newBuffer, key, newSpan);
@@ -63,7 +64,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
             // (This is especially helpful when the two strings are several kilobytes in length!)
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
-                if (isSpanAnAttribute)
+                if (parent.Type == KeyholeType.Attribute)
                     keyholes.SetAttribute(key, newSpan);
                 else if (transition == null)
                     keyholes.SetElement(newBuffer, key, newSpan);
@@ -102,7 +103,7 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                 case KeyholeType.TimeOnly:
                     if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
                     {
-                        if (isSpanAnAttribute)
+                        if (parent.Type == KeyholeType.Attribute)
                         {
                             // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                             // Find the start of this sequence, then grab the sequence's full span.
@@ -128,11 +129,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                     // Recursively traverse deeper, then come back and continue these siblings.
                     DiffKeyholeSpans(
                         keyholes,
-                        key: newKeyhole.Key,
+                        parent: ref newKeyhole,
                         oldSpan: oldBuffer.AsSpan(oldKeyhole.Sequence),
-                        newSpan: newBuffer.AsSpan(newKeyhole.Sequence),
-                        isSpanAnAttribute: newKeyhole.Type == KeyholeType.Attribute,
-                        transition: newKeyhole.Format
+                        newSpan: newBuffer.AsSpan(newKeyhole.Sequence)
                     );
                     break;
                 case KeyholeType.Enumerable:
@@ -164,11 +163,9 @@ public ref struct DiffUtil(Keyhole[] oldBuffer, Keyhole[] newBuffer)
                         {
                             DiffKeyholeSpans(
                                 keyholes,
-                                newItem.Key,
+                                ref newItem,
                                 oldBuffer.AsSpan(oldItem.Sequence),
-                                newBuffer.AsSpan(newItem.Sequence),
-                                isSpanAnAttribute: false,
-                                transition: null
+                                newBuffer.AsSpan(newItem.Sequence)
                             );
                         }
                     }
