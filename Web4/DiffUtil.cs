@@ -105,9 +105,6 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
             bool shortCircuit = newKeyhole.Type switch
             {
-                KeyholeType.Html or
-                KeyholeType.Attribute =>
-                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)),
                 KeyholeType.String or
                 KeyholeType.Boolean or
                 KeyholeType.Color or
@@ -124,6 +121,9 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                     CompareMutable(ref parent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.Enumerable =>
                     CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole),
+                KeyholeType.Html or
+                KeyholeType.Attribute =>
+                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)),
                 KeyholeType.EventListener =>
                     false, // Event listeners never need to be diff'd, their only purpose is for lookup.
                 KeyholeType.StringLiteral =>
