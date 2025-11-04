@@ -102,7 +102,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
             ref Keyhole newKeyhole = ref newSpan[i];
-            
+
             bool shortCircuit = newKeyhole.Type switch
             {
                 KeyholeType.Html or
@@ -121,7 +121,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 KeyholeType.DateOnly or
                 KeyholeType.TimeSpan or
                 KeyholeType.TimeOnly =>
-                    CompareMutableValues(ref parent, ref oldKeyhole, ref newKeyhole),
+                    CompareMutable(ref parent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.Enumerable =>
                     CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.EventListener =>
@@ -140,7 +140,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         return false;
     }
 
-    private readonly bool CompareMutableValues(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    private readonly bool CompareMutable(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
         {
