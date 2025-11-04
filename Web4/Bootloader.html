@@ -74,7 +74,8 @@
       elements: [],
       duplicatesOld: {},
       duplicatesNew: {},
-      keyholesInvalidated: false
+      keyholesInvalidated: false,
+      concurrent: 0
     };
 
     static {
@@ -201,6 +202,7 @@
       Web4Keyhole.#transitionBatch.duplicatesNew = {};
       Web4Keyhole.#transitionBatch.duplicatesOld = {};
       Web4Keyhole.#transitionBatch.keyholesInvalidated = false;
+      Web4Keyhole.#transitionBatch.concurrent++;
 
       document.startViewTransition(() => {
         mutations.forEach(mutation => mutation());
@@ -213,7 +215,7 @@
               element.removeAttribute("style");
           }
         });
-        if (keyholesInvalidated)
+        if (--Web4Keyhole.#transitionBatch.concurrent == 0 && keyholesInvalidated)
           document.unregisterKeyholes();
       });
     }
