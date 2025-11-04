@@ -15,12 +15,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
     }
 
-    private readonly bool Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly void Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
     {
-        if (CompareLengths(ref parent, oldSpan, newSpan)) return true;
-        if (CompareImmutables(ref parent, oldSpan, newSpan)) return true;
-        if (CompareMutables(ref parent, oldSpan, newSpan)) return true;
-        return false;
+        if (CompareLengths(ref parent, oldSpan, newSpan)) return;
+        if (CompareImmutables(ref parent, oldSpan, newSpan)) return;
+        if (CompareMutables(ref parent, oldSpan, newSpan)) return;
     }
 
     /// <summary>
@@ -109,8 +108,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             {
                 case KeyholeType.Html:
                 case KeyholeType.Attribute:
-                    if (Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)))
-                        return true;
+                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence));
                     break;
                 case KeyholeType.String:
                 case KeyholeType.Boolean:
@@ -204,8 +202,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
             else
             {
-                if (Recurse(ref newItem, oldBuffer.AsSpan(oldItem.Sequence), newBuffer.AsSpan(newItem.Sequence)))
-                    return true;
+                Recurse(ref newItem, oldBuffer.AsSpan(oldItem.Sequence), newBuffer.AsSpan(newItem.Sequence));
             }
         }
 
