@@ -90,9 +90,9 @@ public static class Web4EndpointRouteBuilderExtensions
             {
                 var logger = app.Services.GetRequiredService<ILogger<WebSocketTransport>>();
                 await WebSocketTransport.Bind(
-                    logger,
                     http,
                     windowBuilder,
+                    logger,
                     app.Lifetime.ApplicationStopping
                 );
             }

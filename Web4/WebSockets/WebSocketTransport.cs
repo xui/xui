@@ -12,17 +12,15 @@ using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
-partial class WebSocketTransport
+partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
 {
-    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
     private static readonly ConcurrentDictionary<string, WebSocketTransport> transports = [];
-    private readonly ILogger logger;
-    private readonly WindowBuilder windowBuilder;
-    private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
-    private readonly Channel<int> diffChannel;
-    private readonly Channel<ReadOnlySequence<byte>> outputChannel;
-    private Keyhole[]? snapshot = null;
+    public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
 
+    private Keyhole[]? snapshot = null;
+    private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
+    private readonly Channel<int> diffChannel = CreateDiffChannel();
+    private readonly Channel<ReadOnlySequence<byte>> outputChannel = CreateOutputChannel();
 
     public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
@@ -32,53 +30,15 @@ partial class WebSocketTransport
     public IConsole Console => this;
     public IKeyholes Keyholes => this;
 
-    private WebSocketTransport(ILogger logger, string windowID, WindowBuilder windowBuilder, CancellationToken cancel)
-    {
-        this.logger = logger;
-        this.windowBuilder = windowBuilder;
-
-        diffChannel = Channel.CreateBounded<int>(
-            new BoundedChannelOptions(1)
-            {
-                AllowSynchronousContinuations = true,
-                SingleReader = true,
-                SingleWriter = false,
-                FullMode = BoundedChannelFullMode.DropWrite
-            }
-        );
-
-        outputChannel = Channel.CreateBounded<ReadOnlySequence<byte>>(
-            options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
-            {
-                AllowSynchronousContinuations = true,
-                FullMode = BoundedChannelFullMode.DropWrite,
-                SingleReader = true,
-                SingleWriter = false,
-            },
-            itemDropped: sequence =>
-            {
-                // TODO: WebSocket is borked?  Handle:
-                // - Skip the line and gracefully close it.
-                // - Signal this transport to unregister itself everywhere.
-            }
-        );
-
-        // if (!apps.TryGetValue(windowID, out var transport))
-        // {
-        //     apps[windowID] = app;
-        // }
-        // App = app;
-    }
-
     public static async Task Bind(
-        ILogger logger,
         HttpContext http,
         WindowBuilder windowBuilder,
+        ILogger logger,
         CancellationToken cancelProcess)
     {
         // TODO: Move to header approach?
         var windowID = http.Connection.Id;
-        var transport = new WebSocketTransport(logger, windowID, windowBuilder, cancelProcess);
+        var transport = new WebSocketTransport(http, windowBuilder, logger);
 
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -102,6 +62,30 @@ partial class WebSocketTransport
         transports.Remove(windowID, out var _);
         cancelProcessRegistration.Unregister();
     }
+
+    private static Channel<int> CreateDiffChannel() => Channel.CreateBounded<int>(new BoundedChannelOptions(1)
+    {
+        AllowSynchronousContinuations = true,
+        SingleReader = true,
+        SingleWriter = false,
+        FullMode = BoundedChannelFullMode.DropWrite
+    });
+
+    private static Channel<ReadOnlySequence<byte>> CreateOutputChannel() => Channel.CreateBounded<ReadOnlySequence<byte>>(
+        options: new BoundedChannelOptions(1000) // TODO: Make this limit configurable?
+        {
+            AllowSynchronousContinuations = true,
+            FullMode = BoundedChannelFullMode.DropWrite,
+            SingleReader = true,
+            SingleWriter = false,
+        },
+        itemDropped: sequence =>
+        {
+            // TODO: WebSocket is borked?  Handle:
+            // - Skip the line and gracefully close it.
+            // - Signal this transport to unregister itself everywhere.
+        }
+    );
 
     private async Task OutputToWebSocket(WebSocket webSocket, CancellationToken cancel)
     {
@@ -230,13 +214,13 @@ partial class WebSocketTransport
                     {
                         using var batchOutput = Output.BatchThisScope();
                         var threads = @params.GetNextOptionalAsInt();
-                        // App.Benchmark(threads);
+                        Keyholes.Benchmark(threads);
                         break;
                     }
 
                 case var method when method.SequenceEqual("keyholes.ping"u8) && rpc.IdAsInt is int id:
                     {
-                        // App.Ping();
+                        Keyholes.Ping();
                         Output.WriteResponse(id);
                         break;
                     }

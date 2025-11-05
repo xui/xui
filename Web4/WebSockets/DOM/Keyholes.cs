@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Web4.WebSockets;
@@ -82,6 +84,7 @@ partial class WebSocketTransport : IKeyholes
 
     public void DispatchEvent(Action listener)
     {
+        var stopwatch = LogMessageStarted("dispatchEvent");
         try
         {
             listener();
@@ -91,11 +94,16 @@ partial class WebSocketTransport : IKeyholes
             logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
+        finally
+        {
+            LogMessageEnded("dispatchEvent", stopwatch);
+        }
     }
 
     public void DispatchEvent<T>(Action<Event> listener, T @event)
         where T : struct, Event
     {
+        var stopwatch = LogMessageStarted("dispatchEvent");
         try
         {
             // TODO: Memory allocation casting from TEvent (struct) to Event interface.
@@ -110,11 +118,13 @@ partial class WebSocketTransport : IKeyholes
         {
             // Return buffer(s) to the pool
             @event.Dispose();
+            LogMessageEnded("dispatchEvent", stopwatch);
         }
     }
 
     public async Task DispatchEvent(Func<Task> listener)
     {
+        var stopwatch = LogMessageStarted("dispatchEvent");
         try
         {
             await listener();
@@ -124,11 +134,16 @@ partial class WebSocketTransport : IKeyholes
             logger.LogError(ex, "An unexpected error in this event listener: {Message}", ex.Message);
             Console.Error(ex);
         }
+        finally
+        {
+            LogMessageEnded("dispatchEvent", stopwatch);
+        }
     }
 
     public async Task DispatchEvent<T>(Func<Event, Task> listener, T @event)
         where T : struct, Event
     {
+        var stopwatch = LogMessageStarted("dispatchEvent");
         try
         {
             // TODO: Memory allocation casting from TEvent (struct) to Event interface.
@@ -143,12 +158,78 @@ partial class WebSocketTransport : IKeyholes
         {
             // Return buffer(s) to the pool
             @event.Dispose();
+            LogMessageEnded("dispatchEvent", stopwatch);
         }
+    }
+
+    public void Ping()
+    {
+        var stopwatch = LogMessageStarted("ping");
+        LogMessageEnded("ping", stopwatch);
     }
 
     public void Dump()
     {
+        var stopwatch = LogMessageStarted("dump");
+
         var buffer = CaptureSnapshot();
         new KeyholeDumper(Console, buffer).Dump();
+
+        LogMessageEnded("dump", stopwatch);
+    }
+
+    public void Benchmark(int? threads)
+    {
+        var stopwatch = LogMessageStarted("benchmark");
+
+        // TODO: Implement
+
+        LogMessageEnded("benchmark", stopwatch);
+    }
+
+    private Stopwatch? LogMessageStarted(string method)
+    {
+        // TODO: Temporary until a proper IHttpApplication is ready to be built and include proper diagnostics.
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Request starting {Protocol} {Method} {Scheme}://{Host}{PathBase}{Path}{QueryString} - {ContentType} {ContentLength}",
+                "JSON-RPC/2.0",
+                method,
+                httpContext.Request.Scheme == "https" ? "wss" : "ws",
+                httpContext.Request.Host,
+                httpContext.Request.PathBase,
+                httpContext.Request.Path,
+                httpContext.Request.QueryString,
+                "application/json",
+                ""
+            );
+            return Stopwatch.StartNew();
+        }
+        return null;
+    }
+
+    private void LogMessageEnded(string method, Stopwatch? stopwatch)
+    {
+        // TODO: Temporary until a proper IHttpApplication is ready to be built and include proper diagnostics.
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Request finished {Protocol} {Method} {Scheme}://{Host}{PathBase}{Path}{QueryString} - {StatusCode} {ContentLength} {ContentType} {ElapsedMilliseconds}ms",
+                "JSON-RPC/2.0",
+                method,
+                httpContext.Request.Scheme == "https" ? "wss" : "ws",
+                httpContext.Request.Host,
+                httpContext.Request.PathBase,
+                httpContext.Request.Path,
+                httpContext.Request.QueryString,
+                200,
+                "",
+                "application/json",
+                stopwatch?.Elapsed.TotalMilliseconds
+            );
+        }
     }
 }
