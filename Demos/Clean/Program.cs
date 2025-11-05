@@ -30,13 +30,14 @@ Html GetList() => $"""
             </lr>
         """):zoom-fade}
 
-        <button onclick={ DoThingAsync }>Async</button>
-        <button onclick={ EditRandom }>Edit Random</button>
-        <button onclick={ Move1 }>Move 1</button>
-        <button onclick={ Swap2 }>Swap 2</button>
-        <button onclick={ Shuffle }>Shuffle</button>
-        <button onclick={ AddOne }>Add One</button>
-        <button onclick={ RemoveOne }>Remove One</button>
+        <button onpointerdown={ () => c++ }>Clicks: { c }</button>
+        <button onpointerdown={ DoThingAsync }>Async</button>
+        <button onpointerdown={ EditRandom }>Edit Random</button>
+        <button onpointerdown={ Move1 }>Move 1</button>
+        <button onpointerdown={ Swap2 }>Swap 2</button>
+        <button onpointerdown={ Shuffle }>Shuffle</button>
+        <button onpointerdown={ AddOne }>Add One</button>
+        <button onpointerdown={ RemoveOne }>Remove One</button>
         
     </list>
     """;
@@ -229,7 +230,7 @@ void OnStopImmediatePropagation(Event.Subsets.Target e)
 // window.AddEventListener("click", () => Console.WriteLine($"Click event 3 process on window"));
 
 Html MyButton(string text, Action<Event>? onClick = null) => $"""
-    <button onclick={onClick ?? OnClick}>
+    <button onpointerdown={onClick ?? OnClick}>
         Hello {text}! Clicks: {c}
     </button>
     """;
