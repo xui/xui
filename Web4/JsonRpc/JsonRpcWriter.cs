@@ -144,23 +144,6 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    public void WriteNotification(ValueTuple<string, string, string> method)
-    {
-        OnMessageBegin();
-
-        jsonWriter.WriteStartObject();
-        jsonWriter.WriteString("jsonrpc", "2.0");
-
-        jsonWriter.WritePropertyName("method");
-        jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
-        jsonWriter.WriteStringValueSegment(method.Item3, true);
-
-        jsonWriter.WriteEndObject();
-
-        OnMessageEnd();
-    }
-
     public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param1)
     {
         OnMessageBegin();
@@ -218,7 +201,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, string? param2 = null)
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1)
     {
         OnMessageBegin();
 
@@ -235,42 +218,6 @@ public partial class JsonRpcWriter : IDisposable
         WriteHtmlPartial(buffer, param1, includeSentinels: true);
         jsonWriter.WriteStringValueSegment("", true);
 
-        if (param2 is not null)
-            jsonWriter.WriteStringValue(param2);
-
-        jsonWriter.WriteEndArray();
-
-        jsonWriter.WriteEndObject();
-
-        OnMessageEnd();
-    }
-
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, ValueTuple<string, string>? param3 = null)
-    {
-        OnMessageBegin();
-
-        jsonWriter.WriteStartObject();
-        jsonWriter.WriteString("jsonrpc", "2.0");
-
-        jsonWriter.WritePropertyName("method");
-        jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
-        jsonWriter.WriteStringValueSegment(method.Item3, true);
-
-        jsonWriter.WriteStartArray("params");
-
-        if (param1 is not null)
-            jsonWriter.WriteStringValue(param1);
-
-        WriteHtmlPartial(buffer, param2, includeSentinels: true);
-        jsonWriter.WriteStringValueSegment("", true);
-
-        if (param3 is not null)
-        {
-            jsonWriter.WriteStringValueSegment(param3.Value.Item1, false);
-            jsonWriter.WriteStringValueSegment(param3.Value.Item2, true);
-        }
- 
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
@@ -297,7 +244,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStringValueSegment(param2.Item1, false);
         jsonWriter.WriteStringValueSegment(param2.Item2, true);
- 
+
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
@@ -333,8 +280,58 @@ public partial class JsonRpcWriter : IDisposable
         if (param3.Item2.TryFormat(strInt, out length))
             jsonWriter.WriteStringValueSegment(strInt[..length], false);
         jsonWriter.WriteStringValueSegment("", true);
- 
+
         jsonWriter.WriteEndArray();
+
+        jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
+    }
+
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, ValueTuple<string, string>? param3 = null)
+    {
+        OnMessageBegin();
+
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
+
+        jsonWriter.WriteStartArray("params");
+
+        if (param1 is not null)
+            jsonWriter.WriteStringValue(param1);
+
+        WriteHtmlPartial(buffer, param2, includeSentinels: true);
+        jsonWriter.WriteStringValueSegment("", true);
+
+        if (param3 is not null)
+        {
+            jsonWriter.WriteStringValueSegment(param3.Value.Item1, false);
+            jsonWriter.WriteStringValueSegment(param3.Value.Item2, true);
+        }
+
+        jsonWriter.WriteEndArray();
+
+        jsonWriter.WriteEndObject();
+
+        OnMessageEnd();
+    }
+
+    public void WriteNotification(ValueTuple<string, string, string> method)
+    {
+        OnMessageBegin();
+
+        jsonWriter.WriteStartObject();
+        jsonWriter.WriteString("jsonrpc", "2.0");
+
+        jsonWriter.WritePropertyName("method");
+        jsonWriter.WriteStringValueSegment(method.Item1, false);
+        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteEndObject();
 
@@ -357,7 +354,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStringValueSegment(param1.Item1, false);
         jsonWriter.WriteStringValueSegment(param1.Item2, true);
- 
+
         jsonWriter.WriteEndArray();
 
         jsonWriter.WriteEndObject();
