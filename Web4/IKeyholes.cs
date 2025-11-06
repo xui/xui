@@ -7,8 +7,8 @@ public interface IKeyholes
     void SetAttribute(string key, ref Keyhole keyhole);
     void SetAttribute(string key, Span<Keyhole> keyholes);
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes);
-    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, bool reverseTransition);
-    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, object oldTag, object newTag);
+    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName);
+    void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary);
     void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes);
     void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName);
     void RemoveElement(string key);

@@ -34,11 +34,23 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         if (oldSpan.Length != newSpan.Length)
         {
             if (parent.Type == KeyholeType.Attribute)
-                keyholes.SetAttribute(parent.Key, newSpan);
+                keyholes.SetAttribute(
+                    parent.Key,
+                    newSpan
+                );
             else if (parent.Format is null)
-                keyholes.SetElement(newBuffer, parent.Key, newSpan);
+                keyholes.SetElement(
+                    newBuffer,
+                    parent.Key,
+                    newSpan
+                );
             else
-                keyholes.SetElement(newBuffer, parent.Key, newSpan, false); // TODO: lineNumber logic here!
+                keyholes.SetElement(
+                    newBuffer,
+                    parent.Key,
+                    newSpan,
+                    (false ? "web4-rev-" : "web4-fwd-", parent.Key)
+                ); // TODO: lineNumber logic here!
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -76,11 +88,23 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (parent.Type == KeyholeType.Attribute)
-                    keyholes.SetAttribute(parent.Key, newSpan);
+                    keyholes.SetAttribute(
+                        parent.Key,
+                        newSpan
+                    );
                 else if (parent.Format == null)
-                    keyholes.SetElement(newBuffer, parent.Key, newSpan);
+                    keyholes.SetElement(
+                        newBuffer,
+                        parent.Key,
+                        newSpan
+                    );
                 else
-                    keyholes.SetElement(newBuffer, parent.Key, newSpan, false); // TODO: lineNumber logic here!
+                    keyholes.SetElement(
+                        newBuffer,
+                        parent.Key,
+                        newSpan,
+                        (false ? "web4-rev-" : "web4-fwd-", parent.Key)
+                    ); // TODO: lineNumber logic here!
 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -192,7 +216,13 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             if (tagChanges > 1 && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
             {
                 var newPartial = newBuffer.AsSpan(newItem.Sequence);
-                keyholes.SetElement(newBuffer, newItem.Key, newPartial, newItem.Tag, oldItem.Tag);
+                keyholes.SetElement(
+                    newBuffer,
+                    newItem.Key,
+                    newPartial,
+                    ("web4-move-", newItem.Tag.GetHashCode()),
+                    ("web4-move-", oldItem.Tag.GetHashCode())
+                );
             }
             else
             {
