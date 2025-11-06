@@ -111,35 +111,38 @@
       if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#batchMutation(mutation, true);
         this.#prepareElement(newElement, viewTransitionName);
         this.#prepareElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName);
+        this.#prepareSiblings();
+        this.#batchMutation(mutation, true);
       }
     }
 
-    addElement(key, rawHtml, viewTransitionName) {
+    addElement(key, rawHtml, transition) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);
 
       let mutation = () => priorElement.after(newElement);
 
-      if (!this.element.shouldAnimate(viewTransitionName)) {
+      if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.#batchMutation(mutation, false);
+        this.#prepareElement(newElement, `web4-add-${this.key}`);
         this.#prepareSiblings();
+        this.#batchMutation(mutation, false);
       }
     }
 
-    removeElement(viewTransitionName) {
+    removeElement(transition) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
 
-      if (!this.element.shouldAnimate(viewTransitionName)) {
+      if (!this.element.shouldAnimate(transition)) {
         mutation();
       } else {
-        this.#batchMutation(mutation, true);
+        this.#prepareElement(this.element, `web4-remove-${this.key}`);
         this.#prepareSiblings();
+        this.#batchMutation(mutation, true);
       }
     }
 
@@ -167,7 +170,7 @@
           Web4Keyhole.#transitionBatch.elements.push(sibling);
         
         if (sibling.style && !sibling.style.viewTransitionName)
-          sibling.style.viewTransitionName = `web4-${this.key}-sibling-${i}`;
+          sibling.style.viewTransitionName = `web4-sibling-${this.key}-${i}`;
       });
     }
 

@@ -59,7 +59,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                     {
                         Writer.Inject($$"""
                             <style>
-                                ::view-transition-group(web4-{{partial.Key}}-fwd, web4-{{partial.Key}}-rev) { animation: none; }
+                                ::view-transition-group(web4-fwd-{{partial.Key}}, web4-rev-{{partial.Key}}) { animation: none; }
                                 ::view-transition-new(web4-fwd-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
                                 ::view-transition-old(web4-fwd-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out; }
                                 ::view-transition-new(web4-rev-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
