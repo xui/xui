@@ -59,34 +59,38 @@ partial class WebSocketTransport : IKeyholes
           );
     }
 
-    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string>? viewTransitionName = null)
+    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes)
     {
-        if (viewTransitionName is null)
-            Output.WriteNotification(buffer,
-                method: ("keyholes.", priorKey, ".addElement"),
-                param1: key,
-                param2: keyholes
-            );
-        else
-            Output.WriteNotification(buffer,
-                method: ("keyholes.", priorKey, ".addElement"),
-                param1: key,
-                param2: keyholes,
-                param3: viewTransitionName.Value
-            );
+        Output.WriteNotification(buffer,
+            method: ("keyholes.", priorKey, ".addElement"),
+            param1: key,
+            param2: keyholes
+        );
     }
 
-    public void RemoveElement(string key, ValueTuple<string, string>? viewTransitionName = null)
+    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName)
     {
-        if (viewTransitionName is null)
-            Output.WriteNotification(
-                method: ("keyholes.", key, ".removeElement")
-            );
-        else
-            Output.WriteNotification(
-                method: ("keyholes.", key, ".removeElement"),
-                param1: viewTransitionName.Value
-            );
+        Output.WriteNotification(buffer,
+            method: ("keyholes.", priorKey, ".addElement"),
+            param1: key,
+            param2: keyholes,
+            param3: viewTransitionName
+        );
+    }
+
+    public void RemoveElement(string key)
+    {
+        Output.WriteNotification(
+            method: ("keyholes.", key, ".removeElement")
+        );
+    }
+
+    public void RemoveElement(string key, ValueTuple<string, string> viewTransitionName)
+    {
+        Output.WriteNotification(
+            method: ("keyholes.", key, ".removeElement"),
+            param1: viewTransitionName
+        );
     }
 
     public void DispatchEvent(Action listener)

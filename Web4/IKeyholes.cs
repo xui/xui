@@ -9,8 +9,10 @@ public interface IKeyholes
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes);
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, bool reverseTransition);
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, object oldTag, object newTag);
-    void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string>? viewTransitionName = null);
-    void RemoveElement(string key, ValueTuple<string, string>? viewTransitionName = null);
+    void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes);
+    void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName);
+    void RemoveElement(string key);
+    void RemoveElement(string key, ValueTuple<string, string> viewTransitionName);
     void DispatchEvent(Action listener);
     void DispatchEvent<T>(Action<Event> listener, T @event) where T : struct, Event;
     Task DispatchEvent(Func<Task> listener);
