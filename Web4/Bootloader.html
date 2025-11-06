@@ -118,29 +118,29 @@
       }
     }
 
-    addElement(key, rawHtml, transition) {
+    addElement(key, rawHtml, viewTransitionName) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);
 
       let mutation = () => priorElement.after(newElement);
 
-      if (!this.element.shouldAnimate(transition)) {
+      if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#prepareElement(newElement, `web4-add-${this.key}`);
+        this.#prepareElement(newElement, viewTransitionName);
         this.#prepareSiblings();
         this.#batchMutation(mutation, false);
       }
     }
 
-    removeElement(transition) {
+    removeElement(viewTransitionName) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
 
-      if (!this.element.shouldAnimate(transition)) {
+      if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#prepareElement(this.element, `web4-remove-${this.key}`);
+        this.#prepareElement(this.element, viewTransitionName);
         this.#prepareSiblings();
         this.#batchMutation(mutation, true);
       }

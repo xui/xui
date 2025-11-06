@@ -171,7 +171,6 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
     private readonly bool CompareEnumerable(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
-        var transition = newKeyhole.Format;
         var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
         var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
         var minLength = Math.Min(oldItems.Length, newItems.Length);
@@ -213,7 +212,10 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 ref var newItem = ref newItems[d];
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
-                keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, transition);
+                if (newKeyhole.Format is null)
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan);
+                else
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, ("web4-add-", newItem.Key));
             }
         }
         else if (oldItems.Length > newItems.Length)
@@ -224,7 +226,10 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             for (var d = minLength; d < oldItems.Length; d++)
             {
                 ref var item = ref oldItems[d];
-                keyholes.RemoveElement(item.Key, transition);
+                if (newKeyhole.Format is null)
+                    keyholes.RemoveElement(item.Key);
+                else
+                    keyholes.RemoveElement(item.Key, ("web4-remove-", item.Key));
             }
         }
 
