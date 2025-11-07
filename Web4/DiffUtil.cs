@@ -199,21 +199,25 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
         var minLength = Math.Min(oldItems.Length, newItems.Length);
         var tagChanges = 0;
-        for (var d = 0; d < minLength; d++)
+        if (newKeyhole.Format is not null)
         {
-            ref var oldItem = ref oldItems[d];
-            ref var newItem = ref newItems[d];
-            if (oldItem.Tag != newItem.Tag)
-                if (++tagChanges > 1)
-                    break;
+            for (var d = 0; d < minLength; d++)
+            {
+                ref var oldItem = ref oldItems[d];
+                ref var newItem = ref newItems[d];
+                if (oldItem.Tag != newItem.Tag)
+                    if (++tagChanges > 1)
+                        break;
+            }
         }
+        bool shouldUseTransition = tagChanges > 1;
 
         for (var d = 0; d < minLength; d++)
         {
             ref var oldItem = ref oldItems[d];
             ref var newItem = ref newItems[d];
 
-            if (tagChanges > 1 && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
+            if (shouldUseTransition && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
             {
                 var newPartial = newBuffer.AsSpan(newItem.Sequence);
                 keyholes.SetElement(
