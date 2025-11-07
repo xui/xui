@@ -306,7 +306,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from RemoveElement
-    public void WriteNotification(ValueTuple<string, string, string> method, ValueTuple<string, string>? param1 = null)
+    public void WriteNotification(ValueTuple<string, string, string> method, ValueTuple<string, int>? param1 = null)
     {
         OnMessageBegin();
 
@@ -323,7 +323,10 @@ public partial class JsonRpcWriter : IDisposable
         if (param1.HasValue)
         {
             jsonWriter.WriteStringValueSegment(param1.Value.Item1, false);
-            jsonWriter.WriteStringValueSegment(param1.Value.Item2, true);
+            Span<char> strInt = stackalloc char[11]; // max int length
+            if (param1.Value.Item2.TryFormat(strInt, out int length))
+                jsonWriter.WriteStringValueSegment(strInt[..length], false);
+            jsonWriter.WriteStringValueSegment("", true);
         }
 
         jsonWriter.WriteEndArray();

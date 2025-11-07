@@ -85,7 +85,7 @@ partial class WebSocketTransport : IKeyholes
         );
     }
 
-    public void RemoveElement(string key, ValueTuple<string, string> viewTransitionName)
+    public void RemoveElement(string key, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(
             method: ("keyholes.", key, ".removeElement"),

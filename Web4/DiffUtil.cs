@@ -263,7 +263,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 if (newKeyhole.Format is null)
                     keyholes.RemoveElement(item.Key);
                 else
-                    keyholes.RemoveElement(item.Key, ("web4-remove-", item.Key));
+                    keyholes.RemoveElement(item.Key, ("web4-move-", item.Tag.GetHashCode()));
             }
         }
 
