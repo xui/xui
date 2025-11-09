@@ -8,10 +8,10 @@ namespace Web4.WebSockets;
 // and explicitly implement on WebSocketTransport.
 partial class WebSocketTransport : IKeyholes
 {
-    public void SetTextNode(string key, ref Keyhole keyhole)
+    public void SetText(string key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".setTextNode"),
+            method: ("keyholes.", key, ".setText"),
             param1: ref keyhole
         );
     }
@@ -32,63 +32,63 @@ partial class WebSocketTransport : IKeyholes
         );
     }
 
-    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes)
+    public void SetNode(Keyhole[] buffer, string key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setElement"),
+            method: ("keyholes.", key, ".setNode"),
             param1: keyholes
         );
     }
 
-    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName)
+    public void SetNode(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setElement"),
+            method: ("keyholes.", key, ".setNode"),
             param1: keyholes,
             param2: viewTransitionName
         );
     }
 
-    public void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary)
+    public void SetNode(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setElement"),
+            method: ("keyholes.", key, ".setNode"),
             param1: keyholes,
             param2: viewTransitionName,
             param3: viewTransitionNameSecondary
           );
     }
 
-    public void AddElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string newKey)
+    public void PushNode(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string newKey)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".addElement"),
+            method: ("keyholes.", key, ".pushNode"),
             param1: keyholes,
             param2: newKey
         );
     }
 
-    public void AddElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string newKey, ValueTuple<string, int> viewTransitionName)
+    public void PushNode(Keyhole[] buffer, string key, Span<Keyhole> keyholes, string newKey, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".addElement"),
+            method: ("keyholes.", key, ".pushNode"),
             param1: keyholes,
             param2: newKey,
             param3: viewTransitionName
         );
     }
 
-    public void RemoveElement(string key)
+    public void PopNode(string key)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".removeElement")
+            method: ("keyholes.", key, ".popNode")
         );
     }
 
-    public void RemoveElement(string key, ValueTuple<string, int> viewTransitionName)
+    public void PopNode(string key, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".removeElement"),
+            method: ("keyholes.", key, ".popNode"),
             param1: viewTransitionName
         );
     }

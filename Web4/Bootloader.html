@@ -88,7 +88,7 @@
       this.element = element;
     }
 
-    setTextNode(value) {
+    setText(value) {
       this.element.nodeValue = value;
     }
 
@@ -100,7 +100,7 @@
       }
     }
 
-    setElement(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
+    setNode(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
       let oldElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(this.key);
@@ -118,7 +118,7 @@
       }
     }
 
-    addElement(rawHtml, key, viewTransitionName) {
+    pushNode(rawHtml, key, viewTransitionName) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);
@@ -134,7 +134,7 @@
       }
     }
 
-    removeElement(viewTransitionName) {
+    popNode(viewTransitionName) {
       let mutation = () => this.element.parentNode.removeChild(this.element);
 
       if (!this.element.shouldAnimate(viewTransitionName)) {

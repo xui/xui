@@ -39,13 +39,13 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                     newSpan
                 );
             else if (parent.Format is null)
-                keyholes.SetElement(
+                keyholes.SetNode(
                     newBuffer,
                     parent.Key,
                     newSpan
                 );
             else
-                keyholes.SetElement(
+                keyholes.SetNode(
                     newBuffer,
                     parent.Key,
                     newSpan,
@@ -93,13 +93,13 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                         newSpan
                     );
                 else if (parent.Format == null)
-                    keyholes.SetElement(
+                    keyholes.SetNode(
                         newBuffer,
                         parent.Key,
                         newSpan
                     );
                 else
-                    keyholes.SetElement(
+                    keyholes.SetNode(
                         newBuffer,
                         parent.Key,
                         newSpan,
@@ -185,7 +185,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
             else
             {
-                keyholes.SetTextNode(newKeyhole.Key, ref newKeyhole);
+                keyholes.SetText(newKeyhole.Key, ref newKeyhole);
             }
         }
 
@@ -215,9 +215,9 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
                 if (newKeyhole.Format is null || newItem.Tag is null)
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItemSpan, newItem.Key);
+                    keyholes.PushNode(newBuffer, priorItem.Key, newItemSpan, newItem.Key);
                 else
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
+                    keyholes.PushNode(newBuffer, priorItem.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
             }
         }
         else if (oldItems.Length > newItems.Length)
@@ -229,9 +229,9 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             {
                 ref var item = ref oldItems[d];
                 if (newKeyhole.Format is null || item.Tag is null)
-                    keyholes.RemoveElement(item.Key);
+                    keyholes.PopNode(item.Key);
                 else
-                    keyholes.RemoveElement(item.Key, ("web4-move-", item.Tag.GetHashCode()));
+                    keyholes.PopNode(item.Key, ("web4-move-", item.Tag.GetHashCode()));
             }
         }
 
@@ -257,7 +257,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             if (shouldUseTransition && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
             {
                 var newPartial = newBuffer.AsSpan(newItem.Sequence);
-                keyholes.SetElement(
+                keyholes.SetNode(
                     newBuffer,
                     newItem.Key,
                     newPartial,

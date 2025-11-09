@@ -144,7 +144,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    // Called from SetTextNode and SetAttribute
+    // Called from SetText and SetAttribute
     public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param1)
     {
         OnMessageBegin();
@@ -203,7 +203,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    // Called from SetElement
+    // Called from SetNode
     public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, string>? param2 = null)
     {
         OnMessageBegin();
@@ -234,7 +234,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    // Called from SetElement
+    // Called from SetNode
     public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, int> param2, ValueTuple<string, int> param3)
     {
         OnMessageBegin();
@@ -271,7 +271,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    // Called from AddElement
+    // Called from PushNode
     public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, string param2, ValueTuple<string, int>? param3 = null)
     {
         OnMessageBegin();
@@ -307,7 +307,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    // Called from RemoveElement
+    // Called from PopNode
     public void WriteNotification(ValueTuple<string, string, string> method, ValueTuple<string, int>? param1 = null)
     {
         OnMessageBegin();
