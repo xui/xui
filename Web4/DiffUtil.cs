@@ -198,6 +198,43 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
         var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
         var minLength = Math.Min(oldItems.Length, newItems.Length);
+
+        // Appending items to the end must be handled before handling
+        // any siblings that precede it because it uses priorElement.after()
+        // and priorElement might be swapped for a new element as a part of the batch.
+        if (oldItems.Length < newItems.Length)
+        {
+            // The new enumerable has more items than the old one. 
+            // These items can simply be appended to the end.  
+            // This will not violate any keyhole's positional stability
+            // or cause any keyname collisions.
+            for (var d = minLength; d < newItems.Length; d++)
+            {
+                ref var priorItem = ref newItems[d - 1];
+                ref var newItem = ref newItems[d];
+                var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
+
+                if (newKeyhole.Format is null || newItem.Tag is null)
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan);
+                else
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, ("web4-move-", newItem.Tag.GetHashCode()));
+            }
+        }
+        else if (oldItems.Length > newItems.Length)
+        {
+            // The old enumerable has more items than the new one. 
+            // These items can simply be removed.  
+            // This will not violate any keyhole's positional stability.
+            for (var d = minLength; d < oldItems.Length; d++)
+            {
+                ref var item = ref oldItems[d];
+                if (newKeyhole.Format is null || item.Tag is null)
+                    keyholes.RemoveElement(item.Key);
+                else
+                    keyholes.RemoveElement(item.Key, ("web4-move-", item.Tag.GetHashCode()));
+            }
+        }
+
         var tagChanges = oldItems.Length > newItems.Length ? 1 : 0;
         if (newKeyhole.Format is not null)
         {
@@ -231,39 +268,6 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             else
             {
                 Recurse(ref newItem, oldBuffer.AsSpan(oldItem.Sequence), newBuffer.AsSpan(newItem.Sequence));
-            }
-        }
-
-        if (oldItems.Length < newItems.Length)
-        {
-            // The new enumerable has more items than the old one. 
-            // These items can simply be appended to the end.  
-            // This will not violate any keyhole's positional stability
-            // or cause any keyname collisions.
-            for (var d = minLength; d < newItems.Length; d++)
-            {
-                ref var priorItem = ref newItems[d - 1];
-                ref var newItem = ref newItems[d];
-                var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
-
-                if (newKeyhole.Format is null)
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan);
-                else
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, ("web4-add-", newItem.Key));
-            }
-        }
-        else if (oldItems.Length > newItems.Length)
-        {
-            // The old enumerable has more items than the new one. 
-            // These items can simply be removed.  
-            // This will not violate any keyhole's positional stability.
-            for (var d = minLength; d < oldItems.Length; d++)
-            {
-                ref var item = ref oldItems[d];
-                if (newKeyhole.Format is null)
-                    keyholes.RemoveElement(item.Key);
-                else
-                    keyholes.RemoveElement(item.Key, ("web4-move-", item.Tag.GetHashCode()));
             }
         }
 

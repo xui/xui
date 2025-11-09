@@ -68,7 +68,7 @@ partial class WebSocketTransport : IKeyholes
         );
     }
 
-    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName)
+    public void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(buffer,
             method: ("keyholes.", priorKey, ".addElement"),

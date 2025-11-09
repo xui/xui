@@ -272,7 +272,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from AddElement
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, ValueTuple<string, string>? param3 = null)
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, string? param1, Span<Keyhole> param2, ValueTuple<string, int>? param3 = null)
     {
         OnMessageBegin();
 
@@ -295,7 +295,10 @@ public partial class JsonRpcWriter : IDisposable
         if (param3 is not null)
         {
             jsonWriter.WriteStringValueSegment(param3.Value.Item1, false);
-            jsonWriter.WriteStringValueSegment(param3.Value.Item2, true);
+            Span<char> strInt = stackalloc char[11]; // max int length
+            if (param3.Value.Item2.TryFormat(strInt, out int length))
+                jsonWriter.WriteStringValueSegment(strInt[..length], false);
+            jsonWriter.WriteStringValueSegment("", true);
         }
 
         jsonWriter.WriteEndArray();

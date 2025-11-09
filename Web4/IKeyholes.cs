@@ -10,7 +10,7 @@ public interface IKeyholes
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName);
     void SetElement(Keyhole[] buffer, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary);
     void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes);
-    void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, string> viewTransitionName);
+    void AddElement(Keyhole[] buffer, string priorKey, string key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName);
     void RemoveElement(string key);
     void RemoveElement(string key, ValueTuple<string, int> viewTransitionName);
     void DispatchEvent(Action listener);
