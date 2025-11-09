@@ -267,9 +267,6 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
         }
 
-        // TODO: Handle when oldItems.Length = 0.  
-        // Looks like it will need to resemble <if> where it drops in a placeholder.
-
         // Allow deeper recursion.
         return false;
     }
