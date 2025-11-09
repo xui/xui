@@ -235,7 +235,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
         }
 
-        var tagChanges = oldItems.Length > newItems.Length ? 1 : 0;
+        var tagChanges = oldItems.Length != newItems.Length ? 1 : 0;
         if (newKeyhole.Format is not null)
         {
             for (var d = 0; d < minLength; d++)
