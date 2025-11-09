@@ -72,8 +72,6 @@
     static #transitionBatch = {
       mutations: [],
       elements: [],
-      duplicatesOld: {},
-      duplicatesNew: {},
       keyholesInvalidated: false,
       concurrent: 0
     };
@@ -104,7 +102,6 @@
       let oldElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(this.key);
-      [ viewTransitionName, viewTransitionNameSecondary ] = this.#fixDuplicates(viewTransitionName, viewTransitionNameSecondary);
 
       let mutation = () => oldElement.replaceWith(newElement);
 
@@ -173,21 +170,6 @@
       });
     }
 
-    #fixDuplicates(nameNew, nameOld) {
-      let nameNewDupes = Web4Keyhole.#transitionBatch.duplicatesNew[nameNew];
-      if (!nameNewDupes) { nameNewDupes = 1; } else if (nameNew) { nameNewDupes++; }
-      Web4Keyhole.#transitionBatch.duplicatesNew[nameNew] = nameNewDupes;
-
-      let nameOldDupes = Web4Keyhole.#transitionBatch.duplicatesOld[nameOld];
-      if (!nameOldDupes) { nameOldDupes = 1; } else if (nameOld) { nameOldDupes++; }
-      Web4Keyhole.#transitionBatch.duplicatesOld[nameOld] = nameOldDupes;
-
-      return [
-        nameNewDupes <= 1 ? nameNew : `${nameNew}-${nameNewDupes}`,
-        nameOldDupes <= 1 ? nameOld : `${nameOld}-${nameOldDupes}`
-      ];
-    }
-
     static flushTransitionBatch() {
       let mutations = Web4Keyhole.#transitionBatch.mutations;
       let elements = Web4Keyhole.#transitionBatch.elements;
@@ -201,8 +183,6 @@
 
       Web4Keyhole.#transitionBatch.mutations = [];
       Web4Keyhole.#transitionBatch.elements = [];
-      Web4Keyhole.#transitionBatch.duplicatesNew = {};
-      Web4Keyhole.#transitionBatch.duplicatesOld = {};
       Web4Keyhole.#transitionBatch.keyholesInvalidated = false;
       Web4Keyhole.#transitionBatch.concurrent++;
 
@@ -277,6 +257,7 @@
     #handleMessage(event) {
       let batch = JSON.parse(event.data);
       batch = Array.isArray(batch) ? batch : [batch];
+      this.#fixDuplicates(batch);
       batch.forEach(rpc => {
 
         // A function to call
@@ -299,6 +280,35 @@
       });
 
       Web4Keyhole.flushTransitionBatch();
+    }
+
+    #fixDuplicates(batch) {
+      let duplicatesNew = {};
+      let duplicatesOld = {};
+
+      batch.forEach(rpc => {
+        let iNew = -1, iOld = -1;
+        if (rpc.method.endsWith("setNode")) { iNew = 1; iOld = 2;}
+        else if (rpc.method.endsWith("popNode")) { iOld = 0; } 
+        else if (rpc.method.endsWith("pushNode")) { iNew = 2; }
+        else { return; }
+
+        if (iNew >= 0) {
+          let name = rpc.params[iNew];
+          let occurrances = duplicatesNew[name] ?? 0;
+          duplicatesNew[name] = ++occurrances;
+          if (occurrances > 1)
+            rpc.params[iNew] = `${name}-${occurrances}`
+        }
+
+        if (iOld >= 0) {
+          let name = rpc.params[iOld];
+          let occurrances = duplicatesOld[name] ?? 0;
+          duplicatesOld[name] = ++occurrances;
+          if (occurrances > 1)
+            rpc.params[iOld] = `${name}-${occurrances}`
+        }
+      });
     }
 
     async #updateConnectionState(e) {
