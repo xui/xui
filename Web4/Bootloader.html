@@ -118,7 +118,7 @@
       }
     }
 
-    addElement(key, rawHtml, viewTransitionName) {
+    addElement(rawHtml, key, viewTransitionName) {
       let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);

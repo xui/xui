@@ -215,9 +215,9 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
                 if (newKeyhole.Format is null || newItem.Tag is null)
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan);
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItemSpan, newItem.Key);
                 else
-                    keyholes.AddElement(newBuffer, priorItem.Key, newItem.Key, newItemSpan, ("web4-move-", newItem.Tag.GetHashCode()));
+                    keyholes.AddElement(newBuffer, priorItem.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
             }
         }
         else if (oldItems.Length > newItems.Length)
