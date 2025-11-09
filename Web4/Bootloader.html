@@ -119,11 +119,10 @@
     }
 
     pushNode(rawHtml, key, viewTransitionName) {
-      let priorElement = this.element;
       let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
       newElement.registerKeyholes(key);
 
-      let mutation = () => priorElement.after(newElement);
+      let mutation = () => this.element.before(newElement);
 
       if (!this.element.shouldAnimate(viewTransitionName)) {
         mutation();
@@ -390,7 +389,7 @@
   Event.prototype.NEXT_PROPAGATION_ID = 0;
   Event.prototype.NEXT_PROPAGATION_LEVEL = 0;
 
-  HTMLElement.prototype.shouldAnimate = function(viewTransitionName) {
+  Node.prototype.shouldAnimate = function(viewTransitionName) {
     // TODO: Not sure about BODY tag.  Perhaps better to verify by CSS props instead?
     let isInAnimationContainer =  ["ROW", "COL", "LIST", "BODY"].includes(this.parentElement?.tagName);
     return document.startViewTransition && viewTransitionName && isInAnimationContainer;
@@ -405,14 +404,20 @@
       let comment = comments.snapshotItem(i);
       let key = comment.textContent;
       if (key.startsWith('key')) {
-        let element = comment.previousSibling;
-        if (element.nodeType === Node.COMMENT_NODE) {
-          // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
-          element = element.parentNode.insertBefore(document.createTextNode(""), comment);
+        if (!key.endsWith('[]')) {
+          let element = comment.previousSibling;
+          if (element.nodeType === Node.COMMENT_NODE) {
+            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
+            element = element.parentNode.insertBefore(document.createTextNode(""), comment);
+          }
+          keyholes.set(key, element);
+          comment.parentElement.removeChild(comment);
+        } else {
+          key = key.replace('[]', '');
+          keyholes.set(key, comment);
+          comment.textContent = '';
         }
-        keyholes.set(key, element);
       }
-      comment.parentElement.removeChild(comment);
     }
     
     let attrs = document.evaluate('//*/attribute::*', this, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
