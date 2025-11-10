@@ -69,7 +69,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Html:
                 int start = keyhole.SequenceStart;
                 int length = keyhole.SequenceLength;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}"} %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -81,7 +81,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Enumerable:
                 start = keyhole.SequenceStart;
                 length = keyhole.SequenceLength;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{start}..{start + length - 1}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
