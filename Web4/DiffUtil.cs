@@ -220,11 +220,10 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
             if (shouldUseTransition && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
             {
-                var newPartial = newBuffer.AsSpan(newItem.Sequence);
                 keyholes.SetNode(
                     newBuffer,
                     newItem.Key,
-                    newPartial,
+                    newBuffer.AsSpan(newItem.Sequence),
                     ("web4-move-", newItem.Tag.GetHashCode()),
                     ("web4-move-", oldItem.Tag.GetHashCode())
                 );
