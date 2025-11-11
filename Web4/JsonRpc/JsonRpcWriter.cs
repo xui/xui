@@ -354,7 +354,7 @@ public partial class JsonRpcWriter : IDisposable
                     WriteHtmlPartial(buffer, partialHtml, includeSentinels);
                     if (includeSentinels)
                     {
-                        jsonWriter.WriteStringValueSegment("<!--", false);
+                        jsonWriter.WriteStringValueSegment("<!--/", false);
                         jsonWriter.WriteStringValueSegment(keyhole.Key, false);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }
@@ -382,7 +382,7 @@ public partial class JsonRpcWriter : IDisposable
                         WriteHtmlPartial(buffer, partialEnumerable, true);
                         if (includeSentinels)
                         {
-                            jsonWriter.WriteStringValueSegment("<!--", false);
+                            jsonWriter.WriteStringValueSegment("<!--/", false);
                             jsonWriter.WriteStringValueSegment(k.Key, false);
                             jsonWriter.WriteStringValueSegment("-->", false);
                         }
@@ -392,14 +392,16 @@ public partial class JsonRpcWriter : IDisposable
                 default:
                     if (includeSentinels)
                     {
-                        jsonWriter.WriteStringValueSegment("<!-- -->", false);
+                            jsonWriter.WriteStringValueSegment("<!--", false);
+                            jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                            jsonWriter.WriteStringValueSegment("-->", false);
                     }
 
                     WriteMutableKeyholeValue(ref keyhole);
 
                     if (includeSentinels)
                     {
-                        jsonWriter.WriteStringValueSegment("<!--", false);
+                        jsonWriter.WriteStringValueSegment("<!--/", false);
                         jsonWriter.WriteStringValueSegment(keyhole.Key, false);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }

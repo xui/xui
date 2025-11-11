@@ -52,7 +52,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 if (partial.Key?.Length > 0)
                 {
                     Writer.Inject($"""
-                        <!--{partial.Key}-->
+                        <!--/{partial.Key}-->
                         """);
 
                     if (format is not null)
@@ -130,7 +130,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // At the end of the body an inline script registers them 
         // because we can't rely on id= or document.getElementById().
         // It should end up looking like this:
-        // $"<!-- -->{value:format}<!--keyabc-->"
+        // $"<!--key123-->{value:format}<!--/key123-->"
 
         // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
 
@@ -139,12 +139,12 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.Inject($"<!-- -->");
+                Writer.Inject($"<!--{key}-->");
 
                 value.TryFormat(Writer.GetSpan(), out length, format, null);
                 Writer.Advance(length);
 
-                Writer.Inject($"<!--{key}-->");
+                Writer.Inject($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
@@ -182,7 +182,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 Writer.Inject($"""
-                    <!-- -->{value}<!--{key}-->
+                    <!--{key}-->{value}<!--/{key}-->
                     """);
                 break;
 
@@ -214,7 +214,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 var b = value ? "true" : "false";
                 Writer.Inject($"""
-                    <!-- -->{b}<!--{key}-->
+                    <!--{key}-->{b}<!--/{key}-->
                     """);
                 break;
 
@@ -254,12 +254,12 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.Inject($"<!-- -->");
+                Writer.Inject($"<!--{key}-->");
 
                 value.TryFormat(Writer.GetSpan(), out length, format);
                 Writer.Advance(length);
 
-                Writer.Inject($"<!--{key}-->");
+                Writer.Inject($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
@@ -368,14 +368,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             Writer.Inject($"""
-                <!--{keyGenerator.GetNextKey()}-->
+                <!--/{keyGenerator.GetNextKey()}-->
                 """);
 
             i++;
         }
 
         Writer.Inject($"""
-            <!--{key}[]-->
+            <!--{key} /-->
             """);
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);

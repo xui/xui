@@ -427,19 +427,22 @@
       let comment = comments.snapshotItem(i);
       let key = comment.textContent;
       if (key.startsWith('key')) {
-        if (!key.endsWith('[]')) {
-          let element = comment.previousSibling;
-          if (element.nodeType === Node.COMMENT_NODE) {
-            // Text node was missing because keyhole value was "", e.g. `<!----><!--key123-->`
-            element = element.parentNode.insertBefore(document.createTextNode(""), comment);
-          }
-          keyholes.set(key, element);
-          comment.parentElement.removeChild(comment);
-        } else {
-          key = key.replace('[]', '');
+        if (key.endsWith(' /')) {
+          // Needed as a placeholder for zero-length enumerations, do not removeChild
+          key = key.replace(' /', '');
           keyholes.set(key, comment);
-          comment.textContent = '[]';
+        } else {
+          comment.parentElement.removeChild(comment);
         }
+      } else if (key.startsWith('/key')) {
+        key = key.replace('/', '');
+        let element = comment.previousSibling;
+        if (element.nodeType === Node.COMMENT_NODE) {
+          // Text node was missing because keyhole value was an empty string (""), e.g. `<!--key123--><!--/key123-->`
+          element = element.parentNode.insertBefore(document.createTextNode(""), comment);
+        }
+        keyholes.set(key, element);
+        comment.parentElement.removeChild(comment);
       }
     }
     
