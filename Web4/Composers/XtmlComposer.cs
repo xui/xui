@@ -397,6 +397,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         Writer.Inject($"""
             <!doctype html>
+            <html>
             <head>
             
             """);
