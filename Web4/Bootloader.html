@@ -100,7 +100,9 @@
 
     setNode(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
       let oldElement = this.element;
-      let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
+      let fragment = document.createRange().createContextualFragment(rawHtml);
+      // Gets the first HTMLElement or first comment (ignores leading text elements).
+      let newElement = fragment.children[0] ?? fragment.childNodes[0];
       newElement.registerKeyholes(this.key);
 
       let mutation = () => oldElement.replaceWith(newElement);
