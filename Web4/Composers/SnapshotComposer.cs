@@ -27,7 +27,7 @@ public class SnapshotComposer : BaseComposer
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        if (IsInitialHtml)
+        if (LiteralLength == 0)
         {
             html.Index = -1;
         }

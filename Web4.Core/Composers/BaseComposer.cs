@@ -14,7 +14,6 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    protected bool IsInitialHtml => FormattedCount == formattedValuesRemaining && FormattedCount <= 1;
     protected bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
     protected bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 

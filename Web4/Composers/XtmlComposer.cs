@@ -395,6 +395,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (FormattedCount <= 1)
             return 0;
 
+        // Wait for the next append where there's actual content.
+        if (literal.Length == 0)
+            return 0;
+
         Writer.Inject($"""
             <!doctype html>
             <html>

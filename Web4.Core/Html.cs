@@ -14,7 +14,7 @@ public ref partial struct Html
     public string Key { get; set; }
     public int Index { get; set; }
     public int Cursor { get; private set; }
-    public int Length { get; private set; }
+    public int Length { get; private set; } // TODO: Rename to `Segments` or `KeyCount`?
     public bool IsAttribute { get; set; }
 
     public Html(int literalLength, int formattedCount)
