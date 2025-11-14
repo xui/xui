@@ -32,13 +32,18 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             var key = keyGenerator.GetNextKey();
             html.Key = key;
             keyGenerator.CreateNewGeneration(key, html.Length);
-        }
 
-        if (attributeStatus == AttributeStatus.Pending)
-        {
-            HandleDeferredLiteral();
-            Writer.Inject($"\"");
-            attributeStatus = AttributeStatus.InProgress;
+            switch (attributeStatus)
+            {
+                case AttributeStatus.None:
+                    Writer.Inject($"<!--{key}-->");
+                    break;
+                case AttributeStatus.Pending:
+                    HandleDeferredLiteral();
+                    Writer.Inject($"\"");
+                    attributeStatus = AttributeStatus.InProgress;
+                    break;
+            }
         }
 
         base.OnHtmlPartialBegins(ref html);
