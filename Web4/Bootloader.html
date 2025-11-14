@@ -39,15 +39,15 @@
         delete this.booleanAttributeName;
     }
 
-    get elements() {
+    get nodes() {
       return Object.fromEntries(Object
         .values(keyholes)
-        .map(k => [k.key, k.element]
+        .map(k => [k.key, k.node]
       ));
     }
 
     getElementByKey(key) {
-      return this[key]?.element;
+      return this[key]?.node;
     }
 
     dump() {
@@ -68,10 +68,10 @@
   class Web4Keyhole {
     #transport;
     key;
-    element;
+    node;
     static #transitionBatch = {
       mutations: [],
-      elements: [],
+      nodes: [],
       keyholesInvalidated: false,
       concurrent: 0
     };
@@ -80,63 +80,63 @@
       document.addEventListener('DOMContentLoaded', () => document.registerKeyholes());
     }
 
-    constructor(transport, key, element) {
+    constructor(transport, key, node) {
       this.#transport = transport;
       this.key = key;
-      this.element = element;
+      this.node = node;
     }
 
     setText(value) {
-      this.element.nodeValue = value;
+      this.node.nodeValue = value;
     }
 
     setAttribute(value) {
       if (this.booleanAttributeName) {
-        this.element[this.booleanAttributeName] = value;
+        this.node[this.booleanAttributeName] = value;
       } else {
-        this.element.value = value;
+        this.node.value = value;
       }
     }
 
     setNode(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
-      let oldElement = this.element;
-      let newElement = this.#createNode(rawHtml)
-      newElement.registerKeyholes(this.key);
+      let oldNode = this.node;
+      let newNode = this.#createNode(rawHtml)
+      newNode.registerKeyholes(this.key);
 
-      let mutation = () => oldElement.replaceWith(newElement);
+      let mutation = () => oldNode.replaceWith(newNode);
 
-      if (!this.element.shouldAnimate(viewTransitionName)) {
+      if (!this.node.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#prepareElement(newElement, viewTransitionName);
-        this.#prepareElement(oldElement, viewTransitionNameSecondary ?? viewTransitionName);
+        this.#prepareNode(newNode, viewTransitionName);
+        this.#prepareNode(oldNode, viewTransitionNameSecondary ?? viewTransitionName);
         this.#prepareSiblings();
         this.#batchMutation(mutation, true);
       }
     }
 
     pushNode(rawHtml, key, viewTransitionName) {
-      let newElement = this.#createNode(rawHtml);
-      newElement.registerKeyholes(key);
+      let newNode = this.#createNode(rawHtml);
+      newNode.registerKeyholes(key);
 
-      let mutation = () => this.element.before(newElement);
+      let mutation = () => this.node.before(newNode);
 
-      if (!this.element.shouldAnimate(viewTransitionName)) {
+      if (!this.node.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#prepareElement(newElement, viewTransitionName);
+        this.#prepareNode(newNode, viewTransitionName);
         this.#prepareSiblings();
         this.#batchMutation(mutation, false);
       }
     }
 
     popNode(viewTransitionName) {
-      let mutation = () => this.element.parentNode.removeChild(this.element);
+      let mutation = () => this.node.parentNode.removeChild(this.node);
 
-      if (!this.element.shouldAnimate(viewTransitionName)) {
+      if (!this.node.shouldAnimate(viewTransitionName)) {
         mutation();
       } else {
-        this.#prepareElement(this.element, viewTransitionName);
+        this.#prepareNode(this.node, viewTransitionName);
         this.#prepareSiblings();
         this.#batchMutation(mutation, true);
       }
@@ -144,6 +144,13 @@
 
     dispatchEvent(event) {
       this.#transport.dispatchEvent(event, this.key);
+    }
+
+    #batchMutation(mutation, invalidatesKeyholes) {
+      Web4Keyhole.#transitionBatch.mutations.push(mutation);
+
+      if (invalidatesKeyholes)
+        Web4Keyhole.#transitionBatch.keyholesInvalidated = true;
     }
 
     #createNode(rawHtml) {
@@ -154,24 +161,17 @@
       return fragment.children[0] ?? fragment.childNodes[0];
     }
 
-    #batchMutation(mutation, invalidatesKeyholes) {
-      Web4Keyhole.#transitionBatch.mutations.push(mutation);
+    #prepareNode(node, viewTransitionName) {
+      if (!Web4Keyhole.#transitionBatch.nodes.includes(node))
+        Web4Keyhole.#transitionBatch.nodes.push(node);
 
-      if (invalidatesKeyholes)
-        Web4Keyhole.#transitionBatch.keyholesInvalidated = true;
-    }
-
-    #prepareElement(element, viewTransitionName) {
-      if (!Web4Keyhole.#transitionBatch.elements.includes(element))
-        Web4Keyhole.#transitionBatch.elements.push(element);
-
-      element.style.viewTransitionName = viewTransitionName;
+      node.style.viewTransitionName = viewTransitionName;
     }
 
     #prepareSiblings() {
-      this.element.parentElement.childNodes.forEach((sibling, i) => {
-        if (!Web4Keyhole.#transitionBatch.elements.includes(sibling))
-          Web4Keyhole.#transitionBatch.elements.push(sibling);
+      this.node.parentElement.childNodes.forEach((sibling, i) => {
+        if (!Web4Keyhole.#transitionBatch.nodes.includes(sibling))
+          Web4Keyhole.#transitionBatch.nodes.push(sibling);
         
         if (sibling.style && !sibling.style.viewTransitionName)
           sibling.style.viewTransitionName = `web4-sibling-${this.key}-${i}`;
@@ -180,7 +180,7 @@
 
     static flushTransitionBatch() {
       let mutations = Web4Keyhole.#transitionBatch.mutations;
-      let elements = Web4Keyhole.#transitionBatch.elements;
+      let nodes = Web4Keyhole.#transitionBatch.nodes;
       let keyholesInvalidated = Web4Keyhole.#transitionBatch.keyholesInvalidated;
 
       if (!document.startViewTransition || mutations.length == 0) {
@@ -190,7 +190,7 @@
       }
 
       Web4Keyhole.#transitionBatch.mutations = [];
-      Web4Keyhole.#transitionBatch.elements = [];
+      Web4Keyhole.#transitionBatch.nodes = [];
       Web4Keyhole.#transitionBatch.keyholesInvalidated = false;
       Web4Keyhole.#transitionBatch.concurrent++;
 
@@ -198,11 +198,11 @@
         mutations.forEach(mutation => mutation());
       })
       .finished.then(() => {
-        elements.forEach(element => {
-          if (element.style?.viewTransitionName?.startsWith("web4")) {
-            element.style.removeProperty("view-transition-name");
-            if (element.style.length == 0)
-              element.removeAttribute("style");
+        nodes.forEach(node => {
+          if (node.style?.viewTransitionName?.startsWith("web4")) {
+            node.style.removeProperty("view-transition-name");
+            if (node.style.length == 0)
+              node.removeAttribute("style");
           }
         });
         if (--Web4Keyhole.#transitionBatch.concurrent == 0 && keyholesInvalidated)
@@ -444,12 +444,12 @@
         }
       } else if (key.startsWith('/key')) {
         key = key.replace('/', '');
-        let element = comment.previousSibling;
-        if (element.nodeType === Node.COMMENT_NODE) {
+        let node = comment.previousSibling;
+        if (node.nodeType === Node.COMMENT_NODE) {
           // Text node was missing because keyhole value was an empty string (""), e.g. `<!--key123--><!--/key123-->`
-          element = element.parentNode.insertBefore(document.createTextNode(""), comment);
+          node = node.parentNode.insertBefore(document.createTextNode(""), comment);
         }
-        keyholes.set(key, element);
+        keyholes.set(key, node);
         comment.parentElement.removeChild(comment);
       }
     }
@@ -460,8 +460,8 @@
       let key = attr.name;
       if (key.startsWith('key')) {
         if (attr.value === "") {
-          let element = attrs.snapshotItem(i - 1)
-          keyholes.set(key, element);
+          let node = attrs.snapshotItem(i - 1)
+          keyholes.set(key, node);
         } else {
           keyholes.set(key, attr.ownerElement, attr.value);
         }
@@ -472,10 +472,10 @@
 
   HTMLDocument.prototype.unregisterKeyholes = function() {
     for (let key in keyholes) {
-      let element = keyholes[key].element;
-      if (element.nodeType == Node.ATTRIBUTE_NODE)
-        element = element.ownerElement;
-      if (element instanceof Node && element != document && !document.body.contains(element))
+      let node = keyholes[key].node;
+      if (node.nodeType == Node.ATTRIBUTE_NODE)
+        node = node.ownerElement;
+      if (node instanceof Node && node != document && !document.body.contains(node))
         delete keyholes[key];
     }
   }

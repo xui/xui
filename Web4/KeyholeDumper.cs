@@ -45,14 +45,14 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.String:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.element");
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node");
                 Console.GroupEnd();
                 break;
             case KeyholeType.Integer:
                 if (keyhole.IsValueAnAttribute) // TODO: This isn't getting set?
                     Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 else
-                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.element");
+                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node");
                 Console.GroupEnd();
                 break;
             case KeyholeType.Boolean:
@@ -60,7 +60,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.Color:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", $"globalThis.keyholes.{keyhole.Key}.element");
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", $"globalThis.keyholes.{keyhole.Key}.node");
                 Console.GroupEnd();
                 break;
             // TODO: Support the other FormatTypes too
@@ -83,7 +83,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Html:
                 start = keyhole.SequenceStart;
                 length = keyhole.SequenceLength;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, $"globalThis.keyholes.{keyhole.Key}.element", CSS_BRACE, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, $"globalThis.keyholes.{keyhole.Key}.node", CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
