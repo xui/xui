@@ -189,7 +189,7 @@ public ref partial struct Html
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableElement(ref this, htmls, format, expression);
+        var @continue = composer.WriteMutableNode(ref this, htmls, format, expression);
         Cursor++;
 
         return @continue;
