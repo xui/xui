@@ -10,7 +10,7 @@ string name = "World";
 int c = 16;
 double d = 3.14;
 List<string> names = ["one", "two", "three", "four", "five", "six", "seven"];
-Color color = Color.Green;
+Color color = Color.FromArgb(0xf2f2f7);
 bool b = true;
 bool @checked = true;
 
@@ -36,7 +36,7 @@ Html GetList() => $"""
         <button onpointerdown={ Move1 }>Move 1</button>
         <button onpointerdown={ Swap2 }>Swap 2</button>
         <button onpointerdown={ Shuffle }>Shuffle</button>
-        <button onpointerdown={ AddOne }>Add One</button>
+        <button onpointerdown={ AddOne }>Insert One</button>
         <button onpointerdown={ RemoveOne }>Remove One</button>
         
     </list>
@@ -102,12 +102,16 @@ void Shuffle()
 
 void AddOne()
 {
-    names.Add(names.Count.ToString());
+    // names.Add(names.Count.ToString());
+    var i = Random.Shared.Next(names.Count);
+    names.Insert(i, names.Count.ToString());
 }
 
 void RemoveOne()
 {
-    names.RemoveAt(names.Count - 1);
+    // State.names.RemoveAt(State.names.Count - 1);
+    var i = Random.Shared.Next(names.Count);
+    names.RemoveAt(i);
 }
 
 app.MapWeb4("/swiftui", () => $"""
@@ -123,7 +127,7 @@ var window = app.MapWeb4("/app", () => $"""
         <head>
             <title>Neato</title>
         </head>
-        <body>
+        <body style={$"background-color: {color}"}>
             <button onmousedown={() => c++}>
                 Clicks: {c}
             </button>
