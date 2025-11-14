@@ -51,4 +51,7 @@ public static class Extensions
         => (color.A == byte.MaxValue)
             ? (color.ToArgb() & 0xFFFFFF)
             : color.ToArgb();
+
+    public static Color Invert(this Color color)
+        => Color.FromArgb(color.A, 255 - color.R, 255 - color.G, 255 - color.B);
 }

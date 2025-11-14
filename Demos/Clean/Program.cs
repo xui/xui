@@ -173,7 +173,7 @@ var window = app.MapWeb4("/app", () => $"""
             <br/><br/>
 
             <input type="color" value={color} oninput={e => color = e.Target.Value} />
-            <span style={$"color: {color}; font-size: {c}pt;"}>{color:RGB}</span>
+            <span style={$"color: {color.Invert()}; font-size: {c}pt;"}>{color:RGB}</span>
             <br/>
 
             <h2>Click on the buttons</h2>
