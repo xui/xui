@@ -435,7 +435,7 @@
       let comment = comments.snapshotItem(i);
       let key = comment.textContent;
       if (key.startsWith('key')) {
-        if (key.endsWith(' /')) {
+        if (key.endsWith('/')) {
           // Needed as a placeholder for zero-length enumerations, do not removeChild
           key = key.replace(' /', '');
           keyholes.set(key, comment);
