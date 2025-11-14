@@ -23,6 +23,9 @@ public ref partial struct Html
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = BaseComposer.Current ?? throw new ArgumentNullException("BaseComposer.Current");
         this.composer.Grow(ref this, literalLength, formattedCount);
+
+        if (literalLength == 0 && formattedCount == 0)
+            AppendLiteral(string.Empty);
     }
 
     public Html(int literalLength, int formattedCount, BaseComposer composer)
@@ -30,6 +33,9 @@ public ref partial struct Html
         Length = 2 * formattedCount + 1;
         this.composer = BaseComposer.Current ??= composer.Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
+
+        if (literalLength == 0 && formattedCount == 0)
+            AppendLiteral(string.Empty);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
@@ -37,6 +43,9 @@ public ref partial struct Html
         Length = 2 * formattedCount + 1;
         this.composer = BaseComposer.Current ??= new HtmlComposer(writer).Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
+
+        if (literalLength == 0 && formattedCount == 0)
+            AppendLiteral(string.Empty);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
@@ -45,6 +54,9 @@ public ref partial struct Html
         composer.Writer = writer;
         this.composer = BaseComposer.Current ??= composer.Init();
         this.composer.Grow(ref this, literalLength, formattedCount);
+
+        if (literalLength == 0 && formattedCount == 0)
+            AppendLiteral(string.Empty);
     }
 
     // PARTIAL MARKUP
