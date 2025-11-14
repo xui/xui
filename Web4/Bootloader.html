@@ -100,9 +100,7 @@
 
     setNode(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
       let oldElement = this.element;
-      let fragment = document.createRange().createContextualFragment(rawHtml);
-      // Gets the first HTMLElement or first comment (ignores leading text elements).
-      let newElement = fragment.children[0] ?? fragment.childNodes[0];
+      let newElement = this.#createNode(rawHtml)
       newElement.registerKeyholes(this.key);
 
       let mutation = () => oldElement.replaceWith(newElement);
@@ -118,7 +116,7 @@
     }
 
     pushNode(rawHtml, key, viewTransitionName) {
-      let newElement = document.createRange().createContextualFragment(rawHtml).children[0];
+      let newElement = this.#createNode(rawHtml);
       newElement.registerKeyholes(key);
 
       let mutation = () => this.element.before(newElement);
@@ -146,6 +144,14 @@
 
     dispatchEvent(event) {
       this.#transport.dispatchEvent(event, this.key);
+    }
+
+    #createNode(rawHtml) {
+      if (!rawHtml)
+        return document.createTextNode("");
+
+      let fragment = document.createRange().createContextualFragment(rawHtml);
+      return fragment.children[0] ?? fragment.childNodes[0];
     }
 
     #batchMutation(mutation, invalidatesKeyholes) {
