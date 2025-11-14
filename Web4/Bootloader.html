@@ -309,9 +309,9 @@
 
       batch.forEach(rpc => {
         let iNew = -1, iOld = -1;
-        if (rpc.method.endsWith("setNode")) { iNew = 1; iOld = 2;}
-        else if (rpc.method.endsWith("popNode")) { iOld = 0; } 
-        else if (rpc.method.endsWith("pushNode")) { iNew = 2; }
+        if (rpc.method?.endsWith("setNode")) { iNew = 1; iOld = 2;}
+        else if (rpc.method?.endsWith("popNode")) { iOld = 0; } 
+        else if (rpc.method?.endsWith("pushNode")) { iNew = 2; }
         else { return; }
 
         if (iNew >= 0) {
