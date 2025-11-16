@@ -22,8 +22,8 @@ Html GetList() => $"""
 
         {names.Select(n => $"""
             <lr>
-                <ld>Hello { name }, { n }!</ld>
-                <ld>{ Icons.Check }</ld>
+                <ld>{ Icons.Globe }</ld>
+                <ld>Hello, { n }!</ld>
             </lr>
         """):zoom-fade}
 
