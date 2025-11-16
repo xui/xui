@@ -12,7 +12,6 @@ double d = 3.14;
 List<string> names = ["one", "two", "three", "four", "five", "six", "seven"];
 Color color = Color.FromArgb(0xf2f2f7);
 bool b = true;
-bool @checked = true;
 
 app.MapWeb4("/list", () => $"""
     <div>
