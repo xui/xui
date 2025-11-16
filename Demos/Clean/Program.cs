@@ -14,9 +14,7 @@ Color color = Color.FromArgb(0xf2f2f7);
 bool b = true;
 
 app.MapWeb4("/list", () => $"""
-    <div>
-        {GetList()}
-    </div>
+    {GetList()}
     """);
 
 Html GetList() => $"""
