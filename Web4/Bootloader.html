@@ -165,7 +165,8 @@
       if (!Web4Keyhole.#transitionBatch.nodes.includes(node))
         Web4Keyhole.#transitionBatch.nodes.push(node);
 
-      node.style.viewTransitionName = viewTransitionName;
+      if (node.style)
+        node.style.viewTransitionName = viewTransitionName;
     }
 
     #prepareSiblings() {
