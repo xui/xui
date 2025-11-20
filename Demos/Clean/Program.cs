@@ -163,7 +163,7 @@ var window = app.MapWeb4("/app", () => $"""
 
             <row>
                 {true switch {
-                    _ when c < 5  => MyButton(text: "Neato"),
+                    _ when c < 5 => MyButton(text: "Neato"),
                     _ when c == 15 => NoCButton(name),
                     _ when c > 50 => YourButton(),
                     _ => NoneButton()

@@ -451,7 +451,7 @@
           node = node.parentNode.insertBefore(document.createTextNode(""), comment);
         }
         keyholes.set(key, node);
-        comment.parentElement.removeChild(comment);
+        comment.parentElement?.removeChild(comment);
       }
     }
     
