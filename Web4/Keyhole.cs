@@ -55,6 +55,7 @@ public struct Keyhole
     public int SequenceLength { readonly get => (int)value1; set => value1 = value; }
     public bool IsValueAnAttribute { readonly get => value2 == -1; set => value2 = value ? -1 : 0; }
 
+    public int ParentStart { readonly get => value2; set => value2 = value; }
     public static bool Equals(ref Keyhole left, ref Keyhole right)
         => left.Type == right.Type && left.Type switch
         {

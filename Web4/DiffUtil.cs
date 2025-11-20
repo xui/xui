@@ -8,8 +8,8 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
-        Span<Keyhole> oldSpan = oldBuffer.AsSpan(..oldFirst.SequenceLength);
-        Span<Keyhole> newSpan = newBuffer.AsSpan(..newFirst.SequenceLength);
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(oldFirst.Sequence);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(newFirst.Sequence);
 
         var diffUtil = new DiffUtil(keyholes, oldBuffer, newBuffer);
         diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
@@ -172,7 +172,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             {
                 // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                 // Find the start of this sequence, then grab the sequence's full span.
-                ref var startKeyhole = ref newBuffer[newKeyhole.SequenceStart];
+                ref var startKeyhole = ref newBuffer[newKeyhole.ParentStart];
                 keyholes.SetAttribute(parent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                 // Shortcircuit.  No need to diff the rest of this span.

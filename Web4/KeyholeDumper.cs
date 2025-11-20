@@ -69,8 +69,8 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.Attribute:
-                int start = keyhole.SequenceStart;
-                int length = keyhole.SequenceLength;
+                int start = keyhole.Sequence.Start.Value;
+                int length = keyhole.Sequence.End.Value - start;
                 Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
@@ -81,8 +81,8 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.Html:
-                start = keyhole.SequenceStart;
-                length = keyhole.SequenceLength;
+                start = keyhole.Sequence.Start.Value;
+                length = keyhole.Sequence.End.Value - start;
                 Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, $"globalThis.keyholes.{keyhole.Key}.node", CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
@@ -93,8 +93,8 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.Enumerable:
-                start = keyhole.SequenceStart;
-                length = keyhole.SequenceLength;
+                start = keyhole.Sequence.Start.Value;
+                length = keyhole.Sequence.End.Value - start;
                 Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)

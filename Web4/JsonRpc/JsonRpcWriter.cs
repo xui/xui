@@ -373,12 +373,12 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment(keyhole.Key, false);
                     break;
                 case KeyholeType.Enumerable:
-                    int start = keyhole.SequenceStart;
-                    int end = keyhole.SequenceLength + start;
+                    int start = keyhole.Sequence.Start.Value;
+                    int end = keyhole.Sequence.End.Value;
                     for (int i2 = start; i2 < end; i2++)
                     {
                         ref var k = ref buffer[i2];
-                        Span<Keyhole> partialEnumerable = buffer.AsSpan(k.SequenceStart, k.SequenceLength);
+                        Span<Keyhole> partialEnumerable = buffer.AsSpan(k.Sequence);
                         WriteHtmlPartial(buffer, partialEnumerable, true);
                         if (includeSentinels)
                         {

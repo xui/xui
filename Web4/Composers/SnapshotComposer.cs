@@ -102,7 +102,7 @@ public class SnapshotComposer : BaseComposer
         if (parent.IsAttribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.SequenceStart = parent.Index;
+            keyhole.ParentStart = parent.Index;
         }
         else
         {
@@ -123,7 +123,7 @@ public class SnapshotComposer : BaseComposer
         if (parent.IsAttribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.SequenceStart = parent.Index;
+            keyhole.ParentStart = parent.Index;
         }
         else
         {
@@ -144,7 +144,7 @@ public class SnapshotComposer : BaseComposer
         if (parent.IsAttribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.SequenceStart = parent.Index;
+            keyhole.ParentStart = parent.Index;
         }
         else
         {
@@ -165,7 +165,7 @@ public class SnapshotComposer : BaseComposer
         if (parent.IsAttribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.SequenceStart = parent.Index;
+            keyhole.ParentStart = parent.Index;
         }
         else
         {
@@ -185,7 +185,7 @@ public class SnapshotComposer : BaseComposer
         if (parent.IsAttribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.SequenceStart = parent.Index;
+            keyhole.ParentStart = parent.Index;
         }
         else
         {
