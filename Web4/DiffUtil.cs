@@ -8,18 +8,16 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
-        Span<Keyhole> oldSpan = oldBuffer.AsSpan(oldFirst.Sequence);
-        Span<Keyhole> newSpan = newBuffer.AsSpan(newFirst.Sequence);
 
         var diffUtil = new DiffUtil(keyholes, oldBuffer, newBuffer);
-        diffUtil.Recurse(ref newFirst, oldSpan, newSpan);
+        diffUtil.Recurse(ref oldFirst, ref newFirst);
     }
 
-    private readonly bool Recurse(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool Recurse(ref Keyhole oldParent, ref Keyhole newParent)
     {
-        if (CompareLengths(ref parent, oldSpan, newSpan)) return false;
-        if (CompareImmutables(ref parent, oldSpan, newSpan)) return false;
-        if (CompareMutables(ref parent, oldSpan, newSpan)) return false;
+        if (CompareLengths(ref oldParent, ref newParent)) return false;
+        if (CompareImmutables(ref oldParent, ref newParent)) return false;
+        if (CompareMutables(ref oldParent, ref newParent)) return false;
         return false;
     }
 
@@ -29,28 +27,31 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
     /// then it's impossible that they are the same.  
     /// So replace the whole span.
     /// </summary>
-    private readonly bool CompareLengths(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool CompareLengths(ref Keyhole oldParent, ref Keyhole newParent)
     {
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(oldParent.Sequence);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(newParent.Sequence);
+
         if (oldSpan.Length != newSpan.Length)
         {
-            if (parent.Type == KeyholeType.Attribute)
+            if (newParent.Type == KeyholeType.Attribute)
                 keyholes.SetAttribute(
-                    parent.Key,
+                    newParent.Key,
                     newSpan
                 );
-            else if (parent.Format is null)
+            else if (newParent.Format is null)
                 keyholes.SetNode(
                     newBuffer,
-                    parent.Key,
+                    newParent.Key,
                     newSpan
                 );
             else
                 keyholes.SetNode(
                     newBuffer,
-                    parent.Key,
+                    newParent.Key,
                     newSpan,
-                    (false ? "web4-rev-" : "web4-fwd-", parent.Key)
-                ); // TODO: lineNumber logic here!
+                    (oldParent.RelativeOrder <= newParent.RelativeOrder ? "web4-fwd-" : "web4-rev-", newParent.Key)
+                );
 
             // Shortcircuit.  No need to finish diffing this span or traverse deeper
             // since this whole span (and possibly its children) will be sent to the browser.
@@ -73,8 +74,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
     /// compiler guarantees that InterpolatedStringHandlers gives us where
     /// we can expect the exact same string literals at each keyhole every time.
     /// </summary>
-    private readonly bool CompareImmutables(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool CompareImmutables(ref Keyhole oldParent, ref Keyhole newParent)
     {
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(oldParent.Sequence);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(newParent.Sequence);
+
         for (int i = 0; i < newSpan.Length; i += 2)
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
@@ -87,24 +91,24 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             // (This is especially helpful when the two strings are several kilobytes in length!)
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
-                if (parent.Type == KeyholeType.Attribute)
+                if (newParent.Type == KeyholeType.Attribute)
                     keyholes.SetAttribute(
-                        parent.Key,
+                        newParent.Key,
                         newSpan
                     );
-                else if (parent.Format == null)
+                else if (newParent.Format == null)
                     keyholes.SetNode(
                         newBuffer,
-                        parent.Key,
+                        newParent.Key,
                         newSpan
                     );
                 else
                     keyholes.SetNode(
                         newBuffer,
-                        parent.Key,
+                        newParent.Key,
                         newSpan,
-                        (false ? "web4-rev-" : "web4-fwd-", parent.Key)
-                    ); // TODO: lineNumber logic here!
+                        (oldParent.RelativeOrder <= newParent.RelativeOrder ? "web4-fwd-" : "web4-rev-", newParent.Key)
+                    );
 
                 // Shortcircuit.  This whole segment (and possibly its children) will be replaced 
                 // so there's no need to diff its mutables or traverse deeper.
@@ -120,8 +124,11 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
     /// MUTABLES (state)
     /// Traverse every odd index – these are guaranteed to be a mutable keyhole value, i.e. state.
     /// </summary>
-    private readonly bool CompareMutables(ref Keyhole parent, Span<Keyhole> oldSpan, Span<Keyhole> newSpan)
+    private readonly bool CompareMutables(ref Keyhole oldParent, ref Keyhole newParent)
     {
+        Span<Keyhole> oldSpan = oldBuffer.AsSpan(oldParent.Sequence);
+        Span<Keyhole> newSpan = newBuffer.AsSpan(newParent.Sequence);
+
         for (int i = 1; i < newSpan.Length; i += 2)
         {
             ref Keyhole oldKeyhole = ref oldSpan[i];
@@ -142,12 +149,12 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 KeyholeType.DateOnly or
                 KeyholeType.TimeSpan or
                 KeyholeType.TimeOnly =>
-                    CompareMutable(ref parent, ref oldKeyhole, ref newKeyhole),
+                    CompareMutable(ref oldParent, ref newParent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.Enumerable =>
-                    CompareEnumerable(ref parent, ref oldKeyhole, ref newKeyhole),
+                    CompareEnumerable(ref oldParent, ref newParent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.Html or
                 KeyholeType.Attribute =>
-                    Recurse(ref newKeyhole, oldBuffer.AsSpan(oldKeyhole.Sequence), newBuffer.AsSpan(newKeyhole.Sequence)),
+                    Recurse(ref oldKeyhole, ref newKeyhole),
                 KeyholeType.EventListener =>
                     false, // Event listeners never need to be diff'd, their only purpose is for lookup.
                 KeyholeType.StringLiteral =>
@@ -164,16 +171,16 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         return false;
     }
 
-    private readonly bool CompareMutable(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    private readonly bool CompareMutable(ref Keyhole oldParent, ref Keyhole newParent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         if (!Keyhole.Equals(ref oldKeyhole, ref newKeyhole))
         {
-            if (parent.Type == KeyholeType.Attribute)
+            if (newParent.Type == KeyholeType.Attribute)
             {
                 // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                 // Find the start of this sequence, then grab the sequence's full span.
                 ref var startKeyhole = ref newBuffer[newKeyhole.ParentStart];
-                keyholes.SetAttribute(parent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
+                keyholes.SetAttribute(newParent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                 // Shortcircuit.  No need to diff the rest of this span.
                 // This whole attribute sequence will be updated.
@@ -193,7 +200,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         return false;
     }
 
-    private readonly bool CompareEnumerable(ref Keyhole parent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    private readonly bool CompareEnumerable(ref Keyhole oldParent, ref Keyhole newParent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
         var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
@@ -230,7 +237,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             }
             else
             {
-                Recurse(ref newItem, oldBuffer.AsSpan(oldItem.Sequence), newBuffer.AsSpan(newItem.Sequence));
+                Recurse(ref oldItem, ref newItem);
             }
         }
 

@@ -16,10 +16,12 @@ public ref partial struct Html
     public int Cursor { get; private set; }
     public int Length { get; private set; } // TODO: Rename to `Segments` or `KeyCount`?
     public bool IsAttribute { get; set; }
+    public int RelativeOrder { get; private set; }
 
-    public Html(int literalLength, int formattedCount)
+    public Html(int literalLength, int formattedCount, [CallerLineNumber] int lineNumber = 0)
     {
         Length = 2 * formattedCount + 1;
+        RelativeOrder = lineNumber;
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = BaseComposer.Current ?? throw new ArgumentNullException("BaseComposer.Current");
         this.composer.Grow(ref this, literalLength, formattedCount);
@@ -173,10 +175,13 @@ public ref partial struct Html
     // MUTABLE ELEMENTS
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public bool AppendFormatted(Html html, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
+    public bool AppendFormatted(Html html, int alignment = -1, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
+        
+        if (alignment >= 0)
+            html.RelativeOrder = alignment;
 
         var @continue = composer.OnHtmlPartialEnds(ref this, ref html, format, expression);
         Cursor++;

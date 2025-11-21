@@ -69,6 +69,7 @@ public class SnapshotComposer : BaseComposer
             keyhole.Expression = expression;
             keyhole.SequenceStart = partial.Index;
             keyhole.SequenceLength = partial.Length;
+            keyhole.RelativeOrder = partial.RelativeOrder;
 
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
@@ -295,6 +296,7 @@ public class SnapshotComposer : BaseComposer
             itemKeyhole.Tag = item; // TODO: Memory allocation?
             itemKeyhole.SequenceStart = partial.Index;
             itemKeyhole.SequenceLength = partial.Length;
+            itemKeyhole.RelativeOrder = partial.RelativeOrder;
 
             i++;
         }
