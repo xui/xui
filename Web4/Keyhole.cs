@@ -45,7 +45,7 @@ public struct Keyhole
     public TimeOnly TimeOnly { readonly get => new(value1); set => value1 = value.Ticks; }
 
     // --- backing field: value2 ---
-    // These are "helper properties" and most use `value2` as their backing field.  
+    // These are "helper properties" and use `value2` as their backing field.  
     // Like the properties that use value1, they aim to conserve memory width in keyhole 
     // buffers by reusing one backing field across a number of properties that are only 
     // used depending on the keyhole type.
