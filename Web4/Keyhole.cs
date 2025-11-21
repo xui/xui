@@ -4,12 +4,12 @@ namespace Web4;
 
 public struct Keyhole
 {
-    private string key;         // 64 bits
-    private object? reference;  // 64 bits
-    private long value1;        // 64 bits
-    private int value2;         // 32 bits
-    private KeyholeType type;   // 32 bits
-    private string? format;     // 64 bits
+    private string key;         // 8 bytes
+    private object? reference;  // 8 bytes
+    private long value1;        // 8 bytes
+    private int value2;         // 4 bytes
+    private KeyholeType type;   // 4 bytes
+    private string? format;     // 8 bytes
 
     public string Key { readonly get => key; set => key = value; }
     public KeyholeType Type { readonly get => type; set => type = value; }
