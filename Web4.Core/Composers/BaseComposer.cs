@@ -33,8 +33,6 @@ public abstract class BaseComposer
         
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;
-
-        OnHtmlPartialBegins(ref html);
     }
 
     protected bool CompleteStringLiteral(int literalLength)
