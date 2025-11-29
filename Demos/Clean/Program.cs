@@ -1,6 +1,4 @@
 global using Web4;
-global using Web4.Core.DOM;
-global using static Clean.Factories.Factory;
 using System.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);
