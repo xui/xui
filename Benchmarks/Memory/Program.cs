@@ -21,7 +21,7 @@ public class Tests
     readonly FindKeyholeComposer findKeyholeComposer = new();
     readonly string name = "Rylan";
     readonly int c = 3;
-    readonly State<int> cState = 3.AsState();
+    readonly int cState = 3;// State<int> cState = 3.AsState();
 
     [Benchmark]
     public void Baseline()
