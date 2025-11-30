@@ -131,7 +131,7 @@ public class FindKeyholeComposer : BaseComposer
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
 
-    public override bool WriteMutableNode<T>(ref Html parent, Html.IList<T> partials, string? format = null, string? expression = null)
+    public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         if (this.key is null)
             return false;

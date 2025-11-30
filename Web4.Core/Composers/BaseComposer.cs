@@ -88,7 +88,7 @@ public abstract class BaseComposer
         return OnHtmlPartialEnds(ref parent, ref partial, format, expression);
     }
 
-    public virtual bool WriteMutableNode<T>(ref Html parent, Html.IList<T> partials, string? format = null, string? expression = null)
+    public virtual bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         foreach (var partial in partials) { }
         return CompleteFormattedValue();

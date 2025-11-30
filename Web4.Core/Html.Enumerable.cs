@@ -2,7 +2,7 @@ namespace Web4;
 
 public static class HtmlExtensions
 {
-    public static Html.IList<T> Select<T>(
+    public static Html.Enumerable<T> Select<T>(
         this IList<T> source, 
         Func<T, Html> selector)
             => new(source, selector);
@@ -15,12 +15,12 @@ public static class HtmlExtensions
 
 public ref partial struct Html
 {
-    public struct IList<T>(System.Collections.Generic.IList<T> source, Func<T, Html> selector)
+    public struct Enumerable<T>(IList<T> source, Func<T, Html> selector)
     {
         public readonly int Count => source.Count;
         public readonly Enumerator GetEnumerator() => new(source, selector);
 
-        public struct Enumerator(System.Collections.Generic.IList<T> list, Func<T, Html> selector)
+        public struct Enumerator(IList<T> list, Func<T, Html> selector)
         {
             int index = -1;
             public readonly Html Current => selector(list[index]);
