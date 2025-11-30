@@ -259,7 +259,7 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public override bool WriteMutableNode<T>(ref Html parent, Html.IList<T> partials, string? format = null, string? expression = null)
     {
         // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
         // also implement ICollection then it will iterate in order to find the count
