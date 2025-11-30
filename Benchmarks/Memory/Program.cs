@@ -378,7 +378,7 @@ public class Tests
     }
 
     record Point(double X, double Y);
-    private static List<Point> tiles;
+    private static Point[] tiles;
 
     [Benchmark]
     public void SpiralToDevNull()
@@ -685,7 +685,7 @@ public class Tests
             radius += step * 0.015;
         }
 
-        Tests.tiles = tiles;
+        Tests.tiles = tiles.ToArray();
 
 
 
