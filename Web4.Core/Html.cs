@@ -22,6 +22,7 @@ public ref partial struct Html
     {
         Length = 2 * formattedCount + 1;
         RelativeOrder = lineNumber;
+
         // For now, do not allow the creation of Html instances detached from the root-node.
         this.composer = BaseComposer.Current ?? throw new ArgumentNullException("BaseComposer.Current");
         this.composer.Grow(ref this, literalLength, formattedCount);
@@ -29,6 +30,21 @@ public ref partial struct Html
 
         if (literalLength == 0 && formattedCount == 0)
             AppendLiteral(string.Empty);
+    }
+
+    public Html(int literalLength, int formattedCount, Html html, out bool @continue, [CallerLineNumber] int lineNumber = 0)
+    {
+        Length = 2 * formattedCount + 1;
+        RelativeOrder = lineNumber;
+
+        this.composer = html.composer;
+        this.composer.Grow(ref this, literalLength, formattedCount);
+        this.composer.OnHtmlPartialBegins(ref this);
+
+        if (literalLength == 0 && formattedCount == 0)
+            AppendLiteral(string.Empty);
+        
+        @continue = true;
     }
 
     public Html(int literalLength, int formattedCount, BaseComposer composer)
@@ -179,7 +195,7 @@ public ref partial struct Html
     // MUTABLE ELEMENTS
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public bool AppendFormatted(Html html, int alignment = -1, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
+    public bool AppendFormatted([InterpolatedStringHandlerArgument("")] scoped Html html, int alignment = -1, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
@@ -187,7 +203,7 @@ public ref partial struct Html
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = composer.OnHtmlPartialEnds(ref this, ref html, format, expression);
+        var @continue = composer.OnHtmlPartialEnds(ref this, html, format, expression);
         Cursor++;
         return @continue;
     }

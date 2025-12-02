@@ -62,7 +62,7 @@ public abstract class BaseComposer
     }
 
     public virtual void OnHtmlPartialBegins(ref Html parent) { }
-    public virtual bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null)
+    public virtual bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
         // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
