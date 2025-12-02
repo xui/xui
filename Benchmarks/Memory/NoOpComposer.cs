@@ -19,6 +19,4 @@ public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => true;
     public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
     public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
-
-    public override bool OnHtmlPartialEnds(ref Html parent, ref Html partial, string? format = null, string? expression = null) => true;
 }
