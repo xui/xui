@@ -18,68 +18,49 @@ public ref partial struct Html
     public bool IsAttribute { get; set; }
     public int RelativeOrder { get; private set; }
 
-    public Html(int literalLength, int formattedCount, [CallerLineNumber] int lineNumber = 0)
-    {
-        Length = 2 * formattedCount + 1;
-        RelativeOrder = lineNumber;
-
-        // For now, do not allow the creation of Html instances detached from the root-node.
-        this.composer = BaseComposer.Current ?? throw new ArgumentNullException("BaseComposer.Current");
-        this.composer.Grow(ref this, literalLength, formattedCount);
-        this.composer.OnHtmlPartialBegins(ref this);
-
-        if (literalLength == 0 && formattedCount == 0)
-            AppendLiteral(string.Empty);
-    }
-
-    public Html(int literalLength, int formattedCount, Html html, out bool @continue, [CallerLineNumber] int lineNumber = 0)
-    {
-        Length = 2 * formattedCount + 1;
-        RelativeOrder = lineNumber;
-
-        this.composer = html.composer;
-        this.composer.Grow(ref this, literalLength, formattedCount);
-        this.composer.OnHtmlPartialBegins(ref this);
-
-        if (literalLength == 0 && formattedCount == 0)
-            AppendLiteral(string.Empty);
-        
-        @continue = true;
-    }
-
     public Html(int literalLength, int formattedCount, BaseComposer composer)
+        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
     {
-        Length = 2 * formattedCount + 1;
-        this.composer = BaseComposer.Current ??= composer.Init();
-        this.composer.Grow(ref this, literalLength, formattedCount);
-        this.composer.OnHtmlPartialBegins(ref this);
-
-        if (literalLength == 0 && formattedCount == 0)
-            AppendLiteral(string.Empty);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
+        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= new HtmlComposer(writer).Init())
     {
-        Length = 2 * formattedCount + 1;
-        this.composer = BaseComposer.Current ??= new HtmlComposer(writer).Init();
-        this.composer.Grow(ref this, literalLength, formattedCount);
-        this.composer.OnHtmlPartialBegins(ref this);
-
-        if (literalLength == 0 && formattedCount == 0)
-            AppendLiteral(string.Empty);
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
+        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
+    {
+        composer.Writer = writer;
+    }
+
+    // Inline Html: $"<div>{ $"" }</div>"
+    public Html(int literalLength, int formattedCount, Html html, out bool @continue, [CallerLineNumber] int lineNumber = 0)
+        : this(literalLength, formattedCount, lineNumber, html.composer)
+    {
+        @continue = true;
+    }
+
+    // Inline Html: $"<div>{ GetHtml() }</div>"
+    public Html(int literalLength, int formattedCount, [CallerLineNumber] int lineNumber = 0)
+        : this(literalLength, formattedCount, lineNumber, BaseComposer.Current ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."))
+    {
+    }
+
+    private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
     {
         Length = 2 * formattedCount + 1;
-        composer.Writer = writer;
-        this.composer = BaseComposer.Current ??= composer.Init();
+        RelativeOrder = relativeOrder;
+
+        this.composer = composer;
         this.composer.Grow(ref this, literalLength, formattedCount);
         this.composer.OnHtmlPartialBegins(ref this);
 
+        // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
             AppendLiteral(string.Empty);
     }
+
 
     // PARTIAL MARKUP
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
@@ -110,6 +91,8 @@ public ref partial struct Html
 
     private bool WriteMutableValue<T>(T value, string? format = null)
     {
+        // TODO: Faster without the switch?  Benchmark to confirm.
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
