@@ -377,6 +377,35 @@ public class Tests
             """);
     }
 
+
+
+
+    [Benchmark]
+    public void InlineAsInterpolated()
+    {
+        noOpWriter.Write(noOpComposer, $"""
+            <div>
+                {$"<p>Hello {name}<p>"}
+            </div>
+            """);
+    }
+
+    [Benchmark]
+    public void InlineAsMethod()
+    {
+        noOpWriter.Write(noOpComposer, $"""
+            <div>
+                {GetInline()}
+            </div>
+            """);
+    }
+
+    Html GetInline() => $"<p>Hello {name}</p>";
+
+
+
+
+
     record Point(double X, double Y);
     private static Point[] tiles;
 

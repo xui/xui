@@ -34,9 +34,9 @@ public ref partial struct Html
         composer.Writer = writer;
     }
 
-    // Inline Html: $"<div>{ $"" }</div>"
-    public Html(int literalLength, int formattedCount, Html html, out bool @continue, [CallerLineNumber] int lineNumber = 0)
-        : this(literalLength, formattedCount, lineNumber, html.composer)
+    // Inline Html: $"<div>{ $"<p>{...}</p>" }</div>"
+    public Html(int literalLength, int formattedCount, Html parentHtml, out bool @continue, [CallerLineNumber] int lineNumber = 0)
+        : this(literalLength, formattedCount, lineNumber, parentHtml.composer)
     {
         @continue = true;
     }
@@ -45,6 +45,14 @@ public ref partial struct Html
     public Html(int literalLength, int formattedCount, [CallerLineNumber] int lineNumber = 0)
         : this(literalLength, formattedCount, lineNumber, BaseComposer.Current ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."))
     {
+        // How very interesting!  This ctor performs faster than the one above.
+        // Evidently referencing the composer via ThreadStatic (BaseComposer.Current) 
+        // incurs less penalty than passing it through the constructor via the parent Html.
+        //
+        // | Method               | Mean      | Error     | StdDev    | Op/s          | Allocated |
+        // |--------------------- |----------:|----------:|----------:|--------------:|----------:|
+        // | InlineAsInterpolated | 10.178 ns | 0.9530 ns | 0.0522 ns |  98,246,787.3 |         - |
+        // | InlineAsMethod       |  9.887 ns | 1.1004 ns | 0.0603 ns | 101,146,868.6 |         - |
     }
 
     private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
