@@ -7,7 +7,7 @@ namespace Web4.Composers;
 
 public class NoOpWriter : IBufferWriter<byte>
 {
-    private static byte[] scratch = new byte[1024];
+    private static byte[] scratch = new byte[4096];
 
     public void Advance(int count)
     {
