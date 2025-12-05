@@ -12,13 +12,16 @@ public class FindKeyholeComposer : BaseComposer
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
+    private bool CompleteFormattedValue() => true;
+    private bool CompleteStringLiteral(int i) => true;
+
     public EventListener ToEventListenerAndClear(string key, Func<Html> html)
     {
         this.key = key;
         return ToEventListenerAndClear(this, $"{html()}");
     }
 
-    private EventListener ToEventListenerAndClear(BaseComposer composer, [InterpolatedStringHandlerArgument("composer")] Html html)
+    private EventListener ToEventListenerAndClear(IComposer composer, [InterpolatedStringHandlerArgument("composer")] Html html)
     {
         var result = new EventListener()
         {
@@ -76,7 +79,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(this.key))
-            return base.CompleteFormattedValue();
+            return CompleteFormattedValue();
 
         switch (listener)
         {
@@ -159,7 +162,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
 
         keyGenerator.MoveNextKey();
-        return base.CompleteFormattedValue();
+        return CompleteFormattedValue();
     }
 }
 
@@ -170,7 +173,7 @@ public static class FindKeyholeComposerExtension
 
     public static EventListener FindEventListener(this Func<Html> html, string key)
     {
-        current ??= new FindKeyholeComposer();
+        current ??= new FindKeyholeComposer(); // TODO: Composer as a class
         return current.ToEventListenerAndClear(key, html);
     }
 }

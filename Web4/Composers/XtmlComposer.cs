@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
+public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : BaseComposer, IStreamingComposer, IDisposable
 {
+    public IBufferWriter<byte> Writer { get; set; } = writer;
+
     private StableKeyTreeWalker keyGenerator = new();
 
     private enum AttributeStatus { None, Pending, InProgress }
@@ -13,11 +15,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
 
-    protected override void Clear()
-    {
-        attributeStatus = AttributeStatus.None;
-        base.Clear();
-    }
+    // protected override void Clear()
+    // {
+    //     // attributeStatus = AttributeStatus.None;
+    //     // base.Clear();
+    // }
+
+    private bool CompleteFormattedValue() => true;
+    private bool CompleteStringLiteral(int i) => true;
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
@@ -463,5 +468,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 """, Writer);
             return bodyStart;
         }
+    }
+
+    public new void Dispose()
+    {
+        attributeStatus = AttributeStatus.None;
+        BaseComposer.Current = null;
     }
 }

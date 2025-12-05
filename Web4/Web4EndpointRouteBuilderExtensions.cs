@@ -55,7 +55,7 @@ public static class Web4EndpointRouteBuilderExtensions
             }
 
             var pipeWriter = response.BodyWriter;
-            var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
+            var composer = new HtmlComposer(pipeWriter); // TODO: Composer as a class
             await pipeWriter.WriteAsync(composer, $"{requestDelegate(http)}");
 
             HotSpot.Track(pattern, composer);
@@ -77,12 +77,12 @@ public static class Web4EndpointRouteBuilderExtensions
         var group = app.MapGroup(pattern);
         var windowBuilder = new WindowBuilder(group, html);
 
-        group.Map("/", async http =>
-        {
-            var pipeWriter = http.Response.BodyWriter;
-            var composer = new XtmlComposer(pipeWriter, windowBuilder); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, windowBuilder.Html, http);
-        });
+        // group.Map("/", async http =>
+        // {
+        //     var pipeWriter = http.Response.BodyWriter;
+        //     using var composer = new XtmlComposer(pipeWriter, windowBuilder); // TODO: Composer as a class
+        //     await pipeWriter.WriteAsync(composer, windowBuilder.Html, http);
+        // });
 
         group.Map("/web4", async http =>
         {

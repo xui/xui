@@ -27,11 +27,12 @@ public static class WriterExtensions
         return writer.FlushAsync(cancel);
     }
 
-    public static ValueTask<FlushResult> WriteAsync(
+    public static ValueTask<FlushResult> WriteAsync<T>(
         this PipeWriter writer,
-        StreamingComposer composer,
+        T composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
         CancellationToken cancel = default)
+            where T : struct, IStreamingComposer
     {
         // When instantiating an Html object, the compiler generates 
         // lowered code (i.e. AppendLiteral and AppendFormatted) which
@@ -40,22 +41,24 @@ public static class WriterExtensions
         return writer.FlushAsync(cancel);
     }
 
-    public static ValueTask<FlushResult> WriteAsync(
+    public static ValueTask<FlushResult> WriteAsync<T>(
         this PipeWriter writer,
-        StreamingComposer composer,
+        T composer,
         Func<Html> html,
         HttpContext http,
         bool includeServerTiming = false,
         CancellationToken cancel = default)
+            where T : struct, IStreamingComposer
             => includeServerTiming
                 ? writer.WriteWithServerTimingAsync(composer, html, http, cancel)
                 : writer.WriteAsync(composer, $"{html()}", cancel);
 
-    public static ValueTask<FlushResult> WriteAsync(
+    public static ValueTask<FlushResult> WriteAsync<T>(
         this PipeWriter writer,
-        StreamingComposer composer,
+        T composer,
         Func<Html> html,
         HttpContext http)
+            where T : struct, IStreamingComposer
     {
         // TODO: Move to config.  Server-timing in RELEASE mode should be possible.
 #if DEBUG
@@ -65,12 +68,13 @@ public static class WriterExtensions
 #endif
     }
 
-    public static ValueTask<FlushResult> WriteWithServerTimingAsync(
+    public static ValueTask<FlushResult> WriteWithServerTimingAsync<T>(
         this PipeWriter writer,
-        StreamingComposer composer,
+        T composer,
         Func<Html> html,
         HttpContext http,
         CancellationToken cancel = default)
+            where T : struct, IStreamingComposer
     {
         long gc1 = GC.GetAllocatedBytesForCurrentThread();
         long stopwatch = Stopwatch.GetTimestamp();
@@ -88,9 +92,10 @@ public static class WriterExtensions
         return writer.FlushAsync(cancel);
     }
 
-    public static void Compose(
-        this BaseComposer composer,
+    public static void Compose<T>(
+        this T composer,
         [InterpolatedStringHandlerArgument("composer")] Html html)
+            where T : struct, IComposer
     {
         // TODO: This can be moved to the BaseComposer.cs file, use empty string as the arg.
         // This strange gymnastics is required because InterpolatedStringHandlerArgument

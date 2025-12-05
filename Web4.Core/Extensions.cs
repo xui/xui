@@ -14,10 +14,11 @@ public static class Extensions
     {
     }
 
-    public static void Write(
+    public static void Write<T>(
         this IBufferWriter<byte> writer,
-        StreamingComposer composer,
+        T composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
+            where T : struct, IStreamingComposer
     {
     }
 

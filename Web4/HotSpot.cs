@@ -13,14 +13,14 @@ public static class HotSpot
         public int FormattedCount { get; set; } = 0;
     }
 
-    public static void Track(string pattern, BaseComposer composer)
+    public static void Track(string pattern, IComposer composer)
     {
         if (!stats.TryGetValue(pattern, out var stat))
         {
             stat = new Stats
             {
-                LiteralLength = composer.LiteralLength,
-                FormattedCount = composer.FormattedCount,
+                // LiteralLength = composer.LiteralLength,
+                // FormattedCount = composer.FormattedCount,
             };
             stats[pattern] = stat;
         }

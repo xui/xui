@@ -114,43 +114,43 @@ public class Tests
             pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
-    [Benchmark]
-    public async Task XtmlComposer()
-    {
-        pipe.Writer.Write(xtmlComposer, $"""
-            <html>
-                <body>
-                    Hello {name}
-                    <button>
-                        Clicks: {c}
-                    </button>
-                </body>
-            </html>
-            """);
+    // [Benchmark]
+    // public async Task XtmlComposer()
+    // {
+    //     pipe.Writer.Write(xtmlComposer, $"""
+    //         <html>
+    //             <body>
+    //                 Hello {name}
+    //                 <button>
+    //                     Clicks: {c}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
 
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
-    }
+    //     await pipe.Writer.FlushAsync();
+    //     if (pipe.Reader.TryRead(out ReadResult result))
+    //         pipe.Reader.AdvanceTo(result.Buffer.End);
+    // }
 
-    [Benchmark]
-    public async Task XtmlComposerWithState()
-    {
-        pipe.Writer.Write(xtmlComposer, $"""
-            <html>
-                <body>
-                    Hello {name}
-                    <button>
-                        Clicks: {cState}
-                    </button>
-                </body>
-            </html>
-            """);
+    // [Benchmark]
+    // public async Task XtmlComposerWithState()
+    // {
+    //     pipe.Writer.Write(xtmlComposer, $"""
+    //         <html>
+    //             <body>
+    //                 Hello {name}
+    //                 <button>
+    //                     Clicks: {cState}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
 
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
-    }
+    //     await pipe.Writer.FlushAsync();
+    //     if (pipe.Reader.TryRead(out ReadResult result))
+    //         pipe.Reader.AdvanceTo(result.Buffer.End);
+    // }
 
     int i = 1;
     long l = 1;
@@ -167,215 +167,215 @@ public class Tests
     Uri uri = new Uri("https://web4.dev");
 
 
-    [Benchmark]
-    public void SnapshotComposerInt()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {i}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerInt()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {i}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerLong()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {l}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerLong()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {l}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerFloat()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {f}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerFloat()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {f}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerDouble()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {d}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerDouble()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {d}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerDecimal()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {m}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerDecimal()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {m}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerDateTime()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {dt}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerDateTime()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {dt}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerDateOnly()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {d0}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerDateOnly()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {d0}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerTimeSpan()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {ts}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerTimeSpan()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {ts}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerTimeOnly()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {t0}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerTimeOnly()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {t0}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerBool()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {b}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerBool()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {b}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerColor()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {color}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerColor()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {color}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerString()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {str}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerString()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {str}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerUri()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {uri}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerUri()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {uri}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerFormatString()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {c:c}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerFormatString()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {c:c}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
-    [Benchmark]
-    public void SnapshotComposerWithState()
-    {
-        snapshotComposer.Compose($"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {cState}
-                    </button>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SnapshotComposerWithState()
+    // {
+    //     snapshotComposer.Compose($"""
+    //         <html>
+    //             <body>
+    //                 <button>
+    //                     Clicks: {cState}
+    //                 </button>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
 
 
@@ -412,6 +412,7 @@ public class Tests
     [Benchmark]
     public void SpiralToDevNull()
     {
+        NoOpComposer noOpComposer = new NoOpComposer(noOpWriter);
         noOpWriter.Write(noOpComposer, $$"""
             <!DOCTYPE html>
             <html>
@@ -491,46 +492,46 @@ public class Tests
             """);
     }
 
-    [Benchmark]
-    public void SpiralToUtf8Xtml()
-    {
-        noOpWriter.Write(xtmlComposer, $$"""
-            <!DOCTYPE html>
-            <html>
-                <head>
-                <meta charset="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                body {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    background-color: #f0f0f0;
-                    margin: 0;
-                }
-                #wrapper {
-                    width: 960px;
-                    height: 720px;
-                    position: relative;
-                    background-color: white;
-                }
-                .tile {
-                    position: absolute;
-                    width: 10px;
-                    height: 10px;
-                    background-color: #333;
-                }
-                </style>
-                </head>
-                <body>
-                <div id="root">
-                    {{ tiles.Select(t => Tile(t.X, t.Y)) }}
-                </div>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void SpiralToUtf8Xtml()
+    // {
+    //     noOpWriter.Write(xtmlComposer, $$"""
+    //         <!DOCTYPE html>
+    //         <html>
+    //             <head>
+    //             <meta charset="utf-8" />
+    //             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    //             <style>
+    //             body {
+    //                 display: flex;
+    //                 justify-content: center;
+    //                 align-items: center;
+    //                 height: 100vh;
+    //                 background-color: #f0f0f0;
+    //                 margin: 0;
+    //             }
+    //             #wrapper {
+    //                 width: 960px;
+    //                 height: 720px;
+    //                 position: relative;
+    //                 background-color: white;
+    //             }
+    //             .tile {
+    //                 position: absolute;
+    //                 width: 10px;
+    //                 height: 10px;
+    //                 background-color: #333;
+    //             }
+    //             </style>
+    //             </head>
+    //             <body>
+    //             <div id="root">
+    //                 {{ tiles.Select(t => Tile(t.X, t.Y)) }}
+    //             </div>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
     [Benchmark]
     public void SpiralSearch()
@@ -627,24 +628,24 @@ public class Tests
             """);
     }
 
-    [Benchmark]
-    public void GuidTableToUtf8Xtml()
-    {
-        noOpWriter.Write(xtmlComposer, $"""
-            <!doctype html>
-            <html lang="en">
-                <head>
-                    <meta charset="utf-8" />
-                    <link rel="icon" href="{web4Assets}/favicon.png" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    {web4Head}
-                </head>
-                <body data-sveltekit-preload-data="hover">
-                    <div style="display: contents">{GuidTableBody()}</div>
-                </body>
-            </html>
-            """);
-    }
+    // [Benchmark]
+    // public void GuidTableToUtf8Xtml()
+    // {
+    //     noOpWriter.Write(xtmlComposer, $"""
+    //         <!doctype html>
+    //         <html lang="en">
+    //             <head>
+    //                 <meta charset="utf-8" />
+    //                 <link rel="icon" href="{web4Assets}/favicon.png" />
+    //                 <meta name="viewport" content="width=device-width, initial-scale=1" />
+    //                 {web4Head}
+    //             </head>
+    //             <body data-sveltekit-preload-data="hover">
+    //                 <div style="display: contents">{GuidTableBody()}</div>
+    //             </body>
+    //         </html>
+    //         """);
+    // }
 
     [Benchmark]
     public void GuidTableSearch()

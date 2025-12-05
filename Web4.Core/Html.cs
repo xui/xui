@@ -10,7 +10,7 @@ namespace Web4;
 [StructLayout(LayoutKind.Auto)]
 public ref partial struct Html
 {
-    readonly BaseComposer composer;
+    IComposer composer;
     public string Key { get; set; }
     public int Index { get; set; }
     public int Cursor { get; private set; }
@@ -18,17 +18,17 @@ public ref partial struct Html
     public bool IsAttribute { get; set; }
     public int RelativeOrder { get; private set; }
 
-    public Html(int literalLength, int formattedCount, BaseComposer composer)
+    public Html(int literalLength, int formattedCount, IComposer composer)
         : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
     {
     }
 
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
-        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= new HtmlComposer(writer).Init())
+        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= new HtmlComposer(writer).Init()) // TODO: Composer as a class
     {
     }
 
-    public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
+    public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, IStreamingComposer composer)
         : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
     {
         composer.Writer = writer;
@@ -55,7 +55,7 @@ public ref partial struct Html
         // | InlineAsMethod       |  9.887 ns | 1.1004 ns | 0.0603 ns | 101,146,868.6 |         - |
     }
 
-    private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
+    private Html(int literalLength, int formattedCount, int relativeOrder, IComposer composer)
     {
         Length = 2 * formattedCount + 1;
         RelativeOrder = relativeOrder;
@@ -75,6 +75,8 @@ public ref partial struct Html
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
     {
+        ref var composer = ref this.composer;
+
         var @continue = composer.WriteImmutableMarkup(ref this, literal);
         Cursor++;
         return @continue;
@@ -99,6 +101,8 @@ public ref partial struct Html
 
     private bool WriteMutableValue<T>(T value, string? format = null)
     {
+        ref var composer = ref this.composer;
+
         // TODO: Faster without the switch?  Benchmark to confirm.
 
         if (IsEven(Cursor))
@@ -120,6 +124,8 @@ public ref partial struct Html
     private bool WriteMutableValueUtf8<T>(T value, string? format = null)
          where T : struct, IUtf8SpanFormattable
     {
+        ref var composer = ref this.composer;
+        
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -137,6 +143,8 @@ public ref partial struct Html
     public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -150,6 +158,8 @@ public ref partial struct Html
     public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -162,6 +172,8 @@ public ref partial struct Html
     public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -174,6 +186,8 @@ public ref partial struct Html
     public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -188,6 +202,8 @@ public ref partial struct Html
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public bool AppendFormatted([InterpolatedStringHandlerArgument("")] scoped Html html, int alignment = -1, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
         
@@ -202,6 +218,8 @@ public ref partial struct Html
     // EX: { names.Select(n => new MyComponent(name: n)) }
     public bool AppendFormatted<T>(Html.Enumerable<T> htmls, string? format = null, [CallerArgumentExpression(nameof(htmls))] string? expression = null)
     {
+        ref var composer = ref this.composer;
+        
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 

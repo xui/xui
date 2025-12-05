@@ -12,6 +12,10 @@ public class SnapshotComposer : BaseComposer
     private bool isWritingAttribute = false;
     public Keyhole[] Snapshot { get; private set; } = [];
 
+
+    private bool CompleteFormattedValue() => true;
+    private bool CompleteStringLiteral(int i) => true;
+
     public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
     {
         Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
@@ -313,7 +317,7 @@ public static class SnapshotComposerExtension
 
     public static Keyhole[] CreateSnapshot(this Func<Html> html)
     {
-        current ??= new SnapshotComposer();
+        current ??= new SnapshotComposer(); // TODO: Composer as a class
         return current.CreateSnapshotAndClear(html);
     }
 
