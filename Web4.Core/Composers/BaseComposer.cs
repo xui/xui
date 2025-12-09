@@ -15,8 +15,8 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    protected bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
-    protected bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
+    public bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
+    public bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 
     public BaseComposer Init()
     {
@@ -40,13 +40,13 @@ public abstract class BaseComposer
         formattedValuesRemaining += formattedCount;
     }
 
-    protected bool CompleteStringLiteral(int literalLength)
+    public bool CompleteStringLiteral(int literalLength)
     {
         literalLengthRemaining -= literalLength;
         return MoveNext();
     }
 
-    protected bool CompleteFormattedValue()
+    public bool CompleteFormattedValue()
     {
         formattedValuesRemaining -= 1;
         return MoveNext();
@@ -61,7 +61,7 @@ public abstract class BaseComposer
         return true;
     }
 
-    protected virtual void Clear()
+    public virtual void Clear()
     {
         current = null;
     }
