@@ -52,12 +52,10 @@ public abstract class BaseComposer
         return MoveNext();
     }
 
-    protected bool MoveNext()
+    private bool MoveNext()
     {
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
-        {
             Clear();
-        }
         return true;
     }
 
