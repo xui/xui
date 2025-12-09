@@ -61,7 +61,7 @@ public ref partial struct Html
         RelativeOrder = relativeOrder;
 
         this.composer = composer;
-        this.composer.Grow(ref this, literalLength, formattedCount);
+        this.composer.Grow(literalLength, formattedCount);
         this.composer.OnHtmlPartialBegins(ref this);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.

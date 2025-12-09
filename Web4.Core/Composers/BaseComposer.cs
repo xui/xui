@@ -26,11 +26,11 @@ public abstract class BaseComposer
         return this;
     }
 
-    public void Grow(ref Html html, int literalLength, int formattedCount)
     public void Compose([InterpolatedStringHandlerArgument("")] Html html)
     {
     }
 
+    public void Grow(int literalLength, int formattedCount)
     {
         LiteralLength += literalLength;
         FormattedCount += formattedCount;
