@@ -87,14 +87,4 @@ public static class WriterExtensions
 
         return writer.FlushAsync(cancel);
     }
-
-    public static void Compose(
-        this BaseComposer composer,
-        [InterpolatedStringHandlerArgument("composer")] Html html)
-    {
-        // TODO: This can be moved to the BaseComposer.cs file, use empty string as the arg.
-        // This strange gymnastics is required because InterpolatedStringHandlerArgument
-        // must have at least one arg before it in order for the compiler to pick it up right.  
-        // Extension methods help create the illusion of a simple composer.Compose($"...").
-    }
 }
