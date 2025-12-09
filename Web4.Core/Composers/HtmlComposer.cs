@@ -79,11 +79,4 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         Encoding.UTF8.GetBytes("\"\"", Writer);
         return CompleteFormattedValue();
     }
-
-    private bool HandleNotSupported(ReadOnlySpan<char> attributeName)
-    {
-        Encoding.UTF8.GetBytes(attributeName, Writer);
-        Encoding.UTF8.GetBytes("=\"\"", Writer);
-        return CompleteFormattedValue();
-    }
 }
