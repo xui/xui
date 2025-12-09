@@ -405,7 +405,7 @@ public class Tests
 
 
 
-    readonly static BaseComposer baseComposer = new();
+    // readonly static BaseComposer baseComposer = new();
     record Point(double X, double Y);
     private static Point[] tiles;
 
@@ -413,8 +413,8 @@ public class Tests
     public void SpiralToDevNull()
     {
         // noOpWriter.Write(noOpComposer, $$"""
-        // noOpComposer.Compose($$"""
-        baseComposer.Compose($$"""
+        // baseComposer.Compose($$"""
+        noOpComposer.Compose($$"""
             <!DOCTYPE html>
             <html>
                 <head>
