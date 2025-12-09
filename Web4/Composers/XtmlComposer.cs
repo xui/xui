@@ -13,7 +13,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
 
-    protected override void Clear()
+    public override void Clear()
     {
         attributeStatus = AttributeStatus.None;
         base.Clear();
