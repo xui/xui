@@ -13,7 +13,7 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 public class Tests
 {
     readonly Pipe pipe = new();
-    readonly NoOpComposer noOpComposer = new(null);
+    readonly NoOpComposer noOpComposer = new();
     readonly NoOpWriter noOpWriter = new();
     readonly HtmlComposer htmlComposer = new(null);
     readonly XtmlComposer xtmlComposer = new(null, new(null, null));
@@ -41,7 +41,7 @@ public class Tests
     [Benchmark]
     public async Task NoOpComposer()
     {
-        pipe.Writer.Write(noOpComposer, $"""
+        noOpComposer.Compose($"""
             <html>
                 <body>
                     Hello {name}
@@ -60,7 +60,7 @@ public class Tests
     [Benchmark]
     public async Task NoOpComposerWithState()
     {
-        pipe.Writer.Write(noOpComposer, $"""
+        noOpComposer.Compose($"""
             <html>
                 <body>
                     Hello {name}
@@ -383,7 +383,7 @@ public class Tests
     [Benchmark]
     public void InlineAsInterpolated()
     {
-        noOpWriter.Write(noOpComposer, $"""
+        noOpComposer.Compose($"""
             <div>
                 {$"<p>Hello {name}<p>"}
             </div>
@@ -393,7 +393,7 @@ public class Tests
     [Benchmark]
     public void InlineAsMethod()
     {
-        noOpWriter.Write(noOpComposer, $"""
+        noOpComposer.Compose($"""
             <div>
                 {GetInline()}
             </div>
@@ -405,14 +405,16 @@ public class Tests
 
 
 
-
+    readonly static BaseComposer baseComposer = new();
     record Point(double X, double Y);
     private static Point[] tiles;
 
     [Benchmark]
     public void SpiralToDevNull()
     {
-        noOpWriter.Write(noOpComposer, $$"""
+        // noOpWriter.Write(noOpComposer, $$"""
+        // noOpComposer.Compose($$"""
+        baseComposer.Compose($$"""
             <!DOCTYPE html>
             <html>
                 <head>
@@ -449,7 +451,7 @@ public class Tests
             </html>
             """);
     }
-    
+
     [Benchmark]
     public void SpiralToUtf8Buffer()
     {
@@ -592,7 +594,7 @@ public class Tests
     [Benchmark]
     public void GuidTableToDevNull()
     {
-        noOpWriter.Write(noOpComposer, $"""
+        noOpComposer.Compose($"""
             <!doctype html>
             <html lang="en">
                 <head>

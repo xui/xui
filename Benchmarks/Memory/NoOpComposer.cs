@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class NoOpComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
+public class NoOpComposer() : BaseComposer()
 {
     public override bool WriteImmutableMarkup(ref Html parent, string literal) => true;
 
