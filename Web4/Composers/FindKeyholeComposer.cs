@@ -76,7 +76,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(this.key))
-            return base.CompleteFormattedValue();
+            return CompleteFormattedValue();
 
         switch (listener)
         {
@@ -159,7 +159,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
 
         keyGenerator.MoveNextKey();
-        return base.CompleteFormattedValue();
+        return CompleteFormattedValue();
     }
 }
 
