@@ -33,7 +33,7 @@ public static class Web4EndpointRouteBuilderExtensions
         [StringSyntax("Route")] string pattern,
         Func<Html> requestDelegate)
     {
-        return MapGet(endpoints, pattern, context => requestDelegate());
+        return MapGet(endpoints, pattern, httpContext => requestDelegate());
     }
 
     public static IEndpointConventionBuilder MapGet(
@@ -41,9 +41,9 @@ public static class Web4EndpointRouteBuilderExtensions
         [StringSyntax("Route")] string pattern,
         Func<HttpContext, Html> requestDelegate)
     {
-        return endpoints.Map(pattern, async http =>
+        return endpoints.Map(pattern, async httpContext =>
         {
-            var response = http.Response;
+            var response = httpContext.Response;
             if (!response.HasStarted)
             {
                 response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
@@ -56,7 +56,7 @@ public static class Web4EndpointRouteBuilderExtensions
 
             var pipeWriter = response.BodyWriter;
             var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, $"{requestDelegate(http)}");
+            await pipeWriter.WriteAsync(composer, $"{requestDelegate(httpContext)}");
 
             HotSpot.Track(pattern, composer);
         });
