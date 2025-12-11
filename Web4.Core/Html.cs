@@ -23,11 +23,6 @@ public ref partial struct Html
     {
     }
 
-    public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer)
-        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= new HtmlComposer(writer).Init())
-    {
-    }
-
     public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
         : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
     {
