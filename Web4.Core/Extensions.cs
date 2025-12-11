@@ -10,12 +10,6 @@ public static class Extensions
 {
     public static void Write(
         this IBufferWriter<byte> writer,
-        [InterpolatedStringHandlerArgument("writer")] ref Html html)
-    {
-    }
-
-    public static void Write(
-        this IBufferWriter<byte> writer,
         StreamingComposer composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
     {
