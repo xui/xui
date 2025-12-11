@@ -1,5 +1,5 @@
 namespace Web4.Composers;
 
-public class NoOpComposer : BaseComposer
+public sealed class NoOpComposer : BaseComposer
 {
 }
