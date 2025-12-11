@@ -1,6 +1,6 @@
 namespace Web4;
 
-public static class HtmlExtensions
+public static partial class HtmlExtensions
 {
     public static Html.Enumerable<T> Select<T>(
         this IList<T> source, 
