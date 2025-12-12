@@ -15,7 +15,7 @@ public ref partial struct Html
     public int Index { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; } // TODO: Rename to `Segments` or `KeyCount`?
-    public bool IsAttribute { get; set; }
+    public bool IsAttribute { get; set; } // TODO: Rename this to `SuppressSentinels` or something closer to its purpose?
     public int RelativeOrder { get; private set; }
 
     public Html(int literalLength, int formattedCount, BaseComposer composer)
