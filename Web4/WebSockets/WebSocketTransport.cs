@@ -47,7 +47,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
             KeepAliveTimeout = TimeSpan.FromSeconds(20)
         };
         using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
-        var cancelProcessRegistration = cancelProcess.Register(async () => await Disconnect(webSocket));
+        using var reg = cancelProcess.Register(async () => await Disconnect(webSocket));
 
         transports[windowID] = transport;
 
@@ -60,7 +60,6 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
         logger.LogInformation("👋 Goodbye, {WindowID}!", windowID);
 
         transports.Remove(windowID, out var _);
-        cancelProcessRegistration.Unregister();
     }
 
     private static Channel<int> CreateDiffChannel() => Channel.CreateBounded<int>(new BoundedChannelOptions(1)
