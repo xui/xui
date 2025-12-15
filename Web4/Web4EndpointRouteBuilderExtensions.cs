@@ -43,22 +43,12 @@ public static class Web4EndpointRouteBuilderExtensions
     {
         return endpoints.Map(pattern, async httpContext =>
         {
-            var response = httpContext.Response;
-            if (!response.HasStarted)
-            {
-                response.ContentLength = HotSpot.GetContentLengthIfConst(pattern);
-                var startAsyncTask = response.StartAsync();
-                if (!startAsyncTask.IsCompletedSuccessfully)
-                {
-                    await startAsyncTask;
-                }
-            }
+            // TODO: Optimization: set ContentLength if Html's formattedCount is zero.
 
             var pipeWriter = response.BodyWriter;
             var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
             await pipeWriter.WriteAsync(composer, $"{requestDelegate(httpContext)}");
 
-            HotSpot.Track(pattern, composer);
         });
     }
 
