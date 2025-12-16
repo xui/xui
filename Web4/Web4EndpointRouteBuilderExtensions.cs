@@ -31,23 +31,23 @@ public static class Web4EndpointRouteBuilderExtensions
     public static IEndpointConventionBuilder MapGet(
         this IEndpointRouteBuilder endpoints,
         [StringSyntax("Route")] string pattern,
-        Func<Html> requestDelegate)
+        Func<Html> template)
     {
-        return MapGet(endpoints, pattern, httpContext => requestDelegate());
+        return MapGet(endpoints, pattern, httpContext => template());
     }
 
     public static IEndpointConventionBuilder MapGet(
         this IEndpointRouteBuilder endpoints,
         [StringSyntax("Route")] string pattern,
-        Func<HttpContext, Html> requestDelegate)
+        Func<HttpContext, Html> template)
     {
         return endpoints.Map(pattern, async httpContext =>
         {
             // TODO: Optimization: set ContentLength if Html's formattedCount is zero.
 
-            var pipeWriter = response.BodyWriter;
+            var pipeWriter = httpContext.Response.BodyWriter;
             var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, $"{requestDelegate(httpContext)}");
+            await pipeWriter.WriteAsync(composer, $"{template(httpContext)}");
 
         });
     }
@@ -61,40 +61,40 @@ public static class Web4EndpointRouteBuilderExtensions
     public static WindowBuilder MapWeb4(
         this WebApplication app,
         [StringSyntax("Route")] string pattern,
-        Func<Html> html)
+        Func<Html> template)
     {
         app.UseWebSockets();
         var group = app.MapGroup(pattern);
-        var windowBuilder = new WindowBuilder(group, html);
+        var window = new WindowBuilder(group, template);
 
-        group.Map("/", async http =>
+        group.Map("/", async httpContext =>
         {
-            var pipeWriter = http.Response.BodyWriter;
-            var composer = new XtmlComposer(pipeWriter, windowBuilder); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, windowBuilder.Html, http);
+            var pipeWriter = httpContext.Response.BodyWriter;
+            var composer = new XtmlComposer(pipeWriter, window); // TODO: Memory allocation
+            await pipeWriter.WriteAsync(composer, window.Template, httpContext);
         });
 
-        group.Map("/web4", async http =>
+        group.Map("/web4", async httpContext =>
         {
-            if (http.WebSockets.IsWebSocketRequest)
+            if (httpContext.WebSockets.IsWebSocketRequest)
             {
                 var logger = app.Services.GetRequiredService<ILogger<WebSocketTransport>>();
                 await WebSocketTransport.Bind(
-                    http,
-                    windowBuilder,
+                    httpContext,
+                    window,
                     logger,
                     app.Lifetime.ApplicationStopping
                 );
             }
         });
 
-        group.Map("/web4/alive", async http =>
+        group.Map("/web4/alive", async httpContext =>
         {
-            if (http.WebSockets.IsWebSocketRequest)
-                await http.WebSockets.AcceptWebSocketAsync();
+            if (httpContext.WebSockets.IsWebSocketRequest)
+                await httpContext.WebSockets.AcceptWebSocketAsync();
         });
 
 
-        return windowBuilder;
+        return window;
     }
 }

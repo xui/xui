@@ -28,14 +28,14 @@ public class WindowBuilder :
 {
     private readonly RouteGroupBuilder routeGroupBuilder;
 
-    public Func<Html> Html { get; init; }
+    public Func<Html> Template { get; init; }
     public DocumentBuilder Document { get; init; }
     public List<EventListener> Listeners { get; } = [];
 
-    public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> html)
+    public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> template)
     {
         this.routeGroupBuilder = routeGroupBuilder;
-        Html = html;
+        Template = template;
         Document = new(this);
     }
 
@@ -71,7 +71,7 @@ public class WindowBuilder :
             // Otherwise, it starts with "key" and is bound to some element burried somewhere in the HTML.
             // The only way to find it is to compose the HTML and compare every keyhole to the supplied key.
             _ => Keymaker.GetKeyIfCached(key) is string k
-                    ? Html.FindEventListener(k)
+                    ? Template.FindEventListener(k)
                     : default,
         };
     }
