@@ -3,10 +3,8 @@ using System.Drawing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Web4.Events;
 using Web4.EventListeners;
 using Web4.Composers;
-using System.IO.Pipelines;
 
 namespace Web4;
 
