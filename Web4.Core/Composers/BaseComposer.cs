@@ -18,7 +18,7 @@ public abstract class BaseComposer
     public bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
     public bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 
-    public BaseComposer Init()
+    public virtual BaseComposer Init()
     {
         literalLengthRemaining = 0;
         formattedValuesRemaining = 0;
