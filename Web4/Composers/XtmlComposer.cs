@@ -13,10 +13,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
 
-    public override void Clear()
+    public override void Reset()
     {
         attributeStatus = AttributeStatus.None;
-        base.Clear();
+        base.Reset();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)

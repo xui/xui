@@ -55,11 +55,11 @@ public abstract class BaseComposer
     private bool MoveNext()
     {
         if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
-            Clear();
+            Reset();
         return true;
     }
 
-    public virtual void Clear()
+    public virtual void Reset()
     {
         current = null;
     }
