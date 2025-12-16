@@ -12,10 +12,10 @@ public class FindKeyholeComposer : BaseComposer
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    public EventListener ToEventListenerAndClear(string key, Func<Html> html)
+    public EventListener ToEventListenerAndClear(string key, Func<Html> template)
     {
         this.key = key;
-        return ToEventListenerAndClear(this, $"{html()}");
+        return ToEventListenerAndClear(this, $"{template()}");
     }
 
     private EventListener ToEventListenerAndClear(BaseComposer composer, [InterpolatedStringHandlerArgument("composer")] Html html)
@@ -168,9 +168,9 @@ public static class FindKeyholeComposerExtension
     [ThreadStatic]
     static FindKeyholeComposer? current;
 
-    public static EventListener FindEventListener(this Func<Html> html, string key)
+    public static EventListener FindEventListener(this Func<Html> template, string key)
     {
         current ??= new FindKeyholeComposer();
-        return current.ToEventListenerAndClear(key, html);
+        return current.ToEventListenerAndClear(key, template);
     }
 }

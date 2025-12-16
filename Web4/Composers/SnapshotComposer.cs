@@ -12,10 +12,10 @@ public class SnapshotComposer : BaseComposer
     private bool isWritingAttribute = false;
     public Keyhole[] Snapshot { get; private set; } = [];
 
-    public Keyhole[] CreateSnapshotAndClear(Func<Html> html)
+    public Keyhole[] CreateSnapshotAndClear(Func<Html> template)
     {
         Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-        return CreateSnapshotAndClear($"{html()}");
+        return CreateSnapshotAndClear($"{template()}");
     }
 
     private Keyhole[] CreateSnapshotAndClear([InterpolatedStringHandlerArgument("")] Html html)
@@ -311,10 +311,10 @@ public static class SnapshotComposerExtension
     [ThreadStatic]
     static SnapshotComposer? current;
 
-    public static Keyhole[] CreateSnapshot(this Func<Html> html)
+    public static Keyhole[] CreateSnapshot(this Func<Html> template)
     {
         current ??= new SnapshotComposer();
-        return current.CreateSnapshotAndClear(html);
+        return current.CreateSnapshotAndClear(template);
     }
 
     public static void Return(this Keyhole[] buffer)

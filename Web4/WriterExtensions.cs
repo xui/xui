@@ -31,39 +31,39 @@ public static class WriterExtensions
     public static ValueTask<FlushResult> WriteAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        Func<Html> html,
+        Func<Html> template,
         HttpContext http,
         bool includeServerTiming = false,
         CancellationToken cancel = default)
             => includeServerTiming
-                ? writer.WriteWithServerTimingAsync(composer, html, http, cancel)
-                : writer.WriteAsync(composer, $"{html()}", cancel);
+                ? writer.WriteWithServerTimingAsync(composer, template, http, cancel)
+                : writer.WriteAsync(composer, $"{template()}", cancel);
 
     public static ValueTask<FlushResult> WriteAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        Func<Html> html,
+        Func<Html> template,
         HttpContext http)
     {
         // TODO: Move to config.  Server-timing in RELEASE mode should be possible.
 #if DEBUG
-        return writer.WriteWithServerTimingAsync(composer, html, http, http.RequestAborted);
+        return writer.WriteWithServerTimingAsync(composer, template, http, http.RequestAborted);
 #else
-        return writer.WriteAsync(composer, $"{html()}", http.RequestAborted);        
+        return writer.WriteAsync(composer, $"{template()}", http.RequestAborted);        
 #endif
     }
 
     public static ValueTask<FlushResult> WriteWithServerTimingAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        Func<Html> html,
+        Func<Html> template,
         HttpContext http,
         CancellationToken cancel = default)
     {
         long gc1 = GC.GetAllocatedBytesForCurrentThread();
         long stopwatch = Stopwatch.GetTimestamp();
 
-        writer.Write(composer, $"{html()}");
+        writer.Write(composer, $"{template()}");
 
         var elapsed = Stopwatch.GetElapsedTime(stopwatch);
         long gc2 = GC.GetAllocatedBytesForCurrentThread();

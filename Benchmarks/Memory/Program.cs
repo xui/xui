@@ -537,7 +537,7 @@ public class Tests
     [Benchmark]
     public void SpiralSearch()
     {
-        Func<Html> html = () => $$"""
+        Func<Html> template = () => $$"""
             <!DOCTYPE html>
             <html>
                 <head>
@@ -573,7 +573,7 @@ public class Tests
                 </body>
             </html>
             """;
-        html.FindEventListener("");
+        template.FindEventListener("");
     }
 
     static Html Tile(double x, double y) => $"""
@@ -651,7 +651,7 @@ public class Tests
     [Benchmark]
     public void GuidTableSearch()
     {
-        Func<Html> html = () => $"""
+        Func<Html> template = () => $"""
             <!doctype html>
             <html lang="en">
                 <head>
@@ -665,7 +665,7 @@ public class Tests
                 </body>
             </html>
             """;
-        html.FindEventListener("");
+        template.FindEventListener("");
     }
 
     static Html GuidTableBody() => $"""
