@@ -1,9 +1,8 @@
 using System.Drawing;
-using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class FindKeyholeComposer : BaseComposer
+public class FindKeyholeComposer : ResultComposer<EventListener>
 {
     private StableKeyTreeWalker keyGenerator = new();
     public string? Key { get; set; }
@@ -12,20 +11,13 @@ public class FindKeyholeComposer : BaseComposer
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    public new EventListener Compose([InterpolatedStringHandlerArgument("")] Html html)
+    public override EventListener Result => new()
     {
-        var listener = new EventListener()
-        {
-            Action = action,
-            ActionEvent = actionEvent,
-            Func = func,
-            FuncEvent = funcEvent,
-        };
-
-        html.Dispose();
-
-        return listener;
-    }
+        Action = action,
+        ActionEvent = actionEvent,
+        Func = func,
+        FuncEvent = funcEvent,
+    };
 
     public override void Reset()
     {

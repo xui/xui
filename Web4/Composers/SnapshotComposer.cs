@@ -4,18 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class SnapshotComposer : BaseComposer
+public class SnapshotComposer : ResultComposer<Keyhole[]>
 {
     private StableKeyTreeWalker keyGenerator = new();
     private bool isWritingAttribute = false;
     public Keyhole[] Snapshot { get; set; } = [];
-
-    public new Keyhole[] Compose([InterpolatedStringHandlerArgument("")] Html html)
-    {
-        var snapshot = Snapshot;
-        html.Dispose();
-        return snapshot;
-    }
+    public override Keyhole[] Result => Snapshot;
 
     public override void Reset()
     {
