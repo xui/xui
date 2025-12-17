@@ -382,18 +382,19 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
                 DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
             }
 
+            var pool = ArrayPool<Keyhole>.Shared;
             switch (SnapshotStrategy)
             {
                 case SnapshotStrategy.Recapture:
                     // Do not keep this snapshot buffer for later.
                     snapshot = null;
-                    oldBuffer.Return();
-                    newBuffer.Return();
+                    pool.Return(oldBuffer);
+                    pool.Return(newBuffer);
                     break;
                 case SnapshotStrategy.Retain:
                     // Keep this snapshot buffer around to use as the "before" next time.
                     snapshot = newBuffer;
-                    oldBuffer.Return();
+                    pool.Return(oldBuffer);
                     break;
             }
         }
