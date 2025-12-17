@@ -36,11 +36,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             switch (attributeStatus)
             {
                 case AttributeStatus.None:
-                    Writer.Inject($"<!--{key}-->");
+                    Writer.WriteRaw($"<!--{key}-->");
                     break;
                 case AttributeStatus.Pending:
                     HandleDeferredLiteral();
-                    Writer.Inject($"\"");
+                    Writer.WriteRaw($"\"");
                     attributeStatus = AttributeStatus.InProgress;
                     break;
             }
@@ -56,13 +56,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 if (partial.Key?.Length > 0)
                 {
-                    Writer.Inject($"""
+                    Writer.WriteRaw($"""
                         <!--/{partial.Key}-->
                         """);
 
                     if (format is not null)
                     {
-                        Writer.Inject($$"""
+                        Writer.WriteRaw($$"""
                             <style>
                                 ::view-transition-group(web4-fwd-{{partial.Key}}, web4-rev-{{partial.Key}}) { animation: none; }
                                 ::view-transition-new(web4-fwd-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
@@ -76,7 +76,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
 
             case AttributeStatus.InProgress:
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     " {partial.Key}
                     """);
                 attributeStatus = AttributeStatus.None;
@@ -145,22 +145,22 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.Inject($"<!--{key}-->");
+                Writer.WriteRaw($"<!--{key}-->");
 
                 value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
                 Writer.Advance(length);
 
-                Writer.Inject($"<!--/{key}-->");
+                Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.Inject($"\"");
+                Writer.WriteRaw($"\"");
 
                 value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
                 Writer.Advance(length);
 
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     " {key}
                     """);
                 // status jumps from .Pending to .None because the whole 
@@ -187,14 +187,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     <!--{key}-->{value}<!--/{key}-->
                     """);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     "{value}" {key}
                     """);
                 // status jumps from .Pending to .None because the whole 
@@ -219,7 +219,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 var b = value ? "true" : "false";
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     <!--{key}-->{b}<!--/{key}-->
                     """);
                 break;
@@ -228,13 +228,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 var attributeName = HandleDeferredLiteral(isBooleanAttribute: true);
                 if (value)
                 {
-                    Writer.Inject($"""
+                    Writer.WriteRaw($"""
                          {attributeName} {key}="{attributeName}"
                         """);
                 }
                 else
                 {
-                    Writer.Inject($"""
+                    Writer.WriteRaw($"""
                          {key}="{attributeName}"
                         """);
                 }
@@ -261,22 +261,22 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.Inject($"<!--{key}-->");
+                Writer.WriteRaw($"<!--{key}-->");
 
                 value.TryFormat(Writer.GetSpan(maxLength), out length, format);
                 Writer.Advance(length);
 
-                Writer.Inject($"<!--/{key}-->");
+                Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.Inject($"\"");
+                Writer.WriteRaw($"\"");
 
                 value.TryFormat(Writer.GetSpan(maxLength), out length, format);
                 Writer.Advance(length);
 
-                Writer.Inject($"""
+                Writer.WriteRaw($"""
                     " {key}
                     """);
                 // status jumps from .Pending to .None because the whole 
@@ -340,13 +340,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         var key = keyGenerator.GetNextKey();
         if (includeEventArg)
         {
-            Writer.Inject($"""
+            Writer.WriteRaw($"""
                 "keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}
                 """);
         }
         else
         {
-            Writer.Inject($"""
+            Writer.WriteRaw($"""
                 "keyholes.{key}.dispatchEvent(event.trim(''))" {key}
                 """);
         }
@@ -374,14 +374,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
-            Writer.Inject($"""
+            Writer.WriteRaw($"""
                 <!--/{keyGenerator.GetNextKey()}-->
                 """);
 
             i++;
         }
 
-        Writer.Inject($"""
+        Writer.WriteRaw($"""
             <!--{key} /-->
             """);
 
@@ -406,7 +406,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (literal.Length == 0)
             return 0;
 
-        Writer.Inject($"""
+        Writer.WriteRaw($"""
             <!doctype html>
             <html>
             <head>
@@ -438,7 +438,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             Encoding.UTF8.GetBytes("\n\n<script>\n", Writer);
 
             foreach (var listener in window.Listeners)
-                Writer.Inject($"  {listener.Html}\n");
+                Writer.WriteRaw($"  {listener.Html}\n");
 
             Encoding.UTF8.GetBytes("</script>\n\n", Writer);
         }

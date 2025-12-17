@@ -9,7 +9,7 @@ namespace Web4;
 
 public static class WriterExtensions
 {
-    public static void Inject(
+    public static void WriteRaw(
         this IBufferWriter<byte> writer,
         [InterpolatedStringHandlerArgument("writer")] ref RawText text)
     {
