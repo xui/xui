@@ -13,6 +13,7 @@ public static class Extensions
         StreamingComposer composer,
         [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
     {
+        html.Dispose();
     }
 
     public static int GetMaxPossibleLength(this Color color) => 9;

@@ -5,10 +5,6 @@ namespace Web4.Composers;
 
 public abstract class BaseComposer
 {
-    [ThreadStatic]
-    static BaseComposer? current;
-    public static BaseComposer? Current { get => current; set => current = value; }
-
     public int LiteralLength { get; private set; } = 0;
     public int FormattedCount { get; private set; } = 0;
 
@@ -29,6 +25,9 @@ public abstract class BaseComposer
 
     public void Compose([InterpolatedStringHandlerArgument("")] Html html)
     {
+        // ^ That's the root Html getting passed in above.
+        // By the time you've reached this line, the work is done.
+        html.Dispose();
     }
 
     public void Grow(int literalLength, int formattedCount)
@@ -43,25 +42,18 @@ public abstract class BaseComposer
     public bool CompleteStringLiteral(int literalLength)
     {
         literalLengthRemaining -= literalLength;
-        return MoveNext();
+        return true;
     }
 
     public bool CompleteFormattedValue()
     {
         formattedValuesRemaining -= 1;
-        return MoveNext();
-    }
-
-    private bool MoveNext()
-    {
-        if (literalLengthRemaining == 0 && formattedValuesRemaining == 0)
-            Reset();
         return true;
     }
 
     public virtual void Reset()
     {
-        current = null;
+        // Called from the root Html's Dispose()
     }
 
     public virtual void OnHtmlPartialBegins(ref Html parent) { }

@@ -6,23 +6,20 @@ namespace Web4.Composers;
 
 public class SnapshotComposer : BaseComposer
 {
-    // TODO: Don't forget to implement the high watermark logic.
-    private static int highWaterMark = 2048;
     private StableKeyTreeWalker keyGenerator = new();
     private bool isWritingAttribute = false;
-    public Keyhole[] Snapshot { get; private set; } = [];
+    public Keyhole[] Snapshot { get; set; } = [];
 
-    public Keyhole[] CreateSnapshotAndClear(Func<Html> template)
+    public new Keyhole[] Compose([InterpolatedStringHandlerArgument("")] Html html)
     {
-        Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-        return CreateSnapshotAndClear($"{template()}");
+        var snapshot = Snapshot;
+        html.Dispose();
+        return snapshot;
     }
 
-    private Keyhole[] CreateSnapshotAndClear([InterpolatedStringHandlerArgument("")] Html html)
+    public override void Reset()
     {
-        var result = Snapshot;
         Snapshot = [];
-        return result;
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -309,16 +306,16 @@ public class SnapshotComposer : BaseComposer
 public static class SnapshotComposerExtension
 {
     [ThreadStatic]
-    static SnapshotComposer? current;
+    private static SnapshotComposer? reusable;
+
+    // TODO: Don't forget to implement the high watermark logic.
+    private static int highWaterMark = 2048;
 
     public static Keyhole[] CreateSnapshot(this Func<Html> template)
     {
-        current ??= new SnapshotComposer();
-        return current.CreateSnapshotAndClear(template);
-    }
+        var composer = reusable ??= new SnapshotComposer();
+        composer.Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
 
-    public static void Return(this Keyhole[] buffer)
-    {
-        ArrayPool<Keyhole>.Shared.Return(buffer);
+        return composer.Compose($"{template()}");
     }
 }

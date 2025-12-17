@@ -6,21 +6,15 @@ namespace Web4.Composers;
 public class FindKeyholeComposer : BaseComposer
 {
     private StableKeyTreeWalker keyGenerator = new();
-    private string? key = null;
+    public string? Key { get; set; }
     private Action? action = null;
     private Action<Event>? actionEvent = null;
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    public EventListener ToEventListenerAndClear(string key, Func<Html> template)
+    public new EventListener Compose([InterpolatedStringHandlerArgument("")] Html html)
     {
-        this.key = key;
-        return ToEventListenerAndClear(this, $"{template()}");
-    }
-
-    private EventListener ToEventListenerAndClear(BaseComposer composer, [InterpolatedStringHandlerArgument("composer")] Html html)
-    {
-        var result = new EventListener()
+        var listener = new EventListener()
         {
             Action = action,
             ActionEvent = actionEvent,
@@ -28,14 +22,18 @@ public class FindKeyholeComposer : BaseComposer
             FuncEvent = funcEvent,
         };
 
-        key = null;
+        html.Dispose();
+
+        return listener;
+    }
+
+    public override void Reset()
+    {
+        Key = null;
         action = null;
         actionEvent = null;
         func = null;
         funcEvent = null;
-        Current = null;
-
-        return result;
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -58,7 +56,7 @@ public class FindKeyholeComposer : BaseComposer
 
     public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
-        if (this.key is null)
+        if (Key is null)
             return false;
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
@@ -72,10 +70,10 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
-        if (this.key is null)
+        if (Key is null)
             return false;
             
-        if (!keyGenerator.IsNextKey(this.key))
+        if (!keyGenerator.IsNextKey(Key))
             return CompleteFormattedValue();
 
         switch (listener)
@@ -119,7 +117,7 @@ public class FindKeyholeComposer : BaseComposer
                 break;
         }
 
-        key = null;
+        Key = null;
         // Found it so save some time.  Return false to
         // short circuit any following calls to html.Append*().
         return false;
@@ -133,7 +131,7 @@ public class FindKeyholeComposer : BaseComposer
 
     public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        if (this.key is null)
+        if (Key is null)
             return false;
             
         var itemCount = partials.Count;
@@ -155,7 +153,7 @@ public class FindKeyholeComposer : BaseComposer
 
     private bool MoveNextKeyAndComplete()
     {
-        if (this.key is null)
+        if (Key is null)
             return false;
 
         keyGenerator.MoveNextKey();
@@ -166,11 +164,12 @@ public class FindKeyholeComposer : BaseComposer
 public static class FindKeyholeComposerExtension
 {
     [ThreadStatic]
-    static FindKeyholeComposer? current;
+    private static FindKeyholeComposer? reusable;
 
     public static EventListener FindEventListener(this Func<Html> template, string key)
     {
-        current ??= new FindKeyholeComposer();
-        return current.ToEventListenerAndClear(key, template);
+        var composer = reusable ??= new FindKeyholeComposer();
+        composer.Key = key;
+        return composer.Compose($"{template()}");
     }
 }

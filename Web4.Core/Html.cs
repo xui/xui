@@ -8,9 +8,12 @@ namespace Web4;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
-public ref partial struct Html
+public ref partial struct Html : IDisposable
 {
-    readonly BaseComposer composer;
+    [ThreadStatic]
+    private static BaseComposer? scopedComposer;
+    private readonly BaseComposer composer;
+
     public string Key { get; set; }
     public int Index { get; set; }
     public int Cursor { get; private set; }
@@ -18,20 +21,41 @@ public ref partial struct Html
     public bool IsAttribute { get; set; } // TODO: Rename to `SuppressSentinels` or something closer to its purpose?
     public int RelativeOrder { get; private set; }
 
+    /// <summary>
+    /// --- ROOT Html ---
+    /// Example:  composer.Compose($"...")
+    /// This constructor is not intended to be called directly.  
+    /// It's called by compiler-lowered code from methods that use [InterpolatedStringHandlerArgument].
+    /// This constructor is for creating the root Html.
+    /// </summary>
     public Html(int literalLength, int formattedCount, BaseComposer composer)
-        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
+        : this(literalLength, formattedCount, -1, composer.Init())
+    {
+        scopedComposer = composer;
+    }
+
+    /// <summary>
+    /// --- REUSABLE Html (component) ---
+    /// Example:  $"...{ MyCustomHtml(c) }..."
+    /// This constructor is not intended to be called directly.  
+    /// It's called by compiler-lowered code from methods that use [InterpolatedStringHandlerArgument].
+    /// This constructor is for reusable Html (think components).  
+    /// It's relies on ThreadStatic to find its composer (which was established by the root Html).
+    /// </summary>
+    public Html(int literalLength, int formattedCount, [CallerLineNumber] int relativeOrder = 0)
+        : this(literalLength, formattedCount, relativeOrder, scopedComposer ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."))
     {
     }
 
-    public Html(int literalLength, int formattedCount, IBufferWriter<byte> writer, StreamingComposer composer)
-        : this(literalLength, formattedCount, -1, BaseComposer.Current ??= composer.Init())
-    {
-        composer.Writer = writer;
-    }
-
-    // Inline Html: $"<div>{ $"<p>{...}</p>" }</div>"
-    public Html(int literalLength, int formattedCount, Html parentHtml, out bool @continue, [CallerLineNumber] int lineNumber = 0)
-        : this(literalLength, formattedCount, lineNumber, parentHtml.composer)
+    /// <summary>
+    /// --- INLINE Html ---
+    /// Example:  $"...{$"...{c}..."}..."
+    /// This constructor is not intended to be called directly.  
+    /// It's called by compiler-lowered code from methods that use [InterpolatedStringHandlerArgument].
+    /// This constructor is for inline Html.  It gets its composer from the parent Html.
+    /// </summary>
+    public Html(int literalLength, int formattedCount, Html parentHtml, out bool @continue, [CallerLineNumber] int relativeOrder = 0)
+        : this(literalLength, formattedCount, relativeOrder, parentHtml.composer)
     {
         @continue = true;
     }
@@ -208,4 +232,10 @@ public ref partial struct Html
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsEven(int number) => number % 2 == 0;
+
+    public readonly void Dispose()
+    {
+        scopedComposer?.Reset();
+        scopedComposer = null;
+    }
 }
