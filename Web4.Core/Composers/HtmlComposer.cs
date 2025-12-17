@@ -59,7 +59,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
-        var destination = Writer.GetSpan();
+        var destination = Writer.GetSpan(128);  // TODO: Research the true max length of T.
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 

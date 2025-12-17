@@ -138,6 +138,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // $"<!--key123-->{value:format}<!--/key123-->"
 
         // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
+        const int tMaxLength = 128;
 
         var key = keyGenerator.GetNextKey();
         int length;
@@ -146,7 +147,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 Writer.Inject($"<!--{key}-->");
 
-                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
                 Writer.Advance(length);
 
                 Writer.Inject($"<!--/{key}-->");
@@ -156,7 +157,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 HandleDeferredLiteral();
                 Writer.Inject($"\"");
 
-                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
                 Writer.Advance(length);
 
                 Writer.Inject($"""
@@ -170,7 +171,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                value.TryFormat(Writer.GetSpan(), out length, format, null);
+                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
                 Writer.Advance(length);
                 break;
         }
@@ -256,12 +257,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         var key = keyGenerator.GetNextKey();
         int length;
+        int maxLength = value.GetMaxPossibleLength();
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 Writer.Inject($"<!--{key}-->");
 
-                value.TryFormat(Writer.GetSpan(), out length, format);
+                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
                 Writer.Advance(length);
 
                 Writer.Inject($"<!--/{key}-->");
@@ -271,7 +273,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 HandleDeferredLiteral();
                 Writer.Inject($"\"");
 
-                value.TryFormat(Writer.GetSpan(), out length, format);
+                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
                 Writer.Advance(length);
 
                 Writer.Inject($"""
@@ -285,7 +287,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                value.TryFormat(Writer.GetSpan(), out length, format);
+                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
                 Writer.Advance(length);
                 break;
         }
