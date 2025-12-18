@@ -19,45 +19,8 @@ using Web4.WebSockets;
 //namespace Microsoft.AspNetCore.Builder;
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class Web4EndpointRouteBuilderExtensions
+public static class MapWeb4RouteExtensions
 {
-    public static void UseXtmlFiles(this IEndpointRouteBuilder endpoints)
-    {
-        // TODO: Implement.
-    }
-
-    [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
-    [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
-    public static IEndpointConventionBuilder MapGet(
-        this IEndpointRouteBuilder endpoints,
-        [StringSyntax("Route")] string pattern,
-        Func<Html> template)
-    {
-        return MapGet(endpoints, pattern, httpContext => template());
-    }
-
-    public static IEndpointConventionBuilder MapGet(
-        this IEndpointRouteBuilder endpoints,
-        [StringSyntax("Route")] string pattern,
-        Func<HttpContext, Html> template)
-    {
-        return endpoints.Map(pattern, async httpContext =>
-        {
-            // TODO: Optimization: set ContentLength if Html's formattedCount is zero.
-
-            var pipeWriter = httpContext.Response.BodyWriter;
-            var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, $"{template(httpContext)}");
-
-        });
-    }
-
-    public static WindowBuilder Map(
-        this WebApplication app,
-        [StringSyntax("Route")] string pattern,
-        Func<Html> template)
-        => MapWeb4(app, pattern, template);
-
     public static WindowBuilder MapWeb4(
         this WebApplication app,
         [StringSyntax("Route")] string pattern,
