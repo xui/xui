@@ -9,12 +9,6 @@ namespace Web4;
 
 public static class WriterExtensions
 {
-    public static void WriteRaw(
-        this IBufferWriter<byte> writer,
-        [InterpolatedStringHandlerArgument("writer")] ref RawText text)
-    {
-    }
-
     public static ValueTask<FlushResult> WriteAsync(
         this PipeWriter writer,
         StreamingComposer composer,

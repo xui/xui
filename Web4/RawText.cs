@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Web4.Composers;
 
 namespace Web4;
 
@@ -31,4 +30,14 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
         writer.Advance(length);
     }
 }
+
+public static class RawTextExtensions
+{
+    public static void WriteRaw(
+        this IBufferWriter<byte> writer,
+        [InterpolatedStringHandlerArgument("writer")] ref RawText text)
+    {
+    }
+}
+
 #pragma warning restore CS9113 // Parameter is unread.
