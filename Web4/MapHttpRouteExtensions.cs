@@ -20,7 +20,14 @@ public static class MapHttpRouteExtensions
         [StringSyntax("Route")] string pattern,
         Func<Html> template)
     {
-        return MapGet(endpoints, pattern, httpContext => template());
+        return endpoints.Map(pattern, async httpContext =>
+        {
+            // TODO: Optimization: set ContentLength if Html's formattedCount is zero.
+
+            var pipeWriter = httpContext.Response.BodyWriter;
+            pipeWriter.Write($"{template()}");
+            await pipeWriter.FlushAsync(httpContext.RequestAborted);
+        });
     }
 
     public static IEndpointConventionBuilder MapGet(
@@ -33,8 +40,8 @@ public static class MapHttpRouteExtensions
             // TODO: Optimization: set ContentLength if Html's formattedCount is zero.
 
             var pipeWriter = httpContext.Response.BodyWriter;
-            var composer = new HtmlComposer(pipeWriter); // TODO: Memory allocation
-            await pipeWriter.WriteAsync(composer, $"{template(httpContext)}");
+            pipeWriter.Write($"{template(httpContext)}");
+            await pipeWriter.FlushAsync(httpContext.RequestAborted);
         });
     }
 }

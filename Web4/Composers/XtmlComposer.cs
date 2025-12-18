@@ -4,19 +4,38 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
+public class XtmlComposer : StreamingComposer
 {
     private StableKeyTreeWalker keyGenerator = new();
 
+    public required WindowBuilder Window { get; set; }
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
 
+    private XtmlComposer()
+    {
+    }
+
+    [ThreadStatic] static XtmlComposer? shared;
+    public static XtmlComposer Shared(IBufferWriter<byte> writer, WindowBuilder window)
+    {
+        if (shared is null)
+            return shared = new() { Writer = writer, Window = window };
+        
+        var composer = shared;
+        composer.Writer = writer;
+        composer.Window = window;
+        composer.Init();
+        return composer;
+    }
+
     public override void Reset()
     {
+        Writer = null!;
+        Window = null!;
         attributeStatus = AttributeStatus.None;
-        base.Reset();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -45,8 +64,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                     break;
             }
         }
-
-        base.OnHtmlPartialBegins(ref html);
     }
 
     public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
@@ -433,11 +450,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         Encoding.UTF8.GetBytes(BOOTLOADER, Writer);
 
         // Write event handlers set on window or document
-        if (window.Listeners.Count > 0)
+        if (Window.Listeners.Count > 0)
         {
             Encoding.UTF8.GetBytes("\n\n<script>\n", Writer);
 
-            foreach (var listener in window.Listeners)
+            foreach (var listener in Window.Listeners)
                 Writer.WriteRaw($"  {listener.Html}\n");
 
             Encoding.UTF8.GetBytes("</script>\n\n", Writer);

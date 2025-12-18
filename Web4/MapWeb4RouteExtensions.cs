@@ -33,7 +33,7 @@ public static class MapWeb4RouteExtensions
         group.Map("/", async httpContext =>
         {
             var pipeWriter = httpContext.Response.BodyWriter;
-            var composer = new XtmlComposer(pipeWriter, window); // TODO: Memory allocation
+            var composer = XtmlComposer.Shared(pipeWriter, window);
             await pipeWriter.WriteAsync(composer, window.Template, httpContext);
         });
 

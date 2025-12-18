@@ -15,8 +15,7 @@ public class Tests
     readonly Pipe pipe = new();
     readonly NoOpComposer noOpComposer = new();
     readonly NoOpWriter noOpWriter = new();
-    readonly HtmlComposer htmlComposer = new(null);
-    readonly XtmlComposer xtmlComposer = new(null, new(null, null));
+    readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Shared(null!, new(() => $""));
     readonly SnapshotComposer snapshotComposer = new();
     readonly FindKeyholeComposer findKeyholeComposer = new();
     readonly string name = "Rylan";
@@ -79,7 +78,7 @@ public class Tests
     [Benchmark]
     public async Task HtmlComposer()
     {
-        pipe.Writer.Write(htmlComposer, $"""
+        pipe.Writer.Write($"""
             <html>
                 <body>
                     Hello {name}
@@ -98,7 +97,7 @@ public class Tests
     [Benchmark]
     public async Task HtmlComposerWithState()
     {
-        pipe.Writer.Write(htmlComposer, $"""
+        pipe.Writer.Write($"""
             <html>
                 <body>
                     Hello {name}
@@ -117,6 +116,7 @@ public class Tests
     [Benchmark]
     public async Task XtmlComposer()
     {
+        xtmlComposer.Writer = noOpWriter;
         pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
@@ -136,6 +136,7 @@ public class Tests
     [Benchmark]
     public async Task XtmlComposerWithState()
     {
+        xtmlComposer.Writer = noOpWriter;
         pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
@@ -455,7 +456,7 @@ public class Tests
     [Benchmark]
     public void SpiralToUtf8Buffer()
     {
-        noOpWriter.Write(htmlComposer, $$"""
+        noOpWriter.Write($$"""
             <!DOCTYPE html>
             <html>
                 <head>
@@ -496,6 +497,7 @@ public class Tests
     [Benchmark]
     public void SpiralToUtf8Xtml()
     {
+        xtmlComposer.Writer = noOpWriter;
         noOpWriter.Write(xtmlComposer, $$"""
             <!DOCTYPE html>
             <html>
@@ -613,7 +615,7 @@ public class Tests
     [Benchmark]
     public void GuidTableToUtf8Buffer()
     {
-        noOpWriter.Write(htmlComposer, $"""
+        noOpWriter.Write($"""
             <!doctype html>
             <html lang="en">
                 <head>
@@ -632,6 +634,7 @@ public class Tests
     [Benchmark]
     public void GuidTableToUtf8Xtml()
     {
+        xtmlComposer.Writer = noOpWriter;
         noOpWriter.Write(xtmlComposer, $"""
             <!doctype html>
             <html lang="en">

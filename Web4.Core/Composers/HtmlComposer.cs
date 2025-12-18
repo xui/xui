@@ -4,8 +4,29 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
+public class HtmlComposer : StreamingComposer
 {
+    private HtmlComposer()
+    {
+    }
+
+    [ThreadStatic] static HtmlComposer? shared;
+    public static HtmlComposer Shared(IBufferWriter<byte> writer)
+    {
+        if (shared is null)
+            return shared = new() { Writer = writer };
+        
+        var composer = shared;
+        composer.Writer = writer;
+        composer.Init();
+        return composer;
+    }
+
+    public override void Reset()
+    {
+        Writer = null!;
+    }
+
     public override bool WriteImmutableMarkup(ref Html parent, string literal)
     {
         var destination = Writer.GetSpan(literal.Length);

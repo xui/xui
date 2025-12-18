@@ -420,16 +420,13 @@ void DoIt4(Event.Subsets.ModifierShift e)
 
 
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-var composer = new HtmlComposer(null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
 
 app.MapGet("/pip", async context =>
 {
     var pipeWriter = context.Response.BodyWriter;
 
-    pipeWriter.Write(composer, $"""
+    pipeWriter.Write($"""
         <!doctype html>
         <html>
             <body>

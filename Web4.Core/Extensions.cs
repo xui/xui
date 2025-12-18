@@ -8,14 +8,6 @@ namespace Web4;
 
 public static class Extensions
 {
-    public static void Write(
-        this IBufferWriter<byte> writer,
-        StreamingComposer composer,
-        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html)
-    {
-        html.Dispose();
-    }
-
     public static int GetMaxPossibleLength(this Color color) => 9;
 
     public static bool TryFormat(this Color color, Span<byte> utf8Destination, out int bytesWritten)

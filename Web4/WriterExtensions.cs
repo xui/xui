@@ -18,7 +18,7 @@ public static class WriterExtensions
     public static ValueTask<FlushResult> WriteAsync(
         this PipeWriter writer,
         StreamingComposer composer,
-        [InterpolatedStringHandlerArgument("writer", "composer")] ref Html html,
+        [InterpolatedStringHandlerArgument("composer")] ref Html html,
         CancellationToken cancel = default)
     {
         html.Dispose();

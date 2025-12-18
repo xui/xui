@@ -60,12 +60,6 @@ public ref partial struct Html : IDisposable
         @continue = true;
     }
 
-    // Inline Html: $"<div>{ GetHtml() }</div>"
-    public Html(int literalLength, int formattedCount, [CallerLineNumber] int lineNumber = 0)
-        : this(literalLength, formattedCount, lineNumber, BaseComposer.Current ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."))
-    {
-    }
-
     private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
     {
         Length = 2 * formattedCount + 1;

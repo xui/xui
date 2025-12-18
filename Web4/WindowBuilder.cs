@@ -26,11 +26,17 @@ public class WindowBuilder :
     ITouchEventListeners,
     ITransitionEventListeners
 {
-    private readonly RouteGroupBuilder routeGroupBuilder;
+    private readonly RouteGroupBuilder? routeGroupBuilder;
 
     public Func<Html> Template { get; init; }
     public DocumentBuilder Document { get; init; }
     public List<EventListener> Listeners { get; } = [];
+
+    public WindowBuilder(Func<Html> template)
+    {
+        Template = template;
+        Document = new(this);
+    }
 
     public WindowBuilder(RouteGroupBuilder routeGroupBuilder, Func<Html> template)
     {
@@ -43,7 +49,7 @@ public class WindowBuilder :
         [StringSyntax("Route")] string pattern, 
         Action<HttpContext> requestDelegate)
     {
-        routeGroupBuilder.Map(
+        routeGroupBuilder?.Map(
             pattern,
             async context => 
             {
