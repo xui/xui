@@ -71,7 +71,7 @@ void SomeInstanceMethod()
     Console.WriteLine("I am a method");
 }
 
-var window = app.Map("/x02", () => $"""
+var window = app.MapWeb4("/x02", () => $"""
     <!doctype html>
     <html>
         <body>
