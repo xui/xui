@@ -539,7 +539,7 @@ public class Tests
     [Benchmark]
     public void SpiralSearch()
     {
-        Func<Html> template = () => $$"""
+        static Html template() => $$"""
             <!DOCTYPE html>
             <html>
                 <head>
@@ -570,12 +570,12 @@ public class Tests
                 </head>
                 <body>
                 <div id="root">
-                    {{ tiles.Select(t => Tile(t.X, t.Y)) }}
+                    {{tiles.Select(t => Tile(t.X, t.Y))}}
                 </div>
                 </body>
             </html>
             """;
-        template.FindEventListener("");
+        FindKeyholeComposer.Shared.GetResult("", template);
     }
 
     static Html Tile(double x, double y) => $"""
@@ -654,7 +654,7 @@ public class Tests
     [Benchmark]
     public void GuidTableSearch()
     {
-        Func<Html> template = () => $"""
+        static Html template() => $"""
             <!doctype html>
             <html lang="en">
                 <head>
@@ -668,7 +668,7 @@ public class Tests
                 </body>
             </html>
             """;
-        template.FindEventListener("");
+        FindKeyholeComposer.Shared.GetResult("", template);
     }
 
     static Html GuidTableBody() => $"""

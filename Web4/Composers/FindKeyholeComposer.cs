@@ -4,6 +4,9 @@ namespace Web4.Composers;
 
 public class FindKeyholeComposer : ResultComposer<EventListener>
 {
+    [ThreadStatic] static FindKeyholeComposer? shared;
+    public static FindKeyholeComposer Shared => shared ??= new FindKeyholeComposer();
+
     private StableKeyTreeWalker keyGenerator = new();
     public string? Key { get; set; }
     private Action? action = null;
@@ -11,13 +14,19 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    public override EventListener Result => new()
+    protected override EventListener Result => new()
     {
         Action = action,
         ActionEvent = actionEvent,
         Func = func,
         FuncEvent = funcEvent,
     };
+
+    public EventListener GetResult(string key, Func<Html> template)
+    {
+        Key = key;
+        return Compose($"{template()}");
+    }
 
     public override void Reset()
     {
@@ -150,18 +159,5 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
 
         keyGenerator.MoveNextKey();
         return CompleteFormattedValue();
-    }
-}
-
-public static class FindKeyholeComposerExtension
-{
-    [ThreadStatic]
-    private static FindKeyholeComposer? reusable;
-
-    public static EventListener FindEventListener(this Func<Html> template, string key)
-    {
-        var composer = reusable ??= new FindKeyholeComposer();
-        composer.Key = key;
-        return composer.Compose($"{template()}");
     }
 }
