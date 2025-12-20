@@ -1,4 +1,5 @@
 ﻿global using Web4;
+using System.Buffers;
 using System.Drawing;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
@@ -12,15 +13,16 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 [OperationsPerSecond]
 public class Tests
 {
-    readonly Pipe pipe = new();
-    readonly NoOpComposer noOpComposer = new();
-    readonly NoOpWriter noOpWriter = new();
-    readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Shared(null!, new(() => $""));
-    readonly SnapshotComposer snapshotComposer = new();
-    readonly FindKeyholeComposer findKeyholeComposer = new();
-    readonly string name = "Rylan";
-    readonly int c = 3;
-    readonly int cState = 3;// State<int> cState = 3.AsState();
+    static readonly Pipe pipe = new();
+    static readonly WindowBuilder window = new(() => $"");
+    static readonly NoOpComposer noOpComposer = new();
+    static readonly NoOpWriter noOpWriter = new();
+    static readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Shared(null!, window);
+    static readonly SnapshotComposer snapshotComposer = new();
+    static readonly FindKeyholeComposer findKeyholeComposer = new();
+    static readonly string name = "Rylan";
+    static readonly int c = 3;
+    static readonly int cState = 3;// State<int> cState = 3.AsState();
 
     [Benchmark]
     public void Baseline()
@@ -117,6 +119,7 @@ public class Tests
     public async Task XtmlComposer()
     {
         xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Window = window;
         pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
@@ -127,16 +130,13 @@ public class Tests
                 </body>
             </html>
             """);
-
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
     [Benchmark]
     public async Task XtmlComposerWithState()
     {
         xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Window = window;
         pipe.Writer.Write(xtmlComposer, $"""
             <html>
                 <body>
@@ -147,31 +147,28 @@ public class Tests
                 </body>
             </html>
             """);
-
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
-    int i = 1;
-    long l = 1;
-    float f = 3.14f;
-    double d = 3.14;
-    decimal m = 3.14m;
-    DateTime dt = DateTime.Now;
-    DateOnly d0 = DateOnly.MaxValue;
-    TimeSpan ts = TimeSpan.MaxValue;
-    TimeOnly t0 = TimeOnly.MaxValue;
-    bool b = true;
-    Color color = Color.Red;
-    string str = "str";
-    Uri uri = new Uri("https://web4.dev");
+    static readonly int i = 1;
+    static readonly long l = 1;
+    static readonly float f = 3.14f;
+    static readonly double d = 3.14;
+    static readonly decimal m = 3.14m;
+    static readonly DateTime dt = DateTime.Now;
+    static readonly DateOnly d0 = DateOnly.MaxValue;
+    static readonly TimeSpan ts = TimeSpan.MaxValue;
+    static readonly TimeOnly t0 = TimeOnly.MaxValue;
+    static readonly bool b = true;
+    static readonly Color color = Color.Red;
+    static readonly string str = "str";
+    static readonly Uri uri = new Uri("https://web4.dev");
 
 
+        
     [Benchmark]
     public void SnapshotComposerInt()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -180,12 +177,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerLong()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -194,12 +192,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerFloat()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -208,12 +207,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerDouble()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -222,12 +222,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerDecimal()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -236,12 +237,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerDateTime()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -250,12 +252,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerDateOnly()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -264,12 +267,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerTimeSpan()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -278,12 +282,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerTimeOnly()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -292,12 +297,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerBool()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -306,12 +312,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerColor()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -320,12 +327,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerString()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -334,12 +342,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerUri()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -348,12 +357,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerFormatString()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -362,12 +372,13 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
     [Benchmark]
     public void SnapshotComposerWithState()
     {
-        snapshotComposer.Compose($"""
+        var snapshot = snapshotComposer.GetResult(() => $"""
             <html>
                 <body>
                     <button>
@@ -376,6 +387,7 @@ public class Tests
                 </body>
             </html>
             """);
+        ArrayPool<Keyhole>.Shared.Return(snapshot);
     }
 
 
@@ -498,6 +510,7 @@ public class Tests
     public void SpiralToUtf8Xtml()
     {
         xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Window = window;
         noOpWriter.Write(xtmlComposer, $$"""
             <!DOCTYPE html>
             <html>
@@ -575,7 +588,7 @@ public class Tests
                 </body>
             </html>
             """;
-        FindKeyholeComposer.Shared.GetResult("", template);
+        findKeyholeComposer.GetResult("", template);
     }
 
     static Html Tile(double x, double y) => $"""
@@ -635,6 +648,7 @@ public class Tests
     public void GuidTableToUtf8Xtml()
     {
         xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Window = window;
         noOpWriter.Write(xtmlComposer, $"""
             <!doctype html>
             <html lang="en">
