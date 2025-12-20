@@ -87,10 +87,6 @@ public ref partial struct Html : IDisposable
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public bool AppendFormatted(string value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(bool value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(Color value, string? format = null) => WriteMutableValue(value, format);
-    public bool AppendFormatted(Uri value, string? format = null) => WriteMutableValue(value, format);
     public bool AppendFormatted(int value, string? format = null) => WriteMutableValueUtf8(value, format);
     public bool AppendFormatted(long value, string? format = null) => WriteMutableValueUtf8(value, format);
     public bool AppendFormatted(float value, string? format = null) => WriteMutableValueUtf8(value, format);
@@ -101,26 +97,8 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(TimeSpan value, string? format = null) => WriteMutableValueUtf8(value, format);
     public bool AppendFormatted(TimeOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
 
-    private bool WriteMutableValue<T>(T value, string? format = null)
-    {
-        // TODO: Faster without the switch?  Benchmark to confirm.
 
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
-        var @continue = value switch
-        {
-            string s => composer.WriteMutableValue(ref this, s),
-            bool b => composer.WriteMutableValue(ref this, b),
-            Color c => composer.WriteMutableValue(ref this, c, format),
-            Uri u => composer.WriteMutableValue(ref this, u, format),
-            _ => true
-        };
-
-        Cursor++;
-        return @continue;
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool WriteMutableValueUtf8<T>(T value, string? format = null)
          where T : struct, IUtf8SpanFormattable
     {
@@ -129,6 +107,48 @@ public ref partial struct Html : IDisposable
 
         var @continue = composer.WriteMutableValue(ref this, value, format);
 
+        Cursor++;
+        return @continue;
+    }
+
+    public bool AppendFormatted(string value)
+    {
+        // Note: String doesn't implement IUtf8SpanFormattable
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableValue(ref this, value);
+        Cursor++;
+        return @continue;
+    }
+
+    public bool AppendFormatted(bool value)
+    {
+        // Note: Boolean is a struct but it doesn't implement IUtf8SpanFormattable
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableValue(ref this, value);
+        Cursor++;
+        return @continue;
+    }
+
+    public bool AppendFormatted(Color value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableValue(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+
+    public bool AppendFormatted(Uri value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.WriteMutableValue(ref this, value, format);
         Cursor++;
         return @continue;
     }
