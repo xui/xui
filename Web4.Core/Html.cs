@@ -105,7 +105,6 @@ public ref partial struct Html : IDisposable
             AppendLiteral(string.Empty);
 
         var @continue = composer.WriteMutableValue(ref this, value, format);
-
         Cursor++;
         return @continue;
     }
