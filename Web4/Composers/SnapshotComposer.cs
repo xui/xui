@@ -196,7 +196,6 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        // TODO: Optimize.  The classes are faster (no switch?).  Test with dotnet run -c Release --filter '*SnapshotComposer*
         switch (value)
         {
             case int i:
