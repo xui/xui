@@ -97,7 +97,6 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(TimeSpan value, string? format = null) => WriteMutableValueUtf8(value, format);
     public bool AppendFormatted(TimeOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool WriteMutableValueUtf8<T>(T value, string? format = null)
          where T : struct, IUtf8SpanFormattable
