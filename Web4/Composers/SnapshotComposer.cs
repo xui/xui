@@ -155,7 +155,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.WriteMutableValue(ref parent, value, format);
     }
 
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
@@ -176,7 +176,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.WriteMutableValue(ref parent, value, format);
     }
 
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
