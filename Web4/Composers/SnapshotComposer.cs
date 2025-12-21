@@ -180,7 +180,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     }
 
     public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
-    // where T : struct, IUtf8SpanFormattable // (from base)
+        // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref Snapshot[index];
