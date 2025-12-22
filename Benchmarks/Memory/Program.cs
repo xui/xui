@@ -342,6 +342,26 @@ public class Tests
             """);
     }
 
+    [Benchmark]
+    public void InlineBufferAsInterpolated()
+    {
+        noOpWriter.Write($"""
+            <div>
+                {$"<p>Hello {name}<p>"}
+            </div>
+            """);
+    }
+
+    [Benchmark]
+    public void InlineBufferAsMethod()
+    {
+        noOpWriter.Write($"""
+            <div>
+                {GetInline()}
+            </div>
+            """);
+    }
+
     Html GetInline() => $"<p>Hello {name}</p>";
 
 
