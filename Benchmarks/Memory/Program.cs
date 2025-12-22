@@ -22,7 +22,6 @@ public class Tests
     static readonly FindKeyholeComposer findKeyholeComposer = new();
     static readonly string name = "Rylan";
     static readonly int c = 3;
-    static readonly int cState = 3;// State<int> cState = 3.AsState();
 
     [Benchmark]
     public void Baseline()
@@ -55,25 +54,6 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task NoOpComposerWithState()
-    {
-        noOpComposer.Compose($"""
-            <html>
-                <body>
-                    Hello {name}
-                    <button>
-                        Clicks: {cState}
-                    </button>
-                </body>
-            </html>
-            """);
-
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
-    }
-
-    [Benchmark]
     public async Task HtmlComposer()
     {
         pipe.Writer.Write($"""
@@ -82,25 +62,6 @@ public class Tests
                     Hello {name}
                     <button>
                         Clicks: {c}
-                    </button>
-                </body>
-            </html>
-            """);
-
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
-    }
-
-    [Benchmark]
-    public async Task HtmlComposerWithState()
-    {
-        pipe.Writer.Write($"""
-            <html>
-                <body>
-                    Hello {name}
-                    <button>
-                        Clicks: {cState}
                     </button>
                 </body>
             </html>
@@ -126,23 +87,7 @@ public class Tests
                 </body>
             </html>
             """);
-    }
 
-    [Benchmark]
-    public async Task XtmlComposerWithState()
-    {
-        xtmlComposer.Writer = noOpWriter;
-        xtmlComposer.Window = window;
-        pipe.Writer.Write(xtmlComposer, $"""
-            <html>
-                <body>
-                    Hello {name}
-                    <button>
-                        Clicks: {cState}
-                    </button>
-                </body>
-            </html>
-            """);
     }
 
     static readonly int i = 1;
@@ -364,21 +309,6 @@ public class Tests
                 <body>
                     <button>
                         Clicks: {c:c}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerWithState()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {cState}
                     </button>
                 </body>
             </html>
