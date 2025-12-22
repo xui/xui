@@ -75,7 +75,7 @@ public class Tests
     [Benchmark]
     public async Task XtmlComposer()
     {
-        xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Writer = pipe.Writer;
         xtmlComposer.Window = window;
         pipe.Writer.Write(xtmlComposer, $"""
             <html>
@@ -88,6 +88,9 @@ public class Tests
             </html>
             """);
 
+        await pipe.Writer.FlushAsync();
+        if (pipe.Reader.TryRead(out ReadResult result))
+            pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
     static readonly int i = 1;
