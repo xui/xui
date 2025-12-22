@@ -6,7 +6,7 @@ namespace Web4.Composers;
 
 public class HtmlComposer : StreamingComposer
 {
-    private HtmlComposer()
+    protected HtmlComposer()
     {
     }
 

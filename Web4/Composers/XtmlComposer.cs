@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer : StreamingComposer
+public class XtmlComposer : HtmlComposer
 {
     private StableKeyTreeWalker keyGenerator = new();
 
@@ -13,10 +13,6 @@ public class XtmlComposer : StreamingComposer
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
-
-    private XtmlComposer()
-    {
-    }
 
     [ThreadStatic] static XtmlComposer? shared;
     public static XtmlComposer Shared(IBufferWriter<byte> writer, WindowBuilder window)
@@ -140,63 +136,7 @@ public class XtmlComposer : StreamingComposer
         return true;
     }
 
-    public override bool WriteMutableValue(ref Html parent, string value) => WriteMutableString(ref parent, value);
-    public override bool WriteMutableValue(ref Html parent, bool value) => WriteMutableBool(ref parent, value);
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => WriteMutableColor(ref parent, value, format);
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => WriteMutableString(ref parent, value.ToString()); // TODO: Memory allocation!
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        // Wraps the mutable value with two comment tags
-        // to separate it from any neighboring text.
-        // At the end of the body an inline script registers them 
-        // because we can't rely on id= or document.getElementById().
-        // It should end up looking like this:
-        // $"<!--key123-->{value:format}<!--/key123-->"
-
-        // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
-        const int tMaxLength = 128;
-
-        var key = keyGenerator.GetNextKey();
-        int length;
-        switch (attributeStatus)
-        {
-            case AttributeStatus.None:
-                Writer.WriteRaw($"<!--{key}-->");
-
-                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
-                Writer.Advance(length);
-
-                Writer.WriteRaw($"<!--/{key}-->");
-                break;
-
-            case AttributeStatus.Pending:
-                HandleDeferredLiteral();
-                Writer.WriteRaw($"\"");
-
-                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
-                Writer.Advance(length);
-
-                Writer.WriteRaw($"""
-                    " {key}
-                    """);
-                // status jumps from .Pending to .None because the whole 
-                // attribute is just one value, not a bunch of keyholes+literals.
-                attributeStatus = AttributeStatus.None;
-                break;
-
-            case AttributeStatus.InProgress:
-                // No sentinels.  This keyhole is a part of a larger attribute
-                // composed of multiple keyholes+literals.  Write only the value.
-                value.TryFormat(Writer.GetSpan(tMaxLength), out length, format, null);
-                Writer.Advance(length);
-                break;
-        }
-
-        return CompleteFormattedValue();
-    }
-
-    private bool WriteMutableString(ref Html parent, string value)
+    public override bool WriteMutableValue(ref Html parent, string value)
     {
         // Strings have no format strings.
 
@@ -222,14 +162,14 @@ public class XtmlComposer : StreamingComposer
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                Encoding.UTF8.GetBytes(value, Writer);
+                base.WriteMutableValue(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    private bool WriteMutableBool(ref Html parent, bool value)
+    public override bool WriteMutableValue(ref Html parent, bool value)
     {
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
@@ -263,39 +203,29 @@ public class XtmlComposer : StreamingComposer
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                Encoding.UTF8.GetBytes(value ? "true" : "false", Writer);
+                base.WriteMutableValue(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    private bool WriteMutableColor(ref Html parent, Color value, string? format = null)
+    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
     {
         var key = keyGenerator.GetNextKey();
-        int length;
-        int maxLength = value.GetMaxPossibleLength();
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--{key}-->");
-
-                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
-                Writer.Advance(length);
-
+                base.WriteMutableValue(ref parent, value, format);
                 Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 Writer.WriteRaw($"\"");
-
-                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
-                Writer.Advance(length);
-
-                Writer.WriteRaw($"""
-                    " {key}
-                    """);
+                base.WriteMutableValue(ref parent, value, format);
+                Writer.WriteRaw($"\" {key}");
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -304,8 +234,49 @@ public class XtmlComposer : StreamingComposer
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                value.TryFormat(Writer.GetSpan(maxLength), out length, format);
-                Writer.Advance(length);
+                base.WriteMutableValue(ref parent, value, format);
+                break;
+        }
+
+        return CompleteFormattedValue();
+    }
+
+    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
+        => WriteMutableValue(ref parent, value.ToString()); // TODO: Memory allocation!
+        
+    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
+        // where T : struct, IUtf8SpanFormattable // (from base)
+    {
+        // Wraps the mutable value with two comment tags
+        // to separate it from any neighboring text.
+        // At the end of the body an inline script registers them 
+        // because we can't rely on id= or document.getElementById().
+        // It should end up looking like this:
+        // $"<!--key123-->{value:format}<!--/key123-->"
+
+        var key = keyGenerator.GetNextKey();
+        switch (attributeStatus)
+        {
+            case AttributeStatus.None:
+                Writer.WriteRaw($"<!--{key}-->");
+                base.WriteMutableValue(ref parent, value, format);
+                Writer.WriteRaw($"<!--/{key}-->");
+                break;
+
+            case AttributeStatus.Pending:
+                HandleDeferredLiteral();
+                Writer.WriteRaw($"\"");
+                base.WriteMutableValue(ref parent, value, format);
+                Writer.WriteRaw($"\" {key}");
+                // status jumps from .Pending to .None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                base.WriteMutableValue(ref parent, value, format);
                 break;
         }
 
