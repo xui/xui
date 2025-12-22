@@ -363,6 +363,7 @@ public class XtmlComposer : StreamingComposer
         }
         else
         {
+            // TODO: Is it better to use ({}) or () instead?
             Writer.WriteRaw($"""
                 "keyholes.{key}.dispatchEvent(event.trim(''))" {key}
                 """);
