@@ -3,7 +3,7 @@ global using Web4;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-var _name = "World";
+// var _name = "World";
 
 app.MapGet("/classic", () => "Hello World");
 app.MapGet("/wat1/{name}", (string name) => "Hello {name}");
