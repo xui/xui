@@ -22,6 +22,12 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
         return Compose($"{template()}");
     }
     
+    public Keyhole[] GetResult(Keyhole[] buffer, Func<Html> template)
+    {
+        Snapshot = buffer;
+        return Compose($"{template()}");
+    }
+    
     public override void Reset()
     {
         Snapshot = [];

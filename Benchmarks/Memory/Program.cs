@@ -18,13 +18,14 @@ public class Tests
     static readonly NoOpComposer noOpComposer = new();
     static readonly NoOpWriter noOpWriter = new();
     static readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Shared(null!, window);
+    static readonly Keyhole[] keyholeBuffer = ArrayPool<Keyhole>.Shared.Rent(2048);
     static readonly SnapshotComposer snapshotComposer = new();
     static readonly FindKeyholeComposer findKeyholeComposer = new();
     static readonly string name = "Rylan";
     static readonly int c = 3;
 
     [Benchmark]
-    public void Baseline()
+    public void Basic_String()
     {
         NoOpString noOpString = $"""
         <html>
@@ -39,7 +40,7 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task NoOpComposer()
+    public async Task Basic_NoOp()
     {
         noOpComposer.Compose($"""
             <html>
@@ -54,7 +55,22 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task HtmlComposer()
+    public void Basic_Html()
+    {
+        noOpWriter.Write($"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public async Task Basic_Html_PipeWriter()
     {
         pipe.Writer.Write($"""
             <html>
@@ -73,7 +89,24 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task XtmlComposer()
+    public void Basic_Xtml()
+    {
+        xtmlComposer.Writer = noOpWriter;
+        xtmlComposer.Window = window;
+        noOpWriter.Write(xtmlComposer, $"""
+            <html>
+                <body>
+                    Hello {name}
+                    <button>
+                        Clicks: {c}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public async Task Basic_Xtml_PipeWriter()
     {
         xtmlComposer.Writer = pipe.Writer;
         xtmlComposer.Window = window;
@@ -93,237 +126,10 @@ public class Tests
             pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
-    static readonly int i = 1;
-    static readonly long l = 1;
-    static readonly float f = 3.14f;
-    static readonly double d = 3.14;
-    static readonly decimal m = 3.14m;
-    static readonly DateTime dt = DateTime.Now;
-    static readonly DateOnly d0 = DateOnly.MaxValue;
-    static readonly TimeSpan ts = TimeSpan.MaxValue;
-    static readonly TimeOnly t0 = TimeOnly.MaxValue;
-    static readonly bool b = true;
-    static readonly Color color = Color.Red;
-    static readonly string str = "str";
-    static readonly Uri uri = new Uri("https://web4.dev");
-
-
-        
-    [Benchmark]
-    public void SnapshotComposerInt()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {i}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerLong()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {l}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerFloat()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {f}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerDouble()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {d}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerDecimal()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {m}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerDateTime()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {dt}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerDateOnly()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {d0}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerTimeSpan()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {ts}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerTimeOnly()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {t0}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerBool()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {b}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerColor()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {color}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerString()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {str}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerUri()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {uri}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-    [Benchmark]
-    public void SnapshotComposerFormatString()
-    {
-        var snapshot = snapshotComposer.GetResult(() => $"""
-            <html>
-                <body>
-                    <button>
-                        Clicks: {c:c}
-                    </button>
-                </body>
-            </html>
-            """);
-        ArrayPool<Keyhole>.Shared.Return(snapshot);
-    }
-
-
 
 
     [Benchmark]
-    public void InlineAsInterpolated()
+    public void InlineInterpolated_NoOp()
     {
         noOpComposer.Compose($"""
             <div>
@@ -333,17 +139,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void InlineAsMethod()
-    {
-        noOpComposer.Compose($"""
-            <div>
-                {GetInline()}
-            </div>
-            """);
-    }
-
-    [Benchmark]
-    public void InlineBufferAsInterpolated()
+    public void InlineInterpolated_Html()
     {
         noOpWriter.Write($"""
             <div>
@@ -353,7 +149,17 @@ public class Tests
     }
 
     [Benchmark]
-    public void InlineBufferAsMethod()
+    public void InlineMethod_NoOp()
+    {
+        noOpComposer.Compose($"""
+            <div>
+                {GetInline()}
+            </div>
+            """);
+    }
+
+    [Benchmark]
+    public void InlineMethod_Html()
     {
         noOpWriter.Write($"""
             <div>
@@ -372,7 +178,7 @@ public class Tests
     private static Point[] tiles;
 
     [Benchmark]
-    public void SpiralToDevNull()
+    public void Spiral_NoOp()
     {
         // noOpWriter.Write(noOpComposer, $$"""
         // baseComposer.Compose($$"""
@@ -415,7 +221,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void SpiralToUtf8Buffer()
+    public void Spiral_Html()
     {
         noOpWriter.Write($$"""
             <!DOCTYPE html>
@@ -456,7 +262,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void SpiralToUtf8Xtml()
+    public void Spiral_Xtml()
     {
         xtmlComposer.Writer = noOpWriter;
         xtmlComposer.Window = window;
@@ -499,7 +305,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void SpiralSearch()
+    public void Spiral_Find()
     {
         static Html template() => $$"""
             <!DOCTYPE html>
@@ -556,7 +362,7 @@ public class Tests
     static EntryRecord[] entries;
     
     [Benchmark]
-    public void GuidTableToDevNull()
+    public void GuidTable_NoOp()
     {
         noOpComposer.Compose($"""
             <!doctype html>
@@ -575,7 +381,7 @@ public class Tests
     }
     
     [Benchmark]
-    public void GuidTableToUtf8Buffer()
+    public void GuidTable_Html()
     {
         noOpWriter.Write($"""
             <!doctype html>
@@ -594,7 +400,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void GuidTableToUtf8Xtml()
+    public void GuidTable_Xtml()
     {
         xtmlComposer.Writer = noOpWriter;
         xtmlComposer.Window = window;
@@ -615,7 +421,7 @@ public class Tests
     }
 
     [Benchmark]
-    public void GuidTableSearch()
+    public void GuidTable_Find()
     {
         static Html template() => $"""
             <!doctype html>
@@ -633,6 +439,228 @@ public class Tests
             """;
         FindKeyholeComposer.Shared.GetResult("", template);
     }
+
+
+
+
+
+
+    static readonly int i = 1;
+    static readonly long l = 1;
+    static readonly float f = 3.14f;
+    static readonly double d = 3.14;
+    static readonly decimal m = 3.14m;
+    static readonly DateTime dt = DateTime.Now;
+    static readonly DateOnly d0 = DateOnly.MaxValue;
+    static readonly TimeSpan ts = TimeSpan.MaxValue;
+    static readonly TimeOnly t0 = TimeOnly.MaxValue;
+    static readonly bool b = true;
+    static readonly Color color = Color.Red;
+    static readonly string str = "str";
+    static readonly Uri uri = new Uri("https://web4.dev");
+
+
+        
+    [Benchmark]
+    public void SnapshotComposerInt()
+    {
+        snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {i}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerLong()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {l}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerFloat()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {f}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerDouble()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {d}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerDecimal()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {m}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerDateTime()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {dt}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerDateOnly()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {d0}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerTimeSpan()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {ts}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerTimeOnly()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {t0}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerBool()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {b}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerColor()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {color}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerString()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {str}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerUri()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {uri}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+    [Benchmark]
+    public void SnapshotComposerFormatString()
+    {
+        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+            <html>
+                <body>
+                    <button>
+                        Clicks: {c:c}
+                    </button>
+                </body>
+            </html>
+            """);
+    }
+
+
+
+
+
 
     static Html GuidTableBody() => $"""
         <main>
