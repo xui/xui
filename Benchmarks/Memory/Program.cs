@@ -52,10 +52,6 @@ public class Tests
                 </body>
             </html>
             """);
-
-        await pipe.Writer.FlushAsync();
-        if (pipe.Reader.TryRead(out ReadResult result))
-            pipe.Reader.AdvanceTo(result.Buffer.End);
     }
 
     [Benchmark]
