@@ -58,7 +58,6 @@ public static class MapWeb4RouteExtensions
                 await httpContext.WebSockets.AcceptWebSocketAsync();
         });
 
-
         return window;
     }
 
