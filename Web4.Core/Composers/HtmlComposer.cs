@@ -4,19 +4,15 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class HtmlComposer : StreamingComposer
+public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    protected HtmlComposer()
+    [ThreadStatic] static HtmlComposer? reusable;
+    public static HtmlComposer Reuse(IBufferWriter<byte> writer)
     {
-    }
-
-    [ThreadStatic] static HtmlComposer? shared;
-    public static HtmlComposer Shared(IBufferWriter<byte> writer)
-    {
-        if (shared is null)
-            return shared = new() { Writer = writer };
+        if (reusable is null)
+            return reusable = new(writer);
         
-        var composer = shared;
+        var composer = reusable;
         composer.Writer = writer;
         composer.Init();
         return composer;

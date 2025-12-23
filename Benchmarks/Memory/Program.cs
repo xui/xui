@@ -17,7 +17,7 @@ public class Tests
     static readonly WindowBuilder window = new(() => $"");
     static readonly NoOpComposer noOpComposer = new();
     static readonly NoOpWriter noOpWriter = new();
-    static readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Shared(null!, window);
+    static readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Reuse(null!, window);
     static readonly Keyhole[] keyholeBuffer = ArrayPool<Keyhole>.Shared.Rent(2048);
     static readonly SnapshotComposer snapshotComposer = new();
     static readonly FindKeyholeComposer findKeyholeComposer = new();

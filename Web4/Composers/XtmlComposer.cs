@@ -4,23 +4,23 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer : HtmlComposer
+public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
 {
     private StableKeyTreeWalker keyGenerator = new();
 
-    public required WindowBuilder Window { get; set; }
+    public WindowBuilder Window { get; set; } = window;
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
 
-    [ThreadStatic] static XtmlComposer? shared;
-    public static XtmlComposer Shared(IBufferWriter<byte> writer, WindowBuilder window)
+    [ThreadStatic] static XtmlComposer? reusable;
+    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window)
     {
-        if (shared is null)
-            return shared = new() { Writer = writer, Window = window };
+        if (reusable is null)
+            return reusable = new(writer, window);
         
-        var composer = shared;
+        var composer = reusable;
         composer.Writer = writer;
         composer.Window = window;
         composer.Init();

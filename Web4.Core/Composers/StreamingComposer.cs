@@ -2,7 +2,7 @@ using System.Buffers;
 
 namespace Web4.Composers;
 
-public abstract class StreamingComposer : BaseComposer
+public abstract class StreamingComposer(IBufferWriter<byte> writer) : BaseComposer
 {
-    public required IBufferWriter<byte> Writer { get; set; }
+    public IBufferWriter<byte> Writer { get; set; } = writer;
 }
