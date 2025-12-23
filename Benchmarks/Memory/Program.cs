@@ -343,7 +343,7 @@ public class Tests
                 </body>
             </html>
             """;
-        findKeyholeComposer.GetResult("", template);
+        findKeyholeComposer.FindEventListener(key: "", template);
     }
 
     static Html Tile(double x, double y) => $"""
@@ -437,7 +437,7 @@ public class Tests
                 </body>
             </html>
             """;
-        FindKeyholeComposer.Shared.GetResult("", template);
+        FindKeyholeComposer.Shared.FindEventListener(key: "", template);
     }
 
 
@@ -464,7 +464,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerInt()
     {
-        snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -478,7 +478,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerLong()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -492,7 +492,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerFloat()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -506,7 +506,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerDouble()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -520,7 +520,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerDecimal()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -534,7 +534,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerDateTime()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -548,7 +548,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerDateOnly()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -562,7 +562,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerTimeSpan()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -576,7 +576,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerTimeOnly()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -590,7 +590,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerBool()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -604,7 +604,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerColor()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -618,7 +618,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerString()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -632,7 +632,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerUri()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>
@@ -646,7 +646,7 @@ public class Tests
     [Benchmark]
     public void SnapshotComposerFormatString()
     {
-        var snapshot = snapshotComposer.GetResult(keyholeBuffer, () => $"""
+        var snapshot = snapshotComposer.Capture(keyholeBuffer, () => $"""
             <html>
                 <body>
                     <button>

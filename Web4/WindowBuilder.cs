@@ -77,7 +77,7 @@ public class WindowBuilder :
             // Otherwise, it starts with "key" and is bound to some element burried somewhere in the HTML.
             // The only way to find it is to compose the HTML and compare every keyhole to the supplied key.
             _ => Keymaker.GetKeyIfCached(key) is string k
-                    ? FindKeyholeComposer.Shared.GetResult(k, Template)
+                    ? FindKeyholeComposer.Shared.FindEventListener(k, Template)
                     : default,
         };
     }

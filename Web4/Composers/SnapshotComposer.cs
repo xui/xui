@@ -4,33 +4,47 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class SnapshotComposer : ResultComposer<Keyhole[]>
+public class SnapshotComposer : BaseComposer
 {
     // TODO: Don't forget to implement the high watermark logic.
     private static int highWaterMark = 2048;
-    [ThreadStatic] static SnapshotComposer? shared;
-    public static SnapshotComposer Shared => shared ??= new SnapshotComposer();
+    [ThreadStatic] static SnapshotComposer? reusable;
+    public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
 
     private StableKeyTreeWalker keyGenerator = new();
     private bool isWritingAttribute = false;
-    public Keyhole[] Snapshot { get; set; } = [];
-    protected override Keyhole[] Result => Snapshot;
+    private Keyhole[] snapshot = [];
 
-    public Keyhole[] GetResult(Func<Html> template)
+    public Keyhole[] Capture(Func<Html> template)
     {
-        Snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-        return Compose($"{template()}");
+        snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
+        return Interpolate($"{template()}");
     }
     
-    public Keyhole[] GetResult(Keyhole[] buffer, Func<Html> template)
+    public Keyhole[] Capture(Keyhole[] buffer, Func<Html> template)
     {
-        Snapshot = buffer;
-        return Compose($"{template()}");
+        snapshot = buffer;
+        return Interpolate($"{template()}");
+    }
+
+    private Keyhole[] Interpolate([InterpolatedStringHandlerArgument("")] Html html)
+    {
+        // ^ That's the root Html getting passed in above.
+        // By the time you've reached this line, the templating work has already completed.
+        
+        // Hang onto the result before html.Dispose() resets this class.
+        var result = snapshot;
+
+        // html.Dispose() calls composer.Reset() which sets snapshot to [].
+        html.Dispose();
+
+        // Do something interesting with the result.
+        return result;
     }
     
     public override void Reset()
     {
-        Snapshot = [];
+        snapshot = [];
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -43,7 +57,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
         {
             html.Key = string.Empty;
             html.Index = 0;
-            Snapshot[0].SequenceLength = html.Length;
+            snapshot[0].SequenceLength = html.Length;
             keyGenerator.Reset();
             keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
@@ -70,7 +84,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
             // return to where we left off (a little like recursion).
             // so that we can set the partial's type, expression, key, and range.
             var index = parent.Index + parent.Cursor;
-            ref var keyhole = ref Snapshot[index];
+            ref var keyhole = ref snapshot[index];
             keyhole.Key = partial.Key;
             keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
             keyhole.Format = format;
@@ -90,7 +104,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
         if (parent.Index >= 0)
         {
             var index = parent.Index + parent.Cursor;
-            ref var keyhole = ref Snapshot[index];
+            ref var keyhole = ref snapshot[index];
             keyhole.String = literal;
             keyhole.Type = KeyholeType.StringLiteral;
             keyhole.SequenceStart = index;
@@ -104,7 +118,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     public override bool WriteMutableValue(ref Html parent, string value)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.String = value;
         keyhole.Type = KeyholeType.String;
         keyhole.Format = null;
@@ -125,7 +139,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     public override bool WriteMutableValue(ref Html parent, bool value)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.Boolean = value;
         keyhole.Type = KeyholeType.Boolean;
         keyhole.Format = null;
@@ -146,7 +160,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.Color = value;
         keyhole.Type = KeyholeType.Color;
         keyhole.Format = format;
@@ -167,7 +181,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.Uri = value;
         keyhole.Type = KeyholeType.Uri;
         keyhole.Format = format;
@@ -189,7 +203,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.Format = format;
         if (parent.IsAttribute)
         {
@@ -258,7 +272,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
     private bool WriteEventListener(ref Html parent, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref Snapshot[index];
+        ref var keyhole = ref snapshot[index];
         keyhole.Key = keyGenerator.GetNextKey();
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
@@ -276,7 +290,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
 
         // Reserve a keyhole to represent the loop itself
         var key = keyGenerator.GetNextKey();
-        ref var enumerableKeyhole = ref Snapshot[parent.Index + parent.Cursor];
+        ref var enumerableKeyhole = ref snapshot[parent.Index + parent.Cursor];
         enumerableKeyhole.Key = key;
         enumerableKeyhole.Type = KeyholeType.Enumerable;
         enumerableKeyhole.Format = format;
@@ -297,7 +311,7 @@ public class SnapshotComposer : ResultComposer<Keyhole[]>
 
             keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
-            ref var itemKeyhole = ref Snapshot[index + i];
+            ref var itemKeyhole = ref snapshot[index + i];
             itemKeyhole.Key = keyGenerator.GetNextKey();
             itemKeyhole.Type = KeyholeType.Html;
             itemKeyhole.Format = format;

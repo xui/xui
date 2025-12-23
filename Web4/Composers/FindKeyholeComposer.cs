@@ -1,36 +1,50 @@
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class FindKeyholeComposer : ResultComposer<EventListener>
+public class FindKeyholeComposer : BaseComposer
 {
-    [ThreadStatic] static FindKeyholeComposer? shared;
-    public static FindKeyholeComposer Shared => shared ??= new FindKeyholeComposer();
+    [ThreadStatic] static FindKeyholeComposer? reusable;
+    public static FindKeyholeComposer Shared => reusable ??= new FindKeyholeComposer();
 
     private StableKeyTreeWalker keyGenerator = new();
-    public string? Key { get; set; }
+    private string? key;
     private Action? action = null;
     private Action<Event>? actionEvent = null;
     private Func<Task>? func = null;
     private Func<Event, Task>? funcEvent = null;
 
-    protected override EventListener Result => new()
+    public EventListener FindEventListener(string key, Func<Html> template)
     {
-        Action = action,
-        ActionEvent = actionEvent,
-        Func = func,
-        FuncEvent = funcEvent,
-    };
-
-    public EventListener GetResult(string key, Func<Html> template)
-    {
-        Key = key;
-        return Compose($"{template()}");
+        this.key = key;
+        return Interpolate($"{template()}");
     }
 
+    private EventListener Interpolate([InterpolatedStringHandlerArgument("")] Html html)
+    {
+        // ^ That's the root Html getting passed in above.
+        // By the time you've reached this line, the templating work has already completed.
+        
+        // Hang onto the result before html.Dispose() resets this class.
+        var result = new EventListener()
+        {
+            Action = action,
+            ActionEvent = actionEvent,
+            Func = func,
+            FuncEvent = funcEvent,
+        };
+
+        // html.Dispose() calls composer.Reset() which sets everything back to null.
+        html.Dispose();
+
+        // Do something interesting with the result.
+        return result;
+    }
+    
     public override void Reset()
     {
-        Key = null;
+        key = null;
         action = null;
         actionEvent = null;
         func = null;
@@ -57,7 +71,7 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
 
     public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
-        if (Key is null)
+        if (key is null)
             return false;
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
@@ -71,10 +85,10 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
-        if (Key is null)
+        if (key is null)
             return false;
             
-        if (!keyGenerator.IsNextKey(Key))
+        if (!keyGenerator.IsNextKey(key))
             return CompleteFormattedValue();
 
         switch (listener)
@@ -118,7 +132,7 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
                 break;
         }
 
-        Key = null;
+        key = null;
         // Found it so save some time.  Return false to
         // short circuit any following calls to html.Append*().
         return false;
@@ -132,7 +146,7 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
 
     public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        if (Key is null)
+        if (this.key is null)
             return false;
             
         var itemCount = partials.Count;
@@ -154,7 +168,7 @@ public class FindKeyholeComposer : ResultComposer<EventListener>
 
     private bool MoveNextKeyAndComplete()
     {
-        if (Key is null)
+        if (key is null)
             return false;
 
         keyGenerator.MoveNextKey();
