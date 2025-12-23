@@ -8,8 +8,6 @@ namespace Web4;
 
 public static class ColorExtensions
 {
-    public static int GetMaxPossibleLength(this Color color) => 9;
-
     public static bool TryFormat(this Color color, Span<byte> utf8Destination, out int bytesWritten)
         => color.TryFormat(utf8Destination, out bytesWritten, "rgb");
 
@@ -41,4 +39,6 @@ public static class ColorExtensions
 
     public static Color Invert(this Color color)
         => Color.FromArgb(color.A, 255 - color.R, 255 - color.G, 255 - color.B);
+
+    public static int GetMaxPossibleLength(this Color color) => 9;
 }
