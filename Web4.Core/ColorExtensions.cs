@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace Web4;
 
-public static class Extensions
+public static class ColorExtensions
 {
     public static int GetMaxPossibleLength(this Color color) => 9;
 
