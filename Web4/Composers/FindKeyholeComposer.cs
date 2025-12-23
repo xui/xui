@@ -37,6 +37,7 @@ public class FindKeyholeComposer : BaseComposer
     {
         key = null;
         eventListener = default;
+        base.Reset();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)

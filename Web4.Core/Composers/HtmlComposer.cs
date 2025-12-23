@@ -14,13 +14,13 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         
         var composer = reusable;
         composer.Writer = writer;
-        composer.Init();
         return composer;
     }
 
     public override void Reset()
     {
         Writer = null!;
+        base.Reset();
     }
 
     public override bool WriteImmutableMarkup(ref Html parent, string literal)

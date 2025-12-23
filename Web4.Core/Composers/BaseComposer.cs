@@ -1,5 +1,4 @@
 using System.Drawing;
-using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
@@ -14,14 +13,6 @@ public abstract class BaseComposer
     public bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
     public bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 
-    public virtual BaseComposer Init()
-    {
-        literalLengthRemaining = 0;
-        formattedValuesRemaining = 0;
-        LiteralLength = 0;
-        FormattedCount = 0;
-        return this;
-    }
 
     public void Grow(int literalLength, int formattedCount)
     {
@@ -47,6 +38,10 @@ public abstract class BaseComposer
     public virtual void Reset()
     {
         // Called from the root Html's Dispose()
+        literalLengthRemaining = 0;
+        formattedValuesRemaining = 0;
+        literalLengthTotal = 0;
+        formattedCountTotal = 0;
     }
 
     public virtual void OnHtmlPartialBegins(ref Html parent) { }

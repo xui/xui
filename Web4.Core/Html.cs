@@ -28,7 +28,7 @@ public ref partial struct Html : IDisposable
     /// This constructor is for creating the root Html.
     /// </summary>
     public Html(int literalLength, int formattedCount, BaseComposer composer)
-        : this(literalLength, formattedCount, -1, composer.Init())
+        : this(literalLength, formattedCount, -1, composer)
     {
         scopedComposer = composer;
     }

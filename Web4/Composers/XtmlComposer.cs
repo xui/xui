@@ -23,15 +23,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         var composer = reusable;
         composer.Writer = writer;
         composer.Window = window;
-        composer.Init();
         return composer;
     }
 
     public override void Reset()
     {
-        Writer = null!;
         Window = null!;
         attributeStatus = AttributeStatus.None;
+        base.Reset();
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
