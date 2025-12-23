@@ -9,11 +9,8 @@ public class FindKeyholeComposer : BaseComposer
     public static FindKeyholeComposer Shared => reusable ??= new FindKeyholeComposer();
 
     private StableKeyTreeWalker keyGenerator = new();
+    private EventListener eventListener = default;
     private string? key;
-    private Action? action = null;
-    private Action<Event>? actionEvent = null;
-    private Func<Task>? func = null;
-    private Func<Event, Task>? funcEvent = null;
 
     public EventListener FindEventListener(string key, Func<Html> template)
     {
@@ -27,13 +24,7 @@ public class FindKeyholeComposer : BaseComposer
         // By the time you've reached this line, the templating work has already completed.
         
         // Hang onto the result before html.Dispose() resets this class.
-        var result = new EventListener()
-        {
-            Action = action,
-            ActionEvent = actionEvent,
-            Func = func,
-            FuncEvent = funcEvent,
-        };
+        var result = eventListener;
 
         // html.Dispose() calls composer.Reset() which sets everything back to null.
         html.Dispose();
@@ -45,10 +36,7 @@ public class FindKeyholeComposer : BaseComposer
     public override void Reset()
     {
         key = null;
-        action = null;
-        actionEvent = null;
-        func = null;
-        funcEvent = null;
+        eventListener = default;
     }
 
     public override void OnHtmlPartialBegins(ref Html html)
@@ -99,7 +87,7 @@ public class FindKeyholeComposer : BaseComposer
             //       Console.WriteLine($"Button was clicked");
             //   }
             case Action a:
-                action = a;
+                eventListener.Action = a;
                 break;
 
             // Example:
@@ -108,7 +96,7 @@ public class FindKeyholeComposer : BaseComposer
             //       Console.WriteLine($"Button {e.Target.ID} was clicked");
             //   }
             case Action<Event> ae:
-                actionEvent = ae;
+                eventListener.ActionEvent = ae;
                 break;
 
             // Example:
@@ -118,7 +106,7 @@ public class FindKeyholeComposer : BaseComposer
             //       Console.WriteLine($"Button was clicked");
             //   }
             case Func<Task> f:
-                func = f;
+                eventListener.Func = f;
                 break;
 
             // Example:
@@ -128,7 +116,7 @@ public class FindKeyholeComposer : BaseComposer
             //       Console.WriteLine($"Button {e.Target.ID} was clicked");
             //   }
             case Func<Event, Task> fe:
-                funcEvent = fe;
+                eventListener.FuncEvent = fe;
                 break;
         }
 
