@@ -229,7 +229,6 @@ public ref partial struct Html : IDisposable
 
         var @continue = composer.OnIterate(ref this, htmls, format, expression);
         Cursor++;
-
         return @continue;
     }
 
