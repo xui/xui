@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Web4;
 
@@ -81,4 +82,26 @@ public struct Keyhole
                 => left.value1 == right.value1 && left.Format == right.Format,
             _ => throw new NotSupportedException()
         };
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]    
+    public void SetValue<T>(T value)
+    {
+        switch (value)
+        {
+            case string s: String = s; break;
+            case bool b: Boolean = b; break;
+            case int i: Integer = i; break;
+            case long l: Long = l; break;
+            case float f: Float = f; break;
+            case double d: Double = d; break;
+            case decimal m: Decimal = m; break;
+            case DateTime dt: DateTime = dt; break;
+            case DateOnly dO: DateOnly = dO; break;
+            case TimeSpan ts: TimeSpan = ts; break;
+            case TimeOnly tO: TimeOnly = tO; break;
+            case Color c: Color = c; break;
+            case Uri u: Uri = u; break;
+            default: throw new NotSupportedException($"Type {typeof(T)} not supported");
+        }
+    }
 }

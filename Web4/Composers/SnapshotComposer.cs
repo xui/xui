@@ -116,101 +116,24 @@ public class SnapshotComposer : BaseComposer
         return base.OnMarkup(ref parent, literal);
     }
 
-    public override bool OnString(ref Html parent, string value)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.String);
-        keyhole.String = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnBool(ref Html parent, bool value)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Boolean);
-        keyhole.Boolean = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnInt(ref Html parent, int value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Integer, format);
-        keyhole.Integer = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnLong(ref Html parent, long value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Long, format);
-        keyhole.Long = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnFloat(ref Html parent, float value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Float, format);
-        keyhole.Float = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnDouble(ref Html parent, double value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Double, format);
-        keyhole.Double = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnDecimal(ref Html parent, decimal value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Decimal, format);
-        keyhole.Decimal = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.DateTime, format);
-        keyhole.DateTime = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.DateOnly, format);
-        keyhole.DateOnly = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.TimeSpan, format);
-        keyhole.TimeSpan = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.TimeOnly, format);
-        keyhole.TimeOnly = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnColor(ref Html parent, Color value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Color, format);
-        keyhole.Color = value;
-        return CompleteFormattedValue();
-    }
-
-    public override bool OnUri(ref Html parent, Uri value, string? format = null)
-    {
-        ref var keyhole = ref OnKeyhole(ref parent, KeyholeType.Uri, format);
-        keyhole.Uri = value;
-        return CompleteFormattedValue();
-    }
-
-    private ref Keyhole OnKeyhole(ref Html parent, KeyholeType type, string? format = null)
+    public override bool OnString(ref Html parent, string value) => OnKeyhole(ref parent, value, KeyholeType.String);
+    public override bool OnBool(ref Html parent, bool value) => OnKeyhole(ref parent, value, KeyholeType.Boolean);
+    public override bool OnInt(ref Html parent, int value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Integer, format);
+    public override bool OnLong(ref Html parent, long value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Long, format);
+    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Float, format);
+    public override bool OnDouble(ref Html parent, double value, string? format = null)  => OnKeyhole(ref parent, value, KeyholeType.Double, format);
+    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Decimal, format);
+    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.DateTime, format);
+    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.DateOnly, format);
+    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.TimeSpan, format);
+    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.TimeOnly, format);
+    public override bool OnColor(ref Html parent, Color value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Color, format);
+    public override bool OnUri(ref Html parent, Uri value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Uri, format);
+    private bool OnKeyhole<T>(ref Html parent, T value, KeyholeType type, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
+        keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
         if (parent.IsAttribute)
@@ -224,15 +147,14 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return ref keyhole;
+        return CompleteFormattedValue();
     }
 
-
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
-    private bool WriteEventListener(ref Html parent, string? format = null, string? expression = null)
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
+    private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
