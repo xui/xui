@@ -50,7 +50,7 @@ public class SnapshotComposer : BaseComposer
 
     public override void OnHtmlPartialBegins(ref Html html)
     {
-        if (LiteralLength == 0)
+        if (IsRootTemplate)
         {
             html.Index = -1;
         }

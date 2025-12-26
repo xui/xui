@@ -4,20 +4,21 @@ namespace Web4.Composers;
 
 public abstract class BaseComposer
 {
-    public int LiteralLength { get; private set; } = 0;
-    public int FormattedCount { get; private set; } = 0;
-
+    private int literalLengthTotal = 0;
+    private int formattedCountTotal = 0;
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    public bool IsBeforeAppend => FormattedCount == formattedValuesRemaining && LiteralLength == literalLengthRemaining;
-    public bool IsComplete => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
-
+    public bool IsRootTemplate => literalLengthTotal == 0;
+    
+    public bool IsBeforeAppend => formattedCountTotal == formattedValuesRemaining && literalLengthTotal == literalLengthRemaining;
+    
+    public bool IsFinalLiteral => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
 
     public void Grow(int literalLength, int formattedCount)
     {
-        LiteralLength += literalLength;
-        FormattedCount += formattedCount;
+        literalLengthTotal += literalLength;
+        formattedCountTotal += formattedCount;
         
         literalLengthRemaining += literalLength;
         formattedValuesRemaining += formattedCount;

@@ -122,7 +122,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         CompleteStringLiteral(literal.Length);
 
-        if (isBodyOmitted && literal.Length == 0 && IsComplete)
+        if (isBodyOmitted && literal.Length == 0 && IsFinalLiteral)
         {
             Encoding.UTF8.GetBytes("""
                     
@@ -386,10 +386,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private int InjectBootloader(string literal)
     {
-        // If there are zero mutable keys then we can skip this
-        if (FormattedCount <= 1)
-            return 0;
-
         // Wait for the next append where there's actual content.
         if (literal.Length == 0)
             return 0;
