@@ -378,10 +378,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             i++;
         }
 
-        Writer.WriteRaw($"""
-            <!--{key} /-->
-            """);
-
+        Writer.WriteRaw($"<!--{key} /-->");
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
     }
