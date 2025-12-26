@@ -152,9 +152,7 @@ public class FindKeyholeComposer : BaseComposer
             
         var itemCount = partials.Count;
         var key = keyGenerator.GetNextKey();
-
         keyGenerator.CreateNewGeneration(key, itemCount);
-
         int i = 0;
         foreach (var partial in partials)
         {
