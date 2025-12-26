@@ -45,28 +45,28 @@ public abstract class BaseComposer
         formattedCountTotal = 0;
     }
 
-    public virtual void OnHtmlPartialBegins(ref Html parent) { }
-    public virtual bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public virtual void OnElementBegins(ref Html parent) { }
+    public virtual bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
         // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
         return CompleteFormattedValue();
     }
 
-    public virtual bool WriteImmutableMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);
+    public virtual bool OnMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);
 
-    public virtual bool WriteMutableValue(ref Html parent, string value) => CompleteFormattedValue();
-    public virtual bool WriteMutableValue(ref Html parent, bool value) => CompleteFormattedValue();
-    public virtual bool WriteMutableValue(ref Html parent, Color value, string? format = null) => CompleteFormattedValue();
-    public virtual bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => CompleteFormattedValue();
-    public virtual bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
+    public virtual bool OnString(ref Html parent, string value) => CompleteFormattedValue();
+    public virtual bool OnBool(ref Html parent, bool value) => CompleteFormattedValue();
+    public virtual bool OnColor(ref Html parent, Color value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnUri(ref Html parent, Uri value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnValue<T>(ref Html parent, T value, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
 
-    public virtual bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
-    public virtual bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
+    public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
 
-    public virtual bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public virtual bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         foreach (var partial in partials) { }
         return CompleteFormattedValue();

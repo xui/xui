@@ -40,7 +40,7 @@ public class FindKeyholeComposer : BaseComposer
         base.Reset();
     }
 
-    public override void OnHtmlPartialBegins(ref Html html)
+    public override void OnElementBegins(ref Html html)
     {
         if (IsBeforeAppend)
         {
@@ -55,10 +55,10 @@ public class FindKeyholeComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.OnHtmlPartialBegins(ref html);
+        base.OnElementBegins(ref html);
     }
 
-    public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         if (key is null)
             return false;
@@ -67,10 +67,10 @@ public class FindKeyholeComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
 
     private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
     {
@@ -127,13 +127,13 @@ public class FindKeyholeComposer : BaseComposer
         return false;
     }
 
-    public override bool WriteMutableValue(ref Html parent, string value) => MoveNextKeyAndComplete();
-    public override bool WriteMutableValue(ref Html parent, bool value) => MoveNextKeyAndComplete();
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnString(ref Html parent, string value) => MoveNextKeyAndComplete();
+    public override bool OnBool(ref Html parent, bool value) => MoveNextKeyAndComplete();
+    public override bool OnColor(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnUri(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
 
-    public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         if (this.key is null)
             return false;

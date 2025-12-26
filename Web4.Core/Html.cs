@@ -66,7 +66,7 @@ public ref partial struct Html : IDisposable
 
         this.composer = composer;
         this.composer.Grow(literalLength, formattedCount);
-        this.composer.OnHtmlPartialBegins(ref this);
+        this.composer.OnElementBegins(ref this);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -79,7 +79,7 @@ public ref partial struct Html : IDisposable
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
     {
-        var @continue = composer.WriteImmutableMarkup(ref this, literal);
+        var @continue = composer.OnMarkup(ref this, literal);
         Cursor++;
         return @continue;
     }
@@ -104,7 +104,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableValue(ref this, value, format);
+        var @continue = composer.OnValue(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -115,7 +115,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableValue(ref this, value);
+        var @continue = composer.OnString(ref this, value);
         Cursor++;
         return @continue;
     }
@@ -126,7 +126,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableValue(ref this, value);
+        var @continue = composer.OnBool(ref this, value);
         Cursor++;
         return @continue;
     }
@@ -136,7 +136,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableValue(ref this, value, format);
+        var @continue = composer.OnColor(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -146,7 +146,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableValue(ref this, value, format);
+        var @continue = composer.OnUri(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -162,7 +162,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
@@ -175,7 +175,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
@@ -187,7 +187,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
@@ -199,7 +199,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteEventListener(ref this, listener, format, expression);
+        var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
     }
@@ -216,7 +216,7 @@ public ref partial struct Html : IDisposable
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = composer.OnHtmlPartialEnds(ref this, html, format, expression);
+        var @continue = composer.OnElementEnds(ref this, html, format, expression);
         Cursor++;
         return @continue;
     }
@@ -227,7 +227,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.WriteMutableNode(ref this, htmls, format, expression);
+        var @continue = composer.OnIterate(ref this, htmls, format, expression);
         Cursor++;
 
         return @continue;

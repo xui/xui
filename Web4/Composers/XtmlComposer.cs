@@ -33,7 +33,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Reset();
     }
 
-    public override void OnHtmlPartialBegins(ref Html html)
+    public override void OnElementBegins(ref Html html)
     {
         if (IsBeforeAppend)
         {
@@ -61,7 +61,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
     }
 
-    public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         switch (attributeStatus)
         {
@@ -102,7 +102,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    public override bool WriteImmutableMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, string literal)
     {
         int offset = IsBeforeAppend ? InjectBootloader(literal) : 0;
 
@@ -135,7 +135,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return true;
     }
 
-    public override bool WriteMutableValue(ref Html parent, string value)
+    public override bool OnString(ref Html parent, string value)
     {
         // Strings have no format strings.
 
@@ -161,14 +161,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.WriteMutableValue(ref parent, value);
+                base.OnString(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableValue(ref Html parent, bool value)
+    public override bool OnBool(ref Html parent, bool value)
     {
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
@@ -202,28 +202,28 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.WriteMutableValue(ref parent, value);
+                base.OnBool(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
+    public override bool OnColor(ref Html parent, Color value, string? format = null)
     {
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--{key}-->");
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnColor(ref parent, value, format);
                 Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 Writer.WriteRaw($"\"");
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnColor(ref parent, value, format);
                 Writer.WriteRaw($"\" {key}");
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -233,17 +233,17 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnColor(ref parent, value, format);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
-        => WriteMutableValue(ref parent, value.ToString()); // TODO: Memory allocation!
+    public override bool OnUri(ref Html parent, Uri value, string? format = null)
+        => OnString(ref parent, value.ToString()); // TODO: Memory allocation!
         
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
+    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         // Wraps the mutable value with two comment tags
@@ -258,14 +258,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--{key}-->");
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnValue(ref parent, value, format);
                 Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 Writer.WriteRaw($"\"");
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnValue(ref parent, value, format);
                 Writer.WriteRaw($"\" {key}");
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -275,7 +275,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.WriteMutableValue(ref parent, value, format);
+                base.OnValue(ref parent, value, format);
                 break;
         }
 
@@ -315,10 +315,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return attributeName;
     }
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
     private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (deferredLiteral != null)
@@ -343,7 +343,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
         // also implement ICollection then it will iterate in order to find the count

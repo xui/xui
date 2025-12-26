@@ -23,26 +23,26 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         base.Reset();
     }
 
-    public override bool WriteImmutableMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, string literal)
     {
         var destination = Writer.GetSpan(literal.Length);
         var length = Encoding.UTF8.GetBytes(literal, destination);
         Writer.Advance(length);
 
-        return base.WriteImmutableMarkup(ref parent, literal);
+        return base.OnMarkup(ref parent, literal);
     }
 
-    public override bool WriteMutableValue(ref Html parent, string value)
+    public override bool OnString(ref Html parent, string value)
     {
         // string has no formatters (and alignment isn't helpful in HTML)
         var destination = Writer.GetSpan(value.Length);
         var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnString(ref parent, value);
     }
 
-    public override bool WriteMutableValue(ref Html parent, bool value)
+    public override bool OnBool(ref Html parent, bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? "true" : "false";
@@ -50,19 +50,19 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnBool(ref parent, value);
     }
 
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
+    public override bool OnColor(ref Html parent, Color value, string? format = null)
     {
         var destination = Writer.GetSpan(value.GetMaxPossibleLength());
         value.TryFormat(destination, out int length, format);
         Writer.Advance(length);
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnColor(ref parent, value);
     }
 
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
+    public override bool OnUri(ref Html parent, Uri value, string? format = null)
     {
         // TODO: Fix memory allocation happening here
         var output = value.ToString();
@@ -70,24 +70,24 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnUri(ref parent, value);
     }
 
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
+    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var destination = Writer.GetSpan(128);  // TODO: Research the true max length of T.
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        return base.WriteMutableValue(ref parent, value, format);
+        return base.OnValue(ref parent, value, format);
     }
 
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     
     private bool HandleNotSupported()
     {

@@ -48,7 +48,7 @@ public class SnapshotComposer : BaseComposer
         base.Reset();
     }
 
-    public override void OnHtmlPartialBegins(ref Html html)
+    public override void OnElementBegins(ref Html html)
     {
         if (IsRootTemplate)
         {
@@ -71,10 +71,10 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.OnHtmlPartialBegins(ref html);
+        base.OnElementBegins(ref html);
     }
 
-    public override bool OnHtmlPartialEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
@@ -97,10 +97,10 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
 
-        return base.OnHtmlPartialEnds(ref parent, partial, format, expression);
+        return base.OnElementEnds(ref parent, partial, format, expression);
     }
 
-    public override bool WriteImmutableMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, string literal)
     {
         if (parent.Index >= 0)
         {
@@ -113,10 +113,10 @@ public class SnapshotComposer : BaseComposer
             isWritingAttribute = literal.EndsWith('=');
         }
 
-        return base.WriteImmutableMarkup(ref parent, literal);
+        return base.OnMarkup(ref parent, literal);
     }
 
-    public override bool WriteMutableValue(ref Html parent, string value)
+    public override bool OnString(ref Html parent, string value)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
@@ -134,10 +134,10 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnString(ref parent, value);
     }
 
-    public override bool WriteMutableValue(ref Html parent, bool value)
+    public override bool OnBool(ref Html parent, bool value)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
@@ -155,10 +155,10 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value);
+        return base.OnBool(ref parent, value);
     }
 
-    public override bool WriteMutableValue(ref Html parent, Color value, string? format = null)
+    public override bool OnColor(ref Html parent, Color value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
@@ -176,10 +176,10 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value, format);
+        return base.OnColor(ref parent, value, format);
     }
 
-    public override bool WriteMutableValue(ref Html parent, Uri value, string? format = null)
+    public override bool OnUri(ref Html parent, Uri value, string? format = null)
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
@@ -197,10 +197,10 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return base.WriteMutableValue(ref parent, value, format);
+        return base.OnUri(ref parent, value, format);
     }
 
-    public override bool WriteMutableValue<T>(ref Html parent, T value, string? format = null)
+    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (from base)
     {
         var index = parent.Index + parent.Cursor;
@@ -263,13 +263,13 @@ public class SnapshotComposer : BaseComposer
                 throw new NotSupportedException($"Type {typeof(T)} not supported");
         }
 
-        return base.WriteMutableValue(ref parent, value, format);
+        return base.OnValue(ref parent, value, format);
     }
 
-    public override bool WriteEventListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
-    public override bool WriteEventListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
-    public override bool WriteEventListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
-    public override bool WriteEventListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, format, expression);
     private bool WriteEventListener(ref Html parent, string? format = null, string? expression = null)
     {
         var index = parent.Index + parent.Cursor;
@@ -282,7 +282,7 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool WriteMutableNode<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
         // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
         // also implement ICollection then it will iterate in order to find the count
