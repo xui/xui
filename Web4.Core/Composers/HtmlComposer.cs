@@ -32,17 +32,17 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return base.OnMarkup(ref parent, literal);
     }
 
-    public override bool OnString(ref Html parent, string value)
+    public override bool OnStringKeyhole(ref Html parent, string value)
     {
         // string has no formatters (and alignment isn't helpful in HTML)
         var destination = Writer.GetSpan(value.Length);
         var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.OnString(ref parent, value);
+        return base.OnStringKeyhole(ref parent, value);
     }
 
-    public override bool OnBool(ref Html parent, bool value)
+    public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
         // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? "true" : "false";
@@ -50,18 +50,18 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.OnBool(ref parent, value);
+        return base.OnBoolKeyhole(ref parent, value);
     }
 
-    public override bool OnInt(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnLong(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDouble(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnLongKeyhole(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnFloatKeyhole(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDoubleKeyhole(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDecimalKeyhole(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateTimeKeyhole(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
     public virtual bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
         where T : struct, IUtf8SpanFormattable
     {
@@ -72,16 +72,16 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return CompleteFormattedValue();
     }
 
-    public override bool OnColor(ref Html parent, Color value, string? format = null)
+    public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
     {
         var destination = Writer.GetSpan(value.GetMaxPossibleLength());
         value.TryFormat(destination, out int length, format);
         Writer.Advance(length);
 
-        return base.OnColor(ref parent, value);
+        return base.OnColorKeyhole(ref parent, value);
     }
 
-    public override bool OnUri(ref Html parent, Uri value, string? format = null)
+    public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
     {
         // TODO: Fix memory allocation happening here and incorporate format strings
         var output = value.ToString();
@@ -89,7 +89,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.OnUri(ref parent, value);
+        return base.OnUriKeyhole(ref parent, value);
     }
 
 

@@ -67,19 +67,19 @@ public class FindKeyholeComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool OnString(ref Html parent, string value) => MoveNextKeyAndComplete();
-    public override bool OnBool(ref Html parent, bool value) => MoveNextKeyAndComplete();
-    public override bool OnInt(ref Html parent, int value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnLong(ref Html parent, long value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnFloat(ref Html parent, float value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnDouble(ref Html parent, double value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnColor(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnUri(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();
+    public override bool OnBoolKeyhole(ref Html parent, bool value) => MoveNextKeyAndComplete();
+    public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnLongKeyhole(ref Html parent, long value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnFloatKeyhole(ref Html parent, float value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDoubleKeyhole(ref Html parent, double value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDecimalKeyhole(ref Html parent, decimal value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDateTimeKeyhole(ref Html parent, DateTime value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
     private bool MoveNextKeyAndComplete()
     {
         if (key is null)

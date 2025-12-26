@@ -135,7 +135,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return true;
     }
 
-    public override bool OnString(ref Html parent, string value)
+    public override bool OnStringKeyhole(ref Html parent, string value)
     {
         // Strings have no format strings.
 
@@ -161,14 +161,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnString(ref parent, value);
+                base.OnStringKeyhole(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool OnBool(ref Html parent, bool value)
+    public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
@@ -202,22 +202,22 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnBool(ref parent, value);
+                base.OnBoolKeyhole(ref parent, value);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool OnInt(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnLong(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDouble(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnLongKeyhole(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnFloatKeyhole(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDoubleKeyhole(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDecimalKeyhole(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateTimeKeyhole(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
     public override bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
         // where T : struct, IUtf8SpanFormattable // (inherited)
     {
@@ -257,21 +257,21 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    public override bool OnColor(ref Html parent, Color value, string? format = null)
+    public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
     {
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--{key}-->");
-                base.OnColor(ref parent, value, format);
+                base.OnColorKeyhole(ref parent, value, format);
                 Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 Writer.WriteRaw($"\"");
-                base.OnColor(ref parent, value, format);
+                base.OnColorKeyhole(ref parent, value, format);
                 Writer.WriteRaw($"\" {key}");
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -281,15 +281,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnColor(ref parent, value, format);
+                base.OnColorKeyhole(ref parent, value, format);
                 break;
         }
 
         return CompleteFormattedValue();
     }
 
-    public override bool OnUri(ref Html parent, Uri value, string? format = null)
-        => OnString(ref parent, value.ToString()); // TODO: Memory allocation!
+    public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
+        => OnStringKeyhole(ref parent, value.ToString()); // TODO: Memory allocation!
         
     private void HandleDeferredLiteral()
     {

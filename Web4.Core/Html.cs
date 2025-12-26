@@ -93,7 +93,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnString(ref this, value);
+        var @continue = composer.OnStringKeyhole(ref this, value);
         Cursor++;
         return @continue;
     }
@@ -104,7 +104,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnBool(ref this, value);
+        var @continue = composer.OnBoolKeyhole(ref this, value);
         Cursor++;
         return @continue;
     }
@@ -114,7 +114,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnInt(ref this, value, format);
+        var @continue = composer.OnIntKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -124,7 +124,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnLong(ref this, value, format);
+        var @continue = composer.OnLongKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -134,7 +134,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnFloat(ref this, value, format);
+        var @continue = composer.OnFloatKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -144,7 +144,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnDouble(ref this, value, format);
+        var @continue = composer.OnDoubleKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -154,7 +154,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnDecimal(ref this, value, format);
+        var @continue = composer.OnDecimalKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -164,7 +164,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnDateTime(ref this, value, format);
+        var @continue = composer.OnDateTimeKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -174,7 +174,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnDateOnly(ref this, value, format);
+        var @continue = composer.OnDateOnlyKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -184,7 +184,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnTimeSpan(ref this, value, format);
+        var @continue = composer.OnTimeSpanKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -194,7 +194,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnTimeOnly(ref this, value, format);
+        var @continue = composer.OnTimeOnlyKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -204,7 +204,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnColor(ref this, value, format);
+        var @continue = composer.OnColorKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
@@ -214,7 +214,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        var @continue = composer.OnUri(ref this, value, format);
+        var @continue = composer.OnUriKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
     }
