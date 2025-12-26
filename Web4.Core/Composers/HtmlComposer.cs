@@ -64,7 +64,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
 
     public override bool OnUri(ref Html parent, Uri value, string? format = null)
     {
-        // TODO: Fix memory allocation happening here
+        // TODO: Fix memory allocation happening here and incorporate format strings
         var output = value.ToString();
         var destination = Writer.GetSpan(output.Length);
         var length = Encoding.UTF8.GetBytes(output, destination);
