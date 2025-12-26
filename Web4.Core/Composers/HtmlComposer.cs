@@ -53,6 +53,25 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return base.OnBool(ref parent, value);
     }
 
+    public override bool OnInt(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnLong(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDouble(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public virtual bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
+        where T : struct, IUtf8SpanFormattable
+    {
+        var destination = Writer.GetSpan(128);  // TODO: Research the true max length of T.
+        value.TryFormat(destination, out int length, format, null);
+        Writer.Advance(length);
+
+        return CompleteFormattedValue();
+    }
+
     public override bool OnColor(ref Html parent, Color value, string? format = null)
     {
         var destination = Writer.GetSpan(value.GetMaxPossibleLength());
@@ -71,16 +90,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         Writer.Advance(length);
 
         return base.OnUri(ref parent, value);
-    }
-
-    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        var destination = Writer.GetSpan(128);  // TODO: Research the true max length of T.
-        value.TryFormat(destination, out int length, format, null);
-        Writer.Advance(length);
-
-        return base.OnValue(ref parent, value, format);
     }
 
 

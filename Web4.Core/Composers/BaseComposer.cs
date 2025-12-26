@@ -45,21 +45,24 @@ public abstract class BaseComposer
         formattedCountTotal = 0;
     }
 
-    public virtual void OnElementBegins(ref Html parent) { }
-    public virtual bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
-    {
-        // When the compiler instantiates the `Html partial` (above), this causes its contents to be written using the methods below due to the compiler's lowered code.
-        // (more info: InterpolatedStringHandler https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/)
-        return CompleteFormattedValue();
-    }
+    public virtual void OnElementBegin(ref Html parent) { }
+    public virtual bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null) => CompleteFormattedValue();
 
     public virtual bool OnMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);
 
     public virtual bool OnString(ref Html parent, string value) => CompleteFormattedValue();
     public virtual bool OnBool(ref Html parent, bool value) => CompleteFormattedValue();
+    public virtual bool OnInt(ref Html parent, int value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnLong(ref Html parent, long value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnFloat(ref Html parent, float value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnDouble(ref Html parent, double value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnDecimal(ref Html parent, decimal value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnDateTime(ref Html parent, DateTime value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => CompleteFormattedValue();
+    public virtual bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => CompleteFormattedValue();
     public virtual bool OnColor(ref Html parent, Color value, string? format = null) => CompleteFormattedValue();
     public virtual bool OnUri(ref Html parent, Uri value, string? format = null) => CompleteFormattedValue();
-    public virtual bool OnValue<T>(ref Html parent, T value, string? format = null) where T : struct, IUtf8SpanFormattable => CompleteFormattedValue();
 
     public virtual bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => CompleteFormattedValue();

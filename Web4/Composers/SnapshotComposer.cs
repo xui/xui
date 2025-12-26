@@ -48,7 +48,7 @@ public class SnapshotComposer : BaseComposer
         base.Reset();
     }
 
-    public override void OnElementBegins(ref Html html)
+    public override void OnElementBegin(ref Html html)
     {
         if (IsRootTemplate)
         {
@@ -71,10 +71,10 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.OnElementBegins(ref html);
+        base.OnElementBegin(ref html);
     }
 
-    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
@@ -97,7 +97,7 @@ public class SnapshotComposer : BaseComposer
             keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         }
 
-        return base.OnElementEnds(ref parent, partial, format, expression);
+        return base.OnElementEnd(ref parent, partial, format, expression);
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
@@ -158,50 +158,17 @@ public class SnapshotComposer : BaseComposer
         return base.OnBool(ref parent, value);
     }
 
-    public override bool OnColor(ref Html parent, Color value, string? format = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
-        keyhole.Color = value;
-        keyhole.Type = KeyholeType.Color;
-        keyhole.Format = format;
-        if (parent.IsAttribute)
-        {
-            keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.ParentStart = parent.Index;
-        }
-        else
-        {
-            keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.IsValueAnAttribute = isWritingAttribute;
-        }
-
-        return base.OnColor(ref parent, value, format);
-    }
-
-    public override bool OnUri(ref Html parent, Uri value, string? format = null)
-    {
-        var index = parent.Index + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
-        keyhole.Uri = value;
-        keyhole.Type = KeyholeType.Uri;
-        keyhole.Format = format;
-        if (parent.IsAttribute)
-        {
-            keyhole.Key = parent.Key; // use parent's key, no need for its own
-            keyhole.ParentStart = parent.Index;
-        }
-        else
-        {
-            keyhole.Key = keyGenerator.GetNextKey();
-            keyhole.IsValueAnAttribute = isWritingAttribute;
-        }
-
-        return base.OnUri(ref parent, value, format);
-    }
-
-    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
+    public override bool OnInt(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnLong(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDouble(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    private bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
+        where T : struct, IUtf8SpanFormattable
     {
         var index = parent.Index + parent.Cursor;
         ref var keyhole = ref snapshot[index];
@@ -263,7 +230,49 @@ public class SnapshotComposer : BaseComposer
                 throw new NotSupportedException($"Type {typeof(T)} not supported");
         }
 
-        return base.OnValue(ref parent, value, format);
+        return CompleteFormattedValue();
+    }
+
+    public override bool OnColor(ref Html parent, Color value, string? format = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref snapshot[index];
+        keyhole.Color = value;
+        keyhole.Type = KeyholeType.Color;
+        keyhole.Format = format;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key; // use parent's key, no need for its own
+            keyhole.ParentStart = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.IsValueAnAttribute = isWritingAttribute;
+        }
+
+        return base.OnColor(ref parent, value, format);
+    }
+
+    public override bool OnUri(ref Html parent, Uri value, string? format = null)
+    {
+        var index = parent.Index + parent.Cursor;
+        ref var keyhole = ref snapshot[index];
+        keyhole.Uri = value;
+        keyhole.Type = KeyholeType.Uri;
+        keyhole.Format = format;
+        if (parent.IsAttribute)
+        {
+            keyhole.Key = parent.Key; // use parent's key, no need for its own
+            keyhole.ParentStart = parent.Index;
+        }
+        else
+        {
+            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.IsValueAnAttribute = isWritingAttribute;
+        }
+
+        return base.OnUri(ref parent, value, format);
     }
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, string.Empty, expression);

@@ -33,7 +33,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Reset();
     }
 
-    public override void OnElementBegins(ref Html html)
+    public override void OnElementBegin(ref Html html)
     {
         if (IsBeforeAppend)
         {
@@ -61,7 +61,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
     }
 
-    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         switch (attributeStatus)
         {
@@ -209,6 +209,54 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
+    public override bool OnInt(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnLong(ref Html parent, long value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnFloat(ref Html parent, float value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDouble(ref Html parent, double value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
+    public override bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
+        // where T : struct, IUtf8SpanFormattable // (inherited)
+    {
+        // Wraps the mutable value with two comment tags
+        // to separate it from any neighboring text.
+        // At the end of the body an inline script registers them 
+        // because we can't rely on id= or document.getElementById().
+        // It should end up looking like this:
+        // $"<!--key123-->{value:format}<!--/key123-->"
+
+        var key = keyGenerator.GetNextKey();
+        switch (attributeStatus)
+        {
+            case AttributeStatus.None:
+                Writer.WriteRaw($"<!--{key}-->");
+                base.OnUtf8SpanFormattable(ref parent, value, format);
+                Writer.WriteRaw($"<!--/{key}-->");
+                break;
+
+            case AttributeStatus.Pending:
+                HandleDeferredLiteral();
+                Writer.WriteRaw($"\"");
+                base.OnUtf8SpanFormattable(ref parent, value, format);
+                Writer.WriteRaw($"\" {key}");
+                // status jumps from .Pending to .None because the whole 
+                // attribute is just one value, not a bunch of keyholes+literals.
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.InProgress:
+                // No sentinels.  This keyhole is a part of a larger attribute
+                // composed of multiple keyholes+literals.  Write only the value.
+                base.OnUtf8SpanFormattable(ref parent, value, format);
+                break;
+        }
+
+        return CompleteFormattedValue();
+    }
+
     public override bool OnColor(ref Html parent, Color value, string? format = null)
     {
         var key = keyGenerator.GetNextKey();
@@ -243,45 +291,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool OnUri(ref Html parent, Uri value, string? format = null)
         => OnString(ref parent, value.ToString()); // TODO: Memory allocation!
         
-    public override bool OnValue<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (from base)
-    {
-        // Wraps the mutable value with two comment tags
-        // to separate it from any neighboring text.
-        // At the end of the body an inline script registers them 
-        // because we can't rely on id= or document.getElementById().
-        // It should end up looking like this:
-        // $"<!--key123-->{value:format}<!--/key123-->"
-
-        var key = keyGenerator.GetNextKey();
-        switch (attributeStatus)
-        {
-            case AttributeStatus.None:
-                Writer.WriteRaw($"<!--{key}-->");
-                base.OnValue(ref parent, value, format);
-                Writer.WriteRaw($"<!--/{key}-->");
-                break;
-
-            case AttributeStatus.Pending:
-                HandleDeferredLiteral();
-                Writer.WriteRaw($"\"");
-                base.OnValue(ref parent, value, format);
-                Writer.WriteRaw($"\" {key}");
-                // status jumps from .Pending to .None because the whole 
-                // attribute is just one value, not a bunch of keyholes+literals.
-                attributeStatus = AttributeStatus.None;
-                break;
-
-            case AttributeStatus.InProgress:
-                // No sentinels.  This keyhole is a part of a larger attribute
-                // composed of multiple keyholes+literals.  Write only the value.
-                base.OnValue(ref parent, value, format);
-                break;
-        }
-
-        return CompleteFormattedValue();
-    }
-
     private void HandleDeferredLiteral()
     {
         if (!deferredLiteral.HasValue)
@@ -315,11 +324,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return attributeName;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: false, format);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => WriteEventListener(ref parent, includeEventArg: true, format);
-    private bool WriteEventListener(ref Html parent, bool includeEventArg, string? format = null)
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, format);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, format);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
+    private bool OnListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         if (deferredLiteral != null)
             HandleDeferredLiteral();

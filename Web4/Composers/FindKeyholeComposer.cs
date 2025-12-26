@@ -40,7 +40,7 @@ public class FindKeyholeComposer : BaseComposer
         base.Reset();
     }
 
-    public override void OnElementBegins(ref Html html)
+    public override void OnElementBegin(ref Html html)
     {
         if (IsBeforeAppend)
         {
@@ -55,10 +55,10 @@ public class FindKeyholeComposer : BaseComposer
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
-        base.OnElementBegins(ref html);
+        base.OnElementBegin(ref html);
     }
 
-    public override bool OnElementEnds(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
     {
         if (key is null)
             return false;
@@ -67,12 +67,29 @@ public class FindKeyholeComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => ToCommonSignatureIfMatch(ref parent, listener);
+    public override bool OnString(ref Html parent, string value) => MoveNextKeyAndComplete();
+    public override bool OnBool(ref Html parent, bool value) => MoveNextKeyAndComplete();
+    public override bool OnInt(ref Html parent, int value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnLong(ref Html parent, long value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnFloat(ref Html parent, float value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDouble(ref Html parent, double value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDecimal(ref Html parent, decimal value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDateTime(ref Html parent, DateTime value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnDateOnly(ref Html parent, DateOnly value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnTimeSpan(ref Html parent, TimeSpan value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnTimeOnly(ref Html parent, TimeOnly value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnColor(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnUri(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
+    private bool MoveNextKeyAndComplete()
+    {
+        if (key is null)
+            return false;
 
-    private bool ToCommonSignatureIfMatch<T>(ref Html parent, T listener)
+        keyGenerator.MoveNextKey();
+        return CompleteFormattedValue();
+    }
+
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null)
     {
         if (key is null)
             return false;
@@ -80,58 +97,53 @@ public class FindKeyholeComposer : BaseComposer
         if (!keyGenerator.IsNextKey(key))
             return CompleteFormattedValue();
 
-        switch (listener)
-        {
-            // Example:
-            //   void OnClick()
-            //   {
-            //       Console.WriteLine($"Button was clicked");
-            //   }
-            case Action a:
-                eventListener.Action = a;
-                break;
-
-            // Example:
-            //   void OnClick(Event e)
-            //   {
-            //       Console.WriteLine($"Button {e.Target.ID} was clicked");
-            //   }
-            case Action<Event> ae:
-                eventListener.ActionEvent = ae;
-                break;
-
-            // Example:
-            //   async Task OnClick()
-            //   {
-            //       await Task.Delay(1000);
-            //       Console.WriteLine($"Button was clicked");
-            //   }
-            case Func<Task> f:
-                eventListener.Func = f;
-                break;
-
-            // Example:
-            //   async Task OnClick(Event e)
-            //   {
-            //       await Task.Delay(1000);
-            //       Console.WriteLine($"Button {e.Target.ID} was clicked");
-            //   }
-            case Func<Event, Task> fe:
-                eventListener.FuncEvent = fe;
-                break;
-        }
-
+        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
+        eventListener.Action = listener;
         key = null;
-        // Found it so save some time.  Return false to
-        // short circuit any following calls to html.Append*().
         return false;
     }
 
-    public override bool OnString(ref Html parent, string value) => MoveNextKeyAndComplete();
-    public override bool OnBool(ref Html parent, bool value) => MoveNextKeyAndComplete();
-    public override bool OnColor(ref Html parent, Color value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnUri(ref Html parent, Uri value, string? format = null) => MoveNextKeyAndComplete();
-    public override bool OnValue<T>(ref Html parent, T value, string? format = null) => MoveNextKeyAndComplete();
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null)
+    {
+        if (key is null)
+            return false;
+            
+        if (!keyGenerator.IsNextKey(key))
+            return CompleteFormattedValue();
+
+        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
+        eventListener.ActionEvent = listener;
+        key = null;
+        return false;
+    }
+
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null)
+    {
+        if (key is null)
+            return false;
+            
+        if (!keyGenerator.IsNextKey(key))
+            return CompleteFormattedValue();
+
+        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
+        eventListener.Func = listener;
+        key = null;
+        return false;
+    }
+
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null)
+    {
+        if (key is null)
+            return false;
+            
+        if (!keyGenerator.IsNextKey(key))
+            return CompleteFormattedValue();
+
+        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
+        eventListener.FuncEvent = listener;
+        key = null;
+        return false;
+    }
 
     public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
@@ -152,15 +164,6 @@ public class FindKeyholeComposer : BaseComposer
         }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-        return CompleteFormattedValue();
-    }
-
-    private bool MoveNextKeyAndComplete()
-    {
-        if (key is null)
-            return false;
-
-        keyGenerator.MoveNextKey();
         return CompleteFormattedValue();
     }
 }

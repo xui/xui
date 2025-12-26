@@ -66,7 +66,7 @@ public ref partial struct Html : IDisposable
 
         this.composer = composer;
         this.composer.Grow(literalLength, formattedCount);
-        this.composer.OnElementBegins(ref this);
+        this.composer.OnElementBegin(ref this);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -87,28 +87,6 @@ public ref partial struct Html : IDisposable
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
-    public bool AppendFormatted(int value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(long value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(float value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(double value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(decimal value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(DateTime value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(DateOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(TimeSpan value, string? format = null) => WriteMutableValueUtf8(value, format);
-    public bool AppendFormatted(TimeOnly value, string? format = null) => WriteMutableValueUtf8(value, format);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool WriteMutableValueUtf8<T>(T value, string? format = null)
-         where T : struct, IUtf8SpanFormattable
-    {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
-        var @continue = composer.OnValue(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
-
     public bool AppendFormatted(string value)
     {
         // Note: String doesn't implement IUtf8SpanFormattable
@@ -131,6 +109,96 @@ public ref partial struct Html : IDisposable
         return @continue;
     }
 
+    public bool AppendFormatted(int value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnInt(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+
+    public bool AppendFormatted(long value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnLong(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(float value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnFloat(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(double value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnDouble(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(decimal value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnDecimal(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(DateTime value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnDateTime(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(DateOnly value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnDateOnly(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(TimeSpan value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnTimeSpan(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
+    public bool AppendFormatted(TimeOnly value, string? format = null)
+    {
+        if (IsEven(Cursor))
+            AppendLiteral(string.Empty);
+
+        var @continue = composer.OnTimeOnly(ref this, value, format);
+        Cursor++;
+        return @continue;
+    }
+    
     public bool AppendFormatted(Color value, string? format = null)
     {
         if (IsEven(Cursor))
@@ -216,7 +284,7 @@ public ref partial struct Html : IDisposable
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = composer.OnElementEnds(ref this, html, format, expression);
+        var @continue = composer.OnElementEnd(ref this, html, format, expression);
         Cursor++;
         return @continue;
     }
