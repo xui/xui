@@ -33,7 +33,6 @@ public struct Keyhole
     // equality between two keyholes and we can bypass type conversion and compare 
     // value1's directly (as long at the types match too).
     public bool Boolean { readonly get => value1 != 0; set => value1 = value ? 1 : 0; }
-    public Color Color { readonly get => Color.FromArgb((int)value1); set => value1 = value.ToArgb(); }
     public int Integer { readonly get => (int)value1; set => value1 = value; }
     public long Long { readonly get => value1; set => value1 = value; }
     public float Float { readonly get => (float)BitConverter.Int64BitsToDouble(value1); set => value1 = BitConverter.DoubleToInt64Bits(value); }
@@ -43,6 +42,7 @@ public struct Keyhole
     public DateOnly DateOnly { readonly get => DateOnly.FromDayNumber((int)value1); set => value1 = value.DayNumber; }
     public TimeSpan TimeSpan { readonly get => new(value1); set => value1 = value.Ticks; }
     public TimeOnly TimeOnly { readonly get => new(value1); set => value1 = value.Ticks; }
+    public Color Color { readonly get => Color.FromArgb((int)value1); set => value1 = value.ToArgb(); }
 
     public Range Sequence { get => SequenceStart..(SequenceStart + SequenceLength); }
     public int SequenceStart { get => (int)((ulong)value1 >> 32); set => value1 = (long)((ulong)value << 32) | (uint)value1; }
