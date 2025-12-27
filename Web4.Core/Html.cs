@@ -290,7 +290,7 @@ public ref partial struct Html : IDisposable
     }
 
     // EX: { names.Select(n => new MyComponent(name: n)) }
-    public bool AppendFormatted<T>(Html.Enumerable<T> htmls, string? format = null, [CallerArgumentExpression(nameof(htmls))] string? expression = null)
+    public bool AppendFormatted<T>(Html.Enumerable<T> enumerable, string? format = null, [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);

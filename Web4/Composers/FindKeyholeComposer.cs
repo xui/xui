@@ -145,16 +145,16 @@ public class FindKeyholeComposer : BaseComposer
         return false;
     }
 
-    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
+    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
         if (this.key is null)
             return false;
             
-        var itemCount = partials.Count;
+        var itemCount = enumerable.Count;
         var key = keyGenerator.GetNextKey();
         keyGenerator.CreateNewGeneration(key, itemCount);
         int i = 0;
-        foreach (var partial in partials)
+        foreach (var partial in enumerable)
         {
             partial.AppendFormatted(partial);
             keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);

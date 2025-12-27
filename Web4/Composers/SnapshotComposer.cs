@@ -166,9 +166,9 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        var itemCount = partials.Count;
+    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+        var itemCount = enumerable.Count;
 
         // Reserve a keyhole to represent the loop itself
         var key = keyGenerator.GetNextKey();
@@ -185,7 +185,7 @@ public class SnapshotComposer : BaseComposer
 
         // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
         // triggers `OnElementBegin` to be called.
-        var enumerator = partials.GetEnumerator();
+        var enumerator = enumerable.GetEnumerator();
         while (enumerator.MoveNext())
         {
             var (selector, item) = enumerator.CurrentDeconstructed;
