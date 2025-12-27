@@ -166,8 +166,8 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    {
     public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    {
         var itemCount = enumerable.Count;
 
         // Reserve a keyhole to represent the loop itself
