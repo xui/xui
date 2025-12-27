@@ -196,10 +196,10 @@ public class SnapshotComposer : BaseComposer
             itemKeyhole.Key = partial.Key;
             itemKeyhole.Type = KeyholeType.Html;
             itemKeyhole.Format = format;
-            itemKeyhole.Tag = item; // TODO: Memory allocation?
             itemKeyhole.SequenceStart = partial.Index;
             itemKeyhole.SequenceLength = partial.Length;
             itemKeyhole.RelativeOrder = partial.RelativeOrder;
+            itemKeyhole.Tag = item; // TODO: Memory allocation?
 
             keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
         }
