@@ -187,7 +187,7 @@ public class SnapshotComposer : BaseComposer
         keyGenerator.CreateNewGeneration(key, itemCount);
 
         // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
-        // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
+        // triggers `OnElementBegin` to be called.
         var enumerator = partials.GetEnumerator();
         while (enumerator.MoveNext())
         {
