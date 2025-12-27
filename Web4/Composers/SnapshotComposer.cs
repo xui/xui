@@ -168,9 +168,6 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
-        // also implement ICollection then it will iterate in order to find the count
-        // which will instantiate Html values too early thus breaking all the things.
         var itemCount = partials.Count;
 
         // Reserve a keyhole to represent the loop itself
@@ -194,10 +191,9 @@ public class SnapshotComposer : BaseComposer
             var (selector, item) = enumerator.CurrentDeconstructed;
             var partial = selector(item);
 
-            keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
 
             ref var itemKeyhole = ref snapshot[index + i];
-            itemKeyhole.Key = keyGenerator.GetNextKey();
+            itemKeyhole.Key = partial.Key;
             itemKeyhole.Type = KeyholeType.Html;
             itemKeyhole.Format = format;
             itemKeyhole.Tag = item; // TODO: Memory allocation?
@@ -205,7 +201,7 @@ public class SnapshotComposer : BaseComposer
             itemKeyhole.SequenceLength = partial.Length;
             itemKeyhole.RelativeOrder = partial.RelativeOrder;
 
-            i++;
+            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
         }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
