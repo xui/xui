@@ -71,7 +71,10 @@ public abstract class BaseComposer
 
     public virtual bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        foreach (var partial in partials) { }
+        // TODO: Don't be appending to self.  
+        // Create a proper parent either here or in Html.cs.
+        foreach (var partial in partials)
+            partial.AppendFormatted(partial);
         return CompleteFormattedValue();
     }
 }

@@ -156,9 +156,8 @@ public class FindKeyholeComposer : BaseComposer
         int i = 0;
         foreach (var partial in partials)
         {
-            keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
-            keyGenerator.MoveNextKey();
-            i++;
+            partial.AppendFormatted(partial);
+            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
         }
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);

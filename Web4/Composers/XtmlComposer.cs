@@ -354,31 +354,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> partials, string? format = null, string? expression = null)
     {
-        // TODO: Under the hood this calls `IEnumerable<T>.Count<T>()`.  If it does not
-        // also implement ICollection then it will iterate in order to find the count
-        // which will instantiate Html values too early thus breaking all the things.
         var itemCount = partials.Count;
-
-        // Reserve a keyhole to represent the loop itself
         var key = keyGenerator.GetNextKey();
-
-        int i = 0, index = keyGenerator.WriteHead;
         keyGenerator.CreateNewGeneration(key, itemCount);
-
-        // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
-        // triggers `OnHtmlPartialBegins` and `OnHtmlPartialEnds` (above) to be called.
+        int i = 0;
         foreach (var partial in partials)
         {
-            keyGenerator.ReturnToParent(key, i * 2 - 1, itemCount);
-
-            Writer.WriteRaw($"""
-                <!--/{keyGenerator.GetNextKey()}-->
-                """);
-
-            i++;
+            partial.AppendFormatted(partial);
+            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
         }
 
+        // Keyhole to represent the loop itself, useful for zero-length use cases.
         Writer.WriteRaw($"<!--{key} /-->");
+
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
     }

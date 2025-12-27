@@ -295,6 +295,7 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
+        composer.Grow(0, htmls.Count);
         var @continue = composer.OnIterate(ref this, htmls, format, expression);
         Cursor++;
         return @continue;
