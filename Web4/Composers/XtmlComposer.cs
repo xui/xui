@@ -352,8 +352,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    {
     public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    {
         var itemCount = enumerable.Count;
         var key = keyGenerator.GetNextKey();
         keyGenerator.CreateNewGeneration(key, itemCount);
