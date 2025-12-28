@@ -276,7 +276,11 @@ public ref partial struct Html : IDisposable
     // MUTABLE ELEMENTS
 
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
-    public bool AppendFormatted([InterpolatedStringHandlerArgument("")] scoped Html html, int alignment = -1, string? format = null, [CallerArgumentExpression(nameof(html))] string? expression = null)
+    public bool AppendFormatted(
+        [InterpolatedStringHandlerArgument("")] scoped Html html, 
+        int alignment = -1, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
@@ -290,7 +294,10 @@ public ref partial struct Html : IDisposable
     }
 
     // EX: { names.Select(n => new MyComponent(name: n)) }
-    public bool AppendFormatted<T>(Html.Enumerable<T> enumerable, string? format = null, [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
+    public bool AppendFormatted<T>(
+        Html.Enumerable<T> enumerable, 
+        string? format = null, 
+        [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
