@@ -12,6 +12,7 @@ public class SnapshotComposer : BaseComposer
     public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
 
     private StableKeyTreeWalker keyGenerator = new();
+    public int writeHead = 0;
     private bool isWritingAttribute = false;
     private Keyhole[] snapshot = [];
 
@@ -60,16 +61,17 @@ public class SnapshotComposer : BaseComposer
             html.Index = 0;
             snapshot[0].SequenceLength = html.Length;
             keyGenerator.Reset();
-            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
         else
         {
             var key = keyGenerator.GetNextKey();
             html.Key = key;
-            html.Index = keyGenerator.WriteHead;
+            html.Index = writeHead;
             html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
-            keyGenerator.CreateNewGeneration(key, html.Length);
         }
+
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        writeHead += html.Length;
 
         base.OnElementBegin(ref html);
     }
@@ -174,7 +176,7 @@ public class SnapshotComposer : BaseComposer
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         htmls.Key = keyGenerator.GetNextKey();
-        htmls.Index = keyGenerator.WriteHead;
+        htmls.Index = writeHead;
 
         ref var keyhole = ref snapshot[parent.Index + parent.Cursor];
         keyhole.Key = htmls.Key;
@@ -184,7 +186,8 @@ public class SnapshotComposer : BaseComposer
         keyhole.SequenceStart = htmls.Index;
         keyhole.SequenceLength = htmls.Length;
 
-        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);        
+        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);      
+        writeHead += htmls.Length;  
         return true;
     }
 
