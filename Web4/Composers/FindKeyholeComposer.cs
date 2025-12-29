@@ -63,7 +63,9 @@ public class FindKeyholeComposer : BaseComposer
         if (key is null)
             return false;
 
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
+
         return CompleteFormattedValue();
     }
 
@@ -145,22 +147,32 @@ public class FindKeyholeComposer : BaseComposer
         return false;
     }
 
-    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         if (this.key is null)
             return false;
-            
-        var itemCount = enumerable.Count;
-        var key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(key, itemCount);
-        int i = 0;
+        
+        htmls.Key = keyGenerator.GetNextKey();
+        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);
+        return true;
+    }
+
+    public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    {
+        if (this.key is null)
+            return false;
+        
         foreach (var partial in enumerable)
         {
-            partial.AppendFormatted(partial);
-            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
+            htmls.AppendFormatted(partial);
         }
 
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
+    }
+
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    {
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        return true;
     }
 }

@@ -69,7 +69,8 @@ public abstract class BaseComposer
     public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
     public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => CompleteFormattedValue();
 
-    public virtual bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
+    public virtual bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
         // TODO: Don't be appending to self.  
         // Create a proper parent either here or in Html.cs.
@@ -77,4 +78,5 @@ public abstract class BaseComposer
             partial.AppendFormatted(partial);
         return CompleteFormattedValue();
     }
+    public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
 }

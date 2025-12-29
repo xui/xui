@@ -98,7 +98,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 throw new NotSupportedException("Attributes cannot have nested Htmls");
         }
 
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
+
         return CompleteFormattedValue();
     }
 
@@ -352,23 +354,30 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return CompleteFormattedValue();
     }
 
-    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        var itemCount = enumerable.Count;
-        var key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(key, itemCount);
-        int i = 0;
+        htmls.Key = keyGenerator.GetNextKey();
+        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);
+        return true;
+    }
+
+    public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    {
         foreach (var partial in enumerable)
         {
-            partial.AppendFormatted(partial);
-            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
+            htmls.AppendFormatted(partial);
         }
 
+        return CompleteFormattedValue();
+    }
+
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    {
         // Keyhole to represent the loop itself, useful for zero-length use cases.
-        Writer.WriteRaw($"<!--{key} /-->");
+        Writer.WriteRaw($"<!--{htmls.Key} /-->");
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
-        return CompleteFormattedValue();
+        return true;
     }
 
     private static readonly string BOOTLOADER = 

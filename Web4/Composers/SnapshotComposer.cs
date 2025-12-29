@@ -67,7 +67,7 @@ public class SnapshotComposer : BaseComposer
             var key = keyGenerator.GetNextKey();
             html.Key = key;
             html.Index = keyGenerator.WriteHead;
-            html.IsAttribute = isWritingAttribute;
+            html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
             keyGenerator.CreateNewGeneration(key, html.Length);
         }
 
@@ -87,14 +87,19 @@ public class SnapshotComposer : BaseComposer
             var index = parent.Index + parent.Cursor;
             ref var keyhole = ref snapshot[index];
             keyhole.Key = partial.Key;
-            keyhole.Type = partial.IsAttribute ? KeyholeType.Attribute : KeyholeType.Html;
+            keyhole.Type = partial.Type switch {
+                HtmlType.Markup => KeyholeType.Html,
+                HtmlType.Attribute => KeyholeType.Attribute,
+                HtmlType.Enumeration or _ => KeyholeType.Enumerable
+            };
             keyhole.Format = format;
             keyhole.Expression = expression;
             keyhole.SequenceStart = partial.Index;
             keyhole.SequenceLength = partial.Length;
             keyhole.RelativeOrder = partial.RelativeOrder;
 
-            keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+            var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+            keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
         }
 
         return base.OnElementEnd(ref parent, partial, format, expression);
@@ -136,7 +141,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
-        if (parent.IsAttribute)
+        if (parent.Type == HtmlType.Attribute)
         {
             keyhole.Key = parent.Key; // use parent's key, no need for its own
             keyhole.ParentStart = parent.Index;
@@ -166,45 +171,43 @@ public class SnapshotComposer : BaseComposer
         return CompleteFormattedValue();
     }
 
-    public override bool OnIterate<T>(ref Html parent, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        var itemCount = enumerable.Count;
+        htmls.Key = keyGenerator.GetNextKey();
+        htmls.Index = keyGenerator.WriteHead;
 
-        // Reserve a keyhole to represent the loop itself
-        var key = keyGenerator.GetNextKey();
-        ref var enumerableKeyhole = ref snapshot[parent.Index + parent.Cursor];
-        enumerableKeyhole.Key = key;
-        enumerableKeyhole.Type = KeyholeType.Enumerable;
-        enumerableKeyhole.Format = format;
-        enumerableKeyhole.Expression = expression;
-        enumerableKeyhole.SequenceStart = keyGenerator.WriteHead;
-        enumerableKeyhole.SequenceLength = itemCount;
+        ref var keyhole = ref snapshot[parent.Index + parent.Cursor];
+        keyhole.Key = htmls.Key;
+        keyhole.Type = KeyholeType.Enumerable;
+        keyhole.Format = format;
+        keyhole.Expression = expression;
+        keyhole.SequenceStart = keyGenerator.WriteHead;
+        keyhole.SequenceLength = htmls.Length;
 
-        int i = 0, index = keyGenerator.WriteHead;
-        keyGenerator.CreateNewGeneration(key, itemCount);
+        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);        
+        return true;
+    }
 
-        // Note: foreach calls `enumerator.Current` which creates new `Html`s which 
-        // triggers `OnElementBegin` to be called.
+    public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    {
         var enumerator = enumerable.GetEnumerator();
         while (enumerator.MoveNext())
         {
             var (selector, item) = enumerator.CurrentDeconstructed;
             var partial = selector(item);
 
+            htmls.AppendFormatted(partial);
 
-            ref var itemKeyhole = ref snapshot[index + i];
-            itemKeyhole.Key = partial.Key;
-            itemKeyhole.Type = KeyholeType.Html;
-            itemKeyhole.Format = format;
-            itemKeyhole.SequenceStart = partial.Index;
-            itemKeyhole.SequenceLength = partial.Length;
-            itemKeyhole.RelativeOrder = partial.RelativeOrder;
-            itemKeyhole.Tag = item; // TODO: Memory allocation?
-
-            keyGenerator.ReturnToParent(key, ++i * 2 - 1, itemCount);
+            ref var keyhole = ref snapshot[htmls.Index + htmls.Cursor - 1];
+            keyhole.Tag = item; // TODO: Memory allocation?
         }
 
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return CompleteFormattedValue();
+    }
+
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    {
+        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        return true;
     }
 }

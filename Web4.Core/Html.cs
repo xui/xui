@@ -17,7 +17,7 @@ public ref partial struct Html : IDisposable
     public int Index { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; } // TODO: Rename to `Segments` or `KeyCount`?
-    public bool IsAttribute { get; set; } // TODO: Rename to `SuppressSentinels` or something closer to its purpose?
+    public HtmlType Type { get; set; }
     public int RelativeOrder { get; private set; }
 
     /// <summary>
@@ -71,6 +71,15 @@ public ref partial struct Html : IDisposable
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
             AppendLiteral(string.Empty);
+    }
+
+    private Html(int enumerationCount, BaseComposer composer)
+    {
+        Key = string.Empty;
+        Length = enumerationCount;
+        Type = HtmlType.Enumeration;
+        this.composer = composer;
+        this.composer.Grow(0, enumerationCount);
     }
 
 
@@ -282,7 +291,7 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
-        if (IsEven(Cursor))
+        if (IsEven(Cursor) && Type != HtmlType.Enumeration)
             AppendLiteral(string.Empty);
         
         if (alignment >= 0)
@@ -302,8 +311,11 @@ public ref partial struct Html : IDisposable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
-        composer.Grow(0, htmls.Count);
-        var @continue = composer.OnIterate(ref this, htmls, format, expression);
+        var htmls = new Html(enumerable.Count, composer);
+        var @continue = 
+            composer.OnIteratorBegin(ref this, ref htmls, format, expression) &&
+            composer.OnIterate(ref this, ref htmls, enumerable, format, expression) &&
+            composer.OnIteratorEnd(ref this, ref htmls, format, expression);
         Cursor++;
         return @continue;
     }
