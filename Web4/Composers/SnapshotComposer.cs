@@ -181,7 +181,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.Type = KeyholeType.Enumerable;
         keyhole.Format = format;
         keyhole.Expression = expression;
-        keyhole.SequenceStart = keyGenerator.WriteHead;
+        keyhole.SequenceStart = htmls.Index;
         keyhole.SequenceLength = htmls.Length;
 
         keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);        
