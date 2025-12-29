@@ -46,6 +46,7 @@ public class SnapshotComposer : BaseComposer
     public override void Reset()
     {
         snapshot = [];
+        writeHead = 0;
         base.Reset();
     }
 
