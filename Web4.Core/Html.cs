@@ -9,8 +9,7 @@ namespace Web4;
 [StructLayout(LayoutKind.Auto)]
 public ref partial struct Html : IDisposable
 {
-    [ThreadStatic]
-    private static BaseComposer? scopedComposer;
+    [ThreadStatic] static BaseComposer? scopedComposer;
     private readonly BaseComposer composer;
 
     public string Key { get; set; }
