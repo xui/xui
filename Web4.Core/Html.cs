@@ -13,9 +13,9 @@ public ref partial struct Html : IDisposable
     private readonly BaseComposer composer;
 
     public string Key { get; set; }
-    public int Index { get; set; }
+    public int Start { get; set; }
     public int Cursor { get; private set; }
-    public int Length { get; private set; } // TODO: Rename to `Segments` or `KeyCount`?
+    public int Length { get; private set; }
     public HtmlType Type { get; set; }
     public int RelativeOrder { get; private set; }
 
