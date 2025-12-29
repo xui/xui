@@ -65,8 +65,7 @@ public class SnapshotComposer : BaseComposer
         }
         else
         {
-            var key = keyGenerator.GetNextKey();
-            html.Key = key;
+            html.Key = keyGenerator.GetNextKey();
             html.Start = writeHead;
             html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
             writeHead += html.Length;
