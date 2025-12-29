@@ -68,10 +68,10 @@ public class SnapshotComposer : BaseComposer
             html.Key = key;
             html.Start = writeHead;
             html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
+            writeHead += html.Length;
         }
 
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
-        writeHead += html.Length;
 
         base.OnElementBegin(ref html);
     }
