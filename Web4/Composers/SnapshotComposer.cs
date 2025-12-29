@@ -61,6 +61,7 @@ public class SnapshotComposer : BaseComposer
             html.Key = string.Empty;
             html.Start = 0;
             snapshot[0].SequenceLength = html.Length;
+            writeHead += html.Length;
         }
         else
         {
