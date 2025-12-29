@@ -37,7 +37,6 @@ public class FindKeyholeComposer : BaseComposer
     {
         key = null;
         eventListener = default;
-        keyGenerator.Reset();
         base.Reset();
     }
 

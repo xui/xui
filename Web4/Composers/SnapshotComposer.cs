@@ -47,7 +47,6 @@ public class SnapshotComposer : BaseComposer
     {
         snapshot = [];
         writeHead = 0;
-        keyGenerator.Reset();
         base.Reset();
     }
 

@@ -30,7 +30,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         Window = null!;
         attributeStatus = AttributeStatus.None;
-        keyGenerator.Reset();
         base.Reset();
     }
 

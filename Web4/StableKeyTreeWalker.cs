@@ -25,11 +25,4 @@ internal struct StableKeyTreeWalker()
         keyCursor = (cursor >> 1) + 1;
         parentLength = numberOfChildren;
     }
-
-    public void Reset()
-    {
-        parentKey = string.Empty;
-        keyCursor = 0;
-        parentLength = 0;
-    }
 }
