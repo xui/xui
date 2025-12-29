@@ -163,8 +163,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnStringKeyhole(ref parent, value);
-                break;
+                return base.OnStringKeyhole(ref parent, value);
         }
 
         return CompleteFormattedValue();
@@ -204,8 +203,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnBoolKeyhole(ref parent, value);
-                break;
+                return base.OnBoolKeyhole(ref parent, value);
         }
 
         return CompleteFormattedValue();
@@ -256,7 +254,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
@@ -287,7 +285,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
