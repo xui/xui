@@ -30,6 +30,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         Window = null!;
         attributeStatus = AttributeStatus.None;
+        keyGenerator.Reset();
         base.Reset();
     }
 
@@ -38,19 +39,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (IsBeforeAppend)
         {
             html.Key = string.Empty;
-            keyGenerator.Reset();
-            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
         else
         {
-            var key = keyGenerator.GetNextKey();
-            html.Key = key;
-            keyGenerator.CreateNewGeneration(key, html.Length);
+            html.Key = keyGenerator.GetNextKey();
 
             switch (attributeStatus)
             {
                 case AttributeStatus.None:
-                    Writer.WriteRaw($"<!--{key}-->");
+                    Writer.WriteRaw($"<!--{html.Key}-->");
                     break;
                 case AttributeStatus.Pending:
                     HandleDeferredLiteral();
@@ -59,6 +56,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                     break;
             }
         }
+
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)

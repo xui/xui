@@ -37,6 +37,7 @@ public class FindKeyholeComposer : BaseComposer
     {
         key = null;
         eventListener = default;
+        keyGenerator.Reset();
         base.Reset();
     }
 
@@ -45,15 +46,13 @@ public class FindKeyholeComposer : BaseComposer
         if (IsBeforeAppend)
         {
             html.Key = string.Empty;
-            keyGenerator.Reset();
-            keyGenerator.CreateNewGeneration(string.Empty, html.Length);
         }
         else
         {
-            var key = keyGenerator.GetNextKey();
-            html.Key = key;
-            keyGenerator.CreateNewGeneration(key, html.Length);
+            html.Key = keyGenerator.GetNextKey();
         }
+
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
         base.OnElementBegin(ref html);
     }

@@ -47,6 +47,7 @@ public class SnapshotComposer : BaseComposer
     {
         snapshot = [];
         writeHead = 0;
+        keyGenerator.Reset();
         base.Reset();
     }
 
@@ -61,7 +62,6 @@ public class SnapshotComposer : BaseComposer
             html.Key = string.Empty;
             html.Start = 0;
             snapshot[0].SequenceLength = html.Length;
-            keyGenerator.Reset();
         }
         else
         {
