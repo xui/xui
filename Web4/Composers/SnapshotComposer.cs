@@ -12,7 +12,7 @@ public class SnapshotComposer : BaseComposer
     public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
 
     private StableKeyTreeWalker keyGenerator = new();
-    public int writeHead = 0;
+    private int writeHead = 0;
     private bool isWritingAttribute = false;
     private Keyhole[] snapshot = [];
 
