@@ -441,7 +441,7 @@
           key = key.replace(' /', '');
           keyholes.set(key, comment);
         } else {
-          comment.parentElement.removeChild(comment);
+          comment.parentElement?.removeChild(comment);
         }
       } else if (key.startsWith('/key')) {
         key = key.replace('/', '');
