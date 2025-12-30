@@ -57,6 +57,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
 
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
+
+        base.OnElementBegin(ref html);
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)

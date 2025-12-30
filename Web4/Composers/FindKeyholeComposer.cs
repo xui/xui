@@ -64,7 +64,7 @@ public class FindKeyholeComposer : BaseComposer
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
-        return CompleteFormattedValue();
+        return base.OnElementEnd(ref parent, partial, format, expression);
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();
