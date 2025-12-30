@@ -55,22 +55,22 @@ public class SnapshotComposer : BaseComposer
         if (IsRootTemplate)
         {
             html.Start = -1;
+            return;
         }
-        else if (IsBeforeAppend)
+        
+        if (IsBeforeAppend)
         {
             html.Key = string.Empty;
-            html.Start = 0;
             snapshot[0].SequenceLength = html.Length;
-            writeHead += html.Length;
         }
         else
         {
             html.Key = keyGenerator.GetNextKey();
-            html.Start = writeHead;
-            html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
-            writeHead += html.Length;
         }
 
+        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
+        html.Start = writeHead;
+        writeHead += html.Length;
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
         base.OnElementBegin(ref html);
