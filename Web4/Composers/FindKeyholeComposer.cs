@@ -56,7 +56,7 @@ public class FindKeyholeComposer : BaseComposer
         base.OnElementBegin(ref html);
     }
 
-    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         if (key is null)
             return false;
@@ -64,7 +64,7 @@ public class FindKeyholeComposer : BaseComposer
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
-        return base.OnElementEnd(ref parent, partial, format, expression);
+        return base.OnElementEnd(ref parent, html, format, expression);
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();
@@ -160,9 +160,9 @@ public class FindKeyholeComposer : BaseComposer
         if (this.key is null)
             return false;
         
-        foreach (var partial in enumerable)
+        foreach (var html in enumerable)
         {
-            htmls.AppendFormatted(partial);
+            htmls.AppendFormatted(html);
         }
 
         return CompleteFormattedValue();

@@ -76,7 +76,7 @@ public class SnapshotComposer : BaseComposer
         base.OnElementBegin(ref html);
     }
 
-    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
@@ -88,23 +88,23 @@ public class SnapshotComposer : BaseComposer
             // so that we can set the partial's type, expression, key, and range.
             var index = parent.Start + parent.Cursor;
             ref var keyhole = ref snapshot[index];
-            keyhole.Key = partial.Key;
-            keyhole.Type = partial.Type switch {
+            keyhole.Key = html.Key;
+            keyhole.Type = html.Type switch {
                 HtmlType.Markup => KeyholeType.Html,
                 HtmlType.Attribute => KeyholeType.Attribute,
                 HtmlType.Enumeration or _ => KeyholeType.Enumerable
             };
             keyhole.Format = format;
             keyhole.Expression = expression;
-            keyhole.SequenceStart = partial.Start;
-            keyhole.SequenceLength = partial.Length;
-            keyhole.RelativeOrder = partial.RelativeOrder;
+            keyhole.SequenceStart = html.Start;
+            keyhole.SequenceLength = html.Length;
+            keyhole.RelativeOrder = html.RelativeOrder;
 
             var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
             keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
         }
 
-        return base.OnElementEnd(ref parent, partial, format, expression);
+        return base.OnElementEnd(ref parent, html, format, expression);
     }
 
     public override bool OnMarkup(ref Html parent, string literal)

@@ -61,26 +61,26 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.OnElementBegin(ref html);
     }
 
-    public override bool OnElementEnd(ref Html parent, scoped Html partial, string? format = null, string? expression = null)
+    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                if (partial.Key?.Length > 0)
+                if (html.Key?.Length > 0)
                 {
                     Writer.WriteRaw($"""
-                        <!--/{partial.Key}-->
+                        <!--/{html.Key}-->
                         """);
 
                     if (format is not null)
                     {
                         Writer.WriteRaw($$"""
                             <style>
-                                ::view-transition-group(web4-fwd-{{partial.Key}}, web4-rev-{{partial.Key}}) { animation: none; }
-                                ::view-transition-new(web4-fwd-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
-                                ::view-transition-old(web4-fwd-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out; }
-                                ::view-transition-new(web4-rev-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
-                                ::view-transition-old(web4-rev-{{partial.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in reverse; }
+                                ::view-transition-group(web4-fwd-{{html.Key}}, web4-rev-{{html.Key}}) { animation: none; }
+                                ::view-transition-new(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
+                                ::view-transition-old(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out; }
+                                ::view-transition-new(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
+                                ::view-transition-old(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in reverse; }
                             </style>
                             """);
                     }
@@ -89,7 +89,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
             case AttributeStatus.InProgress:
                 Writer.WriteRaw($"""
-                    " {partial.Key}
+                    " {html.Key}
                     """);
                 attributeStatus = AttributeStatus.None;
                 break;
@@ -101,7 +101,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
-        return base.OnElementEnd(ref parent, partial, format, expression);
+        return base.OnElementEnd(ref parent, html, format, expression);
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
