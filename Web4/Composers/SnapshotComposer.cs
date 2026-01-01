@@ -54,7 +54,7 @@ public class SnapshotComposer : BaseComposer
     public override void OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
-        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
+        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         html.Start = writeHead;
         writeHead += html.Length;
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
@@ -76,7 +76,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
             HtmlType.Enumeration => KeyholeType.Enumerable,
-            HtmlType.Markup or _ => KeyholeType.Html,
+            HtmlType.Element or _ => KeyholeType.Html,
         };
         keyhole.Format = format;
         keyhole.Expression = expression;
