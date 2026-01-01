@@ -45,7 +45,6 @@ public class FindKeyholeComposer : BaseComposer
     {
         html.Key = keyGenerator.GetNextKey();
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
-
         base.OnElementBegin(ref html);
     }
 
