@@ -47,27 +47,13 @@ public class SnapshotComposer : BaseComposer
     {
         snapshot = [];
         writeHead = 0;
+        keyGenerator.Reset();
         base.Reset();
     }
 
     public override void OnElementBegin(ref Html html)
     {
-        if (IsRootTemplate)
-        {
-            html.Start = -1;
-            return;
-        }
-        
-        if (IsBeforeAppend)
-        {
-            html.Key = string.Empty;
-            snapshot[0].SequenceLength = html.Length;
-        }
-        else
-        {
-            html.Key = keyGenerator.GetNextKey();
-        }
-
+        html.Key = keyGenerator.GetNextKey();
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Markup;
         html.Start = writeHead;
         writeHead += html.Length;
@@ -81,44 +67,38 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
-        if (parent.Start >= 0)
-        {
-            // Since the partial has been written, 
-            // return to where we left off (a little like recursion).
-            // so that we can set the partial's type, expression, key, and range.
-            var index = parent.Start + parent.Cursor;
-            ref var keyhole = ref snapshot[index];
-            keyhole.Key = html.Key;
-            keyhole.Type = html.Type switch {
-                HtmlType.Markup => KeyholeType.Html,
-                HtmlType.Attribute => KeyholeType.Attribute,
-                HtmlType.Enumeration or _ => KeyholeType.Enumerable
-            };
-            keyhole.Format = format;
-            keyhole.Expression = expression;
-            keyhole.SequenceStart = html.Start;
-            keyhole.SequenceLength = html.Length;
-            keyhole.RelativeOrder = html.RelativeOrder;
+        // Since the partial has been written, 
+        // return to where we left off (a little like recursion).
+        // so that we can set the partial's type, expression, key, and range.
+        var index = parent.Start + parent.Cursor;
+        ref var keyhole = ref snapshot[index];
+        keyhole.Key = html.Key;
+        keyhole.Type = html.Type switch {
+            HtmlType.Attribute => KeyholeType.Attribute,
+            HtmlType.Enumeration => KeyholeType.Enumerable,
+            HtmlType.Markup or _ => KeyholeType.Html,
+        };
+        keyhole.Format = format;
+        keyhole.Expression = expression;
+        keyhole.SequenceStart = html.Start;
+        keyhole.SequenceLength = html.Length;
+        keyhole.RelativeOrder = html.RelativeOrder;
 
-            var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
-            keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
-        }
+        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
         return base.OnElementEnd(ref parent, html, format, expression);
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
     {
-        if (parent.Start >= 0)
-        {
-            var index = parent.Start + parent.Cursor;
-            ref var keyhole = ref snapshot[index];
-            keyhole.String = literal;
-            keyhole.Type = KeyholeType.StringLiteral;
-            keyhole.SequenceStart = index;
-            keyhole.SequenceLength = parent.Length;
-            isWritingAttribute = literal.EndsWith('=');
-        }
+        var index = parent.Start + parent.Cursor;
+        ref var keyhole = ref snapshot[index];
+        keyhole.String = literal;
+        keyhole.Type = KeyholeType.StringLiteral;
+        keyhole.SequenceStart = index;
+        keyhole.SequenceLength = parent.Length;
+        isWritingAttribute = literal.EndsWith('=');
 
         return base.OnMarkup(ref parent, literal);
     }

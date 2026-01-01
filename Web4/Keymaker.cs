@@ -17,16 +17,15 @@ internal readonly struct Keymaker
     /// <returns></returns>
     public static string GetKey(string parentKey, int cursor, int siblings)
     {
-        var isRoot = parentKey.Length == 0;
-        var parentKeyLength = isRoot ? 3 : parentKey.Length; // 3 for "key" prefix.
+        if (parentKey.Length == 0)
+            return "key";
+
+        var parentKeyLength = parentKey.Length;
         var numberWidth = GetNumberWidth(siblings / 2);
         var keyLength = parentKeyLength + numberWidth;
 
         Span<char> key = stackalloc char[keyLength];
-        if (isRoot)
-            "key".CopyTo(key);
-        else
-            parentKey.CopyTo(key);
+        parentKey.CopyTo(key);
 
         while (numberWidth > 0)
         {
@@ -48,16 +47,15 @@ internal readonly struct Keymaker
 
     public static bool IsKey(string compare, string parentKey, int cursor, int siblings)
     {
-        var isRoot = parentKey.Length == 0;
-        var parentKeyLength = isRoot ? 3 : parentKey.Length; // 3 for "key" prefix.
+        if (parentKey.Length == 0)
+            return "key".SequenceEqual(compare);
+
+        var parentKeyLength = parentKey.Length;
         var numberWidth = GetNumberWidth(siblings / 2);
         var keyLength = parentKeyLength + numberWidth;
 
         Span<char> key = stackalloc char[keyLength];
-        if (isRoot)
-            "key".CopyTo(key);
-        else
-            parentKey.CopyTo(key);
+        parentKey.CopyTo(key);
 
         while (numberWidth > 0)
         {

@@ -5,4 +5,5 @@ public enum HtmlType
     Markup,
     Attribute,
     Enumeration,
+    Wrapper,
 }

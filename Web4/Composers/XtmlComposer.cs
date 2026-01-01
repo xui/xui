@@ -30,30 +30,24 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         Window = null!;
         attributeStatus = AttributeStatus.None;
+        keyGenerator.Reset();
         base.Reset();
     }
 
     public override void OnElementBegin(ref Html html)
     {
-        if (IsBeforeAppend)
-        {
-            html.Key = string.Empty;
-        }
-        else
-        {
-            html.Key = keyGenerator.GetNextKey();
+        html.Key = keyGenerator.GetNextKey();
 
-            switch (attributeStatus)
-            {
-                case AttributeStatus.None:
-                    Writer.WriteRaw($"<!--{html.Key}-->");
-                    break;
-                case AttributeStatus.Pending:
-                    HandleDeferredLiteral();
-                    Writer.WriteRaw($"\"");
-                    attributeStatus = AttributeStatus.InProgress;
-                    break;
-            }
+        switch (attributeStatus)
+        {
+            case AttributeStatus.None:
+                Writer.WriteRaw($"<!--{html.Key}-->");
+                break;
+            case AttributeStatus.Pending:
+                HandleDeferredLiteral();
+                Writer.WriteRaw($"\"");
+                attributeStatus = AttributeStatus.InProgress;
+                break;
         }
 
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
@@ -66,24 +60,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                if (html.Key?.Length > 0)
-                {
-                    Writer.WriteRaw($"""
-                        <!--/{html.Key}-->
-                        """);
+                Writer.WriteRaw($"<!--/{html.Key}-->");
 
-                    if (format is not null)
-                    {
-                        Writer.WriteRaw($$"""
-                            <style>
-                                ::view-transition-group(web4-fwd-{{html.Key}}, web4-rev-{{html.Key}}) { animation: none; }
-                                ::view-transition-new(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in; }
-                                ::view-transition-old(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out; }
-                                ::view-transition-new(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-out reverse; }
-                                ::view-transition-old(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{format}}-in reverse; }
-                            </style>
-                            """);
-                    }
+                if (format is {} transition)
+                {
+                    Writer.WriteRaw($$"""
+                        <style>
+                            ::view-transition-group(web4-fwd-{{html.Key}}, web4-rev-{{html.Key}}) { animation: none; }
+                            ::view-transition-new(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in; }
+                            ::view-transition-old(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out; }
+                            ::view-transition-new(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out reverse; }
+                            ::view-transition-old(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in reverse; }
+                        </style>
+                        """);
                 }
                 break;
 

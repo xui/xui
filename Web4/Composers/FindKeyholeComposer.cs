@@ -37,20 +37,13 @@ public class FindKeyholeComposer : BaseComposer
     {
         key = null;
         eventListener = default;
+        keyGenerator.Reset();
         base.Reset();
     }
 
     public override void OnElementBegin(ref Html html)
     {
-        if (IsBeforeAppend)
-        {
-            html.Key = string.Empty;
-        }
-        else
-        {
-            html.Key = keyGenerator.GetNextKey();
-        }
-
+        html.Key = keyGenerator.GetNextKey();
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
         base.OnElementBegin(ref html);

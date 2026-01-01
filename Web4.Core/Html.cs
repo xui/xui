@@ -65,7 +65,16 @@ public ref partial struct Html : IDisposable
 
         this.composer = composer;
         this.composer.Grow(literalLength, formattedCount);
-        this.composer.OnElementBegin(ref this);
+
+        if (composer.IsWrapper)
+        {
+            Key = string.Empty;
+            Type = HtmlType.Wrapper;
+        }
+        else
+        {
+            this.composer.OnElementBegin(ref this);
+        }
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -290,6 +299,8 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
+        if (Type == HtmlType.Wrapper)
+            return true;
         if (IsEven(Cursor) && Type != HtmlType.Enumeration)
             AppendLiteral(string.Empty);
         

@@ -9,7 +9,7 @@ public abstract class BaseComposer
     private int literalLengthRemaining = 0;
     private int formattedValuesRemaining = 0;
 
-    public bool IsRootTemplate => literalLengthTotal == 0;
+    public bool IsWrapper => literalLengthTotal == 0;
     
     public bool IsBeforeAppend => formattedCountTotal == formattedValuesRemaining && literalLengthTotal == literalLengthRemaining;
     
