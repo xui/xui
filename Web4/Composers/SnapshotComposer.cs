@@ -67,6 +67,12 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
+        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
+
+        if (parent.Type == HtmlType.Wrapper)
+            return base.OnElementEnd(ref parent, html, format, expression);
+
         // Since the partial has been written, 
         // return to where we left off (a little like recursion).
         // so that we can set the partial's type, expression, key, and range.
@@ -83,9 +89,6 @@ public class SnapshotComposer : BaseComposer
         keyhole.SequenceStart = html.Start;
         keyhole.SequenceLength = html.Length;
         keyhole.RelativeOrder = html.RelativeOrder;
-
-        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
-        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
         return base.OnElementEnd(ref parent, html, format, expression);
     }

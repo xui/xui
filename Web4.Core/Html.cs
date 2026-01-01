@@ -299,8 +299,9 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
-        if (Type == HtmlType.Wrapper)
+        if (html.Type == HtmlType.Wrapper)
             return true;
+
         if (IsEven(Cursor) && Type != HtmlType.Enumeration)
             AppendLiteral(string.Empty);
         
