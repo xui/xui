@@ -36,7 +36,6 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private void WriteKeyhole(int index, Keyhole keyhole)
     {
-                
         switch (keyhole.Type)
         {
             case KeyholeType.StringLiteral:
