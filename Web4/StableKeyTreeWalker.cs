@@ -5,8 +5,8 @@ namespace Web4;
 internal struct StableKeyTreeWalker()
 {
     private string parentKey = string.Empty;
-    private int parentLength = 0;
     private int keyCursor = 0;
+    private int parentLength = 0;
 
     public void MoveNextKey() => keyCursor++;
     public string GetNextKey() => Keymaker.GetKey(parentKey, keyCursor++, parentLength);
