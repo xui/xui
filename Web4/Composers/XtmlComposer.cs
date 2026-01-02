@@ -138,8 +138,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnStringKeyhole(ref Html parent, string value)
     {
-        // Strings have no format strings.
-
         var key = keyGenerator.GetNextKey();
         switch (attributeStatus)
         {
