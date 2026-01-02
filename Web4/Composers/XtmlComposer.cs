@@ -60,6 +60,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
         switch (attributeStatus)
         {
@@ -72,8 +73,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 attributeStatus = AttributeStatus.InProgress;
                 break;
         }
-
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
         return base.OnElementBegin(ref html);
     }
