@@ -45,10 +45,10 @@ public abstract class BaseComposer
         formattedCountTotal = 0;
     }
 
-    public virtual void OnTemplateBegin(ref Html html) { }
+    public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
     public virtual bool OnTemplateEnd(ref Html html) => true;
 
-    public virtual void OnElementBegin(ref Html html) { }
+    public virtual bool OnElementBegin(ref Html html) => true;
     public virtual bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null) => CompleteFormattedValue();
 
     public virtual bool OnMarkup(ref Html parent, string literal) => CompleteStringLiteral(literal.Length);

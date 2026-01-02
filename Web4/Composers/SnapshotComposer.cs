@@ -51,17 +51,18 @@ public class SnapshotComposer : BaseComposer
         base.Reset();
     }
 
-    public override void OnTemplateBegin(ref Html html)
+    public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
         // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
         html.Key = "key";
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
         html.Start = writeHead;
         writeHead += html.Length;
-        base.OnTemplateBegin(ref html);
+
+        return base.OnTemplateBegin(ref html, ref literal);
     }
 
-    public override void OnElementBegin(ref Html html)
+    public override bool OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
@@ -69,7 +70,7 @@ public class SnapshotComposer : BaseComposer
         writeHead += html.Length;
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
 
-        base.OnElementBegin(ref html);
+        return base.OnElementBegin(ref html);
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
