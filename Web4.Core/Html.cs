@@ -65,8 +65,8 @@ public ref partial struct Html : IDisposable
         RelativeOrder = relativeOrder;
         Key = string.Empty;
         Type = true switch {
-            _ when composer.IsWrapper && literalLength == 0 => HtmlType.Wrapper,
-            _ when composer.IsWrapper && literalLength > 0 => HtmlType.Template,
+            _ when composer.BeforeAppend && literalLength == 0 => HtmlType.Wrapper,
+            _ when composer.BeforeAppend && literalLength > 0 => HtmlType.Template,
             _ => HtmlType.Element
         };
 
