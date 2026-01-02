@@ -51,6 +51,16 @@ public class SnapshotComposer : BaseComposer
         base.Reset();
     }
 
+    public override void OnTemplateBegin(ref Html html)
+    {
+        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
+        html.Key = "key";
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        html.Start = writeHead;
+        writeHead += html.Length;
+        base.OnTemplateBegin(ref html);
+    }
+
     public override void OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
@@ -66,9 +76,6 @@ public class SnapshotComposer : BaseComposer
     {
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
-
-        if (parent.Type == HtmlType.Wrapper)
-            return base.OnElementEnd(ref parent, html, format, expression);
 
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);

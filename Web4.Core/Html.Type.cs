@@ -6,4 +6,5 @@ public enum HtmlType
     Attribute,
     Enumeration,
     Wrapper,
+    Template,
 }

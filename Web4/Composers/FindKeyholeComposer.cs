@@ -41,6 +41,14 @@ public class FindKeyholeComposer : BaseComposer
         base.Reset();
     }
 
+    public override void OnTemplateBegin(ref Html html)
+    {
+        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
+        html.Key = "key";
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        base.OnTemplateBegin(ref html);
+    }
+    
     public override void OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();

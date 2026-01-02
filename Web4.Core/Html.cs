@@ -60,20 +60,29 @@ public ref partial struct Html : IDisposable
 
     private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
     {
+        this.composer = composer;
         Length = 2 * formattedCount + 1;
         RelativeOrder = relativeOrder;
+        Key = string.Empty;
+        Type = true switch {
+            _ when composer.IsWrapper && literalLength == 0 => HtmlType.Wrapper,
+            _ when composer.IsWrapper && literalLength > 0 => HtmlType.Template,
+            _ => HtmlType.Element
+        };
 
-        this.composer = composer;
-        this.composer.Grow(literalLength, formattedCount);
+        composer.Grow(literalLength, formattedCount);
 
-        if (composer.IsWrapper)
+        switch (Type)
         {
-            Key = string.Empty;
-            Type = HtmlType.Wrapper;
-        }
-        else
-        {
-            this.composer.OnElementBegin(ref this);
+            case HtmlType.Wrapper:
+                // Ignore these, e.g. $"{template()}" and any others with zero literals.
+                break;
+            case HtmlType.Template:
+                composer.OnTemplateBegin(ref this);
+                break;
+            case HtmlType.Element:
+                composer.OnElementBegin(ref this);
+                break;
         }
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
@@ -306,7 +315,10 @@ public ref partial struct Html : IDisposable
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = composer.OnElementEnd(ref this, html, format, expression);
+        var @continue = html.Type == HtmlType.Template
+            ? composer.OnTemplateEnd(ref html)
+            : composer.OnElementEnd(ref this, html, format, expression);
+
         Cursor++;
         return @continue;
     }

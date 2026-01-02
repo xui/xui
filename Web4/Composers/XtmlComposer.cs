@@ -34,6 +34,29 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Reset();
     }
 
+    public override void OnTemplateBegin(ref Html html)
+    {
+        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
+        html.Key = "key";
+        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        base.OnTemplateBegin(ref html);
+    }
+
+    public override bool OnTemplateEnd(ref Html html)
+    {
+        if (isBodyOmitted)
+        {
+            Encoding.UTF8.GetBytes("""
+                    
+                    </body>
+                </html>
+                """,
+                Writer);
+        }
+
+        return base.OnTemplateEnd(ref html);
+    }
+
     public override void OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
@@ -111,19 +134,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
         }
 
-        CompleteStringLiteral(literal.Length);
-
-        if (isBodyOmitted && literal.Length == 0 && IsFinalLiteral)
-        {
-            Encoding.UTF8.GetBytes("""
-                    
-                    </body>
-                </html>
-                """,
-                Writer);
-        }
-
-        return true;
+        return CompleteStringLiteral(literal.Length);
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value)
