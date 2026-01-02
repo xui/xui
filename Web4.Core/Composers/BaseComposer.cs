@@ -11,10 +11,6 @@ public abstract class BaseComposer
 
     public bool IsWrapper => literalLengthTotal == 0;
     
-    public bool IsBeforeAppend => formattedCountTotal == formattedValuesRemaining && literalLengthTotal == literalLengthRemaining;
-    
-    public bool IsFinalLiteral => literalLengthRemaining == 0 && formattedValuesRemaining == 1;
-
     public void Grow(int literalLength, int formattedCount)
     {
         literalLengthTotal += literalLength;
