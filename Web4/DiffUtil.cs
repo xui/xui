@@ -158,7 +158,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 KeyholeType.EventListener =>
                     false, // Event listeners never need to be diff'd, their only purpose is for lookup.
                 KeyholeType.StringLiteral =>
-                    throw new InvalidOperationException("It should be impossible to find a StringLiteral in an odd index"),
+                    throw new InvalidOperationException($"It should be impossible to find a StringLiteral in an odd index: {i}"),
                 _ =>
                     throw new InvalidOperationException("Unnamed enum values are not supported")
             };
