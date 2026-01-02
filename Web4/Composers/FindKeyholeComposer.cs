@@ -55,7 +55,6 @@ public class FindKeyholeComposer : BaseComposer
 
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
-
         return base.OnElementEnd(ref parent, html, format, expression);
     }
 
