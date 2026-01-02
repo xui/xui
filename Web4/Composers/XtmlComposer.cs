@@ -39,6 +39,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
         html.Key = "key";
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
+
+        InjectBootloader(ref literal);
+
         return base.OnTemplateBegin(ref html, ref literal);
     }
 
@@ -117,23 +120,18 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnMarkup(ref Html parent, string literal)
     {
-        int offset = IsBeforeAppend ? InjectBootloader(literal) : 0;
-
-        // This makes the assumption that keyholes preceeded with an '=' are 
-        // always attributes.  Attributes need different sentinels than regular
-        // keyholes and boolean attributes have a few strange rules to follow:
+        // This makes the assumption that keyholes preceeded with an '=' are always attributes.  
+        // Attributes need different sentinels than regular keyholes and boolean attributes 
+        // have a few strange rules to follow:
         // https://developer.mozilla.org/en-US/docs/Glossary/Boolean/HTML
         if (literal.EndsWith('='))
         {
             attributeStatus = AttributeStatus.Pending;
-            deferredLiteral = literal.AsMemory(offset);
-        }
-        else
-        {
-            Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
+            deferredLiteral = literal.AsMemory();
+            return CompleteStringLiteral(literal.Length);
         }
 
-        return CompleteStringLiteral(literal.Length);
+        return base.OnMarkup(ref parent, literal);
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value)
@@ -382,12 +380,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         )
         .ReadToEnd();
 
-    private int InjectBootloader(string literal)
+    private void InjectBootloader(ref string literal)
     {
-        // Wait for the next append where there's actual content.
-        if (literal.Length == 0)
-            return 0;
-
         Writer.WriteRaw($"""
             <!doctype html>
             <html>
@@ -396,19 +390,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             """);
 
         // Write dev-included <head> content (if any)
-        int headStart = literal.IndexOf("<head>");
-        bool isHeadOmitted = headStart < 0;
-        if (!isHeadOmitted)
+        int headStart = literal.IndexOf("<head>", StringComparison.Ordinal);
+        if (headStart >= 0)
         {
             headStart += 6; // "<head>".Length;
-            int headEnd = literal.IndexOf("</head>");
+            int headEnd = literal.IndexOf("</head>", headStart, StringComparison.Ordinal);
             if (headEnd > headStart)
-            {
-                Encoding.UTF8.GetBytes(
-                    chars: literal.AsSpan(headStart..headEnd),
-                    writer: Writer
-                );
-            }
+                Encoding.UTF8.GetBytes(literal.AsSpan(headStart..headEnd), Writer);
         }
 
         // Write necesary JavaScript and CSS to operate Web4
@@ -426,26 +414,24 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
 
         // Locate the start of the <body> tag (if present)
-        int bodyStart = literal.IndexOf("<body");
+        int bodyStart = literal.IndexOf("<body", Math.Max(headStart, 0), StringComparison.Ordinal);
         this.isBodyOmitted = bodyStart < 0;
-        if (isBodyOmitted)
-        {
-            Encoding.UTF8.GetBytes("""
+        Encoding.UTF8.GetBytes(isBodyOmitted ? "\n</head><body>\n" : "\n</head>\n", Writer);
 
-                </head>
-                <body>
-                
-                """, Writer);
-            return 0;
+        // Pre-handle the work of OnMarkup, except consider `offset`.
+        // Then set `literal` to "" so the next OnMarkup no-ops.
+        int offset = isBodyOmitted ? 0 : bodyStart;
+        if (literal.EndsWith('='))
+        {
+            attributeStatus = AttributeStatus.Pending;
+            deferredLiteral = literal.AsMemory(offset);
         }
         else
         {
-            Encoding.UTF8.GetBytes("""
-                
-                </head>
-
-                """, Writer);
-            return bodyStart;
+            Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
         }
+
+        CompleteStringLiteral(literal.Length);
+        literal = string.Empty;
     }
 }

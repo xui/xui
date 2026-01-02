@@ -72,19 +72,6 @@ public ref partial struct Html : IDisposable
 
         composer.Grow(literalLength, formattedCount);
 
-        switch (Type)
-        {
-            case HtmlType.Wrapper:
-                // Ignore these, e.g. $"{template()}" and any others with zero literals.
-                break;
-            case HtmlType.Template:
-                composer.OnTemplateBegin(ref this);
-                break;
-            case HtmlType.Element:
-                composer.OnElementBegin(ref this);
-                break;
-        }
-
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
             AppendLiteral(string.Empty);
@@ -105,6 +92,12 @@ public ref partial struct Html : IDisposable
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
     {
+        _ = (Cursor, Type) switch {
+            (0, HtmlType.Template) => composer.OnTemplateBegin(ref this, ref literal),
+            (0, HtmlType.Element) => composer.OnElementBegin(ref this),
+            _ => true,
+        };
+
         var @continue = composer.OnMarkup(ref this, literal);
         Cursor++;
         return @continue;
