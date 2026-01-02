@@ -106,7 +106,6 @@ public ref partial struct Html : IDisposable
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
     public bool AppendFormatted(string value)
     {
-        // Note: String doesn't implement IUtf8SpanFormattable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
@@ -117,7 +116,6 @@ public ref partial struct Html : IDisposable
 
     public bool AppendFormatted(bool value)
     {
-        // Note: Boolean is a struct but it doesn't implement IUtf8SpanFormattable
         if (IsEven(Cursor))
             AppendLiteral(string.Empty);
 
