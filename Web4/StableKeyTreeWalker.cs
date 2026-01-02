@@ -1,5 +1,3 @@
-using System.Buffers;
-
 namespace Web4;
 
 internal struct StableKeyTreeWalker()
