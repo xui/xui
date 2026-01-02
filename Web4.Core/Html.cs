@@ -302,7 +302,7 @@ public ref partial struct Html : IDisposable
         if (html.Type == HtmlType.Wrapper)
             return true;
 
-        if (IsEven(Cursor) && Type != HtmlType.Enumeration)
+        if (IsEven(Cursor) && Type != HtmlType.Enumeration && Type != HtmlType.Wrapper)
             AppendLiteral(string.Empty);
         
         if (alignment >= 0)
