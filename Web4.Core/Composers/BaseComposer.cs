@@ -13,11 +13,7 @@ public abstract class BaseComposer
         return true;
     }
     
-    public virtual void Reset()
-    {
-        // Called from the root Html's Dispose()
-        BeforeAppend = true;
-    }
+    public virtual void Reset() => BeforeAppend = true; // Called from the root Html's Dispose()
 
     public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
     public virtual bool OnTemplateEnd(ref Html html) => true;
