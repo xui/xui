@@ -45,10 +45,8 @@ public abstract class BaseComposer
     public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
     public virtual bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
-        // TODO: Don't be appending to self.  
-        // Create a proper parent either here or in Html.cs.
         foreach (var partial in enumerable)
-            partial.AppendFormatted(partial);
+            htmls.AppendFormatted(partial);
         return true;
     }
     public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
