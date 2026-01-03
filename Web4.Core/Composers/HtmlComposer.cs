@@ -29,7 +29,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(literal, destination);
         Writer.Advance(length);
 
-        return base.OnMarkup(ref parent, literal);
+        return true;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value)
@@ -38,7 +38,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
 
-        return base.OnStringKeyhole(ref parent, value);
+        return true;
     }
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
@@ -48,7 +48,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.OnBoolKeyhole(ref parent, value);
+        return true;
     }
 
     public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
@@ -76,7 +76,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         value.TryFormat(destination, out int length, format);
         Writer.Advance(length);
 
-        return base.OnColorKeyhole(ref parent, value);
+        return true;
     }
 
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
@@ -87,7 +87,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         var length = Encoding.UTF8.GetBytes(output, destination);
         Writer.Advance(length);
 
-        return base.OnUriKeyhole(ref parent, value);
+        return true;
     }
 
 
