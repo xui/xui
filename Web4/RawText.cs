@@ -22,7 +22,7 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
 
     public readonly void AppendFormatted<T>(T value, string? format = null) where T : struct, IUtf8SpanFormattable
     {
-        // TODO: Does Writer.GetSpan() need a length?  What's the max length of all T's?
+        // TODO: What's the max length of all T's?
         const int tMaxLength = 128;
 
         Span<byte> destination = writer.GetSpan(tMaxLength);
