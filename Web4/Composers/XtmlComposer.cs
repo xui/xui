@@ -49,12 +49,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         if (isBodyOmitted)
         {
-            Encoding.UTF8.GetBytes("""
+            Writer.WriteUtf8("""
                     
                     </body>
                 </html>
-                """,
-                Writer);
+                """);
         }
 
         return base.OnTemplateEnd(ref html);
@@ -213,8 +212,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
     public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
     public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
-    public override bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
-        // where T : struct, IUtf8SpanFormattable // (inherited)
+    private bool OnUtf8SpanFormattable<T>(ref Html parent, T value, string? format = null)
+        where T : struct, IUtf8SpanFormattable
     {
         // Wraps the mutable value with two comment tags
         // to separate it from any neighboring text.
@@ -228,14 +227,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--{key}-->");
-                base.OnUtf8SpanFormattable(ref parent, value, format);
+                Writer.WriteUtf8(value, format);
                 Writer.WriteRaw($"<!--/{key}-->");
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 Writer.WriteRaw($"\"");
-                base.OnUtf8SpanFormattable(ref parent, value, format);
+                Writer.WriteUtf8(value, format);
                 Writer.WriteRaw($"\" {key}");
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -245,7 +244,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnUtf8SpanFormattable(ref parent, value, format);
+                Writer.WriteUtf8(value, format);
                 break;
         }
 
@@ -291,7 +290,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!deferredLiteral.HasValue)
             throw new NullReferenceException(nameof(deferredLiteral));
 
-        Encoding.UTF8.GetBytes(deferredLiteral.Value.Span, Writer);
+        Writer.WriteUtf8(deferredLiteral.Value);
         deferredLiteral = null;
     }
 
@@ -313,8 +312,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteralSpan.Length - 2);
 
-        Encoding.UTF8.GetBytes(deferredLiteralSpan[..indexBeforeAttribute], Writer);
+        Writer.WriteUtf8(deferredLiteralSpan[..indexBeforeAttribute]);
         var attributeName = deferredLiteralSpan[(indexBeforeAttribute + 1)..^1];
+
         deferredLiteral = null;
         return attributeName;
     }
@@ -396,27 +396,27 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             headStart += 6; // "<head>".Length;
             int headEnd = literal.IndexOf("</head>", headStart, StringComparison.Ordinal);
             if (headEnd > headStart)
-                Encoding.UTF8.GetBytes(literal.AsSpan(headStart..headEnd), Writer);
+                Writer.WriteUtf8(literal.AsSpan(headStart..headEnd));
         }
 
         // Write necesary JavaScript and CSS to operate Web4
-        Encoding.UTF8.GetBytes(BOOTLOADER, Writer);
+        Writer.WriteUtf8(BOOTLOADER);
 
         // Write event handlers set on window or document
         if (Window.Listeners.Count > 0)
         {
-            Encoding.UTF8.GetBytes("\n\n<script>\n", Writer);
+            Writer.WriteUtf8("\n\n<script>\n");
 
             foreach (var listener in Window.Listeners)
                 Writer.WriteRaw($"  {listener.Html}\n");
 
-            Encoding.UTF8.GetBytes("</script>\n\n", Writer);
+            Writer.WriteUtf8("</script>\n\n");
         }
 
         // Locate the start of the <body> tag (if present)
         int bodyStart = literal.IndexOf("<body", Math.Max(headStart, 0), StringComparison.Ordinal);
         this.isBodyOmitted = bodyStart < 0;
-        Encoding.UTF8.GetBytes(isBodyOmitted ? "\n</head><body>\n" : "\n</head>\n", Writer);
+        Writer.WriteUtf8(isBodyOmitted ? "\n</head><body>\n" : "\n</head>\n");
 
         // Pre-handle the work of OnMarkup, except consider `offset`.
         // Then set `literal` to "" so the next OnMarkup no-ops.
@@ -428,7 +428,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
         else
         {
-            Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
+            Writer.WriteUtf8(literal.AsSpan(offset));
         }
 
         TryBeginAppend(literal.Length);

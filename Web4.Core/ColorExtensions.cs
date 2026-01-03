@@ -8,6 +8,14 @@ namespace Web4;
 
 public static class ColorExtensions
 {
+    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, Color color, string? format = null)
+    {
+        Span<byte> utf8buffer = bufferWriter.GetSpan(color.GetMaxPossibleLength());
+        color.TryFormat(utf8buffer, out int length, format);
+        bufferWriter.Advance(length);
+        return true;
+    }
+
     public static bool TryFormat(this Color color, Span<byte> utf8Destination, out int bytesWritten)
         => color.TryFormat(utf8Destination, out bytesWritten, "rgb");
 

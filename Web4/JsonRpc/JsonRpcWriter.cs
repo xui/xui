@@ -560,7 +560,7 @@ public partial class JsonRpcWriter : IDisposable
                 break;
             case KeyholeType.Uri:
                 // TODO: Fix memory allocation and support format string?
-                Encoding.UTF8.GetBytes(keyhole.Uri!.ToString(), bufferWriter);
+                bufferWriter.WriteUtf8(keyhole.Uri!.ToString());
                 break;
         }
         bufferWriter.Advance(length);

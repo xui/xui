@@ -1,12 +1,41 @@
 using System.Buffers;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Web4.Composers;
 
 namespace Web4;
 
 public static partial class HtmlExtensions
 {
+    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, string text)
+    {
+        Span<byte> utf8buffer = bufferWriter.GetSpan(text.Length);
+        int length = Encoding.UTF8.GetBytes(text, utf8buffer);
+        bufferWriter.Advance(length);
+        return true;
+    }
+
+    public static bool WriteUtf8<T>(this IBufferWriter<byte> bufferWriter, T value, string? format = null)
+        where T : struct, IUtf8SpanFormattable
+    {
+        // TODO: Research the true max length of T.
+        Span<byte> destination = bufferWriter.GetSpan(128);
+        value.TryFormat(destination, out int length, format, null);
+        bufferWriter.Advance(length);
+        return true;
+    }
+
+    public static void WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlyMemory<char> memory)
+        => WriteUtf8(bufferWriter, memory.Span);
+        
+    public static void WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<char> span)
+    {
+        Span<byte> buffer = bufferWriter.GetSpan(span.Length);
+        int length = Encoding.UTF8.GetBytes(span, buffer);
+        bufferWriter.Advance(length);
+    }
+    
     public static void Write(
         this IBufferWriter<byte> writer, // This one defaults to HtmlComposer (see Html constructor below)
         [InterpolatedStringHandlerArgument("writer")] ref Html html)

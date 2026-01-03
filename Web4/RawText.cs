@@ -12,12 +12,16 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
 {
     public readonly void AppendLiteral(ReadOnlySpan<char> value)
     {
-        Encoding.UTF8.GetBytes(value, writer);
+        Span<byte> buffer = writer.GetSpan(value.Length);
+        int length = Encoding.UTF8.GetBytes(value, buffer);
+        writer.Advance(length);
     }
 
     public readonly void AppendFormatted(ReadOnlySpan<char> value)
     {
-        Encoding.UTF8.GetBytes(value, writer);
+        Span<byte> buffer = writer.GetSpan(value.Length);
+        int length = Encoding.UTF8.GetBytes(value, buffer);
+        writer.Advance(length);
     }
 
     public readonly void AppendFormatted<T>(T value, string? format = null) where T : struct, IUtf8SpanFormattable
@@ -25,8 +29,8 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
         // TODO: What's the max length of all T's?
         const int tMaxLength = 128;
 
-        Span<byte> destination = writer.GetSpan(tMaxLength);
-        value.TryFormat(destination, out int length, format, null);
+        Span<byte> buffer = writer.GetSpan(tMaxLength);
+        value.TryFormat(buffer, out int length, format, null);
         writer.Advance(length);
     }
 }
