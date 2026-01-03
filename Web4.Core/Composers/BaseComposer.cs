@@ -5,7 +5,6 @@ namespace Web4.Composers;
 public abstract class BaseComposer
 {
     public bool BeforeAppend { get; private set; } = true;
-
     public bool TryBeginAppend(int literalLength)
     {
         if (literalLength > 0)
