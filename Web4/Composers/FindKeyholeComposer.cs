@@ -85,7 +85,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
 
         keyGenerator.MoveNextKey();
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null)
@@ -94,7 +94,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(key))
-            return CompleteFormattedValue();
+            return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
         eventListener.Action = listener;
@@ -108,7 +108,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(key))
-            return CompleteFormattedValue();
+            return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
         eventListener.ActionEvent = listener;
@@ -122,7 +122,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(key))
-            return CompleteFormattedValue();
+            return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
         eventListener.Func = listener;
@@ -136,7 +136,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         if (!keyGenerator.IsNextKey(key))
-            return CompleteFormattedValue();
+            return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
         eventListener.FuncEvent = listener;
@@ -164,7 +164,7 @@ public class FindKeyholeComposer : BaseComposer
             htmls.AppendFormatted(html);
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)

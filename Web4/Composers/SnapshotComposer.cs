@@ -145,7 +145,7 @@ public class SnapshotComposer : BaseComposer
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
@@ -161,7 +161,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.Format = format;
         keyhole.Expression = expression;
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
@@ -196,7 +196,7 @@ public class SnapshotComposer : BaseComposer
             keyhole.Tag = item; // TODO: Memory allocation?
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)

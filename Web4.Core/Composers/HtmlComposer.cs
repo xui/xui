@@ -69,7 +69,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         value.TryFormat(destination, out int length, format, null);
         Writer.Advance(length);
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
@@ -102,6 +102,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     {
         // attributeName is already written at the end of the prior string literal (e.g. <button onclick=)
         Encoding.UTF8.GetBytes("\"\"", Writer);
-        return CompleteFormattedValue();
+        return true;
     }
 }

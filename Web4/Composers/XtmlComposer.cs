@@ -128,7 +128,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             attributeStatus = AttributeStatus.Pending;
             deferredLiteral = literal.AsMemory();
-            return CompleteStringLiteral(literal.Length);
+            return true;
         }
 
         return base.OnMarkup(ref parent, literal);
@@ -161,7 +161,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 return base.OnStringKeyhole(ref parent, value);
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
@@ -201,7 +201,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 return base.OnBoolKeyhole(ref parent, value);
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnUtf8SpanFormattable(ref parent, value, format);
@@ -344,7 +344,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
         
         attributeStatus = AttributeStatus.None;
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
@@ -361,7 +361,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             htmls.AppendFormatted(partial);
         }
 
-        return CompleteFormattedValue();
+        return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
@@ -431,7 +431,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             Encoding.UTF8.GetBytes(literal.AsSpan(offset), Writer);
         }
 
-        CompleteStringLiteral(literal.Length);
+        TryBeginAppend(literal.Length);
         literal = string.Empty;
     }
 }

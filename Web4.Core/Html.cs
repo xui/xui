@@ -70,7 +70,7 @@ public ref partial struct Html : IDisposable
             _ => HtmlType.Element
         };
 
-        composer.Grow(literalLength, formattedCount);
+        composer.TryBeginAppend(literalLength);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -83,7 +83,6 @@ public ref partial struct Html : IDisposable
         Length = enumerationCount;
         Type = HtmlType.Enumeration;
         this.composer = composer;
-        this.composer.Grow(0, enumerationCount);
     }
 
 
