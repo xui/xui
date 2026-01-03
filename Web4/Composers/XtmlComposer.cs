@@ -6,13 +6,13 @@ namespace Web4.Composers;
 
 public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
 {
-    private StableKeyTreeWalker keyGenerator = new();
-
-    public WindowBuilder Window { get; set; } = window;
     private enum AttributeStatus { None, Pending, InProgress }
+    private StableKeyTreeWalker keyGenerator = new();
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
+
+    public WindowBuilder Window { get; set; } = window;
 
     [ThreadStatic] static XtmlComposer? reusable;
     public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window)
