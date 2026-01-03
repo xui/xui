@@ -34,7 +34,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
 
     public override bool OnStringKeyhole(ref Html parent, string value)
     {
-        // string has no formatters (and alignment isn't helpful in HTML)
         var destination = Writer.GetSpan(value.Length);
         var length = Encoding.UTF8.GetBytes(value, destination);
         Writer.Advance(length);
@@ -44,7 +43,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
-        // bool has no formatters and doesn't implement IUtf8SpanFormattable
         var output = value ? "true" : "false";
         var destination = Writer.GetSpan(output.Length);
         var length = Encoding.UTF8.GetBytes(output, destination);
