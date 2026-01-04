@@ -46,14 +46,14 @@ public class FindKeyholeComposer : BaseComposer
         // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
         html.Key = "key";
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
-        return base.OnTemplateBegin(ref html, ref literal);
+        return true;
     }
     
     public override bool OnElementBegin(ref Html html)
     {
         html.Key = keyGenerator.GetNextKey();
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
-        return base.OnElementBegin(ref html);
+        return true;
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
@@ -63,7 +63,7 @@ public class FindKeyholeComposer : BaseComposer
 
         var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
-        return base.OnElementEnd(ref parent, html, format, expression);
+        return true;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();

@@ -58,8 +58,7 @@ public class SnapshotComposer : BaseComposer
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
         html.Start = writeHead;
         writeHead += html.Length;
-
-        return base.OnTemplateBegin(ref html, ref literal);
+        return true;
     }
 
     public override bool OnElementBegin(ref Html html)
@@ -69,8 +68,7 @@ public class SnapshotComposer : BaseComposer
         html.Start = writeHead;
         writeHead += html.Length;
         keyGenerator.CreateNewGeneration(html.Key, html.Length);
-
-        return base.OnElementBegin(ref html);
+        return true;
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
@@ -97,8 +95,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.SequenceStart = html.Start;
         keyhole.SequenceLength = html.Length;
         keyhole.RelativeOrder = html.RelativeOrder;
-
-        return base.OnElementEnd(ref parent, html, format, expression);
+        return true;
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
@@ -110,8 +107,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.SequenceStart = index;
         keyhole.SequenceLength = parent.Length;
         isWritingAttribute = literal.EndsWith('=');
-
-        return base.OnMarkup(ref parent, literal);
+        return true;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => OnKeyhole(ref parent, value, KeyholeType.String);
@@ -144,7 +140,6 @@ public class SnapshotComposer : BaseComposer
             keyhole.Key = keyGenerator.GetNextKey();
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
-
         return true;
     }
 
@@ -160,7 +155,6 @@ public class SnapshotComposer : BaseComposer
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
         keyhole.Expression = expression;
-
         return true;
     }
 
@@ -178,7 +172,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.SequenceLength = htmls.Length;
 
         keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);      
-        writeHead += htmls.Length;  
+        writeHead += htmls.Length;
         return true;
     }
 
@@ -195,7 +189,6 @@ public class SnapshotComposer : BaseComposer
             ref var keyhole = ref snapshot[htmls.Start + htmls.Cursor - 1];
             keyhole.Tag = item; // TODO: Memory allocation?
         }
-
         return true;
     }
 
