@@ -5,6 +5,8 @@ using Web4.Composers;
 
 namespace Web4;
 
+public enum HtmlType { Element, Attribute, Enumeration, Wrapper, Template }
+
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
 public ref partial struct Html : IDisposable
