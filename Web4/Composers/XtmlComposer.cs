@@ -28,10 +28,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override void Reset()
     {
+        base.Reset();
         Window = null!;
         attributeStatus = AttributeStatus.None;
         keyGenerator.Reset();
-        base.Reset();
     }
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
