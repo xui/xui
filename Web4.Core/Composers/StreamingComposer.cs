@@ -9,5 +9,6 @@ public abstract class StreamingComposer(IBufferWriter<byte> writer) : BaseCompos
     public override void Reset()
     {
         Writer = null!;
+        base.Reset();
     }
 }
