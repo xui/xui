@@ -16,12 +16,6 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
         return composer;
     }
 
-    public override void Reset()
-    {
-        Writer = null!;
-        base.Reset();
-    }
-
     public override bool OnMarkup(ref Html parent, string literal) => Writer.WriteUtf8(literal);
     public override bool OnStringKeyhole(ref Html parent, string value) => Writer.WriteUtf8(value);
     public override bool OnBoolKeyhole(ref Html parent, bool value) => Writer.WriteUtf8(value ? "true" : "false");
