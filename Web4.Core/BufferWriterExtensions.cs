@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -6,7 +7,7 @@ using Web4.Composers;
 
 namespace Web4;
 
-public static partial class HtmlExtensions
+public static partial class BufferWriterExtensions
 {
     public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, string text)
     {
@@ -36,6 +37,14 @@ public static partial class HtmlExtensions
         bufferWriter.Advance(length);
     }
     
+    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, Color color, string? format = null)
+    {
+        Span<byte> utf8buffer = bufferWriter.GetSpan(color.GetMaxPossibleLength());
+        color.TryFormat(utf8buffer, out int length, format);
+        bufferWriter.Advance(length);
+        return true;
+    }
+
     public static void Write(
         this IBufferWriter<byte> writer, // This one defaults to HtmlComposer (see Html constructor below)
         [InterpolatedStringHandlerArgument("writer")] ref Html html)
