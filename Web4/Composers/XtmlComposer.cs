@@ -15,15 +15,14 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public WindowBuilder Window { get; set; } = window;
 
     [ThreadStatic] static XtmlComposer? reusable;
-    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window)
+    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window) 
+        => (reusable ??= new(writer, window)).Set(writer, window);
+    
+    private XtmlComposer Set(IBufferWriter<byte> writer, WindowBuilder window)
     {
-        if (reusable is null)
-            return reusable = new(writer, window);
-        
-        var composer = reusable;
-        composer.Writer = writer;
-        composer.Window = window;
-        return composer;
+        Writer = writer;
+        Window = window;
+        return this;
     }
 
     public override void Reset()

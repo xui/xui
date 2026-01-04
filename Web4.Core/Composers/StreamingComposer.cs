@@ -6,6 +6,13 @@ public abstract class StreamingComposer(IBufferWriter<byte> writer) : BaseCompos
 {
     public IBufferWriter<byte> Writer { get; set; } = writer;
 
+    protected T Set<T>(IBufferWriter<byte> writer)
+        where T : StreamingComposer
+    {
+        Writer = writer;
+        return (T)this;
+    }
+
     public override void Reset()
     {
         Writer = null!;

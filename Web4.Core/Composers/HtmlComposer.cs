@@ -6,15 +6,7 @@ namespace Web4.Composers;
 public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
     [ThreadStatic] static HtmlComposer? reusable;
-    public static HtmlComposer Reuse(IBufferWriter<byte> writer)
-    {
-        if (reusable is null)
-            return reusable = new(writer);
-        
-        var composer = reusable;
-        composer.Writer = writer;
-        return composer;
-    }
+    public static HtmlComposer Reuse(IBufferWriter<byte> writer) => (reusable ??= new(writer)).Set<HtmlComposer>(writer);
 
     public override bool OnMarkup(ref Html parent, string literal) => Writer.WriteUtf8(literal);
     public override bool OnStringKeyhole(ref Html parent, string value) => Writer.WriteUtf8(value);
