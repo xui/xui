@@ -84,19 +84,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 Writer.WriteRaw($"<!--/{html.Key}-->");
-
                 if (format is {} transition)
-                {
-                    Writer.WriteRaw($$"""
-                        <style>
-                            ::view-transition-group(web4-fwd-{{html.Key}}, web4-rev-{{html.Key}}) { animation: none; }
-                            ::view-transition-new(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in; }
-                            ::view-transition-old(web4-fwd-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out; }
-                            ::view-transition-new(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out reverse; }
-                            ::view-transition-old(web4-rev-{{html.Key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in reverse; }
-                        </style>
-                        """);
-                }
+                    InjectTransition(html.Key, transition);
                 break;
 
             case AttributeStatus.InProgress:
@@ -432,5 +421,18 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
         TryBeginAppend(literal.Length);
         literal = string.Empty;
+    }
+
+    private void InjectTransition(string key, string transition)
+    {
+        Writer.WriteRaw($$"""
+            <style>
+                ::view-transition-group(web4-fwd-{{key}}, web4-rev-{{key}}) { animation: none; }
+                ::view-transition-new(web4-fwd-{{key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in; }
+                ::view-transition-old(web4-fwd-{{key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out; }
+                ::view-transition-new(web4-rev-{{key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-out reverse; }
+                ::view-transition-old(web4-rev-{{key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in reverse; }
+            </style>
+            """);
     }
 }
