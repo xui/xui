@@ -381,7 +381,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private void InjectBootloader(ref string literal)
     {
-        Writer.WriteRaw($"""
+        Writer.WriteUtf8($"""
             <!doctype html>
             <html>
             <head>
