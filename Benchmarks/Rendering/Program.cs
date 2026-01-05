@@ -100,6 +100,20 @@ app.MapGet("/guids", ctx => $"""
   </html>
   """);
 
+app.MapWeb4("/guids/xtml", () => $"""
+  <!doctype html>
+  <html lang="en">
+      <head>
+          <meta charset="utf-8" />
+          <link rel="icon" href="/favicon.png" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body data-sveltekit-preload-data="hover">
+          <div style="display: contents">{GuidTableBody()}</div>
+      </body>
+  </html>
+  """);
+
 app.Run();
 
 static Html Tile(double x, double y) => $"""
