@@ -17,7 +17,8 @@ public class Tests
     static readonly WindowBuilder window = new(() => $"");
     static readonly NoOpComposer noOpComposer = new();
     static readonly NoOpWriter noOpWriter = new();
-    static readonly XtmlComposer xtmlComposer = Web4.Composers.XtmlComposer.Reuse(null!, window);
+    static readonly HtmlComposer htmlComposer = new(noOpWriter);
+    static readonly XtmlComposer xtmlComposer = new(noOpWriter, window);
     static readonly Keyhole[] keyholeBuffer = ArrayPool<Keyhole>.Shared.Rent(2048);
     static readonly SnapshotComposer snapshotComposer = new();
     static readonly FindKeyholeComposer findKeyholeComposer = new();
@@ -383,14 +384,14 @@ public class Tests
     [Benchmark]
     public void GuidTable_Html()
     {
-        noOpWriter.Write($"""
+        htmlComposer.Writer = noOpWriter;
+        noOpWriter.Write(htmlComposer, $"""
             <!doctype html>
             <html lang="en">
                 <head>
                     <meta charset="utf-8" />
-                    <link rel="icon" href="{web4Assets}/favicon.png" />
+                    <link rel="icon" href="/favicon.png" />
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    {web4Head}
                 </head>
                 <body data-sveltekit-preload-data="hover">
                     <div style="display: contents">{GuidTableBody()}</div>
@@ -409,9 +410,8 @@ public class Tests
             <html lang="en">
                 <head>
                     <meta charset="utf-8" />
-                    <link rel="icon" href="{web4Assets}/favicon.png" />
+                    <link rel="icon" href="/favicon.png" />
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    {web4Head}
                 </head>
                 <body data-sveltekit-preload-data="hover">
                     <div style="display: contents">{GuidTableBody()}</div>
