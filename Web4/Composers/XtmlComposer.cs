@@ -48,11 +48,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         if (isBodyOmitted)
         {
-            Writer.WriteUtf8("""
+            Writer.Write("""
                     
                     </body>
                 </html>
-                """);
+                """u8);
         }
 
         return base.OnTemplateEnd(ref html);
@@ -67,7 +67,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--{html.Key}-->`
-                Writer.WriteUtf8("<!--"u8, html.Key, "-->"u8);
+                Writer.Write("<!--"u8, html.Key, "-->"u8);
                 break;
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
@@ -86,7 +86,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--/{html.Key}-->`
-                Writer.WriteUtf8("<!--/"u8, html.Key, "-->"u8);
+                Writer.Write("<!--/"u8, html.Key, "-->"u8);
                 if (format is {} transition)
                     InjectTransition(html.Key, transition);
                 break;
@@ -94,7 +94,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // ex: `" {html.Key}`
                 Writer.Write("\" "u8);
-                Writer.WriteUtf8(html.Key);
+                Writer.Write(html.Key);
                 attributeStatus = AttributeStatus.None;
                 break;
 
@@ -131,9 +131,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value}<!--/{key}-->`
-                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, key, "-->"u8);
                 base.OnStringKeyhole(ref parent, value);
-                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -142,7 +142,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 Writer.Write("\""u8);
                 base.OnStringKeyhole(ref parent, value);
                 Writer.Write("\" "u8);
-                Writer.WriteUtf8(key);
+                Writer.Write(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -164,9 +164,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{b}<!--/{key}-->`
-                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, key, "-->"u8);
                 base.OnBoolKeyhole(ref parent, value);
-                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -175,13 +175,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 {
                     // ex: ` {attributeName}`
                     Writer.Write(" "u8);
-                    Writer.WriteUtf8(attributeName);
+                    Writer.Write(attributeName);
                 }
                 // ex: ` {key}="{attributeName}"`
                 Writer.Write(" "u8);
-                Writer.WriteUtf8(key);
+                Writer.Write(key);
                 Writer.Write("=\""u8);
-                Writer.WriteUtf8(attributeName);
+                Writer.Write(attributeName);
                 Writer.Write("\""u8);
 
                 // status jumps from .Pending to .None because the whole 
@@ -222,18 +222,18 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
-                Writer.WriteUtf8(value, format);
-                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write(value, format);
+                Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
                 // ex: `"{value:format}" {key}`
                 Writer.Write("\""u8);
-                Writer.WriteUtf8(value, format);
+                Writer.Write(value, format);
                 Writer.Write("\" "u8);
-                Writer.WriteUtf8(key);
+                Writer.Write(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -242,7 +242,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                Writer.WriteUtf8(value, format);
+                Writer.Write(value, format);
                 break;
         }
 
@@ -256,9 +256,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, key, "-->"u8);
                 base.OnColorKeyhole(ref parent, value);
-                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -267,7 +267,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 Writer.Write("\""u8);
                 base.OnColorKeyhole(ref parent, value, format);
                 Writer.Write("\" "u8);
-                Writer.WriteUtf8(key);
+                Writer.Write(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -291,7 +291,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (!deferredLiteral.HasValue)
             throw new NullReferenceException(nameof(deferredLiteral));
 
-        Writer.WriteUtf8(deferredLiteral.Value);
+        Writer.Write(deferredLiteral.Value);
         deferredLiteral = null;
     }
 
@@ -313,7 +313,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteralSpan.Length - 2);
 
-        Writer.WriteUtf8(deferredLiteralSpan[..indexBeforeAttribute]);
+        Writer.Write(deferredLiteralSpan[..indexBeforeAttribute]);
         var attributeName = deferredLiteralSpan[(indexBeforeAttribute + 1)..^1];
 
         deferredLiteral = null;
@@ -334,20 +334,20 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         {
             // ex: `"keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}`
             Writer.Write("\"keyholes."u8);
-            Writer.WriteUtf8(key);
+            Writer.Write(key);
             Writer.Write(".dispatchEvent(event.trim('"u8);
-            Writer.WriteUtf8(format ?? "*");
+            Writer.Write(format ?? "*");
             Writer.Write("'))\" "u8);
-            Writer.WriteUtf8(key);
+            Writer.Write(key);
         }
         else
         {
             // TODO: Is it better to use ({}) or () instead?
             // ex: `"keyholes.{key}.dispatchEvent(event.trim(''))" {key}`
             Writer.Write("\"keyholes."u8);
-            Writer.WriteUtf8(key);
+            Writer.Write(key);
             Writer.Write(".dispatchEvent(event.trim(''))\" "u8);
-            Writer.WriteUtf8(key);
+            Writer.Write(key);
         }
         
         attributeStatus = AttributeStatus.None;
@@ -375,7 +375,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     {
         // Keyhole to represent the loop itself, useful for zero-length use cases.
         // ex: `<!--{htmls.Key} /-->`
-        Writer.WriteUtf8("<!--"u8, htmls.Key, " /-->"u8);
+        Writer.Write("<!--"u8, htmls.Key, " /-->"u8);
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return true;
@@ -403,7 +403,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             headStart += 6; // "<head>".Length;
             int headEnd = literal.IndexOf("</head>", headStart, StringComparison.Ordinal);
             if (headEnd > headStart)
-                Writer.WriteUtf8(literal.AsSpan(headStart..headEnd));
+                Writer.Write(literal.AsSpan(headStart..headEnd));
         }
 
         // Write necesary JavaScript and CSS to operate Web4
@@ -418,7 +418,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             {
                 // ex: `  {listener.Html}\n`
                 Writer.Write("  "u8);
-                Writer.WriteUtf8(listener.Html ?? "");
+                Writer.Write(listener.Html ?? "");
                 Writer.Write("\n"u8);
             }
 
@@ -440,7 +440,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         }
         else
         {
-            Writer.WriteUtf8(literal.AsSpan(offset));
+            Writer.Write(literal.AsSpan(offset));
         }
 
         TryBeginAppend(literal.Length);

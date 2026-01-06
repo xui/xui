@@ -9,7 +9,7 @@ namespace Web4;
 
 public static partial class BufferWriterExtensions
 {
-    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, string text)
+    public static bool Write(this IBufferWriter<byte> bufferWriter, string text)
     {
         Span<byte> utf8buffer = bufferWriter.GetSpan(text.Length);
         int length = Encoding.UTF8.GetBytes(text, utf8buffer);
@@ -29,7 +29,7 @@ public static partial class BufferWriterExtensions
         return true;
     }
 
-    public static bool WriteUtf8<T>(this IBufferWriter<byte> bufferWriter, T value, string? format = null)
+    public static bool Write<T>(this IBufferWriter<byte> bufferWriter, T value, string? format = null)
         where T : struct, IUtf8SpanFormattable
     {
         // TODO: Research the true max length of T.
@@ -39,17 +39,17 @@ public static partial class BufferWriterExtensions
         return true;
     }
 
-    public static void WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlyMemory<char> memory)
-        => WriteUtf8(bufferWriter, memory.Span);
+    public static void Write(this IBufferWriter<byte> bufferWriter, ReadOnlyMemory<char> memory)
+        => Write(bufferWriter, memory.Span);
         
-    public static void WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<char> span)
+    public static void Write(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<char> span)
     {
         Span<byte> buffer = bufferWriter.GetSpan(span.Length);
         int length = Encoding.UTF8.GetBytes(span, buffer);
         bufferWriter.Advance(length);
     }
     
-    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, Color color, string? format = null)
+    public static bool Write(this IBufferWriter<byte> bufferWriter, Color color, string? format = null)
     {
         Span<byte> utf8buffer = bufferWriter.GetSpan(color.GetMaxPossibleLength());
         color.TryFormat(utf8buffer, out int length, format);
@@ -57,7 +57,7 @@ public static partial class BufferWriterExtensions
         return true;
     }
 
-    public static void WriteUtf8(
+    public static void Write(
         this IBufferWriter<byte> bufferWriter, 
         ReadOnlySpan<byte> text1,
         ReadOnlySpan<byte> text2,
@@ -69,14 +69,14 @@ public static partial class BufferWriterExtensions
     }
 
     // TODO: Remove this one after KeyMaker switches to utf8.
-    public static void WriteUtf8(
+    public static void Write(
         this IBufferWriter<byte> bufferWriter, 
         ReadOnlySpan<byte> text1,
         string text2,
         ReadOnlySpan<byte> text3)
     {
         bufferWriter.Write(text1);
-        bufferWriter.WriteUtf8(text2);
+        bufferWriter.Write(text2);
         bufferWriter.Write(text3);
     }
 
