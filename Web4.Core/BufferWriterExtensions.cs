@@ -17,6 +17,14 @@ public static partial class BufferWriterExtensions
         return true;
     }
 
+    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<byte> bytes)
+    {
+        Span<byte> utf8buffer = bufferWriter.GetSpan(bytes.Length);
+        bytes.CopyTo(utf8buffer);
+        bufferWriter.Advance(bytes.Length);
+        return true;
+    }
+
     public static bool WriteUtf8<T>(this IBufferWriter<byte> bufferWriter, T value, string? format = null)
         where T : struct, IUtf8SpanFormattable
     {

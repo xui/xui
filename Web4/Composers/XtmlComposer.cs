@@ -361,12 +361,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         return true;
     }
 
-    private static readonly string BOOTLOADER = 
-        new StreamReader(System.Reflection.Assembly
+    private static readonly byte[] BOOTLOADER = 
+        Encoding.UTF8.GetBytes(new StreamReader(System.Reflection.Assembly
             .GetExecutingAssembly()
             .GetManifestResourceStream("Web4.Bootloader.html")!
-        )
-        .ReadToEnd();
+        ).ReadToEnd());
 
     private void InjectBootloader(ref string literal)
     {
