@@ -17,8 +17,12 @@ public static partial class BufferWriterExtensions
         return true;
     }
 
-    public static bool WriteUtf8(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<byte> bytes)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool Write(this IBufferWriter<byte> bufferWriter, ReadOnlySpan<byte> bytes)
     {
+        // This performs slightly faster than the built-in Write<T> extension.
+        // Is this because the generic one calls GetSpan without a length hint?
+
         Span<byte> utf8buffer = bufferWriter.GetSpan(bytes.Length);
         bytes.CopyTo(utf8buffer);
         bufferWriter.Advance(bytes.Length);
@@ -59,9 +63,9 @@ public static partial class BufferWriterExtensions
         ReadOnlySpan<byte> text2,
         ReadOnlySpan<byte> text3)
     {
-        bufferWriter.WriteUtf8(text1);
-        bufferWriter.WriteUtf8(text2);
-        bufferWriter.WriteUtf8(text3);
+        bufferWriter.Write(text1);
+        bufferWriter.Write(text2);
+        bufferWriter.Write(text3);
     }
 
     // TODO: Remove this one after KeyMaker switches to utf8.
@@ -71,9 +75,9 @@ public static partial class BufferWriterExtensions
         string text2,
         ReadOnlySpan<byte> text3)
     {
-        bufferWriter.WriteUtf8(text1);
+        bufferWriter.Write(text1);
         bufferWriter.WriteUtf8(text2);
-        bufferWriter.WriteUtf8(text3);
+        bufferWriter.Write(text3);
     }
 
     public static void Write(
