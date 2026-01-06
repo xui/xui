@@ -66,11 +66,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.WriteRaw($"<!--{html.Key}-->");
+                // ex: `<!--{html.Key}-->`
+                Writer.WriteUtf8("<!--"u8, html.Key, "-->"u8);
                 break;
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.WriteRaw($"\"");
+                // ex: `"` (the value will come later in the next On*Keyhole())
+                Writer.WriteUtf8("\""u8);
                 attributeStatus = AttributeStatus.InProgress;
                 break;
         }
@@ -83,15 +85,16 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.WriteRaw($"<!--/{html.Key}-->");
+                // ex: `<!--/{html.Key}-->`
+                Writer.WriteUtf8("<!--/"u8, html.Key, "-->"u8);
                 if (format is {} transition)
                     InjectTransition(html.Key, transition);
                 break;
 
             case AttributeStatus.InProgress:
-                Writer.WriteRaw($"""
-                    " {html.Key}
-                    """);
+                // ex: `" {html.Key}`
+                Writer.WriteUtf8("\" "u8);
+                Writer.WriteUtf8(html.Key);
                 attributeStatus = AttributeStatus.None;
                 break;
 
@@ -127,16 +130,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.WriteRaw($"""
-                    <!--{key}-->{value}<!--/{key}-->
-                    """);
+                // ex: `<!--{key}-->{value}<!--/{key}-->`
+                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                base.OnStringKeyhole(ref parent, value);
+                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.WriteRaw($"""
-                    "{value}" {key}
-                    """);
+                // ex: `"{value}" {key}`
+                Writer.WriteUtf8("\""u8);
+                base.OnStringKeyhole(ref parent, value);
+                Writer.WriteUtf8("\" "u8);
+                Writer.WriteUtf8(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -157,26 +163,27 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                var b = value ? "true" : "false";
-                Writer.WriteRaw($"""
-                    <!--{key}-->{b}<!--/{key}-->
-                    """);
+                // ex: `<!--{key}-->{b}<!--/{key}-->`
+                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                base.OnBoolKeyhole(ref parent, value);
+                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 var attributeName = HandleDeferredLiteral(isBooleanAttribute: true);
                 if (value)
                 {
-                    Writer.WriteRaw($"""
-                         {attributeName} {key}="{attributeName}"
-                        """);
+                    // ex: ` {attributeName}`
+                    Writer.WriteUtf8(" "u8);
+                    Writer.WriteUtf8(attributeName);
                 }
-                else
-                {
-                    Writer.WriteRaw($"""
-                         {key}="{attributeName}"
-                        """);
-                }
+                // ex: ` {key}="{attributeName}"`
+                Writer.WriteUtf8(" "u8);
+                Writer.WriteUtf8(key);
+                Writer.WriteUtf8("=\""u8);
+                Writer.WriteUtf8(attributeName);
+                Writer.WriteUtf8("\""u8);
+
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -214,16 +221,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.WriteRaw($"<!--{key}-->");
+                // ex: `<!--{key}-->{value:format}<!--/{key}-->`
+                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
                 Writer.WriteUtf8(value, format);
-                Writer.WriteRaw($"<!--/{key}-->");
+                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.WriteRaw($"\"");
+                // ex: `"{value:format}" {key}`
+                Writer.WriteUtf8("\""u8);
                 Writer.WriteUtf8(value, format);
-                Writer.WriteRaw($"\" {key}");
+                Writer.WriteUtf8("\" "u8);
+                Writer.WriteUtf8(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -245,16 +255,19 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                Writer.WriteRaw($"<!--{key}-->");
-                base.OnColorKeyhole(ref parent, value, format);
-                Writer.WriteRaw($"<!--/{key}-->");
+                // ex: `<!--{key}-->{value:format}<!--/{key}-->`
+                Writer.WriteUtf8("<!--"u8, key, "-->"u8);
+                base.OnColorKeyhole(ref parent, value);
+                Writer.WriteUtf8("<!--/"u8, key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                Writer.WriteRaw($"\"");
+                // ex: `"{value:format}" {key}`
+                Writer.WriteUtf8("\""u8);
                 base.OnColorKeyhole(ref parent, value, format);
-                Writer.WriteRaw($"\" {key}");
+                Writer.WriteUtf8("\" "u8);
+                Writer.WriteUtf8(key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -319,16 +332,22 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         var key = keyGenerator.GetNextKey();
         if (includeEventArg)
         {
-            Writer.WriteRaw($"""
-                "keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}
-                """);
+            // ex: `"keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}`
+            Writer.WriteUtf8("\"keyholes."u8);
+            Writer.WriteUtf8(key);
+            Writer.WriteUtf8(".dispatchEvent(event.trim('"u8);
+            Writer.WriteUtf8(format ?? "*");
+            Writer.WriteUtf8("'))\" "u8);
+            Writer.WriteUtf8(key);
         }
         else
         {
             // TODO: Is it better to use ({}) or () instead?
-            Writer.WriteRaw($"""
-                "keyholes.{key}.dispatchEvent(event.trim(''))" {key}
-                """);
+            // ex: `"keyholes.{key}.dispatchEvent(event.trim(''))" {key}`
+            Writer.WriteUtf8("\"keyholes."u8);
+            Writer.WriteUtf8(key);
+            Writer.WriteUtf8(".dispatchEvent(event.trim(''))\" "u8);
+            Writer.WriteUtf8(key);
         }
         
         attributeStatus = AttributeStatus.None;
@@ -355,7 +374,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         // Keyhole to represent the loop itself, useful for zero-length use cases.
-        Writer.WriteRaw($"<!--{htmls.Key} /-->");
+        // ex: `<!--{htmls.Key} /-->`
+        Writer.WriteUtf8("<!--"u8, htmls.Key, " /-->"u8);
 
         keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return true;
@@ -369,12 +389,12 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     private void InjectBootloader(ref string literal)
     {
-        Writer.WriteUtf8($"""
+        Writer.WriteUtf8("""
             <!doctype html>
             <html>
             <head>
             
-            """);
+            """u8);
 
         // Write dev-included <head> content (if any)
         int headStart = literal.IndexOf("<head>", StringComparison.Ordinal);
@@ -392,18 +412,23 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // Write event handlers set on window or document
         if (Window.Listeners.Count > 0)
         {
-            Writer.WriteUtf8("\n\n<script>\n");
+            Writer.WriteUtf8("\n\n<script>\n"u8);
 
             foreach (var listener in Window.Listeners)
-                Writer.WriteRaw($"  {listener.Html}\n");
+            {
+                // ex: `  {listener.Html}\n`
+                Writer.WriteUtf8("  "u8);
+                Writer.WriteUtf8(listener.Html ?? "");
+                Writer.WriteUtf8("\n"u8);
+            }
 
-            Writer.WriteUtf8("</script>\n\n");
+            Writer.WriteUtf8("</script>\n\n"u8);
         }
 
         // Locate the start of the <body> tag (if present)
         int bodyStart = literal.IndexOf("<body", Math.Max(headStart, 0), StringComparison.Ordinal);
         this.isBodyOmitted = bodyStart < 0;
-        Writer.WriteUtf8(isBodyOmitted ? "\n</head><body>\n" : "\n</head>\n");
+        Writer.WriteUtf8(isBodyOmitted ? "\n</head><body>\n"u8 : "\n</head>\n"u8);
 
         // Pre-handle the work of OnMarkup, except consider `offset`.
         // Then set `literal` to "" so the next OnMarkup no-ops.
