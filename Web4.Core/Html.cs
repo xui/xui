@@ -5,7 +5,7 @@ using Web4.Composers;
 
 namespace Web4;
 
-public enum HtmlType { Element, Attribute, Enumeration, Wrapper, Template }
+public enum HtmlType { Element, Attribute, Iterator, Wrapper, Template }
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
@@ -79,11 +79,11 @@ public ref partial struct Html : IDisposable
             AppendLiteral(string.Empty);
     }
 
-    private Html(int enumerationCount, BaseComposer composer)
+    private Html(int iteratorCount, BaseComposer composer)
     {
         Key = string.Empty;
-        Length = enumerationCount;
-        Type = HtmlType.Enumeration;
+        Length = iteratorCount;
+        Type = HtmlType.Iterator;
         this.composer = composer;
     }
 
@@ -303,7 +303,7 @@ public ref partial struct Html : IDisposable
         if (html.Type == HtmlType.Wrapper)
             return true;
 
-        if (IsEven(Cursor) && Type != HtmlType.Enumeration && Type != HtmlType.Wrapper)
+        if (IsEven(Cursor) && Type != HtmlType.Iterator && Type != HtmlType.Wrapper)
             AppendLiteral(string.Empty);
         
         if (alignment >= 0)

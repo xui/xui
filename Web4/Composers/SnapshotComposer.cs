@@ -76,7 +76,7 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html partial` has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
-        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
         // Since the partial has been written, 
@@ -87,7 +87,7 @@ public class SnapshotComposer : BaseComposer
         keyhole.Key = html.Key;
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
-            HtmlType.Enumeration => KeyholeType.Enumerable,
+            HtmlType.Iterator => KeyholeType.Iterator,
             HtmlType.Element or _ => KeyholeType.Html,
         };
         keyhole.Format = format;
@@ -165,7 +165,7 @@ public class SnapshotComposer : BaseComposer
 
         ref var keyhole = ref snapshot[parent.Start + parent.Cursor];
         keyhole.Key = htmls.Key;
-        keyhole.Type = KeyholeType.Enumerable;
+        keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
         keyhole.Expression = expression;
         keyhole.SequenceStart = htmls.Start;
@@ -182,9 +182,9 @@ public class SnapshotComposer : BaseComposer
         while (enumerator.MoveNext())
         {
             var (selector, item) = enumerator.CurrentDeconstructed;
-            var partial = selector(item);
+            var html = selector(item);
 
-            htmls.AppendFormatted(partial);
+            htmls.AppendFormatted(html);
 
             ref var keyhole = ref snapshot[htmls.Start + htmls.Cursor - 1];
             keyhole.Tag = item; // TODO: Memory allocation?

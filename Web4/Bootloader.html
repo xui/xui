@@ -437,7 +437,7 @@
       let key = comment.textContent;
       if (key.startsWith('key')) {
         if (key.endsWith('/')) {
-          // Needed as a placeholder for zero-length enumerations, do not removeChild
+          // Needed as a placeholder for zero-length iterators, do not removeChild
           key = key.replace(' /', '');
           keyholes.set(key, comment);
         } else {

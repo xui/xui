@@ -19,5 +19,5 @@ public enum KeyholeType
     Attribute,
     Html,
     EventListener,
-    Enumerable,
+    Iterator,
 }

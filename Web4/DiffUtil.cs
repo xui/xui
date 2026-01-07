@@ -150,8 +150,8 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
                 KeyholeType.TimeSpan or
                 KeyholeType.TimeOnly =>
                     CompareMutable(ref oldParent, ref newParent, ref oldKeyhole, ref newKeyhole),
-                KeyholeType.Enumerable =>
-                    CompareEnumerable(ref oldParent, ref newParent, ref oldKeyhole, ref newKeyhole),
+                KeyholeType.Iterator =>
+                    CompareIterator(ref oldParent, ref newParent, ref oldKeyhole, ref newKeyhole),
                 KeyholeType.Html or
                 KeyholeType.Attribute =>
                     Recurse(ref oldKeyhole, ref newKeyhole),
@@ -200,7 +200,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         return false;
     }
 
-    private readonly bool CompareEnumerable(ref Keyhole oldParent, ref Keyhole newParent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
+    private readonly bool CompareIterator(ref Keyhole oldParent, ref Keyhole newParent, ref Keyhole oldKeyhole, ref Keyhole newKeyhole)
     {
         var oldItems = oldBuffer.AsSpan(oldKeyhole.Sequence);
         var newItems = newBuffer.AsSpan(newKeyhole.Sequence);
@@ -243,7 +243,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
 
         if (oldItems.Length < newItems.Length)
         {
-            // The new enumerable has more items than the old one. 
+            // The new iterator has more items than the old one. 
             // These items can simply be appended to the end.  
             // This will not violate any keyhole's positional stability
             // or cause any keyname collisions.
@@ -260,7 +260,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         }
         else if (oldItems.Length > newItems.Length)
         {
-            // The old enumerable has more items than the new one. 
+            // The old iterator has more items than the new one. 
             // These items can simply be removed.  
             // This will not violate any keyhole's positional stability.
             for (var d = minLength; d < oldItems.Length; d++)

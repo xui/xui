@@ -102,7 +102,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 throw new NotSupportedException("Attributes cannot have nested Htmls");
         }
 
-        var cursor = parent.Type != HtmlType.Enumeration ? parent.Cursor : parent.Cursor * 2;
+        var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
         return base.OnElementEnd(ref parent, html, format, expression);
@@ -363,9 +363,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
-        foreach (var partial in enumerable)
+        foreach (var html in enumerable)
         {
-            htmls.AppendFormatted(partial);
+            htmls.AppendFormatted(html);
         }
 
         return true;
