@@ -218,7 +218,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartArray("params");
 
-        WriteHtmlPartial(buffer, param1, includeSentinels: true);
+        WriteHtml(buffer, param1, includeSentinels: true);
         jsonWriter.WriteStringValueSegment("", true);
 
         if (param2.HasValue)
@@ -249,7 +249,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartArray("params");
 
-        WriteHtmlPartial(buffer, param1, includeSentinels: true);
+        WriteHtml(buffer, param1, includeSentinels: true);
         jsonWriter.WriteStringValueSegment("", true);
 
         Span<char> strInt = stackalloc char[11]; // max int length
@@ -286,7 +286,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WriteStartArray("params");
 
-        WriteHtmlPartial(buffer, param1, includeSentinels: true);
+        WriteHtml(buffer, param1, includeSentinels: true);
         jsonWriter.WriteStringValueSegment("", true);
 
         jsonWriter.WriteStringValue(param2);
@@ -338,7 +338,7 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
-    private void WriteHtmlPartial(Keyhole[] buffer, Span<Keyhole> keyholes, bool includeSentinels)
+    private void WriteHtml(Keyhole[] buffer, Span<Keyhole> keyholes, bool includeSentinels)
     {
         for (int i = 0; i < keyholes.Length; i++)
         {
@@ -350,8 +350,8 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment(keyhole.StringLiteral, false);
                     break;
                 case KeyholeType.Html:
-                    Span<Keyhole> partialHtml = buffer.AsSpan(keyhole.Sequence);
-                    WriteHtmlPartial(buffer, partialHtml, includeSentinels);
+                    Span<Keyhole> html = buffer.AsSpan(keyhole.Sequence);
+                    WriteHtml(buffer, html, includeSentinels);
                     if (includeSentinels)
                     {
                         jsonWriter.WriteStringValueSegment("<!--/", false);
@@ -360,8 +360,8 @@ public partial class JsonRpcWriter : IDisposable
                     }
                     break;
                 case KeyholeType.Attribute:
-                    Span<Keyhole> partialAttr = buffer.AsSpan(keyhole.Sequence);
-                    WriteAttributeSequence(partialAttr);
+                    Span<Keyhole> attribute = buffer.AsSpan(keyhole.Sequence);
+                    WriteAttributeSequence(attribute);
                     jsonWriter.WriteStringValueSegment("", true);
                     break;
                 case KeyholeType.EventListener:
@@ -378,8 +378,8 @@ public partial class JsonRpcWriter : IDisposable
                     for (int i2 = start; i2 < end; i2++)
                     {
                         ref var k = ref buffer[i2];
-                        Span<Keyhole> partialIterator = buffer.AsSpan(k.Sequence);
-                        WriteHtmlPartial(buffer, partialIterator, true);
+                        Span<Keyhole> iterator = buffer.AsSpan(k.Sequence);
+                        WriteHtml(buffer, iterator, true);
                         if (includeSentinels)
                         {
                             jsonWriter.WriteStringValueSegment("<!--/", false);

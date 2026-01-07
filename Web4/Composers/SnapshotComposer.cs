@@ -73,15 +73,15 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
-        // By this point, the `Html partial` has already set its keyholes.
+        // By this point, the `Html html` parameter has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
         var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
         keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
-        // Since the partial has been written, 
+        // Since the html has been written, 
         // return to where we left off (a little like recursion).
-        // so that we can set the partial's type, expression, key, and range.
+        // so that we can set the html's type, expression, key, and range.
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
         keyhole.Key = html.Key;
