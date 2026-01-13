@@ -11,14 +11,14 @@ public class KeyCursor
     private int[] levels = new int[100]; // TODO: Make this grow gracefully
     private int[] widths = new int[100]; // TODO: Make this grow gracefully
 
-    public int KeyLength { get; private set; } = KEY_PREFIX.Length;
+    public int CurrentLength { get; private set; } = KEY_PREFIX.Length;
 
     public KeyCursor() => Reset();
 
     public void Reset()
     {
         currentDepth = -1;
-        KeyLength = KEY_PREFIX.Length;
+        CurrentLength = KEY_PREFIX.Length;
     }
 
     public void MoveNext()
@@ -32,13 +32,13 @@ public class KeyCursor
         currentDepth++;
         levels[currentDepth] = -1;
         widths[currentDepth] = numDigits;
-        KeyLength += numDigits;
 
+        CurrentLength += numDigits;
     }
 
     public void MoveUp()
     {
-        KeyLength -= widths[currentDepth];
+        CurrentLength -= widths[currentDepth];
         currentDepth--;
     }
 
@@ -46,7 +46,7 @@ public class KeyCursor
     {
         get
         {
-            var buffer = new byte[KeyLength]; // TODO: malloc
+            var buffer = new byte[CurrentLength]; // TODO: malloc
             Write(buffer);
             // return buffer;
             return Encoding.UTF8.GetString(buffer);
