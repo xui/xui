@@ -7,9 +7,9 @@ public class KeyCursor
 {
     private static readonly byte[] KEY_PREFIX = "key"u8.ToArray();
 
+    private readonly List<int> levels = [];
+    private readonly List<int> widths = [];
     private int currentDepth;
-    private int[] levels = new int[100]; // TODO: Make this grow gracefully
-    private int[] widths = new int[100]; // TODO: Make this grow gracefully
 
     public int CurrentLength { get; private set; } = KEY_PREFIX.Length;
 
@@ -30,10 +30,17 @@ public class KeyCursor
     {
         int numDigits = GetWidth(numberOfSiblings);
         currentDepth++;
-        levels[currentDepth] = -1;
-        widths[currentDepth] = numDigits;
-
         CurrentLength += numDigits;
+        if (levels.Count <= currentDepth)
+        {
+            levels.Add(-1);
+            widths.Add(numDigits);
+        }
+        else
+        {
+            levels[currentDepth] = -1;
+            widths[currentDepth] = numDigits;
+        }
     }
 
     public void MoveUp()
