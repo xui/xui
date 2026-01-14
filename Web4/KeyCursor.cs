@@ -54,13 +54,13 @@ public class KeyCursor
         get
         {
             var buffer = new byte[CurrentLength]; // TODO: malloc
-            Write(buffer);
+            WriteCurrent(buffer);
             // return buffer;
             return Encoding.UTF8.GetString(buffer);
         }
     }
 
-    public void Write(Span<byte> buffer)
+    public void WriteCurrent(Span<byte> buffer)
     {
         KEY_PREFIX.CopyTo(buffer);
         for (int i = KEY_PREFIX.Length, level = 0; level <= currentDepth; level++)
