@@ -93,7 +93,7 @@ public class KeyCursor
 
     private static int GetWidth(int count) => count switch
     {
-        <= 0x10 << 1 => 1,
+        <= 0x10 << 0 => 1,
         <= 0x10 << 4 => 2,
         <= 0x10 << 8 => 3,
         <= 0x10 << 12 => 4,
