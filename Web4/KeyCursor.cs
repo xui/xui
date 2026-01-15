@@ -62,8 +62,6 @@ public class KeyCursor
 
     private static byte[] GenerateKey(byte[] parentKey, int childIndex)
     {
-        Console.WriteLine($"⚠️ malloc()");
-
         int length = GetLength(childIndex);
         var buffer = new byte[parentKey.Length + length + 1];
         parentKey.CopyTo(buffer);
