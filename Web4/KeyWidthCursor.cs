@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Web4;
 
-public class KeyCursor
+public class KeyWidthCursor
 {
     private static readonly byte[] KEY_PREFIX = "key"u8.ToArray();
 
@@ -13,7 +13,7 @@ public class KeyCursor
 
     public int CurrentLength { get; private set; } = KEY_PREFIX.Length;
 
-    public KeyCursor() => Reset();
+    public KeyWidthCursor() => Reset();
 
     public void Reset()
     {
