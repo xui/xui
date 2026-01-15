@@ -92,13 +92,13 @@ public class KeyCursor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetLength(int number) => number switch
     {
-        <= 0x10 << 0 => 1,
-        <= 0x10 << 4 => 2,
-        <= 0x10 << 8 => 3,
-        <= 0x10 << 12 => 4,
-        <= 0x10 << 16 => 5,
-        <= 0x10 << 20 => 6,
-        <= 0x10 << 24 => 7,
+        < 0x10 << 0 => 1,
+        < 0x10 << 4 => 2,
+        < 0x10 << 8 => 3,
+        < 0x10 << 12 => 4,
+        < 0x10 << 16 => 5,
+        < 0x10 << 20 => 6,
+        < 0x10 << 24 => 7,
         _ => throw new Exception($"Too many siblings: {number}")
     };
 }
