@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Web4.Composers;
 
@@ -8,13 +9,13 @@ public class FindKeyholeComposer : BaseComposer
     [ThreadStatic] static FindKeyholeComposer? reusable;
     public static FindKeyholeComposer Shared => reusable ??= new FindKeyholeComposer();
 
-    private StableKeyTreeWalker keyGenerator = new();
+    private readonly KeyCursor keyCursor = new();
     private EventListener eventListener = default;
     private string? key;
 
-    public EventListener FindEventListener(string key, Func<Html> template)
+    public EventListener FindEventListener(ReadOnlySpan<byte> key, Func<Html> template)
     {
-        this.key = key;
+        this.key = Encoding.UTF8.GetString(key);
         return Interpolate($"{template()}");
     }
 
@@ -37,32 +38,25 @@ public class FindKeyholeComposer : BaseComposer
     {
         key = null;
         eventListener = default;
-        keyGenerator.Reset();
+        keyCursor.Reset();
         base.Reset();
     }
 
-    public override bool OnTemplateBegin(ref Html html, ref string literal)
-    {
-        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
-        html.Key = "key";
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
-        return true;
-    }
-    
     public override bool OnElementBegin(ref Html html)
     {
-        html.Key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        keyCursor.MoveNext();
+        var key = keyCursor.Current; // TODO: Remove?
+        keyCursor.MoveDown();
         return true;
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
+        // TODO: Use something else more readable.  It isn't obvious that it's guarding against "tail calls."
         if (key is null)
             return false;
 
-        var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
-        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
+        keyCursor.MoveUp();
         return true;
     }
 
@@ -84,7 +78,8 @@ public class FindKeyholeComposer : BaseComposer
         if (key is null)
             return false;
 
-        keyGenerator.MoveNextKey();
+        keyCursor.MoveNext();
+        _ = keyCursor.Current; // TODO: Remove?
         return true;
     }
 
@@ -92,8 +87,9 @@ public class FindKeyholeComposer : BaseComposer
     {
         if (key is null)
             return false;
-            
-        if (!keyGenerator.IsNextKey(key))
+        
+        keyCursor.MoveNext();
+        if (!keyCursor.Current.SequenceEqual(key))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -107,7 +103,8 @@ public class FindKeyholeComposer : BaseComposer
         if (key is null)
             return false;
             
-        if (!keyGenerator.IsNextKey(key))
+        keyCursor.MoveNext();
+        if (!keyCursor.Current.SequenceEqual(key))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -121,7 +118,8 @@ public class FindKeyholeComposer : BaseComposer
         if (key is null)
             return false;
             
-        if (!keyGenerator.IsNextKey(key))
+        keyCursor.MoveNext();
+        if (!keyCursor.Current.SequenceEqual(key))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -135,7 +133,8 @@ public class FindKeyholeComposer : BaseComposer
         if (key is null)
             return false;
             
-        if (!keyGenerator.IsNextKey(key))
+        keyCursor.MoveNext();
+        if (!keyCursor.Current.SequenceEqual(key))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -149,8 +148,10 @@ public class FindKeyholeComposer : BaseComposer
         if (this.key is null)
             return false;
         
-        htmls.Key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);
+        keyCursor.MoveNext();
+        var key = keyCursor.Current; // TODO: Remove?
+        keyCursor.MoveDown();
+
         return true;
     }
 
@@ -169,7 +170,8 @@ public class FindKeyholeComposer : BaseComposer
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        keyCursor.MoveUp();
+
         return true;
     }
 }

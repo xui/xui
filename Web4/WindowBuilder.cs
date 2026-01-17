@@ -76,9 +76,7 @@ public class WindowBuilder :
                     
             // Otherwise, it starts with "key" and is bound to some element burried somewhere in the HTML.
             // The only way to find it is to compose the HTML and compare every keyhole to the supplied key.
-            _ => Keymaker.GetKeyIfCached(key) is string k
-                    ? FindKeyholeComposer.Shared.FindEventListener(k, Template)
-                    : default,
+            _ => FindKeyholeComposer.Shared.FindEventListener(key, Template),
         };
     }
 
@@ -293,7 +291,6 @@ public class WindowBuilder :
         if (listener is not null)
         {
             var key = $"{target[..3]}{Listeners.Count}";
-            Keymaker.CacheKey(key);
 
             // TODO: Support more event listener options
             var options = "{passive:true}";

@@ -11,7 +11,7 @@ public class SnapshotComposer : BaseComposer
     [ThreadStatic] static SnapshotComposer? reusable;
     public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
 
-    private StableKeyTreeWalker keyGenerator = new();
+    private readonly KeyCursor keyCursor = new();
     private int writeHead = 0;
     private bool isWritingAttribute = false;
     private Keyhole[] snapshot = [];
@@ -47,15 +47,12 @@ public class SnapshotComposer : BaseComposer
     {
         snapshot = [];
         writeHead = 0;
-        keyGenerator.Reset();
+        keyCursor.Reset();
         base.Reset();
     }
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
-        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
-        html.Key = "key";
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
         html.Start = writeHead;
         writeHead += html.Length;
         return true;
@@ -63,11 +60,12 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnElementBegin(ref Html html)
     {
-        html.Key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current; // TODO: Remove?
+        keyCursor.MoveDown();
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         html.Start = writeHead;
         writeHead += html.Length;
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
         return true;
     }
 
@@ -76,15 +74,15 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html html` parameter has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
-        var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
-        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
+        keyCursor.MoveUp();
+        var key = keyCursor.Current;
 
         // Since the html has been written, 
         // return to where we left off (a little like recursion).
         // so that we can set the html's type, expression, key, and range.
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
-        keyhole.Key = html.Key;
+        keyhole.Key = key;
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
             HtmlType.Iterator => KeyholeType.Iterator,
@@ -125,6 +123,9 @@ public class SnapshotComposer : BaseComposer
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Uri, format);
     private bool OnKeyhole<T>(ref Html parent, T value, KeyholeType type, string? format = null)
     {
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
         keyhole.SetValue(value);
@@ -132,12 +133,12 @@ public class SnapshotComposer : BaseComposer
         keyhole.Format = format;
         if (parent.Type == HtmlType.Attribute)
         {
-            keyhole.Key = parent.Key; // use parent's key, no need for its own
+            keyhole.Key = keyCursor.Parent; // use parent's key, no need for its own
             keyhole.ParentStart = parent.Start;
         }
         else
         {
-            keyhole.Key = keyGenerator.GetNextKey();
+            keyhole.Key = key;
             keyhole.IsValueAnAttribute = isWritingAttribute;
         }
         return true;
@@ -149,9 +150,12 @@ public class SnapshotComposer : BaseComposer
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
     private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
-        keyhole.Key = keyGenerator.GetNextKey();
+        keyhole.Key = key;
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
         keyhole.Expression = expression;
@@ -160,18 +164,20 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        htmls.Key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+        keyCursor.MoveDown();
+
         htmls.Start = writeHead;
 
         ref var keyhole = ref snapshot[parent.Start + parent.Cursor];
-        keyhole.Key = htmls.Key;
+        keyhole.Key = key;
         keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
         keyhole.Expression = expression;
         keyhole.SequenceStart = htmls.Start;
         keyhole.SequenceLength = htmls.Length;
 
-        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);      
         writeHead += htmls.Length;
         return true;
     }
@@ -194,7 +200,7 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
+        keyCursor.MoveUp();
         return true;
     }
 }

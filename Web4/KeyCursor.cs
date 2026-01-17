@@ -10,6 +10,8 @@ public class KeyCursor
     private readonly List<int> levels = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
+    public string Parent => Encoding.UTF8.GetString(keyCache.Key); // TODO: string -> byte[]
+
     public KeyCursor() => Reset();
 
     public void Reset()

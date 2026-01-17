@@ -344,7 +344,7 @@ public class Tests
                 </body>
             </html>
             """;
-        findKeyholeComposer.FindEventListener(key: "", template);
+        findKeyholeComposer.FindEventListener(key: ""u8, template);
     }
 
     static Html Tile(double x, double y) => $"""
@@ -437,7 +437,7 @@ public class Tests
                 </body>
             </html>
             """;
-        FindKeyholeComposer.Shared.FindEventListener(key: "", template);
+        FindKeyholeComposer.Shared.FindEventListener(key: ""u8, template);
     }
 
 

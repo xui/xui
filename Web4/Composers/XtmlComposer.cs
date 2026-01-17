@@ -7,7 +7,7 @@ namespace Web4.Composers;
 public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
 {
     private enum AttributeStatus { None, Pending, InProgress }
-    private StableKeyTreeWalker keyGenerator = new();
+    private readonly KeyCursor keyCursor = new();
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
@@ -30,15 +30,11 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         base.Reset();
         Window = null!;
         attributeStatus = AttributeStatus.None;
-        keyGenerator.Reset();
+        keyCursor.Reset();
     }
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
-        // TODO: Adjust keyGenerator so this step is not needed?  key:`key`
-        html.Key = "key";
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
-
         InjectBootloader(ref literal);
 
         return base.OnTemplateBegin(ref html, ref literal);
@@ -60,14 +56,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnElementBegin(ref Html html)
     {
-        html.Key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(html.Key, html.Length);
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+        keyCursor.MoveDown();
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{html.Key}-->`
-                Writer.Write("<!--"u8, html.Key, "-->"u8);
+                // ex: `<!--{key}-->`
+                Writer.Write("<!--"u8, key, "-->"u8);
                 break;
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
@@ -82,28 +79,28 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
+        keyCursor.MoveUp();
+        var key = keyCursor.Current;
+
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--/{html.Key}-->`
-                Writer.Write("<!--/"u8, html.Key, "-->"u8);
+                // ex: `<!--/{key}-->`
+                Writer.Write("<!--/"u8, key, "-->"u8);
                 if (format is {} transition)
-                    InjectTransition(html.Key, transition);
+                    InjectTransition(key, transition);
                 break;
 
             case AttributeStatus.InProgress:
-                // ex: `" {html.Key}`
+                // ex: `" {key}`
                 Writer.Write("\" "u8);
-                Writer.Write(html.Key);
+                Writer.Write(key);
                 attributeStatus = AttributeStatus.None;
                 break;
 
             case AttributeStatus.Pending:
                 throw new NotSupportedException("Attributes cannot have nested Htmls");
         }
-
-        var cursor = parent.Type != HtmlType.Iterator ? parent.Cursor : parent.Cursor * 2;
-        keyGenerator.ReturnToParent(parent.Key, cursor, parent.Length);
 
         return base.OnElementEnd(ref parent, html, format, expression);
     }
@@ -126,7 +123,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnStringKeyhole(ref Html parent, string value)
     {
-        var key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         switch (attributeStatus)
         {
             case AttributeStatus.None:
@@ -159,7 +158,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
-        var key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         switch (attributeStatus)
         {
             case AttributeStatus.None:
@@ -217,7 +218,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // It should end up looking like this:
         // $"<!--key123-->{value:format}<!--/key123-->"
 
-        var key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         switch (attributeStatus)
         {
             case AttributeStatus.None:
@@ -251,7 +254,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
     {
-        var key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         switch (attributeStatus)
         {
             case AttributeStatus.None:
@@ -329,7 +334,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (deferredLiteral != null)
             HandleDeferredLiteral();
 
-        var key = keyGenerator.GetNextKey();
+        keyCursor.MoveNext();
+        var key = keyCursor.Current;
+
         if (includeEventArg)
         {
             // ex: `"keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}`
@@ -356,8 +363,10 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        htmls.Key = keyGenerator.GetNextKey();
-        keyGenerator.CreateNewGeneration(htmls.Key, htmls.Length);
+        keyCursor.MoveNext();
+        var key = keyCursor.Current; // TODO: Remove?
+        keyCursor.MoveDown();
+
         return true;
     }
 
@@ -373,11 +382,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
+        keyCursor.MoveUp();
+        var key = keyCursor.Current;
+        
         // Keyhole to represent the loop itself, useful for zero-length use cases.
-        // ex: `<!--{htmls.Key} /-->`
-        Writer.Write("<!--"u8, htmls.Key, " /-->"u8);
+        // ex: `<!--{key} /-->`
+        Writer.Write("<!--"u8, key, " /-->"u8);
 
-        keyGenerator.ReturnToParent(parent.Key, parent.Cursor, parent.Length);
         return true;
     }
 

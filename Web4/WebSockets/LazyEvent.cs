@@ -1,7 +1,6 @@
 
 using System.Buffers;
 using System.Drawing;
-using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
 using Web4.Core.DOM;
@@ -70,68 +69,62 @@ public record struct LazyEvent : Event, IDisposable
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    var propertyName = reader.HasValueSequence
-                        ? Keymaker.GetKeyIfCached(reader.ValueSequence)
-                        : Keymaker.GetKeyIfCached(reader.ValueSpan);
-
+                    var (propertyName, type) = GetStringAndType(ref reader);
                     if (propertyName is not null)
                     {
                         reader.Read();
-                        if (types.TryGetValue(propertyName, out var type))
+                        long? value = type switch
                         {
-                            long? value = type switch
-                            {
-                                _ when type == typeof(bool) => reader.GetBoolean() ? 1 : 0,
-                                _ when type == typeof(int) => reader.GetInt32(),
-                                _ when type == typeof(long) => reader.GetInt64(),
-                                _ when type == typeof(double) => BitConverter.DoubleToInt64Bits(reader.GetDouble()),
-                                _ => null,
-                            };
-                            if (value is long l)
-                            {
-                                values ??= valueDictionaryPool.Get();
-                                values[propertyName] = l;
-                            }
+                            _ when type == typeof(bool) => reader.GetBoolean() ? 1 : 0,
+                            _ when type == typeof(int) => reader.GetInt32(),
+                            _ when type == typeof(long) => reader.GetInt64(),
+                            _ when type == typeof(double) => BitConverter.DoubleToInt64Bits(reader.GetDouble()),
+                            _ => null,
+                        };
+                        if (value is long l)
+                        {
+                            values ??= valueDictionaryPool.Get();
+                            values[propertyName] = l;
+                        }
 
-                            if (!canIgnoreRefTypes)
+                        if (!canIgnoreRefTypes)
+                        {
+                            if (type == typeof(string))
                             {
-                                if (type == typeof(string))
-                                {
-                                    references ??= [];
-                                    var str = reader.GetString();
-                                    if (str is not null)
-                                        references[propertyName] = str;
-                                }
-                                else if (type == typeof(ABG))
-                                {
-                                    references ??= [];
-                                    // TODO: Implement
-                                }
-                                else if (type == typeof(DataTransferContainer))
-                                {
-                                    references ??= [];
-                                    // TODO: Implement
-                                }
-                                else if (type == typeof(DOMException))
-                                {
-                                    references ??= [];
-                                    // TODO: Implement
-                                }
-                                else if (type == typeof(EventTarget))
-                                {
-                                    references ??= [];
-                                    ParseEventTarget(reader, propertyName);
-                                }
-                                else if (type == typeof(TouchPoint[]))
-                                {
-                                    references ??= [];
-                                    // TODO: Implement
-                                }
-                                else if (type == typeof(XYZ))
-                                {
-                                    references ??= [];
-                                    // TODO: Implement
-                                }
+                                references ??= [];
+                                var str = reader.GetString();
+                                if (str is not null)
+                                    references[propertyName] = str;
+                            }
+                            else if (type == typeof(ABG))
+                            {
+                                references ??= [];
+                                // TODO: Implement
+                            }
+                            else if (type == typeof(DataTransferContainer))
+                            {
+                                references ??= [];
+                                // TODO: Implement
+                            }
+                            else if (type == typeof(DOMException))
+                            {
+                                references ??= [];
+                                // TODO: Implement
+                            }
+                            else if (type == typeof(EventTarget))
+                            {
+                                references ??= [];
+                                ParseEventTarget(reader, propertyName);
+                            }
+                            else if (type == typeof(TouchPoint[]))
+                            {
+                                references ??= [];
+                                // TODO: Implement
+                            }
+                            else if (type == typeof(XYZ))
+                            {
+                                references ??= [];
+                                // TODO: Implement
                             }
                         }
                     }
@@ -237,147 +230,121 @@ public record struct LazyEvent : Event, IDisposable
         return false;
     }
 
-    static LazyEvent()
+    private static ValueTuple<string, Type> GetStringAndType(ref Utf8JsonReader reader)
     {
-        foreach (var key in types.Keys)
-            Keymaker.CacheKey(key);
+        if (!reader.HasValueSequence)
+            return GetStringAndType(reader.ValueSpan);
+
+        // Bummer.  This property name is split across multiple segments so stackalloc some memory to handle this.
+        // Arbitrary max length to prevent stack-overflow attacks with huge property names.
+        int length = (int)reader.ValueSequence.Length;
+        if (length > 32)
+            return (string.Empty, typeof(Exception));
+
+        Span<byte> buffer = stackalloc byte[length];
+        reader.ValueSequence.CopyTo(buffer);
+        return GetStringAndType(buffer);
     }
 
-    private static readonly Dictionary<string, Type> types = new()
+    // TODO: Benchmarking needed here.  Is this faster than a Dictionay.AlternateLookup?  
+    // Every property fits within 128-bit NEON SIMD-optimized comparison (i.e. even Apple's M1-M5) 
+    // so does that make an ~90-case switch faster than a Dictionary lookup?
+    // Don't forget that this is a highly-concurrent codepath so see if there are any 
+    // Dictionaries that have lock-free reads.
+    private static ValueTuple<string, Type> GetStringAndType(ReadOnlySpan<byte> p) => p switch
     {
-        ["absolute"] = typeof(bool),
-        ["acceleration"] = typeof(XYZ),
-        ["accelerationIncludingGravity"] = typeof(XYZ),
-        ["alpha"] = typeof(double),
-        ["altitudeAngle"] = typeof(double),
-        ["altKey"] = typeof(bool),
-        ["animationName"] = typeof(string),
-        ["azimuthAngle"] = typeof(double),
-        ["beta"] = typeof(double),
-        ["bubbles"] = typeof(bool),
-        ["button"] = typeof(int),
-        ["buttons"] = typeof(int),
-        ["cancelable"] = typeof(bool),
-        ["changedTouches"] = typeof(TouchPoint[]),
-        ["clientX"] = typeof(double),
-        ["clientY"] = typeof(double),
-        ["code"] = typeof(string),
-        ["colNo"] = typeof(int),
-        ["composed"] = typeof(bool),
-        ["ctrlKey"] = typeof(bool),
-        ["currentTarget"] = typeof(EventTarget),
-        ["data"] = typeof(string),
-        ["dataTransfer"] = typeof(DataTransferContainer),
-        ["defaultPrevented"] = typeof(bool),
-        ["deltaMode"] = typeof(int),
-        ["deltaX"] = typeof(double),
-        ["deltaY"] = typeof(double),
-        ["deltaZ"] = typeof(double),
-        ["detail"] = typeof(long),
-        ["elapsedTime"] = typeof(double),
-        ["error"] = typeof(DOMException),
-        ["eventPhase"] = typeof(int),
-        ["fileName"] = typeof(string),
-        ["gamma"] = typeof(double),
-        ["height"] = typeof(int),
-        ["inputType"] = typeof(string),
-        ["interval"] = typeof(double),
-        ["isComposing"] = typeof(bool),
-        ["isPrimary"] = typeof(bool),
-        ["isTrusted"] = typeof(bool),
-        ["key"] = typeof(string),
-        ["length"] = typeof(int),
-        ["lengthComputable"] = typeof(bool),
-        ["lineNo"] = typeof(int),
-        ["loaded"] = typeof(long),
-        ["location"] = typeof(int),
-        ["message"] = typeof(string),
-        ["metaKey"] = typeof(bool),
-        ["movementX"] = typeof(double),
-        ["movementY"] = typeof(double),
-        ["newState"] = typeof(string),
-        ["newUrl"] = typeof(string),
-        ["offsetX"] = typeof(double),
-        ["offsetY"] = typeof(double),
-        ["oldState"] = typeof(string),
-        ["oldUrl"] = typeof(string),
-        ["pageX"] = typeof(double),
-        ["pageY"] = typeof(double),
-        ["persisted"] = typeof(bool),
-        ["pointerID"] = typeof(int),
-        ["pointerType"] = typeof(string),
-        ["pressure"] = typeof(double),
-        ["propertyName"] = typeof(string),
-        ["pseudoElement"] = typeof(string),
-        ["relatedTarget"] = typeof(EventTarget),
-        ["repeat"] = typeof(bool),
-        ["rotationRate"] = typeof(ABG),
-        ["screenX"] = typeof(double),
-        ["screenY"] = typeof(double),
-        ["shiftKey"] = typeof(bool),
-        ["skipped"] = typeof(bool),
-        ["submitter"] = typeof(EventTarget),
-        ["tangentialPressure"] = typeof(double),
-        ["target"] = typeof(EventTarget),
-        ["targetTouches"] = typeof(TouchPoint[]),
-        ["timeStamp"] = typeof(double),
-        ["tiltX"] = typeof(double),
-        ["tiltY"] = typeof(double),
-        ["total"] = typeof(long),
-        ["touches"] = typeof(TouchPoint[]),
-        ["twist"] = typeof(double),
-        ["type"] = typeof(string),
-        ["width"] = typeof(int),
-        ["x"] = typeof(double),
-        ["y"] = typeof(double),
-        ["_id"] = typeof(int)
+        _ when p.SequenceEqual("absolute"u8) => ("absolute", typeof(bool)),
+        _ when p.SequenceEqual("acceleration"u8) => ("acceleration", typeof(XYZ)),
+        _ when p.SequenceEqual("accelerationIncludingGravity"u8) => ("accelerationIncludingGravity", typeof(XYZ)),
+        _ when p.SequenceEqual("alpha"u8) => ("alpha", typeof(double)),
+        _ when p.SequenceEqual("altitudeAngle"u8) => ("altitudeAngle", typeof(double)),
+        _ when p.SequenceEqual("altKey"u8) => ("altKey", typeof(bool)),
+        _ when p.SequenceEqual("animationName"u8) => ("animationName", typeof(string)),
+        _ when p.SequenceEqual("azimuthAngle"u8) => ("azimuthAngle", typeof(double)),
+        _ when p.SequenceEqual("beta"u8) => ("beta", typeof(double)),
+        _ when p.SequenceEqual("bubbles"u8) => ("bubbles", typeof(bool)),
+        _ when p.SequenceEqual("button"u8) => ("button", typeof(int)),
+        _ when p.SequenceEqual("buttons"u8) => ("buttons", typeof(int)),
+        _ when p.SequenceEqual("cancelable"u8) => ("cancelable", typeof(bool)),
+        _ when p.SequenceEqual("changedTouches"u8) => ("changedTouches", typeof(TouchPoint[])),
+        _ when p.SequenceEqual("clientX"u8) => ("clientX", typeof(double)),
+        _ when p.SequenceEqual("clientY"u8) => ("clientY", typeof(double)),
+        _ when p.SequenceEqual("code"u8) => ("code", typeof(string)),
+        _ when p.SequenceEqual("colNo"u8) => ("colNo", typeof(int)),
+        _ when p.SequenceEqual("composed"u8) => ("composed", typeof(bool)),
+        _ when p.SequenceEqual("ctrlKey"u8) => ("ctrlKey", typeof(bool)),
+        _ when p.SequenceEqual("currentTarget"u8) => ("currentTarget", typeof(EventTarget)),
+        _ when p.SequenceEqual("data"u8) => ("data", typeof(string)),
+        _ when p.SequenceEqual("dataTransfer"u8) => ("dataTransfer", typeof(DataTransferContainer)),
+        _ when p.SequenceEqual("defaultPrevented"u8) => ("defaultPrevented", typeof(bool)),
+        _ when p.SequenceEqual("deltaMode"u8) => ("deltaMode", typeof(int)),
+        _ when p.SequenceEqual("deltaX"u8) => ("deltaX", typeof(double)),
+        _ when p.SequenceEqual("deltaY"u8) => ("deltaY", typeof(double)),
+        _ when p.SequenceEqual("deltaZ"u8) => ("deltaZ", typeof(double)),
+        _ when p.SequenceEqual("detail"u8) => ("detail", typeof(long)),
+        _ when p.SequenceEqual("elapsedTime"u8) => ("elapsedTime", typeof(double)),
+        _ when p.SequenceEqual("error"u8) => ("error", typeof(DOMException)),
+        _ when p.SequenceEqual("eventPhase"u8) => ("eventPhase", typeof(int)),
+        _ when p.SequenceEqual("fileName"u8) => ("fileName", typeof(string)),
+        _ when p.SequenceEqual("gamma"u8) => ("gamma", typeof(double)),
+        _ when p.SequenceEqual("height"u8) => ("height", typeof(int)),
+        _ when p.SequenceEqual("inputType"u8) => ("inputType", typeof(string)),
+        _ when p.SequenceEqual("interval"u8) => ("interval", typeof(double)),
+        _ when p.SequenceEqual("isComposing"u8) => ("isComposing", typeof(bool)),
+        _ when p.SequenceEqual("isPrimary"u8) => ("isPrimary", typeof(bool)),
+        _ when p.SequenceEqual("isTrusted"u8) => ("isTrusted", typeof(bool)),
+        _ when p.SequenceEqual("key"u8) => ("key", typeof(string)),
+        _ when p.SequenceEqual("length"u8) => ("length", typeof(int)),
+        _ when p.SequenceEqual("lengthComputable"u8) => ("lengthComputable", typeof(bool)),
+        _ when p.SequenceEqual("lineNo"u8) => ("lineNo", typeof(int)),
+        _ when p.SequenceEqual("loaded"u8) => ("loaded", typeof(long)),
+        _ when p.SequenceEqual("location"u8) => ("location", typeof(int)),
+        _ when p.SequenceEqual("message"u8) => ("message", typeof(string)),
+        _ when p.SequenceEqual("metaKey"u8) => ("metaKey", typeof(bool)),
+        _ when p.SequenceEqual("movementX"u8) => ("movementX", typeof(double)),
+        _ when p.SequenceEqual("movementY"u8) => ("movementY", typeof(double)),
+        _ when p.SequenceEqual("newState"u8) => ("newState", typeof(string)),
+        _ when p.SequenceEqual("newUrl"u8) => ("newUrl", typeof(string)),
+        _ when p.SequenceEqual("offsetX"u8) => ("offsetX", typeof(double)),
+        _ when p.SequenceEqual("offsetY"u8) => ("offsetY", typeof(double)),
+        _ when p.SequenceEqual("oldState"u8) => ("oldState", typeof(string)),
+        _ when p.SequenceEqual("oldUrl"u8) => ("oldUrl", typeof(string)),
+        _ when p.SequenceEqual("pageX"u8) => ("pageX", typeof(double)),
+        _ when p.SequenceEqual("pageY"u8) => ("pageY", typeof(double)),
+        _ when p.SequenceEqual("persisted"u8) => ("persisted", typeof(bool)),
+        _ when p.SequenceEqual("pointerID"u8) => ("pointerID", typeof(int)),
+        _ when p.SequenceEqual("pointerType"u8) => ("pointerType", typeof(string)),
+        _ when p.SequenceEqual("pressure"u8) => ("pressure", typeof(double)),
+        _ when p.SequenceEqual("propertyName"u8) => ("propertyName", typeof(string)),
+        _ when p.SequenceEqual("pseudoElement"u8) => ("pseudoElement", typeof(string)),
+        _ when p.SequenceEqual("relatedTarget"u8) => ("relatedTarget", typeof(EventTarget)),
+        _ when p.SequenceEqual("repeat"u8) => ("repeat", typeof(bool)),
+        _ when p.SequenceEqual("rotationRate"u8) => ("rotationRate", typeof(ABG)),
+        _ when p.SequenceEqual("screenX"u8) => ("screenX", typeof(double)),
+        _ when p.SequenceEqual("screenY"u8) => ("screenY", typeof(double)),
+        _ when p.SequenceEqual("shiftKey"u8) => ("shiftKey", typeof(bool)),
+        _ when p.SequenceEqual("skipped"u8) => ("skipped", typeof(bool)),
+        _ when p.SequenceEqual("submitter"u8) => ("submitter", typeof(EventTarget)),
+        _ when p.SequenceEqual("tangentialPressure"u8) => ("tangentialPressure", typeof(double)),
+        _ when p.SequenceEqual("target"u8) => ("target", typeof(EventTarget)),
+        _ when p.SequenceEqual("targetTouches"u8) => ("targetTouches", typeof(TouchPoint[])),
+        _ when p.SequenceEqual("timeStamp"u8) => ("timeStamp", typeof(double)),
+        _ when p.SequenceEqual("tiltX"u8) => ("tiltX", typeof(double)),
+        _ when p.SequenceEqual("tiltY"u8) => ("tiltY", typeof(double)),
+        _ when p.SequenceEqual("total"u8) => ("total", typeof(long)),
+        _ when p.SequenceEqual("touches"u8) => ("touches", typeof(TouchPoint[])),
+        _ when p.SequenceEqual("twist"u8) => ("twist", typeof(double)),
+        _ when p.SequenceEqual("type"u8) => ("type", typeof(string)),
+        _ when p.SequenceEqual("width"u8) => ("width", typeof(int)),
+        _ when p.SequenceEqual("x"u8) => ("x", typeof(double)),
+        _ when p.SequenceEqual("y"u8) => ("y", typeof(double)),
+        _ when p.SequenceEqual("id"u8) => ("id", typeof(string)),
+        _ when p.SequenceEqual("type"u8) => ("type", typeof(string)),
+        _ when p.SequenceEqual("value"u8) => ("value", typeof(string)),
+        _ when p.SequenceEqual("name"u8) => ("name", typeof(string)),
+        _ when p.SequenceEqual("checked"u8) => ("checked", typeof(bool)),
+        _ => (string.Empty, typeof(Exception)),
     };
-
-    private bool PrintMembers(StringBuilder stringBuilder)
-    {
-        bool isFirst = true;
-        if (values is not null)
-        {
-            foreach (var pair in values)
-            {
-                if (isFirst)
-                    isFirst = false;
-                else
-                    stringBuilder.Append(", ");
-
-                if (types.TryGetValue(pair.Key, out var type))
-                {
-                    if (type == typeof(bool))
-                        stringBuilder.Append($"{pair.Key}: {GetBool(pair.Key) switch { true => "true", false => "false", _ => "null" }}");
-                    else if (type == typeof(int))
-                        stringBuilder.Append($"{pair.Key}: {GetInt(pair.Key)}");
-                    else if (type == typeof(long))
-                        stringBuilder.Append($"{pair.Key}: {GetLong(pair.Key)}");
-                    else if (type == typeof(double))
-                        stringBuilder.Append($"{pair.Key}: {GetDouble(pair.Key)}");
-                }
-            }
-        }
-
-        if (references is not null)
-        {
-            foreach (var pair in references)
-            {
-                if (types.TryGetValue(pair.Key, out var type))
-                {
-                    if (isFirst)
-                        isFirst = false;
-                    else
-                        stringBuilder.Append(", ");
-
-                    if (type == typeof(string))
-                        stringBuilder.Append($"{pair.Key}: \"{GetReference(pair.Key)}\"");
-                    // TODO: Implement others
-                }
-            }
-        }
-        return true;
-    }
 
     public bool? Absolute => GetBool("absolute");
     bool IDeviceOrientation.Absolute => Absolute ?? default;

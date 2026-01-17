@@ -70,7 +70,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Attribute:
                 int start = keyhole.Sequence.Start.Value;
                 int length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression?.Replace("  ", "").Replace("\n", " ")} %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node", CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
