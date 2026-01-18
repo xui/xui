@@ -458,7 +458,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         literal = string.Empty;
     }
 
-    private void InjectTransition(string key, string transition)
+    private void InjectTransition(byte[] key, string transition)
     {
         Writer.WriteRaw($$"""
             <style>

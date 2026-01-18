@@ -5,14 +5,14 @@ namespace Web4;
 
 public struct Keyhole
 {
-    private string key;         // 8 bytes
+    private byte[] key;         // 8 bytes
     private object? reference;  // 8 bytes
     private long value1;        // 8 bytes
     private int value2;         // 4 bytes
     private KeyholeType type;   // 4 bytes
     private string? format;     // 8 bytes
 
-    public string Key { readonly get => key; set => key = value; }
+    public byte[] Key { readonly get => key; set => key = value; }
     public KeyholeType Type { readonly get => type; set => type = value; }
     public string? Format { readonly get => format; set => format = value; }
 

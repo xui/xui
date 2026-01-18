@@ -145,7 +145,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from SetText and SetAttribute
-    public void WriteNotification(ValueTuple<string, string, string> method, ref Keyhole param1)
+    public void WriteNotification(ValueTuple<string, byte[], string> method, ref Keyhole param1)
     {
         OnMessageBegin();
 
@@ -154,7 +154,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -179,7 +179,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from SetAttribute
-    public void WriteNotification(ValueTuple<string, string, string> method, Span<Keyhole> param1)
+    public void WriteNotification(ValueTuple<string, byte[], string> method, Span<Keyhole> param1)
     {
         OnMessageBegin();
 
@@ -188,7 +188,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -204,7 +204,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from SetNode
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, string>? param2 = null)
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, byte[], string> method, Span<Keyhole> param1, ValueTuple<string, byte[]>? param2 = null)
     {
         OnMessageBegin();
 
@@ -213,7 +213,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -224,7 +224,8 @@ public partial class JsonRpcWriter : IDisposable
         if (param2.HasValue)
         {
             jsonWriter.WriteStringValueSegment(param2.Value.Item1, false);
-            jsonWriter.WriteStringValueSegment(param2.Value.Item2, true);
+            WriteKey(method.Item2);
+            jsonWriter.WriteStringValueSegment("", true);
         }
 
         jsonWriter.WriteEndArray();
@@ -235,7 +236,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from SetNode
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, ValueTuple<string, int> param2, ValueTuple<string, int> param3)
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, byte[], string> method, Span<Keyhole> param1, ValueTuple<string, int> param2, ValueTuple<string, int> param3)
     {
         OnMessageBegin();
 
@@ -244,7 +245,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -272,7 +273,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from PushNode
-    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, string, string> method, Span<Keyhole> param1, string param2, ValueTuple<string, int>? param3 = null)
+    public void WriteNotification(Keyhole[] buffer, ValueTuple<string, byte[], string> method, Span<Keyhole> param1, byte[] param2, ValueTuple<string, int>? param3 = null)
     {
         OnMessageBegin();
 
@@ -281,7 +282,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -308,7 +309,7 @@ public partial class JsonRpcWriter : IDisposable
     }
 
     // Called from PopNode
-    public void WriteNotification(ValueTuple<string, string, string> method, ValueTuple<string, int>? param1 = null)
+    public void WriteNotification(ValueTuple<string, byte[], string> method, ValueTuple<string, int>? param1 = null)
     {
         OnMessageBegin();
 
@@ -317,7 +318,7 @@ public partial class JsonRpcWriter : IDisposable
 
         jsonWriter.WritePropertyName("method");
         jsonWriter.WriteStringValueSegment(method.Item1, false);
-        jsonWriter.WriteStringValueSegment(method.Item2, false);
+        WriteKey(method.Item2);
         jsonWriter.WriteStringValueSegment(method.Item3, true);
 
         jsonWriter.WriteStartArray("params");
@@ -338,6 +339,13 @@ public partial class JsonRpcWriter : IDisposable
         OnMessageEnd();
     }
 
+    private void WriteKey(byte[] key)
+    {
+        jsonWriter.Flush();
+        key.CopyTo(bufferWriter.GetSpan(key.Length));
+        bufferWriter.Advance(key.Length);
+    }
+
     private void WriteHtml(Keyhole[] buffer, Span<Keyhole> keyholes, bool includeSentinels)
     {
         for (int i = 0; i < keyholes.Length; i++)
@@ -355,7 +363,7 @@ public partial class JsonRpcWriter : IDisposable
                     if (includeSentinels)
                     {
                         jsonWriter.WriteStringValueSegment("<!--/", false);
-                        jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                        WriteKey(keyhole.Key);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }
                     break;
@@ -366,11 +374,11 @@ public partial class JsonRpcWriter : IDisposable
                     break;
                 case KeyholeType.EventListener:
                     jsonWriter.WriteStringValueSegment("\"keyholes.", false);
-                    jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                    WriteKey(keyhole.Key);
                     jsonWriter.WriteStringValueSegment(".dispatchEvent(event.trim('", false);
                     jsonWriter.WriteStringValueSegment(keyhole.Format ?? "*", false);
                     jsonWriter.WriteStringValueSegment("'))\" ", false);
-                    jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                    WriteKey(keyhole.Key);
                     break;
                 case KeyholeType.Iterator:
                     int start = keyhole.Sequence.Start.Value;
@@ -383,7 +391,7 @@ public partial class JsonRpcWriter : IDisposable
                         if (includeSentinels)
                         {
                             jsonWriter.WriteStringValueSegment("<!--/", false);
-                            jsonWriter.WriteStringValueSegment(k.Key, false);
+                            WriteKey(keyhole.Key);
                             jsonWriter.WriteStringValueSegment("-->", false);
                         }
                     }
@@ -393,7 +401,7 @@ public partial class JsonRpcWriter : IDisposable
                     if (includeSentinels)
                     {
                             jsonWriter.WriteStringValueSegment("<!--", false);
-                            jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                            WriteKey(keyhole.Key);
                             jsonWriter.WriteStringValueSegment("-->", false);
                     }
 
@@ -402,7 +410,7 @@ public partial class JsonRpcWriter : IDisposable
                     if (includeSentinels)
                     {
                         jsonWriter.WriteStringValueSegment("<!--/", false);
-                        jsonWriter.WriteStringValueSegment(keyhole.Key, false);
+                        WriteKey(keyhole.Key);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }
                     break;

@@ -19,6 +19,13 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
         writer.Advance(length);
     }
 
+    public readonly void AppendFormatted(byte[] value)
+    {
+        Span<byte> buffer = writer.GetSpan(value.Length);
+        value.CopyTo(buffer);
+        writer.Advance(value.Length);
+    }
+
     public readonly void AppendFormatted<T>(T value, string? format = null) where T : struct, IUtf8SpanFormattable
     {
         // TODO: What's the max length of all T's?

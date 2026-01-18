@@ -10,7 +10,7 @@ public class KeyCursor
     private readonly List<int> levels = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
-    public string Parent => Encoding.UTF8.GetString(keyCache.Key); // TODO: string -> byte[]
+    public byte[] Parent => keyCache.Key;
 
     public KeyCursor() => Reset();
 
@@ -40,8 +40,7 @@ public class KeyCursor
         currentLevel--;
     }
 
-    public string Current => Encoding.UTF8.GetString(CurrentAsBytes);
-    public byte[] CurrentAsBytes
+    public byte[] Current
     {
         get
         {
