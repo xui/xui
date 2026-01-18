@@ -36,6 +36,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private void WriteKeyhole(int index, Keyhole keyhole)
     {
+        var key = keyhole.Key != null ? Encoding.UTF8.GetString(keyhole.Key) : null;
         switch (keyhole.Type)
         {
             case KeyholeType.StringLiteral:
@@ -44,33 +45,33 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.String:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node");
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
                 Console.GroupEnd();
                 break;
             case KeyholeType.Integer:
                 if (keyhole.IsValueAnAttribute) // TODO: This isn't getting set?
-                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 else
-                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node");
+                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
                 Console.GroupEnd();
                 break;
             case KeyholeType.Boolean:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 Console.GroupEnd();
                 break;
             case KeyholeType.Color:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", $"globalThis.keyholes.{keyhole.Key}.node");
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", ObjectString(key));
                 Console.GroupEnd();
                 break;
             // TODO: Support the other FormatTypes too
             case KeyholeType.EventListener:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression} %c}}"}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression} %c}}"}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
                 Console.GroupEnd();
                 break;
             case KeyholeType.Attribute:
                 int start = keyhole.Sequence.Start.Value;
                 int length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %o %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"globalThis.keyholes.{keyhole.Key}.node", CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key), CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -82,7 +83,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Html:
                 start = keyhole.Sequence.Start.Value;
                 length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, $"globalThis.keyholes.{keyhole.Key}.node", CSS_BRACE, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, ObjectString(key), CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -94,7 +95,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Iterator:
                 start = keyhole.Sequence.Start.Value;
                 length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -104,10 +105,15 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             default:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{keyhole.Key}%c: %c{keyhole.Type}",-28} %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 Console.GroupEnd();
                 break;
         }
+    }
+
+    private static string ObjectString(string key)
+    {
+        return $"globalThis.keyholes.{key}.node";
     }
 
     private static string InlineString(string? value)
