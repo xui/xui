@@ -90,13 +90,15 @@ public ref partial struct Html : IDisposable
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
     {
-        _ = (Cursor, Type) switch {
+        var @continue = (Cursor, Type) switch {
             (0, HtmlType.Template) => composer.OnTemplateBegin(ref this, ref literal),
             (0, HtmlType.Element) => composer.OnElementBegin(ref this),
             _ => true,
         };
+        if (!@continue)
+            return false;
 
-        var @continue = composer.OnMarkup(ref this, literal);
+        @continue = composer.OnMarkup(ref this, literal);
         Cursor++;
         return @continue;
     }
