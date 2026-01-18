@@ -56,8 +56,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnElementBegin(ref Html html)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
         keyCursor.MoveDown();
 
         switch (attributeStatus)
@@ -79,8 +78,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
-        keyCursor.MoveUp();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveUp();
 
         switch (attributeStatus)
         {
@@ -123,8 +121,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnStringKeyhole(ref Html parent, string value)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
 
         switch (attributeStatus)
         {
@@ -158,8 +155,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
 
         switch (attributeStatus)
         {
@@ -218,8 +214,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         // It should end up looking like this:
         // $"<!--key123-->{value:format}<!--/key123-->"
 
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
 
         switch (attributeStatus)
         {
@@ -254,8 +249,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
 
         switch (attributeStatus)
         {
@@ -334,8 +328,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
         if (deferredLiteral != null)
             HandleDeferredLiteral();
 
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
 
         if (includeEventArg)
         {
@@ -364,7 +357,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         keyCursor.MoveNext();
-        var key = keyCursor.Current; // TODO: Remove?
         keyCursor.MoveDown();
 
         return true;
@@ -382,8 +374,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyCursor.MoveUp();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveUp();
         
         // Keyhole to represent the loop itself, useful for zero-length use cases.
         // ex: `<!--{key} /-->`

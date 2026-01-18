@@ -56,7 +56,6 @@ public class FindKeyholeComposer : BaseComposer
     public override bool OnElementBegin(ref Html html)
     {
         keyCursor.MoveNext();
-        var key = keyCursor.Current; // TODO: Remove?
         keyCursor.MoveDown();
         return true;
     }
@@ -89,7 +88,6 @@ public class FindKeyholeComposer : BaseComposer
             return false;
 
         keyCursor.MoveNext();
-        _ = keyCursor.Current; // TODO: Remove?
         return true;
     }
 
@@ -98,8 +96,8 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
         
-        keyCursor.MoveNext();
-        if (!keyCursor.Current.SequenceEqual(key.Span))
+        var key = keyCursor.MoveNext();
+        if (!key.SequenceEqual(this.key.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -113,8 +111,8 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        keyCursor.MoveNext();
-        if (!keyCursor.Current.SequenceEqual(key.Span))
+        var key = keyCursor.MoveNext();
+        if (!key.SequenceEqual(this.key.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -128,8 +126,8 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        keyCursor.MoveNext();
-        if (!keyCursor.Current.SequenceEqual(key.Span))
+        var key = keyCursor.MoveNext();
+        if (!key.SequenceEqual(this.key.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -143,8 +141,8 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        keyCursor.MoveNext();
-        if (!keyCursor.Current.SequenceEqual(key.Span))
+        var key = keyCursor.MoveNext();
+        if (!key.SequenceEqual(this.key.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -159,7 +157,6 @@ public class FindKeyholeComposer : BaseComposer
             return false;
         
         keyCursor.MoveNext();
-        var key = keyCursor.Current; // TODO: Remove?
         keyCursor.MoveDown();
 
         return true;

@@ -61,7 +61,6 @@ public class SnapshotComposer : BaseComposer
     public override bool OnElementBegin(ref Html html)
     {
         keyCursor.MoveNext();
-        var key = keyCursor.Current; // TODO: Remove?
         keyCursor.MoveDown();
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         html.Start = writeHead;
@@ -74,8 +73,7 @@ public class SnapshotComposer : BaseComposer
         // By this point, the `Html html` parameter has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
 
-        keyCursor.MoveUp();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveUp();
 
         // Since the html has been written, 
         // return to where we left off (a little like recursion).
@@ -123,9 +121,7 @@ public class SnapshotComposer : BaseComposer
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Uri, format);
     private bool OnKeyhole<T>(ref Html parent, T value, KeyholeType type, string? format = null)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
-
+        var key = keyCursor.MoveNext();
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
         keyhole.SetValue(value);
@@ -150,9 +146,7 @@ public class SnapshotComposer : BaseComposer
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
     private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
-
+        var key = keyCursor.MoveNext();
         var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
         keyhole.Key = key;
@@ -164,8 +158,7 @@ public class SnapshotComposer : BaseComposer
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyCursor.MoveNext();
-        var key = keyCursor.Current;
+        var key = keyCursor.MoveNext();
         keyCursor.MoveDown();
 
         htmls.Start = writeHead;

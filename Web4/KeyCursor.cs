@@ -21,7 +21,11 @@ public class KeyCursor
         keyCache = KeyCache.Root;
     }
 
-    public void MoveNext() => levels[currentLevel]++;
+    public byte[] MoveNext()
+    {
+        levels[currentLevel]++;
+        return Current;
+    }
 
     public void MoveDown()
     {
@@ -34,10 +38,11 @@ public class KeyCursor
             levels.Add(-1);
     }
 
-    public void MoveUp()
+    public byte[] MoveUp()
     {
         keyCache = keyCache.Parent;
         currentLevel--;
+        return Current;
     }
 
     public byte[] Current
