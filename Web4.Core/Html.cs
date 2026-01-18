@@ -14,7 +14,6 @@ public ref partial struct Html : IDisposable
     [ThreadStatic] static BaseComposer? scopedComposer;
     private readonly BaseComposer composer;
 
-    public string Key { get; set; }
     public int Start { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; }
@@ -65,7 +64,6 @@ public ref partial struct Html : IDisposable
         this.composer = composer;
         Length = 2 * formattedCount + 1;
         RelativeOrder = relativeOrder;
-        Key = string.Empty;
         Type = true switch {
             _ when composer.BeforeAppend && literalLength == 0 => HtmlType.Wrapper,
             _ when composer.BeforeAppend && literalLength > 0 => HtmlType.Template,
@@ -81,7 +79,6 @@ public ref partial struct Html : IDisposable
 
     private Html(int iteratorCount, BaseComposer composer)
     {
-        Key = string.Empty;
         Length = iteratorCount;
         Type = HtmlType.Iterator;
         this.composer = composer;
