@@ -95,10 +95,8 @@ public ref partial struct Html : IDisposable
             (0, HtmlType.Element) => composer.OnElementBegin(ref this),
             _ => true,
         };
-        if (!@continue)
-            return false;
 
-        @continue = composer.OnMarkup(ref this, literal);
+        @continue = @continue && composer.OnMarkup(ref this, literal);
         Cursor++;
         return @continue;
     }
