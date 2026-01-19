@@ -12,7 +12,7 @@ public class FindKeyholeComposer : BaseComposer
     private readonly KeyCursor keyCursor = new();
     private EventListener eventListener = default;
     private byte[] keyBuffer = [];
-    private Memory<byte> key;
+    private Memory<byte> searchKey;
     private bool shortCircuitTailCalls = false;
 
     public EventListener FindEventListener(ReadOnlySpan<byte> key, Func<Html> template)
@@ -25,7 +25,7 @@ public class FindKeyholeComposer : BaseComposer
 
     public EventListener FindEventListener(Memory<byte> key, Func<Html> template)
     {
-        this.key = key;
+        searchKey = key;
         return Interpolate($"{template()}");
     }
 
@@ -46,7 +46,7 @@ public class FindKeyholeComposer : BaseComposer
     
     public override void Reset()
     {
-        key = default;
+        searchKey = default;
         shortCircuitTailCalls = false;
         eventListener = default;
         keyCursor.Reset();
@@ -97,7 +97,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
         
         var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(this.key.Span))
+        if (!key.SequenceEqual(searchKey.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -112,7 +112,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(this.key.Span))
+        if (!key.SequenceEqual(searchKey.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -127,7 +127,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(this.key.Span))
+        if (!key.SequenceEqual(searchKey.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
@@ -142,7 +142,7 @@ public class FindKeyholeComposer : BaseComposer
             return false;
             
         var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(this.key.Span))
+        if (!key.SequenceEqual(searchKey.Span))
             return true;
 
         // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
