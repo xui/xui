@@ -11,27 +11,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
-
     public WindowBuilder Window { get; set; } = window;
-
-    [ThreadStatic] static XtmlComposer? reusable;
-    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window) 
-        => (reusable ??= new(writer, window)).Set(writer, window);
-    
-    private XtmlComposer Set(IBufferWriter<byte> writer, WindowBuilder window)
-    {
-        Writer = writer;
-        Window = window;
-        return this;
-    }
-
-    public override void Reset()
-    {
-        base.Reset();
-        Window = null!;
-        attributeStatus = AttributeStatus.None;
-        keyCursor.Reset();
-    }
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
@@ -460,5 +440,27 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 ::view-transition-old(web4-rev-{{key}}) { width: auto; height: auto; animation: 300ms ease-in-out {{transition}}-in reverse; }
             </style>
             """);
+    }
+
+    public override void Reset()
+    {
+        Writer = null!;
+        Window = null!;
+        attributeStatus = AttributeStatus.None;
+        keyCursor.Reset();
+        base.Reset();
+    }
+
+    [ThreadStatic] static XtmlComposer? reusable;
+    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window) 
+    {
+        if (reusable is {} composer)
+        {
+            composer.Writer = writer;
+            composer.Window = window;
+            return composer;
+        }
+
+        return reusable = new XtmlComposer(writer, window);
     }
 }

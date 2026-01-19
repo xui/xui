@@ -5,8 +5,6 @@ namespace Web4.Composers;
 
 public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
 {
-    [ThreadStatic] static HtmlComposer? reusable;
-    public static HtmlComposer Reuse(IBufferWriter<byte> writer) => (reusable ??= new(writer)).Set<HtmlComposer>(writer);
 
     public override bool OnMarkup(ref Html parent, string literal) => Writer.Write(literal);
     public override bool OnStringKeyhole(ref Html parent, string value) => Writer.Write(value);
@@ -23,10 +21,27 @@ public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => Writer.Write(value, format);
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => Writer.Write(value.ToString());
     // TODO: ^ Fix memory allocation happening here and incorporate format strings
-
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     private bool HandleNotSupported() => Writer.Write("\"\""); // attributeName is already written at the end of the prior string literal (e.g. <button onclick=)
+
+    public override void Reset()
+    {
+        Writer = null!;
+        base.Reset();
+    }
+
+    [ThreadStatic] static HtmlComposer? reusable;
+    public static HtmlComposer Reuse(IBufferWriter<byte> writer)
+    {
+        if (reusable is {} composer)
+        {
+            composer.Writer = writer;
+            return composer;
+        }
+
+        return reusable = new HtmlComposer(writer);
+    }
 }
