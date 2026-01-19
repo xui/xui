@@ -6,7 +6,7 @@ public class KeyCursor
 {
     private const byte separator = (byte)'_';
     private int currentLevel;
-    private readonly List<int> levels = [-1];
+    private readonly List<int> keyDigits = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
     public byte[] Parent => keyCache.Key;
@@ -16,25 +16,25 @@ public class KeyCursor
     public void Reset()
     {
         currentLevel = 0;
-        levels[0] = -1;
+        keyDigits[0] = -1;
         keyCache = KeyCache.Root;
     }
 
     public byte[] MoveNext()
     {
-        levels[currentLevel]++;
+        keyDigits[currentLevel]++;
         return Current;
     }
 
     public void MoveDown()
     {
-        keyCache = keyCache.NextGeneration(levels[currentLevel]);
+        keyCache = keyCache.NextGeneration(keyDigits[currentLevel]);
         currentLevel++;
 
-        if (levels.Count > currentLevel)
-            levels[currentLevel] = -1;
+        if (keyDigits.Count > currentLevel)
+            keyDigits[currentLevel] = -1;
         else
-            levels.Add(-1);
+            keyDigits.Add(-1);
     }
 
     public byte[] MoveUp()
@@ -48,7 +48,7 @@ public class KeyCursor
     {
         get
         {
-            int index = levels[currentLevel];
+            int index = keyDigits[currentLevel];
 
             var key = keyCache[index];
             if (key is not null)
