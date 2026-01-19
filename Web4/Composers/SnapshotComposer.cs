@@ -153,7 +153,8 @@ public class SnapshotComposer : KeyholeComposer
 
         htmls.Start = writeHead;
 
-        ref var keyhole = ref snapshot[parent.Start + parent.Cursor];
+        var index = parent.Start + parent.Cursor;
+        ref var keyhole = ref snapshot[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
