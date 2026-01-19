@@ -38,7 +38,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private void WriteKeyhole(int index, Keyhole keyhole)
     {
-        var key = keyhole.Key;
+        var key = keyhole.Key != null ? Encoding.UTF8.GetString(keyhole.Key) : "";
         switch (keyhole.Type)
         {
             case KeyholeType.StringLiteral:
@@ -113,10 +113,9 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
         }
     }
 
-    private static string ObjectString(byte[] key)
+    private static string ObjectString(string key)
     {
-        var k = Encoding.UTF8.GetString(key);
-        return $"globalThis.keyholes.{k}.node";
+        return $"globalThis.keyholes.{key}.node";
     }
 
     private static string InlineString(string? value)
