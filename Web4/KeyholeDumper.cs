@@ -3,6 +3,8 @@ using Web4.Core.DOM;
 
 namespace Web4;
 
+// TODO: Clean this up.  Many, many memory allocations.
+
 public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 {
     const string CSS_NOTES = "font-size:10px;color:#808080;font-weight:normal;font-family:monospace,monospace;";
@@ -36,7 +38,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private void WriteKeyhole(int index, Keyhole keyhole)
     {
-        var key = keyhole.Key != null ? Encoding.UTF8.GetString(keyhole.Key) : null;
+        var key = keyhole.Key;
         switch (keyhole.Type)
         {
             case KeyholeType.StringLiteral:
@@ -111,9 +113,10 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
         }
     }
 
-    private static string ObjectString(string key)
+    private static string ObjectString(byte[] key)
     {
-        return $"globalThis.keyholes.{key}.node";
+        var k = Encoding.UTF8.GetString(key);
+        return $"globalThis.keyholes.{k}.node";
     }
 
     private static string InlineString(string? value)
