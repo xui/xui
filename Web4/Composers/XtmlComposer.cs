@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : BaseComposer, IStreamingComposer
+public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
+    : KeyholeComposer, IStreamingComposer
 {
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
-    private readonly KeyCursor keyCursor = new();
 
     public IBufferWriter<byte> Writer { get; set; } = writer;
     public WindowBuilder Window { get; set; } = window;
@@ -38,14 +38,13 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnElementBegin(ref Html html)
     {
-        var key = keyCursor.MoveNext();
-        keyCursor.MoveDown();
+        base.OnElementBegin(ref html);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->`
-                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, Key, "-->"u8);
                 break;
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
@@ -60,21 +59,21 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
-        var key = keyCursor.MoveUp();
+        base.OnElementEnd(ref parent, html, format, expression);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--/{key}-->`
-                Writer.Write("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, Key, "-->"u8);
                 if (format is {} transition)
-                    InjectTransition(key, transition);
+                    InjectTransition(Key, transition);
                 break;
 
             case AttributeStatus.InProgress:
                 // ex: `" {key}`
                 Writer.Write("\" "u8);
-                Writer.Write(key);
+                Writer.Write(Key);
                 attributeStatus = AttributeStatus.None;
                 break;
 
@@ -104,15 +103,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnStringKeyhole(ref Html parent, string value)
     {
-        var key = keyCursor.MoveNext();
+        base.OnStringKeyhole(ref parent, value);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value}<!--/{key}-->`
-                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, Key, "-->"u8);
                 Writer.Write(value);
-                Writer.Write("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -121,7 +120,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
                 Writer.Write("\""u8);
                 Writer.Write(value);
                 Writer.Write("\" "u8);
-                Writer.Write(key);
+                Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -139,15 +138,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnBoolKeyhole(ref Html parent, bool value)
     {
-        var key = keyCursor.MoveNext();
+        base.OnBoolKeyhole(ref parent, value);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{b}<!--/{key}-->`
-                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, Key, "-->"u8);
                 Writer.Write(value ? "true" : "false");
-                Writer.Write("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -160,7 +159,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
                 }
                 // ex: ` {key}="{attributeName}"`
                 Writer.Write(" "u8);
-                Writer.Write(key);
+                Writer.Write(Key);
                 Writer.Write("=\""u8);
                 Writer.Write(attributeName);
                 Writer.Write("\""u8);
@@ -199,15 +198,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
         // It should end up looking like this:
         // $"<!--key123-->{value:format}<!--/key123-->"
 
-        var key = keyCursor.MoveNext();
+        base.OnKeyhole();
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, Key, "-->"u8);
                 Writer.Write(value, format);
-                Writer.Write("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -216,7 +215,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
                 Writer.Write("\""u8);
                 Writer.Write(value, format);
                 Writer.Write("\" "u8);
-                Writer.Write(key);
+                Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -234,15 +233,15 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null)
     {
-        var key = keyCursor.MoveNext();
+        base.OnColorKeyhole(ref parent, value, format);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.Write("<!--"u8, key, "-->"u8);
+                Writer.Write("<!--"u8, Key, "-->"u8);
                 Writer.Write(value, format);
-                Writer.Write("<!--/"u8, key, "-->"u8);
+                Writer.Write("<!--/"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -251,7 +250,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
                 Writer.Write("\""u8);
                 Writer.Write(value, format);
                 Writer.Write("\" "u8);
-                Writer.Write(key);
+                Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
                 attributeStatus = AttributeStatus.None;
@@ -310,29 +309,29 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
     private bool OnListener(ref Html parent, bool includeEventArg, string? format = null)
     {
+        base.OnKeyhole();
+
         if (deferredLiteral != null)
             HandleDeferredLiteral();
-
-        var key = keyCursor.MoveNext();
 
         if (includeEventArg)
         {
             // ex: `"keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}`
             Writer.Write("\"keyholes."u8);
-            Writer.Write(key);
+            Writer.Write(Key);
             Writer.Write(".dispatchEvent(event.trim('"u8);
             Writer.Write(format ?? "*");
             Writer.Write("'))\" "u8);
-            Writer.Write(key);
+            Writer.Write(Key);
         }
         else
         {
             // TODO: Is it better to use ({}) or () instead?
             // ex: `"keyholes.{key}.dispatchEvent(event.trim(''))" {key}`
             Writer.Write("\"keyholes."u8);
-            Writer.Write(key);
+            Writer.Write(Key);
             Writer.Write(".dispatchEvent(event.trim(''))\" "u8);
-            Writer.Write(key);
+            Writer.Write(Key);
         }
         
         attributeStatus = AttributeStatus.None;
@@ -341,29 +340,17 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyCursor.MoveNext();
-        keyCursor.MoveDown();
-
-        return true;
-    }
-
-    public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
-    {
-        foreach (var html in enumerable)
-        {
-            htmls.AppendFormatted(html);
-        }
-
+        base.OnIteratorBegin(ref parent, ref htmls, format, expression);
         return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        var key = keyCursor.MoveUp();
+        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
         
         // Keyhole to represent the loop itself, useful for zero-length use cases.
         // ex: `<!--{key} /-->`
-        Writer.Write("<!--"u8, key, " /-->"u8);
+        Writer.Write("<!--"u8, Key, " /-->"u8);
 
         return true;
     }
@@ -452,7 +439,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ba
         Writer = null!;
         Window = null!;
         attributeStatus = AttributeStatus.None;
-        keyCursor.Reset();
         base.Reset();
     }
 

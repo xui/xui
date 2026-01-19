@@ -3,12 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class FindKeyholeComposer : BaseComposer
+public class FindKeyholeComposer : KeyholeComposer
 {
     [ThreadStatic] static FindKeyholeComposer? reusable;
     public static FindKeyholeComposer Shared => reusable ??= new FindKeyholeComposer();
 
-    private readonly KeyCursor keyCursor = new();
     private EventListener eventListener = default;
     private byte[] keyBuffer = [];
     private Memory<byte> searchKey;
@@ -43,29 +42,11 @@ public class FindKeyholeComposer : BaseComposer
         return result;
     }
     
-    public override void Reset()
-    {
-        searchKey = default;
-        shortCircuitTailCalls = false;
-        eventListener = default;
-        keyCursor.Reset();
-        base.Reset();
-    }
-
-    public override bool OnElementBegin(ref Html html)
-    {
-        keyCursor.MoveNext();
-        keyCursor.MoveDown();
-        return true;
-    }
-
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         if (shortCircuitTailCalls)
             return false;
-
-        keyCursor.MoveUp();
-        return true;
+        return base.OnElementEnd(ref parent, html, format, expression);;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();
@@ -85,9 +66,7 @@ public class FindKeyholeComposer : BaseComposer
     {
         if (shortCircuitTailCalls)
             return false;
-
-        keyCursor.MoveNext();
-        return true;
+        return base.OnKeyhole();
     }
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null)
@@ -95,14 +74,16 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
         
-        var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(searchKey.Span))
-            return true;
+        base.OnListener(ref parent, listener, format, expression);
 
-        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
-        eventListener.Action = listener;
-        key = null;
-        return false;
+        if (Key.SequenceEqual(searchKey.Span))
+        {
+            eventListener.Action = listener;
+            shortCircuitTailCalls = true;
+            // Found it so save some time: return false to short circuit any following calls to this html.Append*().
+            return false;
+        }
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null)
@@ -110,14 +91,16 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(searchKey.Span))
-            return true;
-
-        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
-        eventListener.ActionEvent = listener;
-        key = null;
-        return false;
+        base.OnListener(ref parent, listener, format, expression);
+        
+        if (Key.SequenceEqual(searchKey.Span))
+        {
+            eventListener.ActionEvent = listener;
+            shortCircuitTailCalls = true;
+            // Found it so save some time: return false to short circuit any following calls to this html.Append*().
+            return false;
+        }
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null)
@@ -125,14 +108,16 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(searchKey.Span))
-            return true;
-
-        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
-        eventListener.Func = listener;
-        key = null;
-        return false;
+        base.OnListener(ref parent, listener, format, expression);
+        
+        if (Key.SequenceEqual(searchKey.Span))
+        {
+            eventListener.Func = listener;
+            shortCircuitTailCalls = true;
+            // Found it so save some time: return false to short circuit any following calls to this html.Append*().
+            return false;
+        }
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null)
@@ -140,14 +125,16 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
             
-        var key = keyCursor.MoveNext();
-        if (!key.SequenceEqual(searchKey.Span))
-            return true;
-
-        // Found it so save some time.  Return false to short circuit any following calls to html.Append*().
-        eventListener.FuncEvent = listener;
-        key = null;
-        return false;
+        base.OnListener(ref parent, listener, format, expression);
+        
+        if (Key.SequenceEqual(searchKey.Span))
+        {
+            eventListener.FuncEvent = listener;
+            shortCircuitTailCalls = true;
+            // Found it so save some time: return false to short circuit any following calls to this html.Append*().
+            return false;
+        }
+        return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
@@ -155,10 +142,7 @@ public class FindKeyholeComposer : BaseComposer
         if (shortCircuitTailCalls)
             return false;
         
-        keyCursor.MoveNext();
-        keyCursor.MoveDown();
-
-        return true;
+        return base.OnIteratorBegin(ref parent, ref htmls, format, expression);
     }
 
     public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
@@ -167,17 +151,24 @@ public class FindKeyholeComposer : BaseComposer
             return false;
         
         foreach (var html in enumerable)
-        {
             htmls.AppendFormatted(html);
-        }
 
         return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        keyCursor.MoveUp();
+        if (shortCircuitTailCalls)
+            return false;
 
-        return true;
+        return base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+    }
+
+    public override void Reset()
+    {
+        searchKey = default;
+        shortCircuitTailCalls = false;
+        eventListener = default;
+        base.Reset();
     }
 }
