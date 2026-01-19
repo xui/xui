@@ -61,11 +61,12 @@ public static class MapWeb4RouteExtensions
         return window;
     }
 
-    private static ValueTask<FlushResult> WriteAsync(
+    private static ValueTask<FlushResult> WriteAsync<T>(
         this HttpContext httpContext,
-        StreamingComposer composer,
+        T composer,
         Func<Html> template,
         bool includeServerTiming = false) // TODO: Move `includeServerTiming` to Config
+            where T : BaseComposer, IStreamingComposer
     {
         var pipeWriter = httpContext.Response.BodyWriter;
         if (!includeServerTiming)

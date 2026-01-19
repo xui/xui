@@ -3,8 +3,9 @@ using System.Drawing;
 
 namespace Web4.Composers;
 
-public class HtmlComposer(IBufferWriter<byte> writer) : StreamingComposer(writer)
+public class HtmlComposer(IBufferWriter<byte> writer) : BaseComposer, IStreamingComposer
 {
+    public IBufferWriter<byte> Writer { get; set; } = writer;
 
     public override bool OnMarkup(ref Html parent, string literal) => Writer.Write(literal);
     public override bool OnStringKeyhole(ref Html parent, string value) => Writer.Write(value);

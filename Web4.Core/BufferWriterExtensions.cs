@@ -87,10 +87,11 @@ public static partial class BufferWriterExtensions
         html.Dispose();
     }
 
-    public static void Write(
+    public static void Write<T>(
         this IBufferWriter<byte> writer,
-        StreamingComposer composer, // This one lets you supply your own composer.
+        T composer, // This one lets you supply your own composer.
         [InterpolatedStringHandlerArgument("composer")] ref Html html)
+            where T : BaseComposer, IStreamingComposer
     {
         html.Dispose();
     }
@@ -104,11 +105,12 @@ public static partial class BufferWriterExtensions
         return writer.FlushAsync(cancel);
     }
 
-    public static ValueTask<FlushResult> WriteAsync(
+    public static ValueTask<FlushResult> WriteAsync<T>(
         this PipeWriter writer,
-        StreamingComposer composer, // This one lets you supply your own composer.
+        T composer, // This one lets you supply your own composer.
         [InterpolatedStringHandlerArgument("composer")] ref Html html,
         CancellationToken cancel = default)
+            where T : BaseComposer, IStreamingComposer
     {
         html.Dispose();
         return writer.FlushAsync(cancel);

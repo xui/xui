@@ -4,20 +4,22 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : HtmlComposer(writer)
+public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : BaseComposer, IStreamingComposer
 {
     private enum AttributeStatus { None, Pending, InProgress }
-    private readonly KeyCursor keyCursor = new();
     private AttributeStatus attributeStatus = AttributeStatus.None;
     private ReadOnlyMemory<char>? deferredLiteral = null;
     private bool isBodyOmitted = false;
+    private readonly KeyCursor keyCursor = new();
+
+    public IBufferWriter<byte> Writer { get; set; } = writer;
     public WindowBuilder Window { get; set; } = window;
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
         InjectBootloader(ref literal);
 
-        return base.OnTemplateBegin(ref html, ref literal);
+        return true;
     }
 
     public override bool OnTemplateEnd(ref Html html)
@@ -31,7 +33,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 """u8);
         }
 
-        return base.OnTemplateEnd(ref html);
+        return true;
     }
 
     public override bool OnElementBegin(ref Html html)
@@ -53,7 +55,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 break;
         }
 
-        return base.OnElementBegin(ref html);
+        return true;
     }
 
     public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
@@ -80,7 +82,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 throw new NotSupportedException("Attributes cannot have nested Htmls");
         }
 
-        return base.OnElementEnd(ref parent, html, format, expression);
+        return true;
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
@@ -96,7 +98,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             return true;
         }
 
-        return base.OnMarkup(ref parent, literal);
+        Writer.Write(literal);
+        return true;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value)
@@ -108,7 +111,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value}<!--/{key}-->`
                 Writer.Write("<!--"u8, key, "-->"u8);
-                base.OnStringKeyhole(ref parent, value);
+                Writer.Write(value);
                 Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
@@ -116,7 +119,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 HandleDeferredLiteral();
                 // ex: `"{value}" {key}`
                 Writer.Write("\""u8);
-                base.OnStringKeyhole(ref parent, value);
+                Writer.Write(value);
                 Writer.Write("\" "u8);
                 Writer.Write(key);
                 // status jumps from .Pending to .None because the whole 
@@ -127,7 +130,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                return base.OnStringKeyhole(ref parent, value);
+                Writer.Write(value);
+                break;
         }
 
         return true;
@@ -142,7 +146,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{b}<!--/{key}-->`
                 Writer.Write("<!--"u8, key, "-->"u8);
-                base.OnBoolKeyhole(ref parent, value);
+                Writer.Write(value ? "true" : "false");
                 Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
@@ -169,7 +173,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                return base.OnBoolKeyhole(ref parent, value);
+                Writer.Write(value ? "true" : "false");
+                break;
         }
 
         return true;
@@ -236,7 +241,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.None:
                 // ex: `<!--{key}-->{value:format}<!--/{key}-->`
                 Writer.Write("<!--"u8, key, "-->"u8);
-                base.OnColorKeyhole(ref parent, value);
+                Writer.Write(value, format);
                 Writer.Write("<!--/"u8, key, "-->"u8);
                 break;
 
@@ -244,7 +249,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
                 HandleDeferredLiteral();
                 // ex: `"{value:format}" {key}`
                 Writer.Write("\""u8);
-                base.OnColorKeyhole(ref parent, value, format);
+                Writer.Write(value, format);
                 Writer.Write("\" "u8);
                 Writer.Write(key);
                 // status jumps from .Pending to .None because the whole 
@@ -255,7 +260,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window) : Ht
             case AttributeStatus.InProgress:
                 // No sentinels.  This keyhole is a part of a larger attribute
                 // composed of multiple keyholes+literals.  Write only the value.
-                base.OnColorKeyhole(ref parent, value, format);
+                Writer.Write(value, format);
                 break;
         }
 
