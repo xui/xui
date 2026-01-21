@@ -31,7 +31,7 @@ public abstract class BaseComposer
     public virtual bool OnHtmlKeyhole(ref Html parent, scoped Html value, string? format = null, string? expression = null) => true;
 
     public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
-    public virtual bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public virtual bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
         foreach (var html in enumerable)
             htmls.AppendFormatted(html);

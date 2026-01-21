@@ -145,7 +145,7 @@ public class FindKeyholeComposer : KeyholeComposer
         return base.OnIteratorBegin(ref parent, ref htmls, format, expression);
     }
 
-    public override bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
         if (shortCircuitTailCalls)
             return false;

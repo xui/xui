@@ -318,7 +318,7 @@ public ref partial struct Html : IDisposable
         var htmls = new Html(enumerable.Count, composer);
         var @continue = 
             composer.OnIteratorBegin(ref this, ref htmls, format, expression) &&
-            composer.OnIterate(ref this, ref htmls, enumerable, format, expression) &&
+            composer.OnIteratorKeyhole(ref this, ref htmls, enumerable, format, expression) &&
             composer.OnIteratorEnd(ref this, ref htmls, format, expression);
         Cursor++;
         return @continue;
