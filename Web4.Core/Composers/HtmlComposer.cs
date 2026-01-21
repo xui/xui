@@ -22,11 +22,11 @@ public class HtmlComposer(IBufferWriter<byte> writer) : BaseComposer, IStreaming
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => Writer.Write(value, format);
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => Writer.Write(value.ToString());
     // TODO: ^ Fix memory allocation happening here and incorporate format strings
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    private bool HandleNotSupported() => Writer.Write("\"\"");
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => IgnoreListener();
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => IgnoreListener();
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => IgnoreListener();
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => IgnoreListener();
+    private bool IgnoreListener() => Writer.Write("\"\"");
 
     public override void Reset()
     {
