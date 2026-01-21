@@ -68,66 +68,38 @@ public class FindKeyholeComposer : KeyholeComposer
         => !isFound && base.OnIteratorEnd(ref parent, ref htmls, format, expression);
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null)
-    {
-        if (isFound)
-            return false;
-        
-        base.OnListener(ref parent, listener, format, expression);
-
-        if (Key.SequenceEqual(searchKey.Span))
-        {
-            eventListener.Action = listener;
-            isFound = true;
-            return false;
-        }
-
-        return true;
-    }
-
+        => OnListener(listener);
     public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null)
-    {
-        if (isFound)
-            return false;
-            
-        base.OnListener(ref parent, listener, format, expression);
-        
-        if (Key.SequenceEqual(searchKey.Span))
-        {
-            eventListener.ActionEvent = listener;
-            isFound = true;
-            return false;
-        }
-
-        return true;
-    }
-
+        => OnListener(listener);
     public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null)
-    {
-        if (isFound)
-            return false;
-            
-        base.OnListener(ref parent, listener, format, expression);
-        
-        if (Key.SequenceEqual(searchKey.Span))
-        {
-            eventListener.Func = listener;
-            isFound = true;
-            return false;
-        }
-
-        return true;
-    }
-
+        => OnListener(listener);
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null)
+        => OnListener(listener);
+
+    private bool OnListener<T>(T listener)
     {
         if (isFound)
             return false;
             
-        base.OnListener(ref parent, listener, format, expression);
+        base.OnKeyhole();
         
         if (Key.SequenceEqual(searchKey.Span))
         {
-            eventListener.FuncEvent = listener;
+            switch (listener)
+            {
+                case Action action:
+                    eventListener.Action = action;
+                    break;
+                case Action<Event> actionEvent:
+                    eventListener.ActionEvent = actionEvent;
+                    break;
+                case Func<Task> func:
+                    eventListener.Func = func;
+                    break;
+                case Func<Event, Task> funcEvent:
+                    eventListener.FuncEvent = funcEvent;
+                    break;
+            }
             isFound = true;
             return false;
         }
