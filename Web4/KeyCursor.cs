@@ -5,34 +5,34 @@ namespace Web4;
 public class KeyCursor
 {
     private const byte separator = (byte)'_';
-    private int currentLevel;
     private readonly List<int> keyDigits = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
+    public int CurrentDepth { get; private set; }
     public byte[] Parent => keyCache.Key;
 
     public KeyCursor() => Reset();
 
     public void Reset()
     {
-        currentLevel = 0;
+        CurrentDepth = 0;
         keyDigits[0] = -1;
         keyCache = KeyCache.Root;
     }
 
     public byte[] MoveNext()
     {
-        keyDigits[currentLevel]++;
+        keyDigits[CurrentDepth]++;
         return Current;
     }
 
     public void MoveDown()
     {
-        keyCache = keyCache.NextGeneration(keyDigits[currentLevel]);
-        currentLevel++;
+        keyCache = keyCache.NextGeneration(keyDigits[CurrentDepth]);
+        CurrentDepth++;
 
-        if (keyDigits.Count > currentLevel)
-            keyDigits[currentLevel] = -1;
+        if (keyDigits.Count > CurrentDepth)
+            keyDigits[CurrentDepth] = -1;
         else
             keyDigits.Add(-1);
     }
@@ -40,15 +40,16 @@ public class KeyCursor
     public byte[] MoveUp()
     {
         keyCache = keyCache.Parent;
-        currentLevel--;
+        CurrentDepth--;
         return Current;
     }
 
-    public byte[] Current
+    // TODO: Rename this.  It ended up private.  Make it a method?
+    private byte[] Current
     {
         get
         {
-            int index = keyDigits[currentLevel];
+            int index = keyDigits[CurrentDepth];
 
             var key = keyCache[index];
             if (key is not null)
