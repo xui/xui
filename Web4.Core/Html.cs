@@ -64,9 +64,9 @@ public ref partial struct Html : IDisposable
         this.composer = composer;
         Length = 2 * formattedCount + 1;
         RelativeOrder = relativeOrder;
-        Type = true switch {
-            _ when composer.BeforeAppend && literalLength == 0 => HtmlType.Wrapper,
-            _ when composer.BeforeAppend && literalLength > 0 => HtmlType.Template,
+        Type = (literalLength, composer.IsBeforeAppend) switch {
+            (0, true) => HtmlType.Wrapper,
+            (> 0, true) => HtmlType.Template,
             _ => HtmlType.Element
         };
 
