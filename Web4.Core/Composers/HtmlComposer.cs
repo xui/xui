@@ -26,7 +26,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : BaseComposer, IStreaming
     public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => HandleNotSupported();
-    private bool HandleNotSupported() => Writer.Write("\"\""); // attributeName is already written at the end of the prior string literal (e.g. <button onclick=)
+    private bool HandleNotSupported() => Writer.Write("\"\"");
 
     public override void Reset()
     {
