@@ -70,7 +70,7 @@ public ref partial struct Html : IDisposable
             _ => HtmlType.Element
         };
 
-        composer.TryBeginAppend(literalLength);
+        composer.TryBegin(literalLength);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)

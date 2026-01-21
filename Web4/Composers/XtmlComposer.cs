@@ -420,7 +420,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
             Writer.Write(literal.AsSpan(offset));
         }
 
-        TryBeginAppend(literal.Length);
+        TryBegin(literal.Length);
         literal = string.Empty;
     }
 

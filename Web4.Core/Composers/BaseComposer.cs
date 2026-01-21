@@ -4,15 +4,9 @@ namespace Web4.Composers;
 
 public abstract class BaseComposer
 {
-    public bool BeforeAppend { get; private set; } = true;
-    public bool TryBeginAppend(int literalLength)
-    {
-        if (literalLength > 0)
-            BeforeAppend = false;
-        return true;
-    }
-    
-    public virtual bool OnMarkup(ref Html parent, string literal) => TryBeginAppend(literal.Length);
+    public bool IsBeforeAppend { get; private set; } = true;
+
+    public virtual bool OnMarkup(ref Html parent, string literal) => TryBegin(literal.Length);
 
     public virtual bool OnStringKeyhole(ref Html parent, string value) => true;
     public virtual bool OnBoolKeyhole(ref Html parent, bool value) => true;
@@ -44,5 +38,12 @@ public abstract class BaseComposer
     public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
     public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
 
-    public virtual void Reset() => BeforeAppend = true; // Called from the root Html's Dispose()
+    public bool TryBegin(int literalLength)
+    {
+        if (literalLength > 0)
+            IsBeforeAppend = false;
+        return true;
+    }
+    
+    public virtual void Reset() => IsBeforeAppend = true; // Called from the root Html's Dispose()
 }
