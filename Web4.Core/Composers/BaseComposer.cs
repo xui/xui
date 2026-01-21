@@ -4,7 +4,7 @@ namespace Web4.Composers;
 
 public abstract class BaseComposer
 {
-    public bool IsBeforeAppend { get; private set; } = true;
+    public bool IsStarted { get; private set; } = false;
 
     public virtual bool OnMarkup(ref Html parent, string literal) => TryBegin(literal.Length);
 
@@ -41,9 +41,9 @@ public abstract class BaseComposer
     public bool TryBegin(int literalLength)
     {
         if (literalLength > 0)
-            IsBeforeAppend = false;
+            IsStarted = true;
         return true;
     }
     
-    public virtual void Reset() => IsBeforeAppend = true; // Called from the root Html's Dispose()
+    public virtual void Reset() => IsStarted = false; // Called from the root Html's Dispose()
 }
