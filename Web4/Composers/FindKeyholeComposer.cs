@@ -42,11 +42,11 @@ public class FindKeyholeComposer : KeyholeComposer
         return result;
     }
     
-    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         if (shortCircuitTailCalls)
             return false;
-        return base.OnElementEnd(ref parent, html, format, expression);;
+        return base.OnHtmlEnd(ref parent, html, format, expression);;
     }
 
     public override bool OnStringKeyhole(ref Html parent, string value) => MoveNextKeyAndComplete();

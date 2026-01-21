@@ -90,13 +90,7 @@ public ref partial struct Html : IDisposable
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
     {
-        var @continue = (Cursor, Type) switch {
-            (0, HtmlType.Template) => composer.OnTemplateBegin(ref this, ref literal),
-            (0, HtmlType.Element) => composer.OnElementBegin(ref this),
-            _ => true,
-        };
-
-        @continue = @continue && composer.OnMarkup(ref this, literal);
+        var @continue = composer.OnMarkup(ref this, literal);
         Cursor++;
         return @continue;
     }
@@ -306,9 +300,7 @@ public ref partial struct Html : IDisposable
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = html.Type == HtmlType.Template
-            ? composer.OnTemplateEnd(ref html)
-            : composer.OnElementEnd(ref this, html, format, expression);
+        var @continue = composer.OnHtmlKeyhole(ref this, html, format, expression);
 
         Cursor++;
         return @continue;

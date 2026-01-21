@@ -12,14 +12,6 @@ public abstract class BaseComposer
         return true;
     }
     
-    public virtual void Reset() => BeforeAppend = true; // Called from the root Html's Dispose()
-
-    public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
-    public virtual bool OnTemplateEnd(ref Html html) => true;
-
-    public virtual bool OnElementBegin(ref Html html) => true;
-    public virtual bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null) => true;
-
     public virtual bool OnMarkup(ref Html parent, string literal) => TryBeginAppend(literal.Length);
 
     public virtual bool OnStringKeyhole(ref Html parent, string value) => true;
@@ -36,10 +28,7 @@ public abstract class BaseComposer
     public virtual bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => true;
     public virtual bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => true;
 
-    public virtual bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => true;
-    public virtual bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => true;
-    public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
-    public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
+    public virtual bool OnHtmlKeyhole(ref Html parent, scoped Html value, string? format = null, string? expression = null) => true;
 
     public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
     public virtual bool OnIterate<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
@@ -49,4 +38,11 @@ public abstract class BaseComposer
         return true;
     }
     public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null) => true;
+
+    public virtual bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => true;
+    public virtual bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => true;
+    public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
+    public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
+
+    public virtual void Reset() => BeforeAppend = true; // Called from the root Html's Dispose()
 }

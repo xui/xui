@@ -36,9 +36,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnElementBegin(ref Html html)
+    public override bool OnHtmlBegin(ref Html html)
     {
-        base.OnElementBegin(ref html);
+        base.OnHtmlBegin(ref html);
 
         switch (attributeStatus)
         {
@@ -57,9 +57,9 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
-        base.OnElementEnd(ref parent, html, format, expression);
+        base.OnHtmlEnd(ref parent, html, format, expression);
 
         switch (attributeStatus)
         {
@@ -86,6 +86,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
 
     public override bool OnMarkup(ref Html parent, string literal)
     {
+        base.OnMarkup(ref parent, literal);
+
         // This makes the assumption that keyholes preceeded with an '=' are always attributes.  
         // Attributes need different sentinels than regular keyholes and boolean attributes 
         // have a few strange rules to follow:
@@ -98,6 +100,7 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         }
 
         Writer.Write(literal);
+
         return true;
     }
 

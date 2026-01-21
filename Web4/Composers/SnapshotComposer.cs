@@ -50,20 +50,20 @@ public class SnapshotComposer : KeyholeComposer
         return true;
     }
 
-    public override bool OnElementBegin(ref Html html)
+    public override bool OnHtmlBegin(ref Html html)
     {
-        base.OnElementBegin(ref html);
+        base.OnHtmlBegin(ref html);
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         html.Start = writeHead;
         writeHead += html.Length;
         return true;
     }
 
-    public override bool OnElementEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         // By this point, the `Html html` parameter has already set its keyholes.
         // They're just later in the buffer, starting at the "high water mark."
-        base.OnElementEnd(ref parent, html, format, expression);
+        base.OnHtmlEnd(ref parent, html, format, expression);
 
         // Since the html has been written, 
         // return to where we left off (a little like recursion).
