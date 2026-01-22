@@ -36,54 +36,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnHtmlBegin(ref Html html)
-    {
-        base.OnHtmlBegin(ref html);
-
-        switch (attributeStatus)
-        {
-            case AttributeStatus.None:
-                // ex: `<!--{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
-                break;
-            case AttributeStatus.Pending:
-                HandleDeferredLiteral();
-                // ex: `"` (the value will come later in the next On*Keyhole())
-                Writer.Write("\""u8);
-                attributeStatus = AttributeStatus.InProgress;
-                break;
-        }
-
-        return true;
-    }
-
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
-    {
-        base.OnHtmlEnd(ref parent, html, format, expression);
-
-        switch (attributeStatus)
-        {
-            case AttributeStatus.None:
-                // ex: `<!--/{key}-->`
-                Writer.Write("<!--/"u8, Key, "-->"u8);
-                if (format is {} transition)
-                    InjectTransition(Key, transition);
-                break;
-
-            case AttributeStatus.InProgress:
-                // ex: `" {key}`
-                Writer.Write("\" "u8);
-                Writer.Write(Key);
-                attributeStatus = AttributeStatus.None;
-                break;
-
-            case AttributeStatus.Pending:
-                throw new NotSupportedException("Attributes cannot have nested Htmls");
-        }
-
-        return true;
-    }
-
     public override bool OnMarkup(ref Html parent, string literal)
     {
         base.OnMarkup(ref parent, literal);
@@ -272,38 +224,69 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
         => OnStringKeyhole(ref parent, value.ToString()); // TODO: Memory allocation!
         
-    private void HandleDeferredLiteral()
+    public override bool OnHtmlBegin(ref Html html)
     {
-        if (!deferredLiteral.HasValue)
-            throw new NullReferenceException(nameof(deferredLiteral));
+        base.OnHtmlBegin(ref html);
 
-        Writer.Write(deferredLiteral.Value);
-        deferredLiteral = null;
-    }
-
-    private ReadOnlySpan<char> HandleDeferredLiteral(bool isBooleanAttribute = true)
-    {
-        if (!isBooleanAttribute)
+        switch (attributeStatus)
         {
-            HandleDeferredLiteral();
-            return [];
+            case AttributeStatus.None:
+                // ex: `<!--{key}-->`
+                Writer.Write("<!--"u8, Key, "-->"u8);
+                break;
+            case AttributeStatus.Pending:
+                HandleDeferredLiteral();
+                // ex: `"` (the value will come later in the next On*Keyhole())
+                Writer.Write("\""u8);
+                attributeStatus = AttributeStatus.InProgress;
+                break;
         }
 
-        if (!deferredLiteral.HasValue)
-            throw new NullReferenceException(nameof(deferredLiteral));
+        return true;
+    }
 
-        // This string literal will look something like `...<input type="checkbox" checked=`
-        // Note: We know they always end with `=`.
-        var deferredLiteralSpan = deferredLiteral.Value.Span;
-        int indexBeforeAttribute = deferredLiteralSpan.LastIndexOf(' ');
-        ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteralSpan.Length - 2);
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    {
+        base.OnHtmlEnd(ref parent, html, format, expression);
 
-        Writer.Write(deferredLiteralSpan[..indexBeforeAttribute]);
-        var attributeName = deferredLiteralSpan[(indexBeforeAttribute + 1)..^1];
+        switch (attributeStatus)
+        {
+            case AttributeStatus.None:
+                // ex: `<!--/{key}-->`
+                Writer.Write("<!--/"u8, Key, "-->"u8);
+                if (format is {} transition)
+                    InjectTransition(Key, transition);
+                break;
 
-        deferredLiteral = null;
-        return attributeName;
+            case AttributeStatus.InProgress:
+                // ex: `" {key}`
+                Writer.Write("\" "u8);
+                Writer.Write(Key);
+                attributeStatus = AttributeStatus.None;
+                break;
+
+            case AttributeStatus.Pending:
+                throw new NotSupportedException("Attributes cannot have nested Htmls");
+        }
+
+        return true;
+    }
+
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    {
+        base.OnIteratorBegin(ref parent, ref htmls, format, expression);
+        return true;
+    }
+
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    {
+        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+        
+        // Keyhole to represent the loop itself, useful for zero-length use cases.
+        // ex: `<!--{key} /-->`
+        Writer.Write("<!--"u8, Key, " /-->"u8);
+
+        return true;
     }
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, format);
@@ -341,21 +324,38 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    private void HandleDeferredLiteral()
     {
-        base.OnIteratorBegin(ref parent, ref htmls, format, expression);
-        return true;
+        if (!deferredLiteral.HasValue)
+            throw new NullReferenceException(nameof(deferredLiteral));
+
+        Writer.Write(deferredLiteral.Value);
+        deferredLiteral = null;
     }
 
-    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    private ReadOnlySpan<char> HandleDeferredLiteral(bool isBooleanAttribute = true)
     {
-        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
-        
-        // Keyhole to represent the loop itself, useful for zero-length use cases.
-        // ex: `<!--{key} /-->`
-        Writer.Write("<!--"u8, Key, " /-->"u8);
+        if (!isBooleanAttribute)
+        {
+            HandleDeferredLiteral();
+            return [];
+        }
 
-        return true;
+        if (!deferredLiteral.HasValue)
+            throw new NullReferenceException(nameof(deferredLiteral));
+
+        // This string literal will look something like `...<input type="checkbox" checked=`
+        // Note: We know they always end with `=`.
+        var deferredLiteralSpan = deferredLiteral.Value.Span;
+        int indexBeforeAttribute = deferredLiteralSpan.LastIndexOf(' ');
+        ArgumentOutOfRangeException.ThrowIfLessThan(indexBeforeAttribute, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(indexBeforeAttribute, deferredLiteralSpan.Length - 2);
+
+        Writer.Write(deferredLiteralSpan[..indexBeforeAttribute]);
+        var attributeName = deferredLiteralSpan[(indexBeforeAttribute + 1)..^1];
+
+        deferredLiteral = null;
+        return attributeName;
     }
 
     private static readonly byte[] BOOTLOADER = 
