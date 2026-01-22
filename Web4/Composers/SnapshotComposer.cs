@@ -45,7 +45,7 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
         base.OnTemplateBegin(ref html, ref literal);
-        html.Start = writeHead;
+        html.Start = 0;
         writeHead += html.Length;
         return true;
     }
