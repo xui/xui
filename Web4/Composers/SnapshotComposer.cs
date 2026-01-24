@@ -11,10 +11,9 @@ public class SnapshotComposer : KeyholeComposer
     [ThreadStatic] static SnapshotComposer? reusable;
     public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
 
-    private int writeHead = 0;
-    private bool isWritingAttribute = false;
     private Keyhole[] buffer = [];
-
+    private bool isWritingAttribute = false;
+    private int writeHead = 0;
     private readonly List<int> cursors = [0];
     private int Cursor
     {
