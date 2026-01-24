@@ -71,49 +71,6 @@ public class SnapshotComposer : KeyholeComposer
         return true;
     }
 
-    public override bool OnHtmlBegin(ref Html html)
-    {
-        EnsureOddIndex();
-        
-        ref var keyhole = ref snapshot[Cursor];
-        keyhole.SequenceStart = writeHead;
-        keyhole.SequenceLength = html.Length;
-
-        base.OnHtmlBegin(ref html);
-
-        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
-
-        Cursor = writeHead;
-
-        writeHead += html.Length + 1;
-
-        return true;
-    }
-
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
-    {
-        // Prevent bleeding
-        ref var tail = ref snapshot[Cursor];
-        tail.String = string.Empty;
-        tail.Type = KeyholeType.StringLiteral;
-
-        base.OnHtmlEnd(ref parent, html, format, expression);
-
-        ref var keyhole = ref snapshot[Cursor];
-        keyhole.Key = Key;
-        keyhole.Type = html.Type switch {
-            HtmlType.Attribute => KeyholeType.Attribute,
-            HtmlType.Iterator => KeyholeType.Iterator,
-            HtmlType.Element or _ => KeyholeType.Html,
-        };
-        keyhole.Format = format;
-        keyhole.Expression = expression;
-        keyhole.RelativeOrder = html.RelativeOrder;
-
-        Cursor++;
-        return true;
-    }
-
     public override bool OnMarkup(ref Html parent, string literal)
     {
         base.OnMarkup(ref parent, literal);
@@ -160,21 +117,45 @@ public class SnapshotComposer : KeyholeComposer
         return true;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
-    private bool OnListener(ref Html parent, string? format = null, string? expression = null)
+    public override bool OnHtmlBegin(ref Html html)
     {
         EnsureOddIndex();
-        base.OnKeyhole();
+        
+        ref var keyhole = ref snapshot[Cursor];
+        keyhole.SequenceStart = writeHead;
+        keyhole.SequenceLength = html.Length;
+
+        base.OnHtmlBegin(ref html);
+
+        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
+
+        Cursor = writeHead;
+
+        writeHead += html.Length + 1;
+
+        return true;
+    }
+
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    {
+        // Prevent bleeding
+        ref var tail = ref snapshot[Cursor];
+        tail.String = string.Empty;
+        tail.Type = KeyholeType.StringLiteral;
+
+        base.OnHtmlEnd(ref parent, html, format, expression);
 
         ref var keyhole = ref snapshot[Cursor];
         keyhole.Key = Key;
-        keyhole.Type = KeyholeType.EventListener;
+        keyhole.Type = html.Type switch {
+            HtmlType.Attribute => KeyholeType.Attribute,
+            HtmlType.Iterator => KeyholeType.Iterator,
+            HtmlType.Element or _ => KeyholeType.Html,
+        };
         keyhole.Format = format;
         keyhole.Expression = expression;
-        
+        keyhole.RelativeOrder = html.RelativeOrder;
+
         Cursor++;
         return true;
     }
@@ -221,6 +202,25 @@ public class SnapshotComposer : KeyholeComposer
 
         base.OnIteratorEnd(ref parent, ref htmls, format, expression);
 
+        Cursor++;
+        return true;
+    }
+
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
+    private bool OnListener(ref Html parent, string? format = null, string? expression = null)
+    {
+        EnsureOddIndex();
+        base.OnKeyhole();
+
+        ref var keyhole = ref snapshot[Cursor];
+        keyhole.Key = Key;
+        keyhole.Type = KeyholeType.EventListener;
+        keyhole.Format = format;
+        keyhole.Expression = expression;
+        
         Cursor++;
         return true;
     }
