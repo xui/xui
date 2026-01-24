@@ -13,7 +13,7 @@ public class SnapshotComposer : KeyholeComposer
 
     private int writeHead = 0;
     private bool isWritingAttribute = false;
-    private Keyhole[] snapshot = [];
+    private Keyhole[] buffer = [];
 
     private readonly List<int> cursors = [0];
     private int Cursor
@@ -30,13 +30,13 @@ public class SnapshotComposer : KeyholeComposer
 
     public Keyhole[] Capture(Func<Html> template)
     {
-        snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
+        buffer = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
         return Interpolate($"{template()}");
     }
     
     public Keyhole[] Capture(Keyhole[] buffer, Func<Html> template)
     {
-        snapshot = buffer;
+        this.buffer = buffer;
         return Interpolate($"{template()}");
     }
 
@@ -46,7 +46,7 @@ public class SnapshotComposer : KeyholeComposer
         // By the time you've reached this line, the templating work has already completed.
         
         // Hang onto the result before html.Dispose() resets this class.
-        var result = snapshot;
+        var result = buffer;
 
         // html.Dispose() calls composer.Reset() which sets snapshot to [].
         html.Dispose();
@@ -67,15 +67,15 @@ public class SnapshotComposer : KeyholeComposer
     {
         base.OnMarkup(ref parent, literal);
 
-        int cursor = Cursor;
-        ref var keyhole = ref snapshot[cursor];
+        int index = Cursor;
+        ref var keyhole = ref buffer[index];
         keyhole.String = literal;
         keyhole.Type = KeyholeType.StringLiteral;
-        keyhole.SequenceStart = cursor;
+        keyhole.SequenceStart = index;
         keyhole.SequenceLength = parent.Length;
         isWritingAttribute = literal.EndsWith('=');
        
-        Cursor = cursor + 1;
+        Cursor = index + 1;
         return true;
     }
 
@@ -97,8 +97,8 @@ public class SnapshotComposer : KeyholeComposer
         EnsureOddIndex();
         base.OnKeyhole();
 
-        int cursor = Cursor;
-        ref var keyhole = ref snapshot[cursor];
+        int index = Cursor;
+        ref var keyhole = ref buffer[index];
         keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
@@ -107,7 +107,7 @@ public class SnapshotComposer : KeyholeComposer
             ? keyCursor.Parent // Use parent's key, the DOM doesn't register each child for attribute sequences
             : Key;
 
-        Cursor = cursor + 1;
+        Cursor = index + 1;
         return true;
     }
 
@@ -115,7 +115,7 @@ public class SnapshotComposer : KeyholeComposer
     {
         EnsureOddIndex();
         
-        ref var keyhole = ref snapshot[Cursor];
+        ref var keyhole = ref buffer[Cursor];
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
 
@@ -133,14 +133,14 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         // Prevent bleeding
-        ref var tail = ref snapshot[Cursor];
+        ref var tail = ref buffer[Cursor];
         tail.String = string.Empty;
         tail.Type = KeyholeType.StringLiteral;
 
         base.OnHtmlEnd(ref parent, html, format, expression);
 
-        int cursor = Cursor;
-        ref var keyhole = ref snapshot[cursor];
+        int index = Cursor;
+        ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
@@ -151,17 +151,17 @@ public class SnapshotComposer : KeyholeComposer
         keyhole.Expression = expression;
         keyhole.RelativeOrder = html.RelativeOrder;
 
-        Cursor = cursor + 1;
+        Cursor = index + 1;
         return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         EnsureOddIndex();
-        int cursor = Cursor;
+        int index = Cursor;
         base.OnIteratorBegin(ref parent, ref htmls, format, expression);
 
-        ref var keyhole = ref snapshot[cursor];
+        ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
@@ -183,7 +183,7 @@ public class SnapshotComposer : KeyholeComposer
             var html = selector(item);
             htmls.AppendFormatted(html);
 
-            snapshot[Cursor - 1].Tag = item; // TODO: Memory allocation?
+            buffer[Cursor - 1].Tag = item; // TODO: Memory allocation?
         }
         return true;
     }
@@ -191,7 +191,7 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         // Prevent bleeding
-        ref var keyhole = ref snapshot[Cursor];
+        ref var keyhole = ref buffer[Cursor];
         keyhole.String = string.Empty;
         keyhole.Type = KeyholeType.StringLiteral;
 
@@ -210,20 +210,20 @@ public class SnapshotComposer : KeyholeComposer
         EnsureOddIndex();
         base.OnKeyhole();
 
-        int cursor = Cursor;
-        ref var keyhole = ref snapshot[cursor];
+        int index = Cursor;
+        ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
         keyhole.Expression = expression;
         
-        Cursor = cursor + 1;
+        Cursor = index + 1;
         return true;
     }
 
     public override void Reset()
     {
-        snapshot = [];
+        buffer = [];
         writeHead = 0;
         cursors[0] = 0;
         base.Reset();
@@ -232,13 +232,13 @@ public class SnapshotComposer : KeyholeComposer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EnsureOddIndex()
     {
-        int cursor = Cursor;
-        if (cursor % 2 == 0)
+        int index = Cursor;
+        if (index % 2 == 0)
         {
-            ref var keyhole = ref snapshot[cursor];
+            ref var keyhole = ref buffer[index];
             keyhole.String = string.Empty;
             keyhole.Type = KeyholeType.StringLiteral;        
-            Cursor = cursor + 1;
+            Cursor = index + 1;
         }
     }
 }
