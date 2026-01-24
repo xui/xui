@@ -23,7 +23,7 @@ public class KeyCursor
     public byte[] MoveNext()
     {
         keyDigits[CurrentDepth]++;
-        return Current;
+        return GetOrCreateCurrent();
     }
 
     public void MoveDown()
@@ -41,29 +41,25 @@ public class KeyCursor
     {
         keyCache = keyCache.Parent;
         CurrentDepth--;
-        return Current;
+        return GetOrCreateCurrent();
     }
 
-    // TODO: Rename this.  It ended up private.  Make it a method?
-    private byte[] Current
+    private byte[] GetOrCreateCurrent()
     {
-        get
-        {
-            int index = keyDigits[CurrentDepth];
+        int index = keyDigits[CurrentDepth];
 
-            var key = keyCache[index];
-            if (key is not null)
-                return key;
-
-            key = GenerateKey(
-                parentKey: keyCache.Key, 
-                childIndex: index
-            );
-
-            keyCache[index] = key;
-
+        var key = keyCache[index];
+        if (key is not null)
             return key;
-        }
+
+        key = GenerateKey(
+            parentKey: keyCache.Key, 
+            childIndex: index
+        );
+
+        keyCache[index] = key;
+
+        return key;
     }
 
     private static byte[] GenerateKey(byte[] parentKey, int childIndex)
