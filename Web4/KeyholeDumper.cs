@@ -96,7 +96,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 break;
             case KeyholeType.Iterator:
                 start = keyhole.Sequence.Start.Value;
-                length = keyhole.Sequence.End.Value - start;
+                length = (keyhole.Sequence.End.Value - start) / 2;
                 Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c({length} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
