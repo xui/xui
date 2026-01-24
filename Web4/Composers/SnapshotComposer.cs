@@ -16,7 +16,7 @@ public class SnapshotComposer : KeyholeComposer
     private Keyhole[] snapshot = [];
 
     private readonly List<int> cursors = [0];
-    public int Cursor
+    private int Cursor
     {
         get => cursors[keyCursor.CurrentDepth];
         set
