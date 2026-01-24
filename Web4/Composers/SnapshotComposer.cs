@@ -117,15 +117,12 @@ public class SnapshotComposer : KeyholeComposer
         ref var keyhole = ref buffer[Cursor];
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
+        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
 
         base.OnHtmlBegin(ref html);
 
-        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
-
         Cursor = writeHead;
-
         writeHead += html.Length + 1;
-
         return true;
     }
 
