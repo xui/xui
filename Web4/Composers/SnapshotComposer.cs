@@ -35,7 +35,6 @@ public class SnapshotComposer : KeyholeComposer
     public Keyhole[] Capture(Func<Html> template)
     {
         snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
-
         return Interpolate($"{template()}");
     }
     
