@@ -36,9 +36,6 @@ public class SnapshotComposer : KeyholeComposer
     {
         snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
 
-        for (int i = 0; i < snapshot.Length; i++)
-            snapshot[i].StringLiteral = "---BLEED---";
-
         return Interpolate($"{template()}");
     }
     
