@@ -18,17 +18,13 @@ public class SnapshotComposer : KeyholeComposer
     private readonly List<int> cursors = [0];
     public int Cursor
     {
-        get
-        {
-            while (cursors.Count <= keyCursor.CurrentDepth)
-                cursors.Add(0);
-            return cursors[keyCursor.CurrentDepth];
-        }
+        get => cursors[keyCursor.CurrentDepth];
         set
         {
-            while (cursors.Count <= keyCursor.CurrentDepth)
-                cursors.Add(0);
-            cursors[keyCursor.CurrentDepth] = value;
+            if (cursors.Count == keyCursor.CurrentDepth)
+                cursors.Add(value);
+            else
+                cursors[keyCursor.CurrentDepth] = value;
         }
     }
 
@@ -71,14 +67,15 @@ public class SnapshotComposer : KeyholeComposer
     {
         base.OnMarkup(ref parent, literal);
 
-        ref var keyhole = ref snapshot[Cursor];
+        int cursor = Cursor;
+        ref var keyhole = ref snapshot[cursor];
         keyhole.String = literal;
         keyhole.Type = KeyholeType.StringLiteral;
-        keyhole.SequenceStart = Cursor;
+        keyhole.SequenceStart = cursor;
         keyhole.SequenceLength = parent.Length;
         isWritingAttribute = literal.EndsWith('=');
        
-        Cursor++;
+        Cursor = cursor + 1;
         return true;
     }
 
@@ -100,7 +97,8 @@ public class SnapshotComposer : KeyholeComposer
         EnsureOddIndex();
         base.OnKeyhole();
 
-        ref var keyhole = ref snapshot[Cursor];
+        int cursor = Cursor;
+        ref var keyhole = ref snapshot[cursor];
         keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
@@ -109,7 +107,7 @@ public class SnapshotComposer : KeyholeComposer
             ? keyCursor.Parent // Use parent's key, the DOM doesn't register each child for attribute sequences
             : Key;
 
-        Cursor++;
+        Cursor = cursor + 1;
         return true;
     }
 
@@ -141,7 +139,8 @@ public class SnapshotComposer : KeyholeComposer
 
         base.OnHtmlEnd(ref parent, html, format, expression);
 
-        ref var keyhole = ref snapshot[Cursor];
+        int cursor = Cursor;
+        ref var keyhole = ref snapshot[cursor];
         keyhole.Key = Key;
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
@@ -152,17 +151,17 @@ public class SnapshotComposer : KeyholeComposer
         keyhole.Expression = expression;
         keyhole.RelativeOrder = html.RelativeOrder;
 
-        Cursor++;
+        Cursor = cursor + 1;
         return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         EnsureOddIndex();
-        int index = Cursor;
+        int cursor = Cursor;
         base.OnIteratorBegin(ref parent, ref htmls, format, expression);
 
-        ref var keyhole = ref snapshot[index];
+        ref var keyhole = ref snapshot[cursor];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
@@ -211,13 +210,14 @@ public class SnapshotComposer : KeyholeComposer
         EnsureOddIndex();
         base.OnKeyhole();
 
-        ref var keyhole = ref snapshot[Cursor];
+        int cursor = Cursor;
+        ref var keyhole = ref snapshot[cursor];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
         keyhole.Expression = expression;
         
-        Cursor++;
+        Cursor = cursor + 1;
         return true;
     }
 
