@@ -15,9 +15,30 @@ public class SnapshotComposer : KeyholeComposer
     private bool isWritingAttribute = false;
     private Keyhole[] snapshot = [];
 
+    private readonly List<int> cursors = [0];
+    public int Cursor
+    {
+        get
+        {
+            while (cursors.Count <= keyCursor.CurrentDepth)
+                cursors.Add(0);
+            return cursors[keyCursor.CurrentDepth];
+        }
+        set
+        {
+            while (cursors.Count <= keyCursor.CurrentDepth)
+                cursors.Add(0);
+            cursors[keyCursor.CurrentDepth] = value;
+        }
+    }
+
     public Keyhole[] Capture(Func<Html> template)
     {
         snapshot = ArrayPool<Keyhole>.Shared.Rent(highWaterMark);
+
+        for (int i = 0; i < snapshot.Length; i++)
+            snapshot[i].StringLiteral = "---BLEED---";
+
         return Interpolate($"{template()}");
     }
     
@@ -45,31 +66,40 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
         base.OnTemplateBegin(ref html, ref literal);
-        html.Start = 0;
-        writeHead += html.Length;
+        Cursor = 0;
+        writeHead += html.Length + 1;
         return true;
     }
 
     public override bool OnHtmlBegin(ref Html html)
     {
+        EnsureOddIndex();
+        
+        ref var keyhole = ref snapshot[Cursor];
+        keyhole.SequenceStart = writeHead;
+        keyhole.SequenceLength = html.Length;
+
         base.OnHtmlBegin(ref html);
+
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
-        html.Start = writeHead;
-        writeHead += html.Length;
+
+        Cursor = writeHead;
+
+        writeHead += html.Length + 1;
+
         return true;
     }
 
     public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
-        // By this point, the `Html html` parameter has already set its keyholes.
-        // They're just later in the buffer, starting at the "high water mark."
+        // Prevent bleeding
+        ref var tail = ref snapshot[Cursor];
+        tail.String = string.Empty;
+        tail.Type = KeyholeType.StringLiteral;
+
         base.OnHtmlEnd(ref parent, html, format, expression);
 
-        // Since the html has been written, 
-        // return to where we left off (a little like recursion).
-        // so that we can set the html's type, expression, key, and range.
-        var index = parent.Start + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
+        ref var keyhole = ref snapshot[Cursor];
         keyhole.Key = Key;
         keyhole.Type = html.Type switch {
             HtmlType.Attribute => KeyholeType.Attribute,
@@ -78,22 +108,24 @@ public class SnapshotComposer : KeyholeComposer
         };
         keyhole.Format = format;
         keyhole.Expression = expression;
-        keyhole.SequenceStart = html.Start;
-        keyhole.SequenceLength = html.Length;
         keyhole.RelativeOrder = html.RelativeOrder;
+
+        Cursor++;
         return true;
     }
 
     public override bool OnMarkup(ref Html parent, string literal)
     {
         base.OnMarkup(ref parent, literal);
-        var index = parent.Start + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
+
+        ref var keyhole = ref snapshot[Cursor];
         keyhole.String = literal;
         keyhole.Type = KeyholeType.StringLiteral;
-        keyhole.SequenceStart = index;
+        keyhole.SequenceStart = Cursor;
         keyhole.SequenceLength = parent.Length;
         isWritingAttribute = literal.EndsWith('=');
+       
+        Cursor++;
         return true;
     }
 
@@ -112,22 +144,19 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole(ref parent, value, KeyholeType.Uri, format);
     private bool OnKeyhole<T>(ref Html parent, T value, KeyholeType type, string? format = null)
     {
+        EnsureOddIndex();
         base.OnKeyhole();
-        var index = parent.Start + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
+
+        ref var keyhole = ref snapshot[Cursor];
         keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
-        if (parent.Type == HtmlType.Attribute)
-        {
-            keyhole.Key = keyCursor.Parent; // use parent's key, no need for its own
-            keyhole.ParentStart = parent.Start;
-        }
-        else
-        {
-            keyhole.Key = Key;
-            keyhole.IsValueAnAttribute = isWritingAttribute;
-        }
+        keyhole.IsValueAnAttribute = isWritingAttribute;
+        keyhole.Key = parent.Type == HtmlType.Attribute 
+            ? keyCursor.Parent // Use parent's key, the DOM doesn't register each child for attribute sequences
+            : Key;
+
+        Cursor++;
         return true;
     }
 
@@ -137,32 +166,35 @@ public class SnapshotComposer : KeyholeComposer
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
     private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
+        EnsureOddIndex();
         base.OnKeyhole();
-        var index = parent.Start + parent.Cursor;
-        ref var keyhole = ref snapshot[index];
+
+        ref var keyhole = ref snapshot[Cursor];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.EventListener;
         keyhole.Format = format;
         keyhole.Expression = expression;
+        
+        Cursor++;
         return true;
     }
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
+        EnsureOddIndex();
+        int index = Cursor;
         base.OnIteratorBegin(ref parent, ref htmls, format, expression);
 
-        htmls.Start = writeHead;
-
-        var index = parent.Start + parent.Cursor;
         ref var keyhole = ref snapshot[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
         keyhole.Format = format;
         keyhole.Expression = expression;
-        keyhole.SequenceStart = htmls.Start;
+        keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = htmls.Length;
 
-        writeHead += htmls.Length;
+        Cursor = writeHead;
+        writeHead += htmls.Length + 1;
         return true;
     }
 
@@ -173,24 +205,44 @@ public class SnapshotComposer : KeyholeComposer
         {
             var (selector, item) = enumerator.CurrentDeconstructed;
             var html = selector(item);
-
             htmls.AppendFormatted(html);
 
-            ref var keyhole = ref snapshot[htmls.Start + htmls.Cursor - 1];
-            keyhole.Tag = item; // TODO: Memory allocation?
+            snapshot[Cursor - 1].Tag = item; // TODO: Memory allocation?
         }
         return true;
     }
 
     public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
-        return base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+        // Prevent bleeding
+        ref var keyhole = ref snapshot[Cursor];
+        keyhole.String = string.Empty;
+        keyhole.Type = KeyholeType.StringLiteral;
+
+        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+
+        Cursor++;
+        return true;
     }
 
     public override void Reset()
     {
         snapshot = [];
         writeHead = 0;
+        cursors[0] = 0;
         base.Reset();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EnsureOddIndex()
+    {
+        int cursor = Cursor;
+        if (cursor % 2 == 0)
+        {
+            ref var keyhole = ref snapshot[cursor];
+            keyhole.String = string.Empty;
+            keyhole.Type = KeyholeType.StringLiteral;        
+            Cursor = cursor + 1;
+        }
     }
 }

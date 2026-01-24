@@ -14,7 +14,6 @@ public ref partial struct Html : IDisposable
     [ThreadStatic] static BaseComposer? scopedComposer;
     private readonly BaseComposer composer;
 
-    public int Start { get; set; }
     public int Cursor { get; private set; }
     public int Length { get; private set; }
     public HtmlType Type { get; set; }
@@ -79,7 +78,7 @@ public ref partial struct Html : IDisposable
 
     private Html(int iteratorCount, BaseComposer composer)
     {
-        Length = iteratorCount;
+        Length = iteratorCount * 2 + 1;
         Type = HtmlType.Iterator;
         this.composer = composer;
     }
@@ -100,9 +99,6 @@ public ref partial struct Html : IDisposable
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
     public bool AppendFormatted(string value)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnStringKeyhole(ref this, value);
         Cursor++;
         return @continue;
@@ -110,9 +106,6 @@ public ref partial struct Html : IDisposable
 
     public bool AppendFormatted(bool value)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnBoolKeyhole(ref this, value);
         Cursor++;
         return @continue;
@@ -120,9 +113,6 @@ public ref partial struct Html : IDisposable
 
     public bool AppendFormatted(int value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnIntKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -130,9 +120,6 @@ public ref partial struct Html : IDisposable
 
     public bool AppendFormatted(long value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnLongKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -140,9 +127,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(float value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnFloatKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -150,9 +134,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(double value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnDoubleKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -160,9 +141,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(decimal value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnDecimalKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -170,9 +148,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(DateTime value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnDateTimeKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -180,9 +155,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(DateOnly value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnDateOnlyKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -190,9 +162,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(TimeSpan value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnTimeSpanKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -200,9 +169,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(TimeOnly value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnTimeOnlyKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -210,9 +176,6 @@ public ref partial struct Html : IDisposable
     
     public bool AppendFormatted(Color value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnColorKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -220,9 +183,6 @@ public ref partial struct Html : IDisposable
 
     public bool AppendFormatted(Uri value, string? format = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnUriKeyhole(ref this, value, format);
         Cursor++;
         return @continue;
@@ -236,9 +196,6 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
@@ -249,9 +206,6 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
@@ -261,9 +215,6 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
@@ -273,9 +224,6 @@ public ref partial struct Html : IDisposable
     public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var @continue = composer.OnListener(ref this, listener, format, expression);
         Cursor++;
         return @continue;
@@ -291,12 +239,12 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
+        // Possible point of confusion: 
+        // By this line, the `scoped Html html` has already set its own keyholes.
+
         if (html.Type == HtmlType.Wrapper)
             return true;
 
-        if (IsEven(Cursor) && Type != HtmlType.Iterator && Type != HtmlType.Wrapper)
-            AppendLiteral(string.Empty);
-        
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
@@ -312,9 +260,6 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
-        if (IsEven(Cursor))
-            AppendLiteral(string.Empty);
-
         var htmls = new Html(enumerable.Count, composer);
         var @continue = 
             composer.OnIteratorBegin(ref this, ref htmls, format, expression) &&
@@ -323,9 +268,6 @@ public ref partial struct Html : IDisposable
         Cursor++;
         return @continue;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsEven(int number) => number % 2 == 0;
 
     public readonly void Dispose()
     {

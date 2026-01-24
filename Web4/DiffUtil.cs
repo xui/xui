@@ -179,7 +179,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             {
                 // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                 // Find the start of this sequence, then grab the sequence's full span.
-                ref var startKeyhole = ref newBuffer[newKeyhole.ParentStart];
+                ref var startKeyhole = ref newBuffer[newParent.SequenceStart];
                 keyholes.SetAttribute(newParent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                 // Shortcircuit.  No need to diff the rest of this span.
@@ -209,7 +209,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         var tagChanges = oldItems.Length != newItems.Length ? 1 : 0;
         if (newKeyhole.Format is not null)
         {
-            for (var d = 0; d < minLength; d++)
+            for (var d = 1; d < minLength; d += 2)
             {
                 ref var oldItem = ref oldItems[d];
                 ref var newItem = ref newItems[d];
@@ -220,7 +220,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         }
         bool shouldUseTransition = tagChanges > 1;
 
-        for (var d = 0; d < minLength; d++)
+        for (var d = 1; d < minLength; d += 2)
         {
             ref var oldItem = ref oldItems[d];
             ref var newItem = ref newItems[d];
@@ -247,7 +247,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             // These items can simply be appended to the end.  
             // This will not violate any keyhole's positional stability
             // or cause any keyname collisions.
-            for (var d = minLength; d < newItems.Length; d++)
+            for (var d = minLength; d < newItems.Length; d += 2)
             {
                 ref var newItem = ref newItems[d];
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
@@ -263,7 +263,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
             // The old iterator has more items than the new one. 
             // These items can simply be removed.  
             // This will not violate any keyhole's positional stability.
-            for (var d = minLength; d < oldItems.Length; d++)
+            for (var d = minLength; d < oldItems.Length; d += 2)
             {
                 ref var item = ref oldItems[d];
                 if (newKeyhole.Format is null || item.Tag is null)
