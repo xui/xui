@@ -62,7 +62,7 @@ public ref partial struct Html : IDisposable
     private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
     {
         this.composer = composer;
-        Length = 2 * formattedCount + 1;
+        Length = formattedCount * 2 + 1;
         RelativeOrder = relativeOrder;
         Type = (literalLength, composer.IsStarted) switch {
             (0, false) => HtmlType.Wrapper,
