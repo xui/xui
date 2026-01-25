@@ -3,10 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class FindKeyholeComposer : KeyholeComposer
+public class FindKeyComposer : BaseKeyComposer
 {
-    [ThreadStatic] static FindKeyholeComposer? reusable;
-    public static FindKeyholeComposer Shared => reusable ??= new FindKeyholeComposer();
+    [ThreadStatic] static FindKeyComposer? reusable;
+    public static FindKeyComposer Shared => reusable ??= new FindKeyComposer();
 
     private EventListener eventListener = default;
     private byte[] keyBuffer = [];

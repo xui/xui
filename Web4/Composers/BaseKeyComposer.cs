@@ -2,7 +2,7 @@ using System.Drawing;
 
 namespace Web4.Composers;
 
-public abstract class KeyholeComposer : BaseComposer
+public abstract class BaseKeyComposer : BaseComposer
 {
     protected readonly KeyCursor keyCursor = new();
     public byte[] Key { get; private set; } = [];

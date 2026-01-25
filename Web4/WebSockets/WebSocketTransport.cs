@@ -336,7 +336,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
     {
         using var perf = Perf.Measure("CaptureSnapshot"); // TODO: Remove PerfCheck
 
-        return SnapshotComposer.Shared.Capture(windowBuilder.Template);
+        return SnapshotKeyComposer.Shared.Capture(windowBuilder.Template);
     }
 
     public void Invalidate()

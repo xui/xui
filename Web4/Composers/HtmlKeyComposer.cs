@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Web4.Composers;
 
-public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
-    : KeyholeComposer, IStreamingComposer
+public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
+    : BaseKeyComposer, IStreamingComposer
 {
     private enum AttributeStatus { None, Pending, InProgress }
     private AttributeStatus attributeStatus = AttributeStatus.None;
@@ -444,8 +444,8 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
         base.Reset();
     }
 
-    [ThreadStatic] static XtmlComposer? reusable;
-    public static XtmlComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window) 
+    [ThreadStatic] static HtmlKeyComposer? reusable;
+    public static HtmlKeyComposer Reuse(IBufferWriter<byte> writer, WindowBuilder window) 
     {
         if (reusable is {} composer)
         {
@@ -454,6 +454,6 @@ public class XtmlComposer(IBufferWriter<byte> writer, WindowBuilder window)
             return composer;
         }
 
-        return reusable = new XtmlComposer(writer, window);
+        return reusable = new HtmlKeyComposer(writer, window);
     }
 }

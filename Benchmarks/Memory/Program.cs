@@ -18,10 +18,10 @@ public class Tests
     static readonly NoOpComposer noOpComposer = new();
     static readonly NoOpWriter noOpWriter = new();
     static readonly HtmlComposer htmlComposer = new(noOpWriter);
-    static readonly XtmlComposer xtmlComposer = new(noOpWriter, window);
+    static readonly HtmlKeyComposer xtmlComposer = new(noOpWriter, window);
     static readonly Keyhole[] keyholeBuffer = ArrayPool<Keyhole>.Shared.Rent(2048);
-    static readonly SnapshotComposer snapshotComposer = new();
-    static readonly FindKeyholeComposer findKeyholeComposer = new();
+    static readonly SnapshotKeyComposer snapshotComposer = new();
+    static readonly FindKeyComposer findKeyholeComposer = new();
     static readonly string name = "Rylan";
     static readonly int c = 3;
 
@@ -437,7 +437,7 @@ public class Tests
                 </body>
             </html>
             """;
-        FindKeyholeComposer.Shared.FindEventListener(key: ""u8, template);
+        FindKeyComposer.Shared.FindEventListener(key: ""u8, template);
     }
 
 

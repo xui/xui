@@ -4,12 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace Web4.Composers;
 
-public class SnapshotComposer : KeyholeComposer
+public class SnapshotKeyComposer : BaseKeyComposer
 {
     // TODO: Don't forget to implement the high watermark logic.
     private static int highWaterMark = 2048;
-    [ThreadStatic] static SnapshotComposer? reusable;
-    public static SnapshotComposer Shared => reusable ??= new SnapshotComposer();
+    [ThreadStatic] static SnapshotKeyComposer? reusable;
+    public static SnapshotKeyComposer Shared => reusable ??= new SnapshotKeyComposer();
 
     private Keyhole[] buffer = [];
     private bool isWritingAttribute = false;
