@@ -299,7 +299,9 @@
             if (typeof param === 'string' && param.startsWith("%o")) {
               rpc.params[i] = param
                 .substring(2)
-                .split(".")
+                .replaceAll(/[\"\'\`]/gi, '')
+                .split(/[.\[\]]/)
+                .filter(i => i)
                 .reduce((obj, prop) => obj[prop], globalThis);
             }
           });
