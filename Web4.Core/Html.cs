@@ -14,7 +14,6 @@ public ref partial struct Html : IDisposable
     [ThreadStatic] static BaseComposer? scopedComposer;
     private readonly BaseComposer composer;
 
-    public int Cursor { get; private set; }
     public int Length { get; private set; }
     public HtmlType Type { get; set; }
     public int RelativeOrder { get; private set; }
@@ -69,6 +68,8 @@ public ref partial struct Html : IDisposable
             _ => HtmlType.Element
         };
 
+        if (composer.IsStarted)
+            composer.OnHtmlBegin(ref this);
         composer.TryBegin(literalLength);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
@@ -88,146 +89,78 @@ public ref partial struct Html : IDisposable
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
-    {
-        var @continue = composer.OnMarkup(ref this, literal);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnMarkup(ref this, literal);
 
 
     // MUTABLE VALUES
     // Ex: <p>Hello { name }, you have { count } clicks at { DateTime.Now }</p>
     public bool AppendFormatted(string value)
-    {
-        var @continue = composer.OnStringKeyhole(ref this, value);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnStringKeyhole(ref this, value);
 
     public bool AppendFormatted(bool value)
-    {
-        var @continue = composer.OnBoolKeyhole(ref this, value);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnBoolKeyhole(ref this, value);
 
     public bool AppendFormatted(int value, string? format = null)
-    {
-        var @continue = composer.OnIntKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnIntKeyhole(ref this, value, format);
 
     public bool AppendFormatted(long value, string? format = null)
-    {
-        var @continue = composer.OnLongKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnLongKeyhole(ref this, value, format);
     
     public bool AppendFormatted(float value, string? format = null)
-    {
-        var @continue = composer.OnFloatKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnFloatKeyhole(ref this, value, format);
     
     public bool AppendFormatted(double value, string? format = null)
-    {
-        var @continue = composer.OnDoubleKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnDoubleKeyhole(ref this, value, format);
     
     public bool AppendFormatted(decimal value, string? format = null)
-    {
-        var @continue = composer.OnDecimalKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnDecimalKeyhole(ref this, value, format);
     
     public bool AppendFormatted(DateTime value, string? format = null)
-    {
-        var @continue = composer.OnDateTimeKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnDateTimeKeyhole(ref this, value, format);
     
     public bool AppendFormatted(DateOnly value, string? format = null)
-    {
-        var @continue = composer.OnDateOnlyKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnDateOnlyKeyhole(ref this, value, format);
     
     public bool AppendFormatted(TimeSpan value, string? format = null)
-    {
-        var @continue = composer.OnTimeSpanKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnTimeSpanKeyhole(ref this, value, format);
     
     public bool AppendFormatted(TimeOnly value, string? format = null)
-    {
-        var @continue = composer.OnTimeOnlyKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnTimeOnlyKeyhole(ref this, value, format);
     
     public bool AppendFormatted(Color value, string? format = null)
-    {
-        var @continue = composer.OnColorKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnColorKeyhole(ref this, value, format);
 
     public bool AppendFormatted(Uri value, string? format = null)
-    {
-        var @continue = composer.OnUriKeyhole(ref this, value, format);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnUriKeyhole(ref this, value, format);
 
 
     // EVENT HANDLERS
 
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ () => Increment() }>Clicks: { c }</button>
-    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+        => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
-    {
-        var @continue = composer.OnListener(ref this, listener, format, expression);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnListener(ref this, listener, format, expression);
 
     // Ex: <button onclick={ Increment }>Clicks: { c }</button>
     // Ex: <button onclick={ (Event e) => Increment(e) }>Clicks: { c }</button>
-    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+        => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Action<Event> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
-    {
-        var @continue = composer.OnListener(ref this, listener, format, expression);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnListener(ref this, listener, format, expression);
 
     // Ex: <button onclick={ IncrementAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+        => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
-    {
-        var @continue = composer.OnListener(ref this, listener, format, expression);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnListener(ref this, listener, format, expression);
 
     // Ex: <button onclick={ IncrementFromEventAsync }>Clicks: { c }</button>
-    public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null) => AppendEventListener(listener, format, expression);
+    public bool AppendFormatted(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
+        => AppendEventListener(listener, format, expression);
     private bool AppendEventListener(Func<Event, Task> listener, string? format = null, [CallerArgumentExpression(nameof(listener))] string? expression = null)
-    {
-        var @continue = composer.OnListener(ref this, listener, format, expression);
-        Cursor++;
-        return @continue;
-    }
+        => composer.OnListener(ref this, listener, format, expression);
 
 
     // MUTABLE ELEMENTS
@@ -248,10 +181,7 @@ public ref partial struct Html : IDisposable
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
-        var @continue = composer.OnHtmlKeyhole(ref this, html, format, expression);
-
-        Cursor++;
-        return @continue;
+        return composer.OnHtmlKeyhole(ref this, html, format, expression);
     }
 
     // EX: { names.Select(n => new MyComponent(name: n)) }
@@ -261,12 +191,10 @@ public ref partial struct Html : IDisposable
         [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
         var htmls = new Html(enumerable.Count, composer);
-        var @continue = 
+        return
             composer.OnIteratorBegin(ref this, ref htmls, format, expression) &&
             composer.OnIteratorKeyhole(ref this, ref htmls, enumerable, format, expression) &&
             composer.OnIteratorEnd(ref this, ref htmls, format, expression);
-        Cursor++;
-        return @continue;
     }
 
     public readonly void Dispose()

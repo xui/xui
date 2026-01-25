@@ -8,6 +8,7 @@ public class KeyCursor
     private readonly List<int> keyDigits = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
+    public int CurrentIndex => keyDigits[CurrentDepth];
     public int CurrentDepth { get; private set; }
     public byte[] Parent => keyCache.Key;
 

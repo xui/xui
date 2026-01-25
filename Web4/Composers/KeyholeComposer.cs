@@ -12,11 +12,8 @@ public abstract class KeyholeComposer : BaseComposer
 
     public override bool OnMarkup(ref Html parent, string literal)
     {
-        _ = (parent.Cursor, parent.Type) switch {
-            (0, HtmlType.Template) => OnTemplateBegin(ref parent, ref literal),
-            (0, HtmlType.Element) => OnHtmlBegin(ref parent),
-            _ => true,
-        };
+        if (parent.Type == HtmlType.Template && keyCursor.CurrentIndex < 0)
+            OnTemplateBegin(ref parent, ref literal);
 
         return true;
     }
@@ -35,7 +32,7 @@ public abstract class KeyholeComposer : BaseComposer
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => OnKeyhole();
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole();
 
-    public virtual bool OnHtmlBegin(ref Html html)
+    public override bool OnHtmlBegin(ref Html html)
     {
         Key = keyCursor.MoveNext();
         keyCursor.MoveDown();
@@ -43,11 +40,13 @@ public abstract class KeyholeComposer : BaseComposer
     }
 
     public override bool OnHtmlKeyhole(ref Html parent, scoped Html html, string? format = null, string? expression = null)
-        => html.Type == HtmlType.Template
-            ? OnTemplateEnd(ref html)
-            : OnHtmlEnd(ref parent, html, format, expression);
+        => html.Type switch {
+            HtmlType.Wrapper => true, // ignore
+            HtmlType.Template => OnTemplateEnd(ref html),
+            HtmlType.Element or _ => OnHtmlEnd(ref parent, html, format, expression),
+        };
 
-    public virtual bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         Key = keyCursor.MoveUp();
         return true;
