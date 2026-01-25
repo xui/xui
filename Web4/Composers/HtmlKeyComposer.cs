@@ -17,7 +17,7 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
 
     public override bool OnTemplateBegin(ref Html html, ref string literal)
     {
-        InjectBootloader(ref literal);
+        InjectKernel(ref literal);
 
         return true;
     }
@@ -358,13 +358,13 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return attributeName;
     }
 
-    private static readonly byte[] BOOTLOADER = 
+    private static readonly byte[] KERNEL = 
         Encoding.UTF8.GetBytes(new StreamReader(System.Reflection.Assembly
             .GetExecutingAssembly()
-            .GetManifestResourceStream("Web4.Bootloader.html")!
+            .GetManifestResourceStream("Web4.Kernel.html")!
         ).ReadToEnd());
 
-    private void InjectBootloader(ref string literal)
+    private void InjectKernel(ref string literal)
     {
         Writer.Write("""
             <!doctype html>
@@ -384,7 +384,7 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         }
 
         // Write necesary JavaScript and CSS to operate Web4
-        Writer.Write(BOOTLOADER);
+        Writer.Write(KERNEL);
 
         // Write event handlers set on window or document
         if (Window.Listeners.Count > 0)
