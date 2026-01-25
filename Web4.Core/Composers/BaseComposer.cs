@@ -4,9 +4,16 @@ namespace Web4.Composers;
 
 public abstract class BaseComposer
 {
-    public bool IsStarted { get; private set; } = false;
+    public int LiteralLength { get; set; }
+    public int KeyholeCount { get; set; }
 
-    public virtual bool OnMarkup(ref Html parent, string literal) => TryBegin(literal.Length);
+    public void Grow(int literalLength, int keyholeCount)
+    {
+        LiteralLength += literalLength;
+        KeyholeCount += KeyholeCount;
+    }
+
+    public virtual bool OnMarkup(ref Html parent, string literal) => true;
 
     public virtual bool OnStringKeyhole(ref Html parent, string value) => true;
     public virtual bool OnBoolKeyhole(ref Html parent, bool value) => true;
@@ -40,12 +47,10 @@ public abstract class BaseComposer
     public virtual bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => true;
     public virtual bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => true;
 
-    public bool TryBegin(int literalLength)
+    public virtual void Reset()
     {
-        if (literalLength > 0)
-            IsStarted = true;
-        return true;
+        // Called from the root Html's Dispose()
+        LiteralLength = 0;
+        KeyholeCount = 0;
     }
-    
-    public virtual void Reset() => IsStarted = false; // Called from the root Html's Dispose()
 }

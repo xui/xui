@@ -62,15 +62,15 @@ public ref partial struct Html : IDisposable
         this.composer = composer;
         Length = formattedCount * 2 + 1;
         RelativeOrder = relativeOrder;
-        Type = (literalLength, composer.IsStarted) switch {
-            (0, false) => HtmlType.Wrapper,
-            (> 0, false) => HtmlType.Template,
+        Type = (literalLength, composer.LiteralLength) switch {
+            (0, 0) => HtmlType.Wrapper,
+            (> 0, 0) => HtmlType.Template,
             _ => HtmlType.Element
         };
 
-        if (composer.IsStarted)
+        if (composer.LiteralLength > 0)
             composer.OnHtmlBegin(ref this);
-        composer.TryBegin(literalLength);
+        composer.Grow(literalLength, formattedCount);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -82,6 +82,7 @@ public ref partial struct Html : IDisposable
         Length = iteratorCount * 2 + 1;
         Type = HtmlType.Iterator;
         this.composer = composer;
+        composer.Grow(0, iteratorCount);
     }
 
 
