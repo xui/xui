@@ -115,7 +115,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private static string ObjectString(string key)
     {
-        return $"globalThis.keyholes.{key}.node";
+        return $"%oglobalThis.keyholes.{key}.node";
     }
 
     private static string InlineString(string? value)

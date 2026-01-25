@@ -266,7 +266,7 @@
     #handleMessage(event) {
       let batch = JSON.parse(event.data);
       batch = Array.isArray(batch) ? batch : [batch];
-      this.#evaluateExpressions(batch);
+      this.#unescapeParams(batch);
       this.#fixDuplicates(batch);
       batch.forEach(rpc => {
 
@@ -292,12 +292,15 @@
       Web4Keyhole.flushTransitionBatch();
     }
 
-    #evaluateExpressions(batch) {
+    #unescapeParams(batch) {
       batch.forEach(rpc => {
         if (rpc.params) {
           rpc.params.forEach((param, i) => {
-            if (typeof param === 'string' && param.startsWith("globalThis.keyholes")) {
-              rpc.params[i] = eval(param);
+            if (typeof param === 'string' && param.startsWith("%o")) {
+              rpc.params[i] = param
+                .substring(2)
+                .split(".")
+                .reduce((obj, prop) => obj[prop], globalThis);
             }
           });
         }
