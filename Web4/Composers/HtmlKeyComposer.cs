@@ -312,7 +312,6 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         }
         else
         {
-            // TODO: Is it better to use ({}) or () instead?
             // ex: `"keyholes.{key}.dispatchEvent(event.trim(''))" {key}`
             Writer.Write("\"keyholes."u8);
             Writer.Write(Key);
