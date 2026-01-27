@@ -166,7 +166,7 @@
         Web4Keyhole.#transitionBatch.nodes.push(node);
 
       if (node.style)
-        node.style.viewTransitionName = viewTransitionName.replace(":", "-");
+        node.style.viewTransitionName = viewTransitionName.replaceAll(":", "-");
     }
 
     #prepareSiblings() {
@@ -175,7 +175,7 @@
           Web4Keyhole.#transitionBatch.nodes.push(sibling);
         
         if (sibling.style && !sibling.style.viewTransitionName)
-          sibling.style.viewTransitionName = `web4-sibling-${this.key.replace(":", "-")}-${i}`;
+          sibling.style.viewTransitionName = `web4-sibling-${this.key.replaceAll(":", "-")}-${i}`;
       });
     }
 
