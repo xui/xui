@@ -11,7 +11,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetText(byte[] key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".setText"),
+            method: ("keyholes['", key, "'].setText"),
             param1: ref keyhole
         );
     }
@@ -19,7 +19,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(byte[] key, ref Keyhole keyhole)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".setAttribute"),
+            method: ("keyholes['", key, "'].setAttribute"),
             param1: ref keyhole
         );
     }
@@ -27,7 +27,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetAttribute(byte[] key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".setAttribute"),
+            method: ("keyholes['", key, "'].setAttribute"),
             param1: keyholes
         );
     }
@@ -35,7 +35,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setNode"),
+            method: ("keyholes['", key, "'].setNode"),
             param1: keyholes
         );
     }
@@ -43,7 +43,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, byte[]> viewTransitionName)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setNode"),
+            method: ("keyholes['", key, "'].setNode"),
             param1: keyholes,
             param2: viewTransitionName
         );
@@ -52,7 +52,7 @@ partial class WebSocketTransport : IKeyholes
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".setNode"),
+            method: ("keyholes['", key, "'].setNode"),
             param1: keyholes,
             param2: viewTransitionName,
             param3: viewTransitionNameSecondary
@@ -62,7 +62,7 @@ partial class WebSocketTransport : IKeyholes
     public void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".pushNode"),
+            method: ("keyholes['", key, "'].pushNode"),
             param1: keyholes,
             param2: newKey
         );
@@ -71,7 +71,7 @@ partial class WebSocketTransport : IKeyholes
     public void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(buffer,
-            method: ("keyholes.", key, ".pushNode"),
+            method: ("keyholes['", key, "'].pushNode"),
             param1: keyholes,
             param2: newKey,
             param3: viewTransitionName
@@ -81,14 +81,14 @@ partial class WebSocketTransport : IKeyholes
     public void PopNode(byte[] key)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".popNode")
+            method: ("keyholes['", key, "'].popNode")
         );
     }
 
     public void PopNode(byte[] key, ValueTuple<string, int> viewTransitionName)
     {
         Output.WriteNotification(
-            method: ("keyholes.", key, ".popNode"),
+            method: ("keyholes['", key, "'].popNode"),
             param1: viewTransitionName
         );
     }

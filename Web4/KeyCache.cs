@@ -3,7 +3,7 @@ namespace Web4;
 class KeyCache
 {
     private readonly List<KeyCache?> children = [];
-    public static KeyCache Root { get; } = new KeyCache(null!, "key"u8.ToArray());
+    public static KeyCache Root { get; } = new KeyCache(null!, []);
     public byte[] Key { get; private set; }
     public KeyCache Parent { get; private set; }
 

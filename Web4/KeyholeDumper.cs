@@ -47,33 +47,33 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             case KeyholeType.String:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
                 Console.GroupEnd();
                 break;
             case KeyholeType.Integer:
                 if (keyhole.IsValueAnAttribute) // TODO: This isn't getting set?
-                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %c{keyhole.Integer}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 else
-                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
+                    Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key));
                 Console.GroupEnd();
                 break;
             case KeyholeType.Boolean:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %c{(keyhole.Boolean ? "true" : "false")}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 Console.GroupEnd();
                 break;
             case KeyholeType.Color:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", ObjectString(key));
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %c◼ %o", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, $"color:#{keyhole.Color.ToRgb():x6}", ObjectString(key));
                 Console.GroupEnd();
                 break;
             // TODO: Support the other FormatTypes too
             case KeyholeType.EventListener:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression} %c}}"}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} {$"%c{{ %c{keyhole.Expression} %c}}"}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, CSS_DEFAULT, CSS_BRACE);
                 Console.GroupEnd();
                 break;
             case KeyholeType.Attribute:
                 int start = keyhole.Sequence.Start.Value;
                 int length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %o %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key), CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %o %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, ObjectString(key), CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -85,7 +85,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Html:
                 start = keyhole.Sequence.Start.Value;
                 length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, ObjectString(key), CSS_BRACE, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} {$"%c{{ %o %c}}"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_BRACE, ObjectString(key), CSS_BRACE, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -97,7 +97,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
             case KeyholeType.Iterator:
                 start = keyhole.Sequence.Start.Value;
                 length = keyhole.Sequence.End.Value - start;
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} {$"%c({length / 2} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} {$"%c({length / 2} items)"} %cbuffer[{keyhole.Sequence}]", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_DEFAULT, CSS_LINK);
 
                 for (int i = start; i < start + length; i++)
                 {
@@ -107,7 +107,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
                 Console.GroupEnd();
                 break;
             default:
-                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%c{key}%c: %c{keyhole.Type}",-28} %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
+                Console.GroupCollapsed($"{$"[{index}]",-4}  {$"%ckey:{key} %c: %c{keyhole.Type}",-28} %c{keyhole.Double}", CSS_VARIABLE, CSS_OPERATOR, CSS_TYPE, CSS_NUMBER);
                 Console.GroupEnd();
                 break;
         }
@@ -115,7 +115,7 @@ public ref struct KeyholeDumper(IConsole Console, Keyhole[] buffer)
 
     private static string ObjectString(string key)
     {
-        return $"%oglobalThis.keyholes.{key}.node";
+        return $"%oglobalThis.keyholes['{key}'].node";
     }
 
     private static string InlineString(string? value)

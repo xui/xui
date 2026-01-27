@@ -166,7 +166,7 @@
         Web4Keyhole.#transitionBatch.nodes.push(node);
 
       if (node.style)
-        node.style.viewTransitionName = viewTransitionName;
+        node.style.viewTransitionName = viewTransitionName.replace(":", "-");
     }
 
     #prepareSiblings() {
@@ -175,7 +175,7 @@
           Web4Keyhole.#transitionBatch.nodes.push(sibling);
         
         if (sibling.style && !sibling.style.viewTransitionName)
-          sibling.style.viewTransitionName = `web4-sibling-${this.key}-${i}`;
+          sibling.style.viewTransitionName = `web4-sibling-${this.key.replace(":", "-")}-${i}`;
       });
     }
 
@@ -236,7 +236,7 @@
 
       let message = {
         jsonrpc: "2.0", 
-        method: `keyholes.${key}.dispatchEvent`, 
+        method: `keyholes['${key}'].dispatchEvent`, 
         params: params
       };
       this.#webSocket.send(JSON.stringify(message));
@@ -273,7 +273,8 @@
         // A function to call
         if (rpc.method) {
           let [obj, func] = rpc.method
-            .split(".")
+            .split(/[.\[\]\'\"]/)
+            .filter(i => i)
             .reduce(([obj, func], prop) => [func, func[prop]], [null, window]);
           func.apply(obj, rpc.params);
         }
@@ -299,8 +300,7 @@
             if (typeof param === 'string' && param.startsWith("%o")) {
               rpc.params[i] = param
                 .substring(2)
-                .replaceAll(/[\"\'\`]/gi, '')
-                .split(/[.\[\]]/)
+                .split(/[.\[\]\'\"]/)
                 .filter(i => i)
                 .reduce((obj, prop) => obj[prop], globalThis);
             }
@@ -440,19 +440,19 @@
     for (let i = comments.snapshotLength - 1; i >= 0; i--) {
       let comment = comments.snapshotItem(i);
       let key = comment.textContent;
-      if (key.startsWith('key')) {
+      if (key.startsWith('key:')) {
         if (key.endsWith('/')) {
           // Needed as a placeholder for zero-length iterators, do not removeChild
-          key = key.replace(' /', '');
+          key = key.replace('key:', '').replace(' /', '');
           keyholes.set(key, comment);
         } else {
           comment.parentElement?.removeChild(comment);
         }
-      } else if (key.startsWith('/key')) {
-        key = key.replace('/', '');
+      } else if (key.startsWith('/key:')) {
+        key = key.replace('/key:', '');
         let node = comment.previousSibling;
         if (node.nodeType === Node.COMMENT_NODE) {
-          // Text node was missing because keyhole value was an empty string (""), e.g. `<!--key123--><!--/key123-->`
+          // Text node was missing because keyhole value was an empty string (""), e.g. `<!--key:123--><!--/key:123-->`
           node = node.parentNode.insertBefore(document.createTextNode(""), comment);
         }
         keyholes.set(key, node);
@@ -464,7 +464,8 @@
     for (let i = 0; i < attrs.snapshotLength; i++) {
       let attr = attrs.snapshotItem(i);
       let key = attr.name;
-      if (key.startsWith('key')) {
+      if (key.startsWith('key:')) {
+        key = key.replace('key:', '');
         if (attr.value === "") {
           let node = attrs.snapshotItem(i - 1)
           keyholes.set(key, node);

@@ -63,18 +63,18 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{key}-->{value}<!--/{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
+                // ex: `<!--key:{Key}-->{value}<!--/key:{Key}-->`
+                Writer.Write("<!--key:"u8, Key, "-->"u8);
                 Writer.Write(value);
-                Writer.Write("<!--/"u8, Key, "-->"u8);
+                Writer.Write("<!--/key:"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                // ex: `"{value}" {key}`
+                // ex: `"{value}" key:{Key}`
                 Writer.Write("\""u8);
                 Writer.Write(value);
-                Writer.Write("\" "u8);
+                Writer.Write("\" key:"u8);
                 Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -98,10 +98,10 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{key}-->{b}<!--/{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
+                // ex: `<!--key:{Key}-->{b}<!--/key:{Key}-->`
+                Writer.Write("<!--key:"u8, Key, "-->"u8);
                 Writer.Write(value ? "true" : "false");
-                Writer.Write("<!--/"u8, Key, "-->"u8);
+                Writer.Write("<!--/key:"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
@@ -112,8 +112,8 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
                     Writer.Write(" "u8);
                     Writer.Write(attributeName);
                 }
-                // ex: ` {key}="{attributeName}"`
-                Writer.Write(" "u8);
+                // ex: ` key:{Key}="{attributeName}"`
+                Writer.Write(" key:"u8);
                 Writer.Write(Key);
                 Writer.Write("=\""u8);
                 Writer.Write(attributeName);
@@ -158,18 +158,18 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
+                // ex: `<!--key:{Key}-->{value:format}<!--/key:{Key}-->`
+                Writer.Write("<!--key:"u8, Key, "-->"u8);
                 Writer.Write(value, format);
-                Writer.Write("<!--/"u8, Key, "-->"u8);
+                Writer.Write("<!--/key:"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                // ex: `"{value:format}" {key}`
+                // ex: `"{value:format}" key:{Key}`
                 Writer.Write("\""u8);
                 Writer.Write(value, format);
-                Writer.Write("\" "u8);
+                Writer.Write("\" key:"u8);
                 Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -193,18 +193,18 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{key}-->{value:format}<!--/{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
+                // ex: `<!--key:{Key}-->{value:format}<!--/key:{Key}-->`
+                Writer.Write("<!--key:"u8, Key, "-->"u8);
                 Writer.Write(value, format);
-                Writer.Write("<!--/"u8, Key, "-->"u8);
+                Writer.Write("<!--/key:"u8, Key, "-->"u8);
                 break;
 
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
-                // ex: `"{value:format}" {key}`
+                // ex: `"{value:format}" key:{Key}`
                 Writer.Write("\""u8);
                 Writer.Write(value, format);
-                Writer.Write("\" "u8);
+                Writer.Write("\" key:"u8);
                 Writer.Write(Key);
                 // status jumps from .Pending to .None because the whole 
                 // attribute is just one value, not a bunch of keyholes+literals.
@@ -231,8 +231,8 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--{key}-->`
-                Writer.Write("<!--"u8, Key, "-->"u8);
+                // ex: `<!--key:{Key}-->`
+                Writer.Write("<!--key:"u8, Key, "-->"u8);
                 break;
             case AttributeStatus.Pending:
                 HandleDeferredLiteral();
@@ -252,15 +252,15 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         switch (attributeStatus)
         {
             case AttributeStatus.None:
-                // ex: `<!--/{key}-->`
-                Writer.Write("<!--/"u8, Key, "-->"u8);
+                // ex: `<!--/key:{Key}-->`
+                Writer.Write("<!--/key:"u8, Key, "-->"u8);
                 if (format is {} transition)
-                    InjectTransition(Key, transition);
+                    InjectTransition(transition);
                 break;
 
             case AttributeStatus.InProgress:
-                // ex: `" {key}`
-                Writer.Write("\" "u8);
+                // ex: `" key:{Key}`
+                Writer.Write("\" key:"u8);
                 Writer.Write(Key);
                 attributeStatus = AttributeStatus.None;
                 break;
@@ -283,8 +283,8 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         base.OnIteratorEnd(ref parent, ref htmls, format, expression);
         
         // Keyhole to represent the loop itself, useful for zero-length use cases.
-        // ex: `<!--{key} /-->`
-        Writer.Write("<!--"u8, Key, " /-->"u8);
+        // ex: `<!--key:{Key} /-->`
+        Writer.Write("<!--key:"u8, Key, " /-->"u8);
 
         return true;
     }
@@ -302,20 +302,20 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
 
         if (includeEventArg)
         {
-            // ex: `"keyholes.{key}.dispatchEvent(event.trim('{format ?? "*"}'))" {key}`
-            Writer.Write("\"keyholes."u8);
+            // ex: `"keyholes['key'].dispatchEvent(event.trim('{format ?? "*"}'))" key:{Key}`
+            Writer.Write("\"keyholes['"u8);
             Writer.Write(Key);
-            Writer.Write(".dispatchEvent(event.trim('"u8);
+            Writer.Write("'].dispatchEvent(event.trim('"u8);
             Writer.Write(format ?? "*");
-            Writer.Write("'))\" "u8);
+            Writer.Write("'))\" key:"u8);
             Writer.Write(Key);
         }
         else
         {
-            // ex: `"keyholes.{key}.dispatchEvent(event.trim(''))" {key}`
-            Writer.Write("\"keyholes."u8);
+            // ex: `"keyholes['key'].dispatchEvent(event.trim(''))" key:{Key}`
+            Writer.Write("\"keyholes['"u8);
             Writer.Write(Key);
-            Writer.Write(".dispatchEvent(event.trim(''))\" "u8);
+            Writer.Write("'].dispatchEvent(event.trim(''))\" key:"u8);
             Writer.Write(Key);
         }
         
@@ -422,8 +422,11 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         literal = string.Empty;
     }
 
-    private void InjectTransition(byte[] key, string transition)
+    private void InjectTransition(string transition)
     {
+        Span<byte> key = stackalloc byte[Key.Length];
+        for (int i = 0; i < key.Length; i++)
+            key[i] = Key[i] == ':' ? (byte)'-' : Key[i];
         Writer.WriteRaw($$"""
             <style>
                 ::view-transition-group(web4-fwd-{{key}}, web4-rev-{{key}}) { animation: none; }

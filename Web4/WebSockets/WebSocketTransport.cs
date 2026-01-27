@@ -261,7 +261,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
 
     private static ReadOnlySpan<byte> GetKey(ReadOnlySpan<byte> method)
     {
-        var split = method.Split((byte)'.');
+        var split = method.Split((byte)'\'');
         return split.MoveNext() && split.MoveNext()
             ? method[split.Current]
             : [];

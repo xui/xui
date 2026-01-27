@@ -1,5 +1,5 @@
 using System.Buffers;
-using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Channels;
 using Web4.WebSockets;
@@ -8,6 +8,9 @@ namespace Web4.JsonRpc;
 
 public partial class JsonRpcWriter : IDisposable
 {
+    // OK to relax escaping since WebSockets are ALWAYS UTF-8 (when not binary).
+    // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/character-encoding
+    private readonly static JsonWriterOptions options = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
     [ThreadStatic]
     private static JsonRpcWriter? threadStaticWriter;
     private readonly PooledSequenceBufferWriter<byte> bufferWriter;
@@ -19,7 +22,7 @@ public partial class JsonRpcWriter : IDisposable
     private JsonRpcWriter()
     {
         bufferWriter = new();
-        jsonWriter = new(bufferWriter);
+        jsonWriter = new(bufferWriter, options);
     }
 
     public static JsonRpcWriter Current(ChannelWriter<ReadOnlySequence<byte>> flusher)
@@ -362,7 +365,7 @@ public partial class JsonRpcWriter : IDisposable
                     WriteHtml(buffer, html, includeSentinels);
                     if (includeSentinels)
                     {
-                        jsonWriter.WriteStringValueSegment("<!--/", false);
+                        jsonWriter.WriteStringValueSegment("<!--/key:", false);
                         WriteKey(keyhole.Key);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }
@@ -373,11 +376,11 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment("", true);
                     break;
                 case KeyholeType.EventListener:
-                    jsonWriter.WriteStringValueSegment("\"keyholes.", false);
+                    jsonWriter.WriteStringValueSegment("\"keyholes['", false);
                     WriteKey(keyhole.Key);
-                    jsonWriter.WriteStringValueSegment(".dispatchEvent(event.trim('", false);
+                    jsonWriter.WriteStringValueSegment("'].dispatchEvent(event.trim('", false);
                     jsonWriter.WriteStringValueSegment(keyhole.Format ?? "*", false);
-                    jsonWriter.WriteStringValueSegment("'))\" ", false);
+                    jsonWriter.WriteStringValueSegment("'))\" key:", false);
                     WriteKey(keyhole.Key);
                     break;
                 case KeyholeType.Iterator:
@@ -390,7 +393,7 @@ public partial class JsonRpcWriter : IDisposable
                         WriteHtml(buffer, iterator, true);
                         if (includeSentinels)
                         {
-                            jsonWriter.WriteStringValueSegment("<!--/", false);
+                            jsonWriter.WriteStringValueSegment("<!--/key:", false);
                             WriteKey(keyhole.Key);
                             jsonWriter.WriteStringValueSegment("-->", false);
                         }
@@ -400,7 +403,7 @@ public partial class JsonRpcWriter : IDisposable
                 default:
                     if (includeSentinels)
                     {
-                            jsonWriter.WriteStringValueSegment("<!--", false);
+                            jsonWriter.WriteStringValueSegment("<!--key:", false);
                             WriteKey(keyhole.Key);
                             jsonWriter.WriteStringValueSegment("-->", false);
                     }
@@ -409,7 +412,7 @@ public partial class JsonRpcWriter : IDisposable
 
                     if (includeSentinels)
                     {
-                        jsonWriter.WriteStringValueSegment("<!--/", false);
+                        jsonWriter.WriteStringValueSegment("<!--/key:", false);
                         WriteKey(keyhole.Key);
                         jsonWriter.WriteStringValueSegment("-->", false);
                     }

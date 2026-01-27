@@ -4,7 +4,7 @@ namespace Web4;
 
 public class KeyCursor
 {
-    private const byte separator = (byte)'_';
+    private const byte separator = (byte)':';
     private readonly List<int> keyDigits = [-1];
     private KeyCache keyCache = KeyCache.Root;
 
@@ -66,11 +66,21 @@ public class KeyCursor
     private static byte[] GenerateKey(byte[] parentKey, int childIndex)
     {
         int length = GetLength(childIndex);
-        var buffer = new byte[parentKey.Length + length + 1];
-        parentKey.CopyTo(buffer);
-        buffer[parentKey.Length] = separator;
+        byte[] buffer;
+        Span<byte> dest;
+        if (parentKey.Length == 0)
+        {
+            buffer = new byte[length];
+            dest = buffer.AsSpan(0);
+        }
+        else
+        {
+            buffer = new byte[parentKey.Length + length + 1];
+            parentKey.CopyTo(buffer);
+            buffer[parentKey.Length] = separator;
+            dest = buffer.AsSpan(parentKey.Length + 1);
+        }
 
-        Span<byte> dest = buffer.AsSpan(parentKey.Length + 1);
         if (length >= 7) dest[^7] = ToHexChar(childIndex >> 24);
         if (length >= 6) dest[^6] = ToHexChar(childIndex >> 20);
         if (length >= 5) dest[^5] = ToHexChar(childIndex >> 16);

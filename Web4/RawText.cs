@@ -19,7 +19,7 @@ public readonly ref struct RawText(int literalLength, int formattedCount, IBuffe
         writer.Advance(length);
     }
 
-    public readonly void AppendFormatted(byte[] value)
+    public readonly void AppendFormatted(Span<byte> value)
     {
         Span<byte> buffer = writer.GetSpan(value.Length);
         value.CopyTo(buffer);
