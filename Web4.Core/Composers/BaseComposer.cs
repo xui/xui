@@ -10,7 +10,7 @@ public abstract class BaseComposer
     public void Grow(int literalLength, int keyholeCount)
     {
         LiteralLength += literalLength;
-        KeyholeCount += KeyholeCount;
+        KeyholeCount += keyholeCount;
     }
 
     public virtual bool OnMarkup(ref Html parent, ref string literal) => true;
