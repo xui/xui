@@ -62,9 +62,9 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, ref string literal)
     {
-        base.OnMarkup(ref parent, literal);
+        base.OnMarkup(ref parent, ref literal);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];

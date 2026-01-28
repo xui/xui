@@ -10,7 +10,7 @@ public abstract class BaseKeyComposer : BaseComposer
     public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
     public virtual bool OnTemplateEnd(ref Html html) => true;
 
-    public override bool OnMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, ref string literal)
     {
         if (parent.Type == HtmlType.Template && keyCursor.CurrentIndex < 0)
             OnTemplateBegin(ref parent, ref literal);

@@ -36,9 +36,9 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnMarkup(ref Html parent, string literal)
+    public override bool OnMarkup(ref Html parent, ref string literal)
     {
-        base.OnMarkup(ref parent, literal);
+        base.OnMarkup(ref parent, ref literal);
 
         // This makes the assumption that keyholes preceeded with an '=' are always attributes.  
         // Attributes need different sentinels than regular keyholes and boolean attributes 

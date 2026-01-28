@@ -90,7 +90,7 @@ public ref partial struct Html : IDisposable
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
     public bool AppendLiteral(string literal)
-        => composer.OnMarkup(ref this, literal);
+        => composer.OnMarkup(ref this, ref literal);
 
 
     // MUTABLE VALUES

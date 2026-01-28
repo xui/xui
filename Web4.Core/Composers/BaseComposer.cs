@@ -13,7 +13,7 @@ public abstract class BaseComposer
         KeyholeCount += KeyholeCount;
     }
 
-    public virtual bool OnMarkup(ref Html parent, string literal) => true;
+    public virtual bool OnMarkup(ref Html parent, ref string literal) => true;
 
     public virtual bool OnStringKeyhole(ref Html parent, string value) => true;
     public virtual bool OnBoolKeyhole(ref Html parent, bool value) => true;
