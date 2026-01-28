@@ -172,6 +172,8 @@ public class SnapshotKeyComposer : BaseKeyComposer
 
     public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {
+        OnIteratorBegin(ref parent, ref htmls, format, expression);
+
         var enumerator = enumerable.GetEnumerator();
         while (enumerator.MoveNext())
         {
@@ -181,6 +183,8 @@ public class SnapshotKeyComposer : BaseKeyComposer
 
             buffer[Cursor - 1].Tag = item; // TODO: Memory allocation?
         }
+
+        OnIteratorEnd(ref parent, ref htmls, format, expression);
         return true;
     }
 

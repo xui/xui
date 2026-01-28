@@ -60,14 +60,19 @@ public abstract class BaseKeyComposer : BaseComposer
         return true;
     }
 
-    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         Key = keyCursor.MoveNext();
         keyCursor.MoveDown();
         return true;
     }
 
-    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+        => OnIteratorBegin(ref parent, ref htmls, format, expression)
+        && base.OnIteratorKeyhole(ref parent, ref htmls, enumerable, format, expression)
+        && OnIteratorEnd(ref parent, ref htmls, format, expression);
+
+    public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
     {
         Key = keyCursor.MoveUp();
         return true;

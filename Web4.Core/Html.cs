@@ -190,10 +190,7 @@ public ref partial struct Html : IDisposable
         [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
         var htmls = new Html(enumerable.Count, composer);
-        return
-            composer.OnIteratorBegin(ref this, ref htmls, format, expression) &&
-            composer.OnIteratorKeyhole(ref this, ref htmls, enumerable, format, expression) &&
-            composer.OnIteratorEnd(ref this, ref htmls, format, expression);
+        return composer.OnIteratorKeyhole(ref this, ref htmls, enumerable, format, expression);
     }
 
     public readonly void Dispose()
