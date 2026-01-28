@@ -192,6 +192,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
     private ReadOnlySequence<byte>? HandleJsonRpcMessage(ReadOnlySequence<byte> sequence)
     {
         // TODO: This doesn't belong here.
+        // TODO: Once you figure out where they belong, they need to be in try/catches.
         foreach (var t in transports.Values)
             t.Invalidate();
 
