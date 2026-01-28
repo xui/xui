@@ -9,6 +9,14 @@ public abstract class BaseKeyComposer : BaseComposer
 
     public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
     public virtual bool OnTemplateEnd(ref Html html) => true;
+    public override void Grow(ref Html html, int literalLength, int keyholeCount)
+    {
+        if (LiteralLength > 0)
+            OnHtmlBegin(ref html);
+
+        base.Grow(ref html, literalLength, keyholeCount);
+    }
+
 
     public override bool OnMarkup(ref Html parent, ref string literal)
     {
@@ -32,7 +40,7 @@ public abstract class BaseKeyComposer : BaseComposer
     public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => OnKeyhole();
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole();
 
-    public override bool OnHtmlBegin(ref Html html)
+    public virtual bool OnHtmlBegin(ref Html html)
     {
         Key = keyCursor.MoveNext();
         keyCursor.MoveDown();
@@ -46,7 +54,7 @@ public abstract class BaseKeyComposer : BaseComposer
             HtmlType.Element or _ => OnHtmlEnd(ref parent, html, format, expression),
         };
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public virtual bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
     {
         Key = keyCursor.MoveUp();
         return true;

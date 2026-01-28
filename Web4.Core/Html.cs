@@ -68,9 +68,7 @@ public ref partial struct Html : IDisposable
             _ => HtmlType.Element
         };
 
-        if (composer.LiteralLength > 0)
-            composer.OnHtmlBegin(ref this);
-        composer.Grow(literalLength, formattedCount);
+        composer.Grow(ref this, literalLength, formattedCount);
 
         // e.g. $"".  Complier's lowered code calls no Append*() methods for this use case.
         if (literalLength == 0 && formattedCount == 0)
@@ -82,7 +80,7 @@ public ref partial struct Html : IDisposable
         Length = iteratorCount * 2 + 1;
         Type = HtmlType.Iterator;
         this.composer = composer;
-        composer.Grow(0, iteratorCount);
+        // composer.Grow(ref this, 0, iteratorCount);
     }
 
 
