@@ -150,8 +150,6 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         // to separate it from any neighboring text.
         // At the end of the body an inline script registers them 
         // because we can't rely on id= or document.getElementById().
-        // It should end up looking like this:
-        // $"<!--key123-->{value:format}<!--/key123-->"
 
         base.OnKeyhole(ref parent);
 
