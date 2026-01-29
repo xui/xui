@@ -114,6 +114,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
     {
         EnsureOddIndex();
         int index = Cursor;
+        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         base.OnHtmlBegin(ref html);
 
         ref var keyhole = ref buffer[index];
@@ -126,7 +127,6 @@ public class SnapshotKeyComposer : BaseKeyComposer
             HtmlType.Iterator => KeyholeType.Iterator,
             HtmlType.Element or _ => KeyholeType.Html,
         };
-        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
 
         Cursor = writeHead;
         writeHead += html.Length + 1;
