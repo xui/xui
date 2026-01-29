@@ -113,13 +113,20 @@ public class SnapshotKeyComposer : BaseKeyComposer
     public override bool OnHtmlBegin(ref Html html)
     {
         EnsureOddIndex();
-        
-        ref var keyhole = ref buffer[Cursor];
+        int index = Cursor;
+        base.OnHtmlBegin(ref html);
+
+        ref var keyhole = ref buffer[index];
+        keyhole.Key = Key;
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
+        keyhole.RelativeOrder = html.RelativeOrder;
+        keyhole.Type = html.Type switch {
+            HtmlType.Attribute => KeyholeType.Attribute,
+            HtmlType.Iterator => KeyholeType.Iterator,
+            HtmlType.Element or _ => KeyholeType.Html,
+        };
         html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
-
-        base.OnHtmlBegin(ref html);
 
         Cursor = writeHead;
         writeHead += html.Length + 1;
@@ -137,15 +144,8 @@ public class SnapshotKeyComposer : BaseKeyComposer
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
-        keyhole.Key = Key;
-        keyhole.Type = html.Type switch {
-            HtmlType.Attribute => KeyholeType.Attribute,
-            HtmlType.Iterator => KeyholeType.Iterator,
-            HtmlType.Element or _ => KeyholeType.Html,
-        };
         keyhole.Format = format;
         keyhole.Expression = expression;
-        keyhole.RelativeOrder = html.RelativeOrder;
 
         Cursor = index + 1;
         return true;
