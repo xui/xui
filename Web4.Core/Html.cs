@@ -174,9 +174,6 @@ public ref partial struct Html : IDisposable
         // Possible point of confusion: 
         // By this line, the `scoped Html html` has already set its own keyholes.
 
-        if (html.Type == HtmlType.Wrapper)
-            return true;
-
         if (alignment >= 0)
             html.RelativeOrder = alignment;
 
