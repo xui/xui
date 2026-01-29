@@ -5,7 +5,7 @@ using Web4.Composers;
 
 namespace Web4;
 
-public enum HtmlType { Element, Attribute, Iterator, Wrapper, Template }
+public enum HtmlType { Element, Iterator, Wrapper, Template }
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]

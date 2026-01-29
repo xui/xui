@@ -98,13 +98,11 @@ public class SnapshotKeyComposer : BaseKeyComposer
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
+        keyhole.Key = Key;
         keyhole.SetValue(value);
         keyhole.Type = type;
         keyhole.Format = format;
         keyhole.IsValueAnAttribute = isWritingAttribute;
-        keyhole.Key = parent.Type == HtmlType.Attribute 
-            ? keyCursor.Parent // Use parent's key, the DOM doesn't register each child for attribute sequences
-            : Key;
 
         Cursor = index + 1;
         return true;
@@ -114,7 +112,6 @@ public class SnapshotKeyComposer : BaseKeyComposer
     {
         EnsureOddIndex();
         int index = Cursor;
-        html.Type = isWritingAttribute ? HtmlType.Attribute : HtmlType.Element;
         base.OnHtmlBegin(ref html);
 
         ref var keyhole = ref buffer[index];
@@ -122,8 +119,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
         keyhole.RelativeOrder = html.RelativeOrder;
-        keyhole.Type = html.Type switch {
-            HtmlType.Attribute => KeyholeType.Attribute,
+        keyhole.Type = isWritingAttribute ? KeyholeType.Attribute : html.Type switch {
             HtmlType.Iterator => KeyholeType.Iterator,
             HtmlType.Element or _ => KeyholeType.Html,
         };
