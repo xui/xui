@@ -54,9 +54,9 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return result;
     }
     
-    public override bool OnTemplateBegin(ref Html html, ref string literal)
+    public override bool OnTemplateBegin(ref Html html, ref string markup)
     {
-        base.OnTemplateBegin(ref html, ref literal);
+        base.OnTemplateBegin(ref html, ref markup);
         Cursor = 0;
         writeHead += html.Length + 1;
         return true;

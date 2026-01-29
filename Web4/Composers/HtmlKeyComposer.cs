@@ -15,9 +15,9 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
     public IBufferWriter<byte> Writer { get; set; } = writer;
     public WindowBuilder Window { get; set; } = window;
 
-    public override bool OnTemplateBegin(ref Html html, ref string literal)
+    public override bool OnTemplateBegin(ref Html html, ref string markup)
     {
-        InjectKernel(ref literal);
+        InjectKernel(ref markup);
 
         return true;
     }

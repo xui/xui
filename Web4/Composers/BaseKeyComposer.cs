@@ -14,7 +14,7 @@ public abstract class BaseKeyComposer : BaseComposer
         base.Grow(ref html, literalLength, keyholeCount);
     }
 
-    public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
+    public virtual bool OnTemplateBegin(ref Html html, ref string markup) => true;
     public virtual bool OnTemplateEnd(ref Html html) => true;
 
     public override bool OnMarkup(ref Html parent, ref string literal) => (isHtmlPrepared, parent.Type) switch {
