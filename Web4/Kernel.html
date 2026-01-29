@@ -302,7 +302,7 @@
                 .substring(2)
                 .split(/[.\[\]\'\"]/)
                 .filter(i => i)
-                .reduce((obj, prop) => obj[prop], globalThis);
+                .reduce((obj, prop) => obj != undefined ? obj[prop] : undefined, globalThis);
             }
           });
         }
