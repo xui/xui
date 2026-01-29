@@ -153,7 +153,7 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         // It should end up looking like this:
         // $"<!--key123-->{value:format}<!--/key123-->"
 
-        base.OnKeyhole();
+        base.OnKeyhole(ref parent);
 
         switch (attributeStatus)
         {
@@ -295,7 +295,7 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
     private bool OnListener(ref Html parent, bool includeEventArg, string? format = null)
     {
-        base.OnKeyhole();
+        base.OnKeyhole(ref parent);
 
         if (deferredLiteral != null)
             HandleDeferredLiteral();

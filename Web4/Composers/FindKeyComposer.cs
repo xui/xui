@@ -46,8 +46,8 @@ public class FindKeyComposer : BaseKeyComposer
     // subsequent AppendFormatted() or AppendLiteral() methods.  
     // And isFound is used to trickle that upwards to all parent Htmls.
     
-    protected override bool OnKeyhole()
-        => !isFound && base.OnKeyhole();
+    protected override bool OnKeyhole(ref Html parent)
+        => !isFound && base.OnKeyhole(ref parent);
 
     public override bool OnHtmlBegin(ref Html html)
         => !isFound && base.OnHtmlBegin(ref html);
@@ -68,20 +68,20 @@ public class FindKeyComposer : BaseKeyComposer
         => !isFound && base.OnIteratorEnd(ref parent, ref htmls, format, expression);
 
     public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null)
-        => OnListener(listener);
+        => OnListener(ref parent, listener);
     public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null)
-        => OnListener(listener);
+        => OnListener(ref parent, listener);
     public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null)
-        => OnListener(listener);
+        => OnListener(ref parent, listener);
     public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null)
-        => OnListener(listener);
+        => OnListener(ref parent, listener);
 
-    private bool OnListener<T>(T listener)
+    private bool OnListener<T>(ref Html parent, T listener)
     {
         if (isFound)
             return false;
             
-        base.OnKeyhole();
+        base.OnKeyhole(ref parent);
         
         if (Key.SequenceEqual(searchKey.Span))
         {

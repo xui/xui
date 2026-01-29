@@ -6,39 +6,36 @@ public abstract class BaseKeyComposer : BaseComposer
 {
     protected readonly KeyCursor keyCursor = new();
     public byte[] Key { get; private set; } = [];
+    private bool isHtmlPrepared = true;
 
-    public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
-    public virtual bool OnTemplateEnd(ref Html html) => true;
     public override void Grow(ref Html html, int literalLength, int keyholeCount)
     {
-        if (LiteralLength > 0)
-            OnHtmlBegin(ref html);
-
+        isHtmlPrepared = false;
         base.Grow(ref html, literalLength, keyholeCount);
     }
 
+    public virtual bool OnTemplateBegin(ref Html html, ref string literal) => true;
+    public virtual bool OnTemplateEnd(ref Html html) => true;
 
-    public override bool OnMarkup(ref Html parent, ref string literal)
-    {
-        if (parent.Type == HtmlType.Template && keyCursor.CurrentIndex < 0)
-            OnTemplateBegin(ref parent, ref literal);
+    public override bool OnMarkup(ref Html parent, ref string literal) => (isHtmlPrepared, parent.Type) switch {
+        (false, HtmlType.Template) => isHtmlPrepared = OnTemplateBegin(ref parent, ref literal),
+        (false, HtmlType.Element) => isHtmlPrepared = OnHtmlBegin(ref parent),
+        _ => true,
+    };
 
-        return true;
-    }
-
-    public override bool OnStringKeyhole(ref Html parent, string value) => OnKeyhole();
-    public override bool OnBoolKeyhole(ref Html parent, bool value) => OnKeyhole();
-    public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnKeyhole();
-    public override bool OnLongKeyhole(ref Html parent, long value, string? format = null) => OnKeyhole();
-    public override bool OnFloatKeyhole(ref Html parent, float value, string? format = null) => OnKeyhole();
-    public override bool OnDoubleKeyhole(ref Html parent, double value, string? format = null) => OnKeyhole();
-    public override bool OnDecimalKeyhole(ref Html parent, decimal value, string? format = null) => OnKeyhole();
-    public override bool OnDateTimeKeyhole(ref Html parent, DateTime value, string? format = null) => OnKeyhole();
-    public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => OnKeyhole();
-    public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => OnKeyhole();
-    public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => OnKeyhole();
-    public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => OnKeyhole();
-    public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole();
+    public override bool OnStringKeyhole(ref Html parent, string value) => OnKeyhole(ref parent);
+    public override bool OnBoolKeyhole(ref Html parent, bool value) => OnKeyhole(ref parent);
+    public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnLongKeyhole(ref Html parent, long value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnFloatKeyhole(ref Html parent, float value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnDoubleKeyhole(ref Html parent, double value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnDecimalKeyhole(ref Html parent, decimal value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnDateTimeKeyhole(ref Html parent, DateTime value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnDateOnlyKeyhole(ref Html parent, DateOnly value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnTimeSpanKeyhole(ref Html parent, TimeSpan value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnTimeOnlyKeyhole(ref Html parent, TimeOnly value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => OnKeyhole(ref parent);
+    public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => OnKeyhole(ref parent);
 
     public virtual bool OnHtmlBegin(ref Html html)
     {
@@ -78,19 +75,27 @@ public abstract class BaseKeyComposer : BaseComposer
         return true;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnKeyhole();
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnKeyhole();
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnKeyhole();
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnKeyhole();
+    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
 
     public override void Reset()
     {
+        isHtmlPrepared = true;
         keyCursor.Reset();
         base.Reset();
     }
 
-    protected virtual bool OnKeyhole()
+    protected virtual bool OnKeyhole(ref Html parent)
     {
+        var discard = string.Empty;
+        _ = (isHtmlPrepared, parent.Type) switch {
+            (false, HtmlType.Template) => isHtmlPrepared = OnTemplateBegin(ref parent, ref discard),
+            (false, HtmlType.Element) => isHtmlPrepared = OnHtmlBegin(ref parent),
+            _ => true,
+        };
+
         Key = keyCursor.MoveNext();
         return true;
     }

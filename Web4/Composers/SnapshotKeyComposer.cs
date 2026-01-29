@@ -94,7 +94,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
     private bool OnKeyhole<T>(ref Html parent, T value, KeyholeType type, string? format = null)
     {
         EnsureOddIndex();
-        base.OnKeyhole();
+        base.OnKeyhole(ref parent);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
@@ -208,7 +208,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
     private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
         EnsureOddIndex();
-        base.OnKeyhole();
+        base.OnKeyhole(ref parent);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
