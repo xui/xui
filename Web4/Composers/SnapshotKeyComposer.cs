@@ -119,10 +119,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
         keyhole.RelativeOrder = html.RelativeOrder;
-        keyhole.Type = isWritingAttribute ? KeyholeType.Attribute : html.Type switch {
-            HtmlType.Iterator => KeyholeType.Iterator,
-            HtmlType.Element or _ => KeyholeType.Html,
-        };
+        keyhole.Type = isWritingAttribute ? KeyholeType.Attribute : KeyholeType.Html;
 
         Cursor = writeHead;
         writeHead += html.Length + 1;

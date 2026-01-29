@@ -5,7 +5,7 @@ using Web4.Composers;
 
 namespace Web4;
 
-public enum HtmlType { Element, Iterator, Wrapper, Template }
+public enum HtmlType { Element, Wrapper, Template }
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
@@ -78,7 +78,7 @@ public ref partial struct Html : IDisposable
     private Html(int iteratorCount, BaseComposer composer)
     {
         Length = iteratorCount * 2 + 1;
-        Type = HtmlType.Iterator;
+        Type = HtmlType.Element;
         this.composer = composer;
         // composer.Grow(ref this, 0, iteratorCount);
     }
