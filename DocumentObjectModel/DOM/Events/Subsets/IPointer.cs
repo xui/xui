@@ -33,19 +33,4 @@ namespace Web4
             bool IsPrimary { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Pointer> listener, 
-            string? format = Pointer.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Pointer, Task> listener, 
-            string? format = Pointer.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

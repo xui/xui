@@ -30,19 +30,4 @@ namespace Web4
             bool Repeat { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Keys> listener, 
-            string? format = Keys.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Keys, Task> listener, 
-            string? format = Keys.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

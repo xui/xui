@@ -15,19 +15,4 @@ namespace Web4
             EventTarget RelatedTarget { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<RelatedTarget> listener, 
-            string? format = RelatedTarget.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<RelatedTarget, Task> listener, 
-            string? format = RelatedTarget.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

@@ -20,19 +20,4 @@ namespace Web4
             double ClientY { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<ClientXY> listener, 
-            string? format = ClientXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<ClientXY, Task> listener, 
-            string? format = ClientXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

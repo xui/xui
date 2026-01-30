@@ -39,19 +39,4 @@ namespace Web4
             double Gamma { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<DeviceOrientation> listener, 
-            string? format = DeviceOrientation.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<DeviceOrientation, Task> listener, 
-            string? format = DeviceOrientation.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

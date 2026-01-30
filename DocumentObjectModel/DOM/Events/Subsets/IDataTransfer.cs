@@ -47,19 +47,4 @@ namespace Web4
             public static readonly DataTransferItem Empty = new();
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<DataTransfer> listener, 
-            string? format = DataTransfer.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<DataTransfer, Task> listener, 
-            string? format = DataTransfer.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

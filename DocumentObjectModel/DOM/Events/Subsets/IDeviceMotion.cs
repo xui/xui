@@ -63,19 +63,4 @@ namespace Web4
             public static readonly ABG Empty = new();
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<DeviceMotion> listener, 
-            string? format = DeviceMotion.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<DeviceMotion, Task> listener, 
-            string? format = DeviceMotion.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

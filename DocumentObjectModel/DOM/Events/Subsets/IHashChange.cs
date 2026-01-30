@@ -21,19 +21,4 @@ namespace Web4
 
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<HashChange> listener, 
-            string? format = HashChange.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<HashChange, Task> listener, 
-            string? format = HashChange.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

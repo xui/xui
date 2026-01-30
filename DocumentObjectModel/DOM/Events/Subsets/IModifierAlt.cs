@@ -15,19 +15,4 @@ namespace Web4
             bool AltKey { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<ModifierAlt> listener, 
-            string? format = ModifierAlt.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<ModifierAlt, Task> listener, 
-            string? format = ModifierAlt.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

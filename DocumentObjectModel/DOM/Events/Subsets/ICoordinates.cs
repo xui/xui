@@ -16,19 +16,4 @@ namespace Web4
                 ScreenXY.Format;
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Coordinates> listener, 
-            string? format = Coordinates.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Coordinates, Task> listener, 
-            string? format = Coordinates.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

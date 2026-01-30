@@ -20,19 +20,4 @@ namespace Web4
             double OffsetY { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<OffsetXY> listener, 
-            string? format = OffsetXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<OffsetXY, Task> listener, 
-            string? format = OffsetXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

@@ -77,19 +77,4 @@ namespace Web4
             Uri EventTarget<Uri>.Value => ValueAsUri ?? new Uri("about:blank");
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Target> listener, 
-            string? format = Target.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Target, Task> listener, 
-            string? format = Target.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

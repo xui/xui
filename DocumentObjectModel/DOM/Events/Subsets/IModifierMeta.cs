@@ -15,19 +15,4 @@ namespace Web4
             bool MetaKey { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<ModifierMeta> listener, 
-            string? format = ModifierMeta.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<ModifierMeta, Task> listener, 
-            string? format = ModifierMeta.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

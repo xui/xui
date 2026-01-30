@@ -15,19 +15,4 @@ namespace Web4
             bool ShiftKey { get; }
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<ModifierShift> listener, 
-            string? format = ModifierShift.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<ModifierShift, Task> listener, 
-            string? format = ModifierShift.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }

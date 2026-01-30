@@ -14,19 +14,4 @@ namespace Web4
                 ModifierShift.Format;
         }
     }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Modifiers> listener, 
-            string? format = Modifiers.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Modifiers, Task> listener, 
-            string? format = Modifiers.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-    }
 }
