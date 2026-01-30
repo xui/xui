@@ -63,9 +63,12 @@ public static partial class BufferWriterExtensions
         ReadOnlySpan<byte> text2,
         ReadOnlySpan<byte> text3)
     {
-        bufferWriter.Write(text1);
-        bufferWriter.Write(text2);
-        bufferWriter.Write(text3);
+        int totalLength = text1.Length + text2.Length + text3.Length;
+        Span<byte> utf8buffer = bufferWriter.GetSpan(totalLength);
+        text1.CopyTo(utf8buffer);
+        text2.CopyTo(utf8buffer[text1.Length..]);
+        text3.CopyTo(utf8buffer[(text1.Length + text2.Length)..]);
+        bufferWriter.Advance(totalLength);
     }
 
     public static void Write(
