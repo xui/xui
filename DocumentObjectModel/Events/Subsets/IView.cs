@@ -1,6 +1,4 @@
-using System.Runtime.CompilerServices;
 using Web4.Core.DOM;
-using static Web4.Events.Aliases.Subsets;
 
 namespace Web4
 {
