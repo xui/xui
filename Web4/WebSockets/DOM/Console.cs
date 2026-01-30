@@ -1,4 +1,6 @@
-using Web4.Core.DOM;namespace Web4.WebSockets;
+using Web4.Core.DOM;
+
+namespace Web4.WebSockets;
 
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on WebSocketTransport.
