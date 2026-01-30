@@ -68,18 +68,6 @@ public static partial class BufferWriterExtensions
         bufferWriter.Write(text3);
     }
 
-    // TODO: Remove this one after KeyMaker switches to utf8.
-    public static void Write(
-        this IBufferWriter<byte> bufferWriter, 
-        ReadOnlySpan<byte> text1,
-        string text2,
-        ReadOnlySpan<byte> text3)
-    {
-        bufferWriter.Write(text1);
-        bufferWriter.Write(text2);
-        bufferWriter.Write(text3);
-    }
-
     public static void Write(
         this IBufferWriter<byte> writer, // This one defaults to HtmlComposer (see Html constructor below)
         [InterpolatedStringHandlerArgument("writer")] ref Html html)
