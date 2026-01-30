@@ -1,10 +1,6 @@
 global using Web4;
-global using Web4.ZeroScript;
-global using System.Buffers;
 using Web4.Composers;
 using System.Drawing;
-using Web4.Events;
-using Web4.Events.Subsets;
 Action<string> Log = Console.WriteLine;
 
 var builder = WebApplication.CreateBuilder(args);
