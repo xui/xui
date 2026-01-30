@@ -67,10 +67,10 @@ public class WindowBuilder :
 
         return key switch
         {
-            // If the key starts with "win" or "doc" that means it's a top-level window or document event.
+            // If the key starts with "win:" or "doc:" that means it's a top-level window or document event.
             // These live in a simple List<> and can be looked up by index.
-            _ when key.StartsWith("win"u8) || key.StartsWith("doc"u8) =>
-                int.TryParse(key[3..], out var index) && index < Listeners.Count
+            _ when key.StartsWith("win:"u8) || key.StartsWith("doc:"u8) =>
+                int.TryParse(key[4..], out var index) && index < Listeners.Count
                     ? Listeners[index]
                     : default,
                     
@@ -290,7 +290,7 @@ public class WindowBuilder :
         
         if (listener is not null)
         {
-            var key = $"{target[..3]}{Listeners.Count}";
+            var key = $"{target[..3]}:{Listeners.Count}";
 
             // TODO: Support more event listener options
             var options = "{passive:true}";
@@ -308,12 +308,12 @@ public class WindowBuilder :
     private string CreateListenerString(string? format, string type, string target, string key, string options) => format switch
     {
         // Serialize nothing – the event object is never used
-        "" => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('')), {options}); keyholes.set('{key}', {target});",
+        "" => $"{target}.addEventListener('{type}', e => keyholes['{key}'].dispatchEvent(e.trim('')), {options}); keyholes.set('{key}', {target});",
 
         // Serialize the event – the event object is needed
-        null => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('*')), {options}); keyholes.set('{key}', {target});",
+        null => $"{target}.addEventListener('{type}', e => keyholes['{key}'].dispatchEvent(e.trim('*')), {options}); keyholes.set('{key}', {target});",
 
         // Serialize selectively – only a few properties are ever used
-        _ => $"{target}.addEventListener('{type}', e => keyholes.{key}.dispatchEvent(e.trim('{format}')), {options}); keyholes.set('{key}', {target});",
+        _ => $"{target}.addEventListener('{type}', e => keyholes['{key}'].dispatchEvent(e.trim('{format}')), {options}); keyholes.set('{key}', {target});",
     };
 }
