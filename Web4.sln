@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering", "Benchmarks\Ren
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "List", "Demos\List\List.csproj", "{EF4D2E96-5869-499A-AEFA-A122279960B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentObjectModel", "DocumentObjectModel\DocumentObjectModel.csproj", "{C4092B9D-5F7B-4790-B9F5-4F960527F8C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dom", "DocumentObjectModel\Dom.csproj", "{C4092B9D-5F7B-4790-B9F5-4F960527F8C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
