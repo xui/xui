@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="../../Web4.Core/MicroHtml.csproj" />
+    <ProjectReference Include="../../MicroHtml/MicroHtml.csproj" />
     <ProjectReference Include="../../Web4/Web4.Keyholes.csproj" />
   </ItemGroup>
 
