@@ -11,8 +11,4 @@
     <ProjectReference Include="../Web4.Dom/Web4.Dom.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DOM/" />
-  </ItemGroup>
-
 </Project>
