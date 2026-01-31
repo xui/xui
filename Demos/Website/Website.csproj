@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Web4/Web4.Keyholes.csproj" />
-    <ProjectReference Include="../../ZeroScript/Web4.Xtml.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="../../Web4.Xtml/Web4.Xtml.csproj" OutputItemType="Analyzer" />
   </ItemGroup>
 
   <PropertyGroup>

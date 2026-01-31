@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 
 #pragma warning disable RS1035 // Do not use banned APIs for analyzers
 
-namespace Web4.ZeroScript
+namespace Web4.Xtml
 {
     [Generator]
     public class LiveGenerator : ISourceGenerator
@@ -25,7 +25,7 @@ namespace Web4.ZeroScript
             if (context.SyntaxContextReceiver is not SyntaxReceiver receiver)
                 return;
 
-            if (context.Compilation.GetTypeByMetadataName("Web4.ZeroScript.LiveAttribute") is not INamedTypeSymbol attributeSymbol)
+            if (context.Compilation.GetTypeByMetadataName("Web4.Xtml.LiveAttribute") is not INamedTypeSymbol attributeSymbol)
                 return;
 
             // if (context.Compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged") is not INamedTypeSymbol notifySymbol)
@@ -194,7 +194,7 @@ namespace Web4.ZeroScript
                     {
                         // Get the symbol being declared by the field, and keep it if it's annotated
                         var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
-                        if (fieldSymbol?.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == "Web4.ZeroScript.LiveAttribute") == true)
+                        if (fieldSymbol?.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == "Web4.Xtml.LiveAttribute") == true)
                         {
                             Fields.Add(fieldSymbol);
                         }
