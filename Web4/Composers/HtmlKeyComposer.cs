@@ -358,7 +358,7 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
     private static readonly byte[] KERNEL = 
         Encoding.UTF8.GetBytes(new StreamReader(System.Reflection.Assembly
             .GetExecutingAssembly()
-            .GetManifestResourceStream("Web4.Kernel.html")!
+            .GetManifestResourceStream("Web4.Keyholes.Kernel.html")!
         ).ReadToEnd());
 
     private void InjectKernel(ref string literal)

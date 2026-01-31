@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{9D577A44
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Demos\Website\Website.csproj", "{6049CED7-E2EE-413F-A84F-5D2E520DE533}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4", "Web4\Web4.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Keyholes", "Web4\Web4.Keyholes.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroHtml", "Web4.Core\MicroHtml.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
 EndProject
