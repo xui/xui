@@ -2,11 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Web4\Web4.csproj" />
-    <!-- TODO: Why do I have to reference ...Generators.csproj AGAIN when .csproj (above) already does that. -->
-    <ProjectReference 
-      Include="..\..\ZeroScript\ZeroScript.csproj" 
-      OutputItemType="Analyzer" 
-    />
   </ItemGroup>
 
   <PropertyGroup>

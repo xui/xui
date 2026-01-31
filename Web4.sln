@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroHtml", "Web4.Core\Micr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memory", "Benchmarks\Memory\Memory.csproj", "{A057E78A-294B-459F-8F1F-2BBFBF23D4C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroScript", "ZeroScript\ZeroScript.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Xtml", "ZeroScript\Web4.Xtml.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clean", "Demos\Clean\Clean.csproj", "{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}"
 EndProject
