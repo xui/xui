@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Demos\Website\We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4", "Web4\Web4.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Core", "Web4.Core\Web4.Core.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroHtml", "Web4.Core\MicroHtml.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memory", "Benchmarks\Memory\Memory.csproj", "{A057E78A-294B-459F-8F1F-2BBFBF23D4C9}"
 EndProject
