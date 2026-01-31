@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="../Web4.Core/µHtml.csproj" />
+    <ProjectReference Include="../Web4.Core/MicroHtml.csproj" />
     <EmbeddedResource Include="Kernel.html" />
   </ItemGroup>
   

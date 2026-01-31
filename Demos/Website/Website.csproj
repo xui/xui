@@ -1,12 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Web4\Web4.csproj" />
-    <!-- TODO: Why do I have to reference ...Generators.csproj AGAIN when .csproj (above) already does that. -->
-    <ProjectReference 
-      Include="..\..\ZeroScript\ZeroScript.csproj" 
-      OutputItemType="Analyzer" 
-    />
+    <ProjectReference Include="../../Web4/Web4.Keyholes.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{9D577A44
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Demos\Website\Website.csproj", "{6049CED7-E2EE-413F-A84F-5D2E520DE533}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4", "Web4\Web4.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Keyholes", "Web4\Web4.Keyholes.csproj", "{359629BE-860E-45F2-ADD7-DE064C1F8761}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "µHtml", "Web4.Core\µHtml.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroHtml", "Web4.Core\MicroHtml.csproj", "{16893E3B-9B33-4756-B9C2-DA244A076CF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memory", "Benchmarks\Memory\Memory.csproj", "{A057E78A-294B-459F-8F1F-2BBFBF23D4C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroScript", "ZeroScript\ZeroScript.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Xtml", "ZeroScript\Web4.Xtml.csproj", "{B54145FB-DC9E-435A-BB12-37FC51CEF18A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clean", "Demos\Clean\Clean.csproj", "{CE9E6FE6-5623-44AB-B227-77FEEC1CA2A2}"
 EndProject
@@ -25,7 +25,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering", "Benchmarks\Ren
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "List", "Demos\List\List.csproj", "{EF4D2E96-5869-499A-AEFA-A122279960B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dom", "Dom\Dom.csproj", "{52B3DFC5-89F9-4680-BECE-FAC0F7A81B60}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.Dom", "Dom\Web4.Dom.csproj", "{52B3DFC5-89F9-4680-BECE-FAC0F7A81B60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.WebSocket", "Web4.WebSocket\Web4.WebSocket.csproj", "{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web4.WebAssembly", "Web4.WebAssembly\Web4.WebAssembly.csproj", "{046536ED-748D-44CE-A07C-18C5C5C106B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,6 +161,30 @@ Global
 		{52B3DFC5-89F9-4680-BECE-FAC0F7A81B60}.Release|x64.Build.0 = Release|Any CPU
 		{52B3DFC5-89F9-4680-BECE-FAC0F7A81B60}.Release|x86.ActiveCfg = Release|Any CPU
 		{52B3DFC5-89F9-4680-BECE-FAC0F7A81B60}.Release|x86.Build.0 = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|x64.Build.0 = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Debug|x86.Build.0 = Debug|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|x64.ActiveCfg = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|x64.Build.0 = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|x86.ActiveCfg = Release|Any CPU
+		{09C1DAFD-F9DD-4BF4-81F9-E9618A30779A}.Release|x86.Build.0 = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|x64.Build.0 = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|x64.Build.0 = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{046536ED-748D-44CE-A07C-18C5C5C106B1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
