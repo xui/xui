@@ -1,5 +1,4 @@
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using static Web4.Events.Aliases.Subsets;
 
 namespace Web4
@@ -76,20 +75,5 @@ namespace Web4
             Color EventTarget<Color>.Value => ValueAsColor ?? default;
             Uri EventTarget<Uri>.Value => ValueAsUri ?? new Uri("about:blank");
         }
-    }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<Target> listener, 
-            string? format = Target.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<Target, Task> listener, 
-            string? format = Target.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }

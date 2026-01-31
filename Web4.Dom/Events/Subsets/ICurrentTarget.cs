@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using static Web4.Events.Aliases.Subsets;
-
 namespace Web4
 {
     namespace Events.Subsets
@@ -16,20 +13,5 @@ namespace Web4
             /// </summary>
             EventTarget CurrentTarget { get; }
         }
-    }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<CurrentTarget> listener, 
-            string? format = CurrentTarget.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<CurrentTarget, Task> listener, 
-            string? format = CurrentTarget.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }

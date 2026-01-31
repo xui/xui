@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using static Web4.Events.Aliases.Subsets;
-
 namespace Web4
 {
     namespace Events.Subsets
@@ -19,20 +16,5 @@ namespace Web4
             /// </summary>
             double MovementY { get; }
         }
-    }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<MovementXY> listener, 
-            string? format = MovementXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<MovementXY, Task> listener, 
-            string? format = MovementXY.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }

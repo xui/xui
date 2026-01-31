@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using static Web4.Events.Aliases.Subsets;
-
 namespace Web4
 {
     namespace Events.Subsets
@@ -14,20 +11,5 @@ namespace Web4
             /// </summary>
             bool MetaKey { get; }
         }
-    }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<ModifierMeta> listener, 
-            string? format = ModifierMeta.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<ModifierMeta, Task> listener, 
-            string? format = ModifierMeta.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }

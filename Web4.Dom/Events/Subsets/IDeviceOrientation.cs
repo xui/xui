@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using static Web4.Events.Aliases.Subsets;
-
 namespace Web4
 {
     namespace Events.Subsets
@@ -38,20 +35,5 @@ namespace Web4
             /// </summary>
             double Gamma { get; }
         }
-    }
-
-    public ref partial struct Html
-    {
-        public bool AppendFormatted(
-            Action<DeviceOrientation> listener, 
-            string? format = DeviceOrientation.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
-
-        public bool AppendFormatted(
-            Func<DeviceOrientation, Task> listener, 
-            string? format = DeviceOrientation.Format, 
-            [CallerArgumentExpression(nameof(listener))] string? expression = null) 
-                => AppendEventListener(listener, format, expression);
     }
 }
