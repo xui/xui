@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../MicroHtml/MicroHtml.csproj" />
-    <ProjectReference Include="../../Web4/Web4.Keyholes.csproj" />
+    <ProjectReference Include="../../Web4.Keyholes/Web4.Keyholes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

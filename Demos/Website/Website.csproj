@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="../../Web4/Web4.Keyholes.csproj" />
+    <ProjectReference Include="../../Web4.Keyholes/Web4.Keyholes.csproj" />
     <ProjectReference Include="../../Web4.Xtml/Web4.Xtml.csproj" OutputItemType="Analyzer" />
   </ItemGroup>
 
