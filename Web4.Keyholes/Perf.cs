@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
 public static class Perf
 {

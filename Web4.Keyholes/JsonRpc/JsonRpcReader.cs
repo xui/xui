@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Text.Json;
+using Web4.Keyholes;
 
 namespace Web4.JsonRpc;
 

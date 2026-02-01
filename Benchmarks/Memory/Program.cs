@@ -1,5 +1,4 @@
-﻿global using Web4;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Drawing;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
@@ -7,6 +6,8 @@ using BenchmarkDotNet.Running;
 using MicroHtml;
 using MicroHtml.Composers;
 using Web4.Composers;
+using Web4.Keyholes;
+using Web4.Keyholes.Composers;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 

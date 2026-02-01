@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Web4.EventListeners;
-using Web4.Composers;
+using Web4.Keyholes.Composers;
 using Web4.Dom;
 using MicroHtml;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
 public class WindowBuilder : 
     IWindowEventListeners,

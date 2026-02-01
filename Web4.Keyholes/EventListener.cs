@@ -1,6 +1,6 @@
 using Web4.Dom;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
 public record struct EventListener(
     Action? Action = null,

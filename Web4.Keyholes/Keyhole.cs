@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
 public struct Keyhole
 {

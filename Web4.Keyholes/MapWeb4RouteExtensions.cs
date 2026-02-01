@@ -1,12 +1,12 @@
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 
-using Web4.Composers;
+using Web4.Keyholes.Composers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Web4;
+using Web4.Keyholes;
 using Html = MicroHtml.Html;
 using System.Diagnostics;
 using Web4.WebSockets;

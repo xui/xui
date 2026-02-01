@@ -1,4 +1,4 @@
-namespace Web4;
+namespace Web4.Keyholes;
 
 /// <summary>
 /// Calculating diffs requires two snapshots - a "before" and an "after."

@@ -3,7 +3,7 @@ using MicroHtml;
 using MicroHtml.Composers;
 using Web4.Dom;
 
-namespace Web4.Composers;
+namespace Web4.Keyholes.Composers;
 
 public abstract class BaseKeyComposer : BaseComposer
 {

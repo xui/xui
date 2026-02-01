@@ -2,7 +2,7 @@ using System.Text;
 using Web4.Dom;
 using MicroHtml;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
 // TODO: Clean this up.  Many, many memory allocations.
 

@@ -1,8 +1,7 @@
 using Web4.Dom;
 
-namespace Web4;
+namespace Web4.Keyholes;
 
-// TODO: It is awkward that this interface is here and not in the core project, thanks to Keyholes.
 public interface IKeyholes
 {
     void SetText(byte[] key, ref Keyhole keyhole);

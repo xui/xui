@@ -5,7 +5,7 @@ using MicroHtml;
 using MicroHtml.Composers;
 using Web4.Dom;
 
-namespace Web4.Composers;
+namespace Web4.Keyholes.Composers;
 
 public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
     : BaseKeyComposer, IStreamingComposer
