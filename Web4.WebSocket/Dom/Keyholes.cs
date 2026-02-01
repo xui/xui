@@ -7,6 +7,7 @@ namespace Web4.WebSocket;
 
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on WebSocketTransport.
+// TODO: Ignore that.  Make it an `internal struct` like LazyEvent?
 partial class WebSocketTransport : IKeyholes
 {
     public void SetText(byte[] key, ref Keyhole keyhole)
