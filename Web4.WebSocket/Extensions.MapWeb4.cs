@@ -12,7 +12,7 @@ using MicroHtml.Composers;
 
 namespace Web4.WebSocket;
 
-public static class MapWeb4RouteExtensions
+public static partial class Extensions
 {
     public static WindowBuilder MapWeb4(
         this WebApplication app,

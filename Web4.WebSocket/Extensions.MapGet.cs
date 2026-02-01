@@ -6,7 +6,7 @@ using MicroHtml;
 
 namespace Web4.WebSocket;
 
-public static class MapHttpRouteExtensions
+public static partial class Extensions
 {
     [RequiresDynamicCode("This API may perform reflection on the supplied delegate and its parameters. These types may require generated code and aren't compatible with native AOT applications.")]
     [RequiresUnreferencedCode("This API may perform reflection on the supplied delegate and its parameters. These types may be trimmed if not directly referenced.")]
