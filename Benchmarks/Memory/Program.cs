@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using MicroHtml;
+using MicroHtml.Composers;
 using Web4.Composers;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);

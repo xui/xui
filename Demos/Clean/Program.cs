@@ -1,6 +1,6 @@
-global using Web4;
 global using Web4.Dom;
 using System.Drawing;
+using MicroHtml;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();

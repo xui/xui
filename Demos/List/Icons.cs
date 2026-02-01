@@ -1,3 +1,5 @@
+using MicroHtml;
+
 static class Icons
 {
     public static Html Globe => $"""

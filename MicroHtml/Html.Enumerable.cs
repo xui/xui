@@ -1,4 +1,4 @@
-namespace Web4;
+namespace MicroHtml;
 
 public static partial class HtmlExtensions
 {

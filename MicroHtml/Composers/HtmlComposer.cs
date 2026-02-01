@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Drawing;
 using Web4.Dom;
 
-namespace Web4.Composers;
+namespace MicroHtml.Composers;
 
 public class HtmlComposer(IBufferWriter<byte> writer) : BaseComposer, IStreamingComposer
 {

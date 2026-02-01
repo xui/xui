@@ -3,9 +3,9 @@ using System.Drawing;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Web4.Composers;
+using MicroHtml.Composers;
 
-namespace Web4;
+namespace MicroHtml;
 
 public static partial class BufferWriterExtensions
 {

@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace Web4.Composers;
+namespace MicroHtml.Composers;
 
 public interface IStreamingComposer
 {

@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Builder;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
-using Web4;
-using Html = Web4.Html;
+using MicroHtml;
+using Html = MicroHtml.Html;
 
 // TODO: "Don't place extension methods in the Microsoft.Extensions.DependencyInjection namespace unless you're authoring an official Microsoft package": https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-usage#register-services-for-di
 // TODO: Html namespace collision problem?

@@ -1,7 +1,6 @@
-using System.Buffers;
 using System.Drawing;
 
-namespace Web4;
+namespace MicroHtml;
 
 public static class ColorExtensions
 {

@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Channels;
 using Web4.WebSockets;
+using MicroHtml;
 
 namespace Web4.JsonRpc;
 

@@ -1,3 +1,4 @@
+global using MicroHtml;
 global using Web4;
 global using Web4.Dom;
 global using Web4.Xtml;

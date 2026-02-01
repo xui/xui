@@ -1,10 +1,10 @@
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Web4.Composers;
+using MicroHtml.Composers;
 using Web4.Dom;
 
-namespace Web4;
+namespace MicroHtml;
 
 public enum HtmlType { Element, Wrapper, Template }
 
