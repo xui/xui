@@ -2,7 +2,7 @@ using System.Buffers;
 
 namespace Web4.JsonRpc;
 
-internal class SequenceSegment<T> : ReadOnlySequenceSegment<T>
+public class SequenceSegment<T> : ReadOnlySequenceSegment<T>
 {
     public T[] RentedBuffer { get; init; }
 
