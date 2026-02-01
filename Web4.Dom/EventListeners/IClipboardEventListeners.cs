@@ -1,6 +1,4 @@
-using Web4.Dom;
-
-namespace Web4.EventListeners;
+namespace Web4.Dom.EventListeners;
 
 public interface IClipboardListeners
 {
