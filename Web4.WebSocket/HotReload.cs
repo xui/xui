@@ -1,6 +1,6 @@
 #if !DEBUG
 
-namespace Web4.Keyholes;
+namespace Web4.WebSocket
 
 public static class HotReload
 {
