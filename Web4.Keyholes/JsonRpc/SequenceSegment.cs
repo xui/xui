@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace Web4.WebSockets;
+namespace Web4.JsonRpc;
 
 internal class SequenceSegment<T> : ReadOnlySequenceSegment<T>
 {
