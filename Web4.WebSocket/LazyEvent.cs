@@ -51,14 +51,10 @@ public record struct LazyEvent : Event, IDisposable
     private void LazyParse(bool canIgnoreRefTypes = false)
     {
         if (values is null)
-        {
             Parse(canIgnoreRefTypes);
-        }
 
         if (!canIgnoreRefTypes && references is null)
-        {
             Parse(canIgnoreRefTypes);
-        }
     }
 
     private void Parse(bool canIgnoreRefTypes = false)
