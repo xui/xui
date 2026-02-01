@@ -44,7 +44,7 @@ public class Tests
     }
 
     [Benchmark]
-    public async Task Basic_NoOp()
+    public void Basic_NoOp()
     {
         noOpComposer.Compose($"""
             <html>
