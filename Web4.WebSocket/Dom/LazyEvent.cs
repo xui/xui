@@ -8,7 +8,7 @@ using Web4.Dom.Events;
 using Web4.Dom.Events.Subsets;
 using Web4.WebSocket.Buffers;
 
-namespace Web4.WebSocket;
+namespace Web4.WebSocket.Dom;
 
 /// <summary>
 /// A WebSocket-optimized implementation of the Event interface.

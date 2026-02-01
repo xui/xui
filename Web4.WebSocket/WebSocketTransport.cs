@@ -10,6 +10,7 @@ using Web4.Keyholes.Composers;
 using Web4.Dom;
 using Web4.WebSocket.Buffers;
 using Web4.Keyholes;
+using Web4.WebSocket.Dom;
 
 namespace Web4.WebSocket;
 
