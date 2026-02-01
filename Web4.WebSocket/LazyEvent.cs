@@ -6,6 +6,7 @@ using Microsoft.Extensions.ObjectPool;
 using Web4.Dom;
 using Web4.Dom.Events;
 using Web4.Dom.Events.Subsets;
+using Web4.JsonRpc;
 
 namespace Web4.WebSockets;
 
