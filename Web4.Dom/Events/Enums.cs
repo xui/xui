@@ -1,4 +1,4 @@
-namespace Web4.Events;
+namespace Web4.Dom.Events;
 
 public enum Button : int
 {

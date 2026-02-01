@@ -1,10 +1,10 @@
 #pragma warning disable IDE1006 // Naming Styles
 
 using System.Drawing;
-using Web4.Events;
-using Web4.Events.Subsets;
+using Web4.Dom.Events;
+using Web4.Dom.Events.Subsets;
 
-namespace Web4;
+namespace Web4.Dom;
 
 /// <summary>
 /// A DOM event

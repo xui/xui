@@ -1,5 +1,5 @@
 using System.Text;
-using Web4.Core.DOM;
+using Web4.Dom;
 
 namespace Web4;
 

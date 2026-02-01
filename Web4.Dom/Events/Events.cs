@@ -1,7 +1,7 @@
-using Web4.Events.Subsets;
-using static Web4.Events.Aliases.Subsets;
+using Web4.Dom.Events.Subsets;
+using static Web4.Dom.Events.Aliases.Subsets;
 
-namespace Web4.Events;
+namespace Web4.Dom.Events;
 
 public interface IDragEvent                 : IMouseEvent, DataTransfer { }
 public interface IPointerEvent              : IMouseEvent, Pointer, Angles, WidthHeight, Pressures, Tilts { }

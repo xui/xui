@@ -1,4 +1,4 @@
-namespace Web4.Core.DOM;
+namespace Web4.Dom;
 
 public interface IDocument
 {

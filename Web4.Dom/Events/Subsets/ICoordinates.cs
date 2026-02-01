@@ -1,6 +1,6 @@
-using static Web4.Events.Aliases.Subsets;
+using static Web4.Dom.Events.Aliases.Subsets;
 
-namespace Web4
+namespace Web4.Dom
 {
     namespace Events.Subsets
     {

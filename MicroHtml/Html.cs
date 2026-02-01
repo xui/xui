@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Web4.Composers;
+using Web4.Dom;
 
 namespace Web4;
 

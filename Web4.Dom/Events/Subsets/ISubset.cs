@@ -1,4 +1,4 @@
-namespace Web4.Events.Subsets;
+namespace Web4.Dom.Events.Subsets;
 
 public interface ISubset
 {

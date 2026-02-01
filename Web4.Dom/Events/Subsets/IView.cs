@@ -1,6 +1,4 @@
-using Web4.Core.DOM;
-
-namespace Web4
+namespace Web4.Dom
 {
     namespace Events.Subsets
     {
