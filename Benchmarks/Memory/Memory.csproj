@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="../../Web4.Keyholes/Web4.Keyholes.csproj" />
+    <ProjectReference Include="../../Web4.WebSocket/Web4.WebSocket.csproj" />
   </ItemGroup>
 
   <ItemGroup>
