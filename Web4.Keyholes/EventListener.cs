@@ -1,3 +1,5 @@
+using Web4.Dom;
+
 namespace Web4;
 
 public record struct EventListener(

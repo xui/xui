@@ -1,7 +1,7 @@
 using System.Drawing;
-using Web4.Core.DOM;
-using Web4.Events;
-using Web4.Events.Subsets;
+using Web4.Dom;
+using Web4.Dom.Events;
+using Web4.Dom.Events.Subsets;
 
 namespace Web4.WebAssembly;
 
@@ -103,7 +103,7 @@ internal partial record struct WebAssemblyEvent(
     double IAngles.AzimuthAngle => AzimuthAngle ?? default;
     double IDeviceOrientation.Beta => Beta ?? default;
     bool IEvent.Bubbles => Bubbles ?? default;
-    Button IButtons.Button => Button ?? Web4.Events.Button.Main;
+    Button IButtons.Button => Button ?? Web4.Dom.Events.Button.Main;
     ButtonFlag IButtons.Buttons => Buttons ?? ButtonFlag.None;
     bool IEvent.Cancelable => Cancelable ?? default;
     TouchPoint[] ITouches.ChangedTouches => ChangedTouches ?? [];
@@ -117,14 +117,14 @@ internal partial record struct WebAssemblyEvent(
     string IData.Data => Data ?? string.Empty;
     DataTransferContainer IDataTransfer.DataTransfer => DataTransfer ?? DataTransferContainer.Empty;
     bool IEvent.DefaultPrevented => DefaultPrevented ?? default;
-    DeltaMode IDeltas.DeltaMode => DeltaMode ?? Web4.Events.DeltaMode.Pixel;
+    DeltaMode IDeltas.DeltaMode => DeltaMode ?? Web4.Dom.Events.DeltaMode.Pixel;
     double IDeltas.DeltaX => DeltaX ?? default;
     double IDeltas.DeltaY => DeltaY ?? default;
     double IDeltas.DeltaZ => DeltaZ ?? default;
     long IDetail.Detail => Detail ?? default;
     double IAnimation.ElapsedTime => ElapsedTime ?? default;
     DOMException IError.Error => Error ?? DOMException.Empty;
-    EventPhase IEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
+    EventPhase IEvent.EventPhase => EventPhase ?? Web4.Dom.Events.EventPhase.None;
     string IError.FileName => FileName ?? string.Empty;
     double IDeviceOrientation.Gamma => Gamma ?? default;
     int IWidthHeight.Height => Height ?? default;

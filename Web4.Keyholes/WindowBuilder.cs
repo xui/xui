@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Web4.EventListeners;
 using Web4.Composers;
+using Web4.Dom;
 
 namespace Web4;
 

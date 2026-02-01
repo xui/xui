@@ -7,7 +7,6 @@ using System.Threading.Channels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Web4.Composers;
-using Web4.Core.DOM;
 using Web4.Dom;
 using Web4.JsonRpc;
 

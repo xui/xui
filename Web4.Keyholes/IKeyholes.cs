@@ -1,3 +1,5 @@
+using Web4.Dom;
+
 namespace Web4;
 
 // TODO: It is awkward that this interface is here and not in the core project, thanks to Keyholes.

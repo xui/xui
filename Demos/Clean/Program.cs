@@ -1,4 +1,5 @@
 global using Web4;
+global using Web4.Dom;
 using System.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);

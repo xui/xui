@@ -1,3 +1,5 @@
+using Web4.Dom;
+
 namespace Web4.EventListeners;
 
 public interface ITransitionEventListeners

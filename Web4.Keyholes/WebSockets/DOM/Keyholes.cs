@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using System.Text;
 using Microsoft.Extensions.Logging;
+using Web4.Dom;
 
 namespace Web4.WebSockets;
 

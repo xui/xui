@@ -3,9 +3,9 @@ using System.Buffers;
 using System.Drawing;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
-using Web4.Core.DOM;
-using Web4.Events;
-using Web4.Events.Subsets;
+using Web4.Dom;
+using Web4.Dom.Events;
+using Web4.Dom.Events.Subsets;
 
 namespace Web4.WebSockets;
 
@@ -377,7 +377,7 @@ public record struct LazyEvent : Event, IDisposable
     bool IEvent.Bubbles => Bubbles ?? default;
 
     public Button? Button => GetInt("button") switch { int v => (Button)v, _ => null };
-    Button IButtons.Button => Button ?? Web4.Events.Button.Main;
+    Button IButtons.Button => Button ?? Web4.Dom.Events.Button.Main;
 
     public ButtonFlag? Buttons => GetInt("button") switch { int v => (ButtonFlag)v, _ => null };
     ButtonFlag IButtons.Buttons => Buttons ?? ButtonFlag.None;
@@ -419,7 +419,7 @@ public record struct LazyEvent : Event, IDisposable
     bool IEvent.DefaultPrevented => DefaultPrevented ?? default;
 
     public DeltaMode? DeltaMode => GetInt("deltaMode") switch { int v => (DeltaMode)v, _ => null };
-    DeltaMode IDeltas.DeltaMode => DeltaMode ?? Web4.Events.DeltaMode.Pixel;
+    DeltaMode IDeltas.DeltaMode => DeltaMode ?? Web4.Dom.Events.DeltaMode.Pixel;
 
     public double? DeltaX => GetDouble("deltaX");
     double IDeltas.DeltaX => DeltaX ?? default;
@@ -440,7 +440,7 @@ public record struct LazyEvent : Event, IDisposable
     DOMException IError.Error => Error ?? DOMException.Empty;
 
     public EventPhase? EventPhase => GetInt("eventPhase") switch { int v => (EventPhase)v, _ => null };
-    EventPhase IEvent.EventPhase => EventPhase ?? Web4.Events.EventPhase.None;
+    EventPhase IEvent.EventPhase => EventPhase ?? Web4.Dom.Events.EventPhase.None;
 
     public string? FileName => GetReference("fileName") as string;
     string IError.FileName => FileName ?? string.Empty;
