@@ -5,7 +5,7 @@ using System.Threading.Channels;
 using MicroHtml;
 using Web4.Keyholes;
 
-namespace Web4.JsonRpc;
+namespace Web4.WebSocket.Buffers;
 
 public partial class JsonRpcWriter : IDisposable
 {

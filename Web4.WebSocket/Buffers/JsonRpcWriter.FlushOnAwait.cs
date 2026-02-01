@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Threading.Channels;
 using Web4.Keyholes;
 
-namespace Web4.JsonRpc;
+namespace Web4.WebSocket.Buffers;
 
 partial class JsonRpcWriter
 {

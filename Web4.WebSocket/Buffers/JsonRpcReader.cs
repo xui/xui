@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Text.Json;
 using Web4.Keyholes;
 
-namespace Web4.JsonRpc;
+namespace Web4.WebSocket.Buffers;
 
 public readonly ref struct JsonRpcReader
 {

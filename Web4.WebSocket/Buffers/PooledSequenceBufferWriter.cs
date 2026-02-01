@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace Web4.JsonRpc;
+namespace Web4.WebSocket.Buffers;
 
 public class PooledSequenceBufferWriter<T> : IBufferWriter<T>
 {
