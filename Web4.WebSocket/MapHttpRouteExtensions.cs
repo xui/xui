@@ -3,12 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using MicroHtml;
-using Html = MicroHtml.Html;
 
-// TODO: "Don't place extension methods in the Microsoft.Extensions.DependencyInjection namespace unless you're authoring an official Microsoft package": https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-usage#register-services-for-di
-// TODO: Html namespace collision problem?
-//namespace Microsoft.AspNetCore.Builder;
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Web4.WebSocket;
 
 public static class MapHttpRouteExtensions
 {

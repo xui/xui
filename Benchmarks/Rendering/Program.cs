@@ -1,4 +1,5 @@
 using MicroHtml;
+using Web4.WebSocket;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();

@@ -1,5 +1,3 @@
-#pragma warning disable IDE0130 // Namespace does not match folder structure
-
 using Web4.Keyholes.Composers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,17 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Web4.Keyholes;
-using Html = MicroHtml.Html;
 using System.Diagnostics;
-using Web4.WebSocket;
 using System.IO.Pipelines;
 using MicroHtml;
 using MicroHtml.Composers;
 
-// TODO: "Don't place extension methods in the Microsoft.Extensions.DependencyInjection namespace unless you're authoring an official Microsoft package": https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-usage#register-services-for-di
-// TODO: Html namespace collision problem?
-//namespace Microsoft.AspNetCore.Builder;
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Web4.WebSocket;
 
 public static class MapWeb4RouteExtensions
 {

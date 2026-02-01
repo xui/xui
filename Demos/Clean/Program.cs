@@ -1,6 +1,7 @@
-global using Web4.Dom;
 using System.Drawing;
 using MicroHtml;
+using Web4.WebSocket;
+using Web4.Dom;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
