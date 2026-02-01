@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Web4.Keyholes;
 using Html = MicroHtml.Html;
 using System.Diagnostics;
-using Web4.WebSockets;
+using Web4.WebSocket;
 using System.IO.Pipelines;
 using MicroHtml;
 using MicroHtml.Composers;

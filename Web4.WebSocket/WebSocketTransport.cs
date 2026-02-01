@@ -11,7 +11,7 @@ using Web4.Dom;
 using Web4.JsonRpc;
 using Web4.Keyholes;
 
-namespace Web4.WebSockets;
+namespace Web4.WebSocket;
 
 partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
 {
@@ -87,7 +87,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
         }
     );
 
-    private async Task OutputToWebSocket(WebSocket webSocket, CancellationToken cancel)
+    private async Task OutputToWebSocket(System.Net.WebSockets.WebSocket webSocket, CancellationToken cancel)
     {
         while (!cancel.IsCancellationRequested && webSocket.State == WebSocketState.Open)
         {
@@ -119,7 +119,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
         }
     }
 
-    private async Task WebSocketToMethod(WebSocket webSocket, CancellationToken cancel)
+    private async Task WebSocketToMethod(System.Net.WebSockets.WebSocket webSocket, CancellationToken cancel)
     {
         const int RECEIVE_BUFFER_LENGTH = 4096;
         ReadOnlySequence<byte> sequence;
@@ -320,7 +320,7 @@ partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBu
         }
     }
 
-    private static async Task Disconnect(WebSocket webSocket)
+    private static async Task Disconnect(System.Net.WebSockets.WebSocket webSocket)
     {
         await webSocket.CloseAsync(
             WebSocketCloseStatus.NormalClosure,

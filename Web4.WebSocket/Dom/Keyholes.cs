@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Web4.Dom;
 using Web4.Keyholes;
 
-namespace Web4.WebSockets;
+namespace Web4.WebSocket;
 
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on WebSocketTransport.

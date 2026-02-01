@@ -8,7 +8,7 @@ using Web4.Dom.Events;
 using Web4.Dom.Events.Subsets;
 using Web4.JsonRpc;
 
-namespace Web4.WebSockets;
+namespace Web4.WebSocket;
 
 /// <summary>
 /// A WebSocket-optimized implementation of the Event interface.
