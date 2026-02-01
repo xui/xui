@@ -14,7 +14,7 @@ using Web4.WebSocket.Dom;
 
 namespace Web4.WebSocket;
 
-partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
+internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
 {
     private static readonly ConcurrentDictionary<string, WebSocketTransport> transports = [];
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;

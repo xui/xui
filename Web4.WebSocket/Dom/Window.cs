@@ -5,7 +5,7 @@ namespace Web4.WebSocket;
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on WebSocketTransport.
 // TODO: Ignore that.  Make it an `internal struct` like LazyEvent?
-partial class WebSocketTransport : IWindow
+internal partial class WebSocketTransport : IWindow
 {
 
     IConsole IWindow.Console => this;

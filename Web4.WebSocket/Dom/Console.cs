@@ -5,7 +5,7 @@ namespace Web4.WebSocket;
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on WebSocketTransport.
 // TODO: Ignore that.  Make it an `internal struct` like LazyEvent?
-public partial class WebSocketTransport : IConsole
+internal partial class WebSocketTransport : IConsole
 {
     // TODO: Tests still needed for each one.
     void IConsole.Assert(bool assertion, string message)
