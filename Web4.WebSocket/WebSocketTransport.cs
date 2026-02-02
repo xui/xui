@@ -24,10 +24,10 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
     private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
     private readonly Channel<int> diffChannel = CreateDiffChannel();
     private readonly Channel<ReadOnlySequence<byte>> outputChannel = CreateOutputChannel();
+    private JsonRpcWriter JsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
 
     public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
-    public JsonRpcWriter JsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
     public IWindow Window => this;
     public IDocument Document => this;
     public IConsole Console => this;
