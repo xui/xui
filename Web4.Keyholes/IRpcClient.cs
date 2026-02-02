@@ -2,7 +2,7 @@ using Web4.Dom;
 
 namespace Web4.Keyholes;
 
-public interface IKeyholes
+public interface IRpcClient
 {
     void SetText(byte[] key, ref Keyhole keyhole);
     void SetAttribute(byte[] key, ref Keyhole keyhole);
@@ -14,11 +14,4 @@ public interface IKeyholes
     void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey, ValueTuple<string, int> viewTransitionName);
     void PopNode(byte[] key);
     void PopNode(byte[] key, ValueTuple<string, int> viewTransitionName);
-    void DispatchEvent(Action listener);
-    void DispatchEvent<T>(Action<Event> listener, T @event) where T : struct, Event;
-    Task DispatchEvent(Func<Task> listener);
-    Task DispatchEvent<T>(Func<Event, Task> listener, T @event) where T : struct, Event;
-    void Ping();
-    void Dump();
-    void Benchmark(int? threads);
 }

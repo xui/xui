@@ -2,16 +2,16 @@ using Web4.Keyholes.Utilities;
 
 namespace Web4.Keyholes;
 
-public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
+public ref struct Reconciler(IRpcClient mutations, Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
-    public static void Diff(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
+    public static void Diff(IRpcClient mutations, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
         using var perf = Perf.Measure("DiffUtil.Diff"); // TODO: Remove PerfCheck
 
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
 
-        var diffUtil = new Reconciler(keyholes, oldBuffer, newBuffer);
+        var diffUtil = new Reconciler(mutations, oldBuffer, newBuffer);
         diffUtil.Recurse(ref oldFirst, ref newFirst);
     }
 
@@ -37,18 +37,18 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
         if (oldSpan.Length != newSpan.Length)
         {
             if (newParent.Type == KeyholeType.Attribute)
-                keyholes.SetAttribute(
+                mutations.SetAttribute(
                     newParent.Key,
                     newSpan
                 );
             else if (newParent.Format is null)
-                keyholes.SetNode(
+                mutations.SetNode(
                     newBuffer,
                     newParent.Key,
                     newSpan
                 );
             else
-                keyholes.SetNode(
+                mutations.SetNode(
                     newBuffer,
                     newParent.Key,
                     newSpan,
@@ -94,18 +94,18 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
             if (!Object.ReferenceEquals(oldKeyhole.StringLiteral, newKeyhole.StringLiteral))
             {
                 if (newParent.Type == KeyholeType.Attribute)
-                    keyholes.SetAttribute(
+                    mutations.SetAttribute(
                         newParent.Key,
                         newSpan
                     );
                 else if (newParent.Format == null)
-                    keyholes.SetNode(
+                    mutations.SetNode(
                         newBuffer,
                         newParent.Key,
                         newSpan
                     );
                 else
-                    keyholes.SetNode(
+                    mutations.SetNode(
                         newBuffer,
                         newParent.Key,
                         newSpan,
@@ -182,7 +182,7 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
                 // This keyhole's value is part of a sequence of keyholes that comprises this attribute.
                 // Find the start of this sequence, then grab the sequence's full span.
                 ref var startKeyhole = ref newBuffer[newParent.SequenceStart];
-                keyholes.SetAttribute(newParent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
+                mutations.SetAttribute(newParent.Key, newBuffer.AsSpan(startKeyhole.Sequence));
 
                 // Shortcircuit.  No need to diff the rest of this span.
                 // This whole attribute sequence will be updated.
@@ -190,11 +190,11 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
             }
             else if (newKeyhole.IsValueAnAttribute)
             {
-                keyholes.SetAttribute(newKeyhole.Key, ref newKeyhole);
+                mutations.SetAttribute(newKeyhole.Key, ref newKeyhole);
             }
             else
             {
-                keyholes.SetText(newKeyhole.Key, ref newKeyhole);
+                mutations.SetText(newKeyhole.Key, ref newKeyhole);
             }
         }
 
@@ -229,7 +229,7 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
 
             if (shouldUseTransition && oldItem.Tag != newItem.Tag && oldItem.Tag is not null && newItem.Tag is not null)
             {
-                keyholes.SetNode(
+                mutations.SetNode(
                     newBuffer,
                     newItem.Key,
                     newBuffer.AsSpan(newItem.Sequence),
@@ -255,9 +255,9 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
                 if (newKeyhole.Format is null || newItem.Tag is null)
-                    keyholes.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key);
+                    mutations.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key);
                 else
-                    keyholes.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
+                    mutations.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
             }
         }
         else if (oldItems.Length > newItems.Length)
@@ -269,9 +269,9 @@ public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] 
             {
                 ref var item = ref oldItems[d];
                 if (newKeyhole.Format is null || item.Tag is null)
-                    keyholes.PopNode(item.Key);
+                    mutations.PopNode(item.Key);
                 else
-                    keyholes.PopNode(item.Key, ("web4-move-", item.Tag.GetHashCode()));
+                    mutations.PopNode(item.Key, ("web4-move-", item.Tag.GetHashCode()));
             }
         }
 

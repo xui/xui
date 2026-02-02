@@ -31,7 +31,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
     public IWindow Window => this;
     public IDocument Document => this;
     public IConsole Console => this;
-    public IKeyholes Keyholes => this;
+    public IRpcServer Keyholes => this;
 
     public static async Task Bind(
         HttpContext http,
@@ -383,7 +383,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
             Keyhole[] newBuffer = CaptureSnapshot();
             using (var batchOutput = Output.BatchThisScope())
             {
-                Reconciler.Diff(Keyholes, oldBuffer, newBuffer);
+                Reconciler.Diff(this, oldBuffer, newBuffer);
             }
 
             var pool = ArrayPool<Keyhole>.Shared;
