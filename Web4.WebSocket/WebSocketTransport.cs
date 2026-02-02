@@ -383,7 +383,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
             Keyhole[] newBuffer = CaptureSnapshot();
             using (var batchOutput = Output.BatchThisScope())
             {
-                DiffUtil.Diff(Keyholes, oldBuffer, newBuffer);
+                Reconciler.Diff(Keyholes, oldBuffer, newBuffer);
             }
 
             var pool = ArrayPool<Keyhole>.Shared;

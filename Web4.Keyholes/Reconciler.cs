@@ -2,7 +2,7 @@ using Web4.Keyholes.Utilities;
 
 namespace Web4.Keyholes;
 
-public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
+public ref struct Reconciler(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
 {
     public static void Diff(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
     {
@@ -11,7 +11,7 @@ public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] ne
         ref Keyhole oldFirst = ref oldBuffer[0];
         ref Keyhole newFirst = ref newBuffer[0];
 
-        var diffUtil = new DiffUtil(keyholes, oldBuffer, newBuffer);
+        var diffUtil = new Reconciler(keyholes, oldBuffer, newBuffer);
         diffUtil.Recurse(ref oldFirst, ref newFirst);
     }
 
