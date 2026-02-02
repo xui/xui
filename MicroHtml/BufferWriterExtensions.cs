@@ -7,7 +7,7 @@ using MicroHtml.Composers;
 
 namespace MicroHtml;
 
-public static partial class BufferWriterExtensions
+public static partial class Extensions
 {
     public static bool Write(this IBufferWriter<byte> bufferWriter, string text)
     {

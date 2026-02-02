@@ -2,7 +2,7 @@ using System.Drawing;
 
 namespace MicroHtml;
 
-public static class ColorExtensions
+public static partial class Extensions
 {
     public static bool TryFormat(this Color color, Span<byte> utf8Destination, out int bytesWritten)
         => color.TryFormat(utf8Destination, out bytesWritten, "rgb");
