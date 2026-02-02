@@ -15,12 +15,12 @@ internal partial class WebSocketTransport : IWindow
 
     void IWindow.Alert(string message)
     {
-        jsonRpc.WriteNotification("window.alert", message);
+        JsonRpc.WriteNotification("window.alert", message);
     }
 
     void IWindow.Focus()
     {
-        jsonRpc.WriteNotification("window.focus");
+        JsonRpc.WriteNotification("window.focus");
     }
 
     Task<string> IWindow.Prompt(string? message, string? defaultValue)

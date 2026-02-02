@@ -13,7 +13,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 {
     public void SetText(byte[] key, ref Keyhole keyhole)
     {
-        jsonRpc.WriteNotification(
+        JsonRpc.WriteNotification(
             method: ("keyholes['", key, "'].setText"),
             param1: ref keyhole
         );
@@ -21,7 +21,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void SetAttribute(byte[] key, ref Keyhole keyhole)
     {
-        jsonRpc.WriteNotification(
+        JsonRpc.WriteNotification(
             method: ("keyholes['", key, "'].setAttribute"),
             param1: ref keyhole
         );
@@ -29,7 +29,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void SetAttribute(byte[] key, Span<Keyhole> keyholes)
     {
-        jsonRpc.WriteNotification(
+        JsonRpc.WriteNotification(
             method: ("keyholes['", key, "'].setAttribute"),
             param1: keyholes
         );
@@ -38,14 +38,14 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int>? viewTransitionNameNew = null, ValueTuple<string, int>? viewTransitionNameOld = null)
     {
         if (viewTransitionNameNew is not null && viewTransitionNameOld is not null)
-            jsonRpc.WriteNotification(buffer,
+            JsonRpc.WriteNotification(buffer,
                 method: ("keyholes['", key, "'].setNode"),
                 param1: keyholes,
                 param2: viewTransitionNameNew.Value,
                 param3: viewTransitionNameOld.Value
             );
         else
-            jsonRpc.WriteNotification(buffer,
+            JsonRpc.WriteNotification(buffer,
                 method: ("keyholes['", key, "'].setNode"),
                 param1: keyholes
             );
@@ -53,7 +53,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, byte[]> viewTransitionName)
     {
-        jsonRpc.WriteNotification(buffer,
+        JsonRpc.WriteNotification(buffer,
             method: ("keyholes['", key, "'].setNode"),
             param1: keyholes,
             param2: viewTransitionName
@@ -62,7 +62,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey)
     {
-        jsonRpc.WriteNotification(buffer,
+        JsonRpc.WriteNotification(buffer,
             method: ("keyholes['", key, "'].pushNode"),
             param1: keyholes,
             param2: newKey
@@ -71,7 +71,7 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey, ValueTuple<string, int> viewTransitionName)
     {
-        jsonRpc.WriteNotification(buffer,
+        JsonRpc.WriteNotification(buffer,
             method: ("keyholes['", key, "'].pushNode"),
             param1: keyholes,
             param2: newKey,
@@ -81,14 +81,14 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
 
     public void PopNode(byte[] key)
     {
-        jsonRpc.WriteNotification(
+        JsonRpc.WriteNotification(
             method: ("keyholes['", key, "'].popNode")
         );
     }
 
     public void PopNode(byte[] key, ValueTuple<string, int> viewTransitionName)
     {
-        jsonRpc.WriteNotification(
+        JsonRpc.WriteNotification(
             method: ("keyholes['", key, "'].popNode"),
             param1: viewTransitionName
         );
