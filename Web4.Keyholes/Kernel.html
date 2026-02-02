@@ -29,10 +29,10 @@
 <script>
 
   class Web4Keyholes {
-    #transport = new WebSocketTransport();
+    #bridge = new WebSocketBridge();
 
     set(key, node, booleanAttributeName) {
-      this[key] = new Web4Keyhole(this.#transport, key, node);
+      this[key] = new Web4Keyhole(this.#bridge, key, node);
       if (booleanAttributeName)
         this[key].booleanAttributeName = booleanAttributeName;
       else
@@ -51,13 +51,13 @@
     }
 
     dump() {
-      this.#transport.dump();
+      this.#bridge.dump();
     }
 
     ping(repeat) {
       repeat = repeat ?? 1;
       console.time("ping");
-      this.#transport.ping().then(() => {
+      this.#bridge.ping().then(() => {
         console.timeEnd("ping");
         if (--repeat > 0)
           this.ping(repeat);
@@ -66,7 +66,7 @@
   }
 
   class Web4Keyhole {
-    #transport;
+    #bridge;
     key;
     node;
     static #transitionBatch = {
@@ -80,8 +80,8 @@
       document.addEventListener('DOMContentLoaded', () => document.registerKeyholes());
     }
 
-    constructor(transport, key, node) {
-      this.#transport = transport;
+    constructor(bridge, key, node) {
+      this.#bridge = bridge;
       this.key = key;
       this.node = node;
     }
@@ -143,7 +143,7 @@
     }
 
     dispatchEvent(event) {
-      this.#transport.dispatchEvent(event, this.key);
+      this.#bridge.dispatchEvent(event, this.key);
     }
 
     #batchMutation(mutation, invalidatesKeyholes) {
@@ -212,7 +212,7 @@
     }
   }
 
-  class WebSocketTransport {
+  class WebSocketBridge {
     #webSocket = new WebSocket(`${location.pathname === '/' ? '' : location.pathname}/web4`);
     #messageID = 0;
     #reconnectionAttempts = 0;
