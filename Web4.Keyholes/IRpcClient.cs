@@ -7,9 +7,8 @@ public interface IRpcClient
     void SetText(byte[] key, ref Keyhole keyhole);
     void SetAttribute(byte[] key, ref Keyhole keyhole);
     void SetAttribute(byte[] key, Span<Keyhole> keyholes);
-    void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes);
+    void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int>? viewTransitionName = null, ValueTuple<string, int>? viewTransitionNameSecondary = null);
     void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, byte[]> viewTransitionName);
-    void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary);
     void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey);
     void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey, ValueTuple<string, int> viewTransitionName);
     void PopNode(byte[] key);

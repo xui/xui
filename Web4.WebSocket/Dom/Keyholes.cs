@@ -35,12 +35,20 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
         );
     }
 
-    public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes)
+    public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int>? viewTransitionName = null, ValueTuple<string, int>? viewTransitionNameSecondary = null)
     {
-        Output.WriteNotification(buffer,
-            method: ("keyholes['", key, "'].setNode"),
-            param1: keyholes
-        );
+        if (viewTransitionName is not null && viewTransitionNameSecondary is not null)
+            Output.WriteNotification(buffer,
+                method: ("keyholes['", key, "'].setNode"),
+                param1: keyholes,
+                param2: viewTransitionName.Value,
+                param3: viewTransitionNameSecondary.Value
+            );
+        else
+            Output.WriteNotification(buffer,
+                method: ("keyholes['", key, "'].setNode"),
+                param1: keyholes
+            );
     }
 
     public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, byte[]> viewTransitionName)
@@ -50,16 +58,6 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
             param1: keyholes,
             param2: viewTransitionName
         );
-    }
-
-    public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int> viewTransitionName, ValueTuple<string, int> viewTransitionNameSecondary)
-    {
-        Output.WriteNotification(buffer,
-            method: ("keyholes['", key, "'].setNode"),
-            param1: keyholes,
-            param2: viewTransitionName,
-            param3: viewTransitionNameSecondary
-          );
     }
 
     public void PushNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, byte[] newKey)
