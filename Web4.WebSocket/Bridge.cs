@@ -15,9 +15,9 @@ using Web4.Keyholes.Utilities;
 
 namespace Web4.WebSocket;
 
-internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
+public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder, ILogger logger)
 {
-    private static readonly ConcurrentDictionary<string, WebSocketTransport> transports = [];
+    private static readonly ConcurrentDictionary<string, Bridge> windows = [];
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
 
     private Keyhole[]? snapshot = null;
@@ -41,7 +41,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
     {
         // TODO: Move to header approach?
         var windowID = http.Connection.Id;
-        var transport = new WebSocketTransport(http, windowBuilder, logger);
+        var transport = new Bridge(http, windowBuilder, logger);
 
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -52,7 +52,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         using var reg = cancelProcess.Register(async () => await Disconnect(webSocket));
 
-        transports[windowID] = transport;
+        windows[windowID] = transport;
 
         await Task.WhenAny(
             transport.OutputToWebSocket(webSocket, http.RequestAborted),
@@ -62,7 +62,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
 
         logger.LogInformation("👋 Goodbye, {WindowID}!", windowID);
 
-        transports.Remove(windowID, out var _);
+        windows.Remove(windowID, out var _);
     }
 
     private static Channel<int> CreateDiffChannel() => Channel.CreateBounded<int>(new BoundedChannelOptions(1)
@@ -196,7 +196,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
     {
         // TODO: This doesn't belong here.
         // TODO: Once you figure out where they belong, they need to be in try/catches.
-        foreach (var t in transports.Values)
+        foreach (var t in windows.Values)
             t.Invalidate();
 
         try
@@ -257,7 +257,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         finally
         {
             // TODO: This doesn't belong here.
-            foreach (var t in transports.Values)
+            foreach (var t in windows.Values)
                 t.Update();
         }
         return sequence;

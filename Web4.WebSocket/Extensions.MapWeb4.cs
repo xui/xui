@@ -34,8 +34,8 @@ public static partial class Extensions
         {
             if (httpContext.WebSockets.IsWebSocketRequest)
             {
-                var logger = app.Services.GetRequiredService<ILogger<WebSocketTransport>>();
-                await WebSocketTransport.Bind(
+                var logger = app.Services.GetRequiredService<ILogger<Bridge>>();
+                await Bridge.Bind(
                     httpContext,
                     window,
                     logger,
