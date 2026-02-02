@@ -7,7 +7,6 @@ namespace Web4.WebSocket;
 // TODO: Ignore that.  Make it an `internal struct` like LazyEvent?
 internal partial class WebSocketTransport : IWindow
 {
-
     IConsole IWindow.Console => this;
 
     IDocument IWindow.Document => this;
@@ -16,12 +15,12 @@ internal partial class WebSocketTransport : IWindow
 
     void IWindow.Alert(string message)
     {
-        Output.WriteNotification("window.alert", message);
+        JsonRpc.WriteNotification("window.alert", message);
     }
 
     void IWindow.Focus()
     {
-        Output.WriteNotification("window.focus");
+        JsonRpc.WriteNotification("window.focus");
     }
 
     Task<string> IWindow.Prompt(string? message, string? defaultValue)
