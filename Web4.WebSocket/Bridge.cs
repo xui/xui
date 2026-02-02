@@ -290,7 +290,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
             Keyholes.DispatchEvent(
                 listenerWithEvent,
-                new LazyEvent(sequence, eventSequence, this)
+                new EventProxy(sequence, eventSequence, this)
             // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }
@@ -311,7 +311,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
             // Do not await event listeners here!  That would block the WebSocket reader.
             _ = Keyholes.DispatchEvent(
                 listenerWithEventAsync,
-                new LazyEvent(sequence, eventSequence, this)
+                new EventProxy(sequence, eventSequence, this)
             // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }
