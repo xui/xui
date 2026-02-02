@@ -41,7 +41,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
     {
         // TODO: Move to header approach?
         var windowID = http.Connection.Id;
-        var transport = new Bridge(http, windowBuilder, logger);
+        var bridge = new Bridge(http, windowBuilder, logger);
 
         // TODO: Move to config
         var context = new WebSocketAcceptContext
@@ -52,12 +52,12 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
         using var webSocket = await http.WebSockets.AcceptWebSocketAsync(context);
         using var reg = cancelProcess.Register(async () => await Disconnect(webSocket));
 
-        windows[windowID] = transport;
+        windows[windowID] = bridge;
 
         await Task.WhenAny(
-            transport.OutputToWebSocket(webSocket, http.RequestAborted),
-            transport.WebSocketToMethod(webSocket, http.RequestAborted),
-            transport.DebounceDiffs(http.RequestAborted)
+            bridge.OutputToWebSocket(webSocket, http.RequestAborted),
+            bridge.WebSocketToMethod(webSocket, http.RequestAborted),
+            bridge.DebounceDiffs(http.RequestAborted)
         );
 
         logger.LogInformation("👋 Goodbye, {WindowID}!", windowID);
@@ -85,7 +85,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
         {
             // TODO: WebSocket is borked?  Handle:
             // - Skip the line and gracefully close it.
-            // - Signal this transport to unregister itself everywhere.
+            // - Signal this bridge to unregister itself everywhere.
         }
     );
 
@@ -132,7 +132,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
                 var buffer = ArrayPool<byte>.Shared.Rent(RECEIVE_BUFFER_LENGTH);
                 var result = await webSocket.ReceiveAsync(buffer, cancel);
 
-                using var perf = Perf.Measure("WebSocketToTransport (loop)"); // TODO: Remove PerfCheck
+                using var perf = Perf.Measure("WebSocketToMethod (loop)"); // TODO: Remove PerfCheck
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {

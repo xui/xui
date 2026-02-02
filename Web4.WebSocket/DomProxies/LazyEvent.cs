@@ -26,15 +26,15 @@ public record struct LazyEvent : Event, IDisposable
 
     private readonly ReadOnlySequence<byte> rpcMessage;
     private readonly ReadOnlySequence<byte> eventParam;
-    private readonly Bridge transport;
+    private readonly Bridge bridge;
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public LazyEvent(ReadOnlySequence<byte> rpcMessage, ReadOnlySequence<byte> eventParam, Bridge transport)
+    public LazyEvent(ReadOnlySequence<byte> rpcMessage, ReadOnlySequence<byte> eventParam, Bridge bridge)
     {
         this.rpcMessage = rpcMessage;
         this.eventParam = eventParam;
-        this.transport = transport;
+        this.bridge = bridge;
     }
 
     public void Dispose()
@@ -624,7 +624,7 @@ public record struct LazyEvent : Event, IDisposable
     public string? Type => GetReference("type") as string;
     string IEvent.Type => Type ?? string.Empty;
 
-    public IWindow? View => this.transport;
+    public IWindow? View => this.bridge;
     IWindow IView.View => View!;
 
     public int? Width => GetInt("width");
@@ -636,7 +636,7 @@ public record struct LazyEvent : Event, IDisposable
     public double? Y => GetDouble("y");
     double IXY.Y => Y ?? default;
 
-    public void StopPropagation() => transport.Propagation.Stop();
+    public void StopPropagation() => bridge.Propagation.Stop();
 
-    public void StopImmediatePropagation() => transport.Propagation.StopImmediate();
+    public void StopImmediatePropagation() => bridge.Propagation.StopImmediate();
 }

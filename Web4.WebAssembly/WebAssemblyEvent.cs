@@ -5,7 +5,7 @@ using Web4.Dom.Events.Subsets;
 
 namespace Web4.WebAssembly;
 
-internal partial record struct WebAssemblyEvent(
+public partial record struct WebAssemblyEvent(
     bool? Absolute = null,
     XYZ? Acceleration = null,
     XYZ? AccelerationIncludingGravity = null,
@@ -210,7 +210,7 @@ internal partial record struct WebAssemblyEvent(
     TouchPoint[] ITouches.Touches => Touches ?? [];
     double IPointer.Twist => Twist ?? default;
     string IEvent.Type => Type ?? string.Empty;
-    public IWindow View => null; // TODO: Implement
+    public IWindow View => null!; // TODO: Implement
     int IWidthHeight.Width => Width ?? default;
     double IXY.X => X ?? default;
     double IXY.Y => Y ?? default;
