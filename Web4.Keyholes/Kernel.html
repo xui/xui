@@ -98,18 +98,18 @@
       }
     }
 
-    setNode(rawHtml, viewTransitionName, viewTransitionNameSecondary) {
+    setNode(rawHtml, viewTransitionNameNew, viewTransitionNameOld) {
       let oldNode = this.node;
       let newNode = this.#createNode(rawHtml)
       newNode.registerKeyholes(this.key);
 
       let mutation = () => oldNode.replaceWith(newNode);
 
-      if (!this.node.shouldAnimate(viewTransitionName)) {
+      if (!this.node.shouldAnimate(viewTransitionNameNew)) {
         mutation();
       } else {
-        this.#prepareNode(newNode, viewTransitionName);
-        this.#prepareNode(oldNode, viewTransitionNameSecondary ?? viewTransitionName);
+        this.#prepareNode(newNode, viewTransitionNameNew);
+        this.#prepareNode(oldNode, viewTransitionNameOld ?? viewTransitionNameNew);
         this.#prepareSiblings();
         this.#batchMutation(mutation, true);
       }

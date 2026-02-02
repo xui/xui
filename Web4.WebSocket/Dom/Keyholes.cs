@@ -35,14 +35,14 @@ internal partial class WebSocketTransport : IRpcClient, IRpcServer
         );
     }
 
-    public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int>? viewTransitionName = null, ValueTuple<string, int>? viewTransitionNameSecondary = null)
+    public void SetNode(Keyhole[] buffer, byte[] key, Span<Keyhole> keyholes, ValueTuple<string, int>? viewTransitionNameNew = null, ValueTuple<string, int>? viewTransitionNameOld = null)
     {
-        if (viewTransitionName is not null && viewTransitionNameSecondary is not null)
+        if (viewTransitionNameNew is not null && viewTransitionNameOld is not null)
             Output.WriteNotification(buffer,
                 method: ("keyholes['", key, "'].setNode"),
                 param1: keyholes,
-                param2: viewTransitionName.Value,
-                param3: viewTransitionNameSecondary.Value
+                param2: viewTransitionNameNew.Value,
+                param3: viewTransitionNameOld.Value
             );
         else
             Output.WriteNotification(buffer,
