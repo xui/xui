@@ -24,7 +24,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
     private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
     private readonly Channel<int> diffChannel = CreateDiffChannel();
     private readonly Channel<ReadOnlySequence<byte>> outputChannel = CreateOutputChannel();
-    private JsonRpcWriter JsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
+    private JsonRpcWriter jsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
 
     public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
@@ -208,14 +208,14 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
             {
                 case var method when method.SequenceEqual("keyholes.dump"u8):
                     {
-                        using var batchOutput = JsonRpc.BatchThisScope();
+                        using var batchOutput = jsonRpc.BatchThisScope();
                         Keyholes.Dump();
                         break;
                     }
 
                 case var method when method.SequenceEqual("keyholes.benchmark"u8):
                     {
-                        using var batchOutput = JsonRpc.BatchThisScope();
+                        using var batchOutput = jsonRpc.BatchThisScope();
                         var threads = @params.GetNextOptionalAsInt();
                         Keyholes.Benchmark(threads);
                         break;
@@ -224,7 +224,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
                 case var method when method.SequenceEqual("keyholes.ping"u8) && rpc.IdAsInt is int id:
                     {
                         Keyholes.Ping();
-                        JsonRpc.WriteResponse(id);
+                        jsonRpc.WriteResponse(id);
                         break;
                     }
 
@@ -277,7 +277,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
 
         if (eventListener.Action is Action listener)
         {
-            using var batchOutput = JsonRpc.BatchThisScope();
+            using var batchOutput = jsonRpc.BatchThisScope();
 
             // Done with buffer(s), return to pool early.
             sequence.ReturnToPool();
@@ -286,7 +286,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         }
         else if (eventListener.ActionEvent is Action<Event> listenerWithEvent)
         {
-            using var batchOutput = JsonRpc.BatchThisScope();
+            using var batchOutput = jsonRpc.BatchThisScope();
 
             Keyholes.DispatchEvent(
                 listenerWithEvent,
@@ -296,7 +296,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         }
         else if (eventListener.Func is Func<Task> listenerAsync)
         {
-            using var batchOutput = JsonRpc.BatchThisScope(continueOnCapturedContext: true);
+            using var batchOutput = jsonRpc.BatchThisScope(continueOnCapturedContext: true);
 
             // Done with buffer(s), return to pool early.
             sequence.ReturnToPool();
@@ -306,7 +306,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         }
         else if (eventListener.FuncEvent is Func<Event, Task> listenerWithEventAsync)
         {
-            using var batchOutput = JsonRpc.BatchThisScope(continueOnCapturedContext: true);
+            using var batchOutput = jsonRpc.BatchThisScope(continueOnCapturedContext: true);
 
             // Do not await event listeners here!  That would block the WebSocket reader.
             _ = Keyholes.DispatchEvent(
@@ -381,7 +381,7 @@ internal partial class WebSocketTransport(HttpContext httpContext, WindowBuilder
         {
             Keyhole[] oldBuffer = snapshot;
             Keyhole[] newBuffer = CaptureSnapshot();
-            using (var batchOutput = JsonRpc.BatchThisScope())
+            using (var batchOutput = jsonRpc.BatchThisScope())
             {
                 Reconciler.Diff(this, oldBuffer, newBuffer);
             }
