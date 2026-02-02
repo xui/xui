@@ -21,12 +21,12 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
     public static SnapshotStrategy SnapshotStrategy { get; set; } = SnapshotStrategy.Retain;
 
     private Keyhole[]? snapshot = null;
+    private bool isInvalidated = false;
     private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
     private readonly Channel<int> diffChannel = CreateDiffChannel();
     private readonly Channel<ReadOnlySequence<byte>> outputChannel = CreateOutputChannel();
     private JsonRpcWriter JsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
 
-    public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
 
     public static async Task Bind(
@@ -341,10 +341,10 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
     public void Invalidate()
     {
-        if (IsInvalidated)
+        if (isInvalidated)
             return;
 
-        IsInvalidated = true;
+        isInvalidated = true;
 
         // This only does work when SnapshotStrategy is in "Recapture" mode
         // since snapshot is never set to null while operating in "Retain" mode.
@@ -353,7 +353,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
     public void Update()
     {
-        if (!IsInvalidated)
+        if (!isInvalidated)
             return;
 
         while (!diffChannel.Writer.TryWrite(0)) ;
@@ -361,7 +361,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
     private void Reconcile()
     {
-        if (!IsInvalidated)
+        if (!isInvalidated)
         {
             logger.LogWarning("Cancelling Reconcile() because IsInvalidated is false (which is unexpected and should be investigated).");
             return;
@@ -403,6 +403,6 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
             logger.LogError(ex, "Unexpected error reconciling diffs: {Message}", ex.Message);
         }
 
-        IsInvalidated = false;
+        isInvalidated = false;
     }
 }
