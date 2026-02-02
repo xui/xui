@@ -11,6 +11,7 @@ using Web4.Dom;
 using Web4.WebSocket.Buffers;
 using Web4.Keyholes;
 using Web4.WebSocket.Dom;
+using Web4.Keyholes.Utilities;
 
 namespace Web4.WebSocket;
 

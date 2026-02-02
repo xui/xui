@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Web4.Keyholes;
+namespace Web4.Keyholes.Utilities;
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]

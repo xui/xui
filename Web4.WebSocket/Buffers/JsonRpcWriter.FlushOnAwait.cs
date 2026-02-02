@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Threading.Channels;
 using Web4.Keyholes;
+using Web4.Keyholes.Utilities;
 
 namespace Web4.WebSocket.Buffers;
 

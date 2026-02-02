@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Web4.Dom;
 using Web4.Keyholes;
+using Web4.Keyholes.Utilities;
 
 namespace Web4.WebSocket;
 

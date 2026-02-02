@@ -1,3 +1,5 @@
+using Web4.Keyholes.Utilities;
+
 namespace Web4.Keyholes;
 
 public ref struct DiffUtil(IKeyholes keyholes, Keyhole[] oldBuffer, Keyhole[] newBuffer)
