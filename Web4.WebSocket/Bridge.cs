@@ -22,12 +22,12 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
     private Keyhole[]? snapshot = null;
     private bool isInvalidated = false;
+    private readonly Propagation propagation = new();
+    
     private TimeSpan diffInterval = TimeSpan.FromMilliseconds(1000d / 60d); // 60fps
     private readonly Channel<int> diffChannel = CreateDiffChannel();
     private readonly Channel<ReadOnlySequence<byte>> outputChannel = CreateOutputChannel();
     private JsonRpcWriter JsonRpc => JsonRpcWriter.Current(outputChannel.Writer);
-
-    public Propagation Propagation { get; } = new();
 
     public static async Task Bind(
         HttpContext http,
@@ -227,12 +227,12 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
                 case var method when method.EndsWith("dispatchEvent"u8):
                     {
                         var eventSequence = @params.GetNextAsSequence();
-                        Propagation.CurrentID = @params.GetNextAsInt();
-                        Propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
+                        propagation.CurrentID = @params.GetNextAsInt();
+                        propagation.CurrentLevel = @params.GetNextOptionalAsInt() ?? 0;
 
                         // Do not handle this event if `stopPropagation()` or `stopImmediatePropagation()`
                         // has previously been called on the browser's same event instance.
-                        if (Propagation.IsStopped)
+                        if (propagation.IsStopped)
                             return sequence;
 
                         DispatchEvent(sequence, eventSequence, GetKey(method));
@@ -286,7 +286,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
             Keyholes.DispatchEvent(
                 listenerWithEvent,
-                new EventProxy(sequence, eventSequence, this)
+                new EventProxy(sequence, eventSequence, this, propagation)
             // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }
@@ -307,7 +307,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
             // Do not await event listeners here!  That would block the WebSocket reader.
             _ = Keyholes.DispatchEvent(
                 listenerWithEventAsync,
-                new EventProxy(sequence, eventSequence, this)
+                new EventProxy(sequence, eventSequence, this, propagation)
             // LazyEvent will return buffer(s) to the pool after it completes.
             );
         }

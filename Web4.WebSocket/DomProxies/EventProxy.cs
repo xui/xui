@@ -26,15 +26,17 @@ public record struct EventProxy : Event, IDisposable
 
     private readonly ReadOnlySequence<byte> rpcMessage;
     private readonly ReadOnlySequence<byte> eventParam;
-    private readonly Bridge bridge;
+    private readonly IWindow window;
+    private readonly Propagation propagation;
     private Dictionary<string, long>? values = null; // Here, longs are used to encode bools, ints, and doubles.
     private Dictionary<string, object>? references = null;
 
-    public EventProxy(ReadOnlySequence<byte> rpcMessage, ReadOnlySequence<byte> eventParam, Bridge bridge)
+    public EventProxy(ReadOnlySequence<byte> rpcMessage, ReadOnlySequence<byte> eventParam, IWindow window, Propagation propagation)
     {
         this.rpcMessage = rpcMessage;
         this.eventParam = eventParam;
-        this.bridge = bridge;
+        this.window = window;
+        this.propagation = propagation;
     }
 
     public void Dispose()
@@ -624,7 +626,7 @@ public record struct EventProxy : Event, IDisposable
     public string? Type => GetReference("type") as string;
     string IEvent.Type => Type ?? string.Empty;
 
-    public IWindow? View => this.bridge;
+    public IWindow? View => this.window;
     IWindow IView.View => View!;
 
     public int? Width => GetInt("width");
@@ -636,7 +638,7 @@ public record struct EventProxy : Event, IDisposable
     public double? Y => GetDouble("y");
     double IXY.Y => Y ?? default;
 
-    public void StopPropagation() => bridge.Propagation.Stop();
+    public void StopPropagation() => propagation.Stop();
 
-    public void StopImmediatePropagation() => bridge.Propagation.StopImmediate();
+    public void StopImmediatePropagation() => propagation.StopImmediate();
 }
