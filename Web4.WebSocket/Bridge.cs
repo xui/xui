@@ -31,7 +31,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
     public IWindow Window => this;
     public IDocument Document => this;
     public IConsole Console => this;
-    public IRpcServer Keyholes => this;
+    public IKeyholes Keyholes => this;
 
     public static async Task Bind(
         HttpContext http,
@@ -383,7 +383,7 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
             Keyhole[] newBuffer = CaptureSnapshot();
             using (var batchOutput = JsonRpc.BatchThisScope())
             {
-                Reconciler.Diff(this, oldBuffer, newBuffer);
+                Reconciler.Diff(mutator: Keyholes, oldBuffer, newBuffer);
             }
 
             var pool = ArrayPool<Keyhole>.Shared;

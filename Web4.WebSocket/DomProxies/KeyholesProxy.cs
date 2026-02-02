@@ -8,7 +8,7 @@ namespace Web4.WebSocket;
 
 // Instead of a new-ing up another class, save an instantiation 
 // and explicitly implement on Bridge.
-public partial class Bridge : IRpcClient, IRpcServer
+public partial class Bridge : IRpcClient, IRpcServer, IKeyholes
 {
     public void SetText(byte[] key, ref Keyhole keyhole)
     {
