@@ -6,6 +6,8 @@ namespace Web4.WebSocket;
 // and explicitly implement on Bridge.
 public partial class Bridge : IDocument
 {
+    public IDocument Document => this;
+
     IWindow IDocument.DefaultView => throw new NotImplementedException();
 
     string? IDocument.Title { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

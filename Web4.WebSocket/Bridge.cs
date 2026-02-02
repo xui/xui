@@ -28,10 +28,6 @@ public partial class Bridge(HttpContext httpContext, WindowBuilder windowBuilder
 
     public bool IsInvalidated { get; private set; } = false;
     public Propagation Propagation { get; } = new();
-    public IWindow Window => this;
-    public IDocument Document => this;
-    public IConsole Console => this;
-    public IKeyholes Keyholes => this;
 
     public static async Task Bind(
         HttpContext http,

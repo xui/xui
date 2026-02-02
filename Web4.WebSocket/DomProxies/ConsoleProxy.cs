@@ -6,6 +6,8 @@ namespace Web4.WebSocket;
 // and explicitly implement on Bridge.
 public partial class Bridge : IConsole
 {
+    public IConsole Console => this;
+
     // TODO: Tests still needed for each one.
     void IConsole.Assert(bool assertion, string message)
         => JsonRpc.WriteNotification("console.assert", assertion ? "true" : "false", message);

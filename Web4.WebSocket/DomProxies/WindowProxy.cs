@@ -6,6 +6,8 @@ namespace Web4.WebSocket;
 // and explicitly implement on Bridge.
 public partial class Bridge : IWindow
 {
+    public IWindow Window => this;
+
     IConsole IWindow.Console => this;
 
     IDocument IWindow.Document => this;

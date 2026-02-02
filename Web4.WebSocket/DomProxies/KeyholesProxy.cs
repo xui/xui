@@ -10,6 +10,8 @@ namespace Web4.WebSocket;
 // and explicitly implement on Bridge.
 public partial class Bridge : IRpcClient, IRpcServer, IKeyholes
 {
+    public IKeyholes Keyholes => this;
+
     public void SetText(byte[] key, ref Keyhole keyhole)
     {
         JsonRpc.WriteNotification(
