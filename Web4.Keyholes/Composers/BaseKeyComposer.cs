@@ -11,10 +11,10 @@ public abstract class BaseKeyComposer : BaseComposer
     public byte[] Key { get; private set; } = [];
     private bool isHtmlPrepared = true;
 
-    public override void Grow(ref Html html, int literalLength, int keyholeCount)
+    public override void Grow(int literalLength, int keyholeCount)
     {
         isHtmlPrepared = false;
-        base.Grow(ref html, literalLength, keyholeCount);
+        base.Grow(literalLength, keyholeCount);
     }
 
     public virtual bool OnTemplateBegin(ref Html html, ref string markup) => true;

@@ -8,7 +8,7 @@ public abstract class BaseComposer
     public int LiteralLength { get; set; }
     public int KeyholeCount { get; set; }
 
-    public virtual void Grow(ref Html html, int literalLength, int keyholeCount)
+    public virtual void Grow(int literalLength, int keyholeCount)
     {
         LiteralLength += literalLength;
         KeyholeCount += keyholeCount;
