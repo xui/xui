@@ -6,11 +6,7 @@ namespace Web4.Dom
     {
         public interface IModifiers : ISubset, ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift, IView
         {
-            new const string TRIM = 
-                ModifierAlt.TRIM + "," + 
-                ModifierCtrl.TRIM + "," + 
-                ModifierMeta.TRIM + "," + 
-                ModifierShift.TRIM;
+            new const string TRIM = $"{ModifierAlt.TRIM},{ModifierCtrl.TRIM},{ModifierMeta.TRIM},{ModifierShift.TRIM}";
         }
     }
 }

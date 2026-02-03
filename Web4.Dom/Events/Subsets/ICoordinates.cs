@@ -6,13 +6,7 @@ namespace Web4.Dom
     {
         public interface ICoordinates : ISubset, XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY, IView
         {
-            new const string TRIM = 
-                XY.TRIM + "," + 
-                ClientXY.TRIM + "," + 
-                MovementXY.TRIM + "," + 
-                OffsetXY.TRIM + "," + 
-                PageXY.TRIM + "," + 
-                ScreenXY.TRIM;
+            new const string TRIM = $"{XY.TRIM},{ClientXY.TRIM},{MovementXY.TRIM},{OffsetXY.TRIM},{PageXY.TRIM},{ScreenXY.TRIM}";
         }
     }
 }
