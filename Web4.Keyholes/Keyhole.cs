@@ -10,11 +10,20 @@ public struct Keyhole
     private long value1;        // 8 bytes
     private int value2;         // 4 bytes
     private KeyholeType type;   // 4 bytes
-    private string? format;     // 8 bytes
+    private string? modifier;   // 8 bytes
 
     public byte[] Key { readonly get => key; set => key = value; }
     public KeyholeType Type { readonly get => type; set => type = value; }
-    public string? Format { readonly get => format; set => format = value; }
+    
+    // --- shared backing field: modifier ---
+    // These all come from the format string of string interpolation, the part after `:`
+    // e.g. $"Your total cost is {amount:c} today."
+    // However, some keyhole types use it for purposes other than formatting.
+    // KeyholeType.EventListener uses it to trim event properties before serialization.
+    // KeyholeType.Html/Iterator uses it to indicate viewTransitionName.
+    public string? Format { readonly get => modifier; set => modifier = value; }
+    public string? Transition { readonly get => modifier; set => modifier = value; }
+    public string? Trim { readonly get => modifier; set => modifier = value; }
 
     // --- shared backing field: reference ---
     // These properties all use `reference` as their backing field.  Since each keyhole
@@ -26,7 +35,7 @@ public struct Keyhole
     public string? Expression       { set => this.reference = value; get => reference as string; }
     public object? Tag              { set => this.reference = value; get => reference; }
 
-    // --- backing field: value1 ---
+    // --- shared backing field: value1 ---
     // These properties all use `value1` as their backing field.  Since each keyhole
     // can only represent a single type at a time we can save a great deal of 
     // wasted RAM and boost memory locality of keyhole buffers by sharing a single backing store 
@@ -49,7 +58,7 @@ public struct Keyhole
     public int SequenceStart { get => (int)((ulong)value1 >> 32); set => value1 = (long)((ulong)value << 32) | (uint)value1; }
     public int SequenceLength { get => (int)value1; set => value1 = (long)((ulong)value1 & 0xFFFFFFFF00000000) | (uint)value; }
 
-    // --- backing field: value2 ---
+    // --- shared backing field: value2 ---
     // These are "helper properties" and use `value2` as their backing field.  
     // Like the properties that use value1, they aim to conserve memory width in keyhole 
     // buffers by reusing one backing field across a number of properties that are only 

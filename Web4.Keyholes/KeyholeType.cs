@@ -18,6 +18,6 @@ public enum KeyholeType
     Uri,
     Attribute,
     Html,
-    EventListener,
     Iterator,
+    EventListener,
 }

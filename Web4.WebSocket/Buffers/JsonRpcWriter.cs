@@ -380,7 +380,7 @@ public partial class JsonRpcWriter : IDisposable
                     jsonWriter.WriteStringValueSegment("\"keyholes['", false);
                     WriteKey(keyhole.Key);
                     jsonWriter.WriteStringValueSegment("'].dispatchEvent(event.trim('", false);
-                    jsonWriter.WriteStringValueSegment(keyhole.Format ?? "*", false);
+                    jsonWriter.WriteStringValueSegment(keyhole.Trim ?? "*", false);
                     jsonWriter.WriteStringValueSegment("'))\" key:", false);
                     WriteKey(keyhole.Key);
                     break;
