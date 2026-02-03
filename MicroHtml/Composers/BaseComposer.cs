@@ -14,7 +14,7 @@ public abstract class BaseComposer
         KeyholeCount += keyholeCount;
     }
 
-    public virtual bool OnMarkup(ref Html parent, ref string literal) => true;
+    public virtual bool OnMarkup(ref Html parent, ref string literal, int relativeOrder = -1) => true;
 
     public virtual bool OnStringKeyhole(ref Html parent, string value) => true;
     public virtual bool OnBoolKeyhole(ref Html parent, bool value) => true;
@@ -30,7 +30,7 @@ public abstract class BaseComposer
     public virtual bool OnColorKeyhole(ref Html parent, Color value, string? format = null) => true;
     public virtual bool OnUriKeyhole(ref Html parent, Uri value, string? format = null) => true;
 
-    public virtual bool OnHtmlKeyhole(ref Html parent, scoped Html value, string? format = null, string? expression = null) => true;
+    public virtual bool OnHtmlKeyhole(ref Html parent, scoped Html value, int relativeOrder = -1, string? format = null, string? expression = null) => true;
 
     public virtual bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
     {

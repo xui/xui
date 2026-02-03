@@ -17,7 +17,6 @@ public ref partial struct Html : IDisposable
 
     public int Length { get; private set; }
     public HtmlType Type { get; set; }
-    public int RelativeOrder { get; private set; }
 
     /// <summary>
     /// --- ROOT Html ---
@@ -27,7 +26,7 @@ public ref partial struct Html : IDisposable
     /// This constructor is for creating the root Html.
     /// </summary>
     public Html(int literalLength, int formattedCount, BaseComposer composer)
-        : this(literalLength, formattedCount, -1, composer)
+        : this(composer, literalLength, formattedCount)
     {
         scopedComposer = composer;
     }
@@ -41,7 +40,7 @@ public ref partial struct Html : IDisposable
     /// It's relies on ThreadStatic to find its composer (which was established by the root Html).
     /// </summary>
     public Html(int literalLength, int formattedCount, [CallerLineNumber] int relativeOrder = 0)
-        : this(literalLength, formattedCount, relativeOrder, scopedComposer ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."))
+        : this(scopedComposer ?? throw new NotSupportedException($"This thread's root Html must provide its own composer."), literalLength, formattedCount)
     {
     }
 
@@ -53,16 +52,15 @@ public ref partial struct Html : IDisposable
     /// This constructor is for inline Html.  It gets its composer from the parent Html.
     /// </summary>
     public Html(int literalLength, int formattedCount, Html parentHtml, out bool @continue, [CallerLineNumber] int relativeOrder = 0)
-        : this(literalLength, formattedCount, relativeOrder, parentHtml.composer)
+        : this(parentHtml.composer, literalLength, formattedCount)
     {
         @continue = true;
     }
 
-    private Html(int literalLength, int formattedCount, int relativeOrder, BaseComposer composer)
+    private Html(BaseComposer composer, int literalLength, int formattedCount)
     {
         this.composer = composer;
         Length = formattedCount * 2 + 1;
-        RelativeOrder = relativeOrder;
         Type = (literalLength, composer.LiteralLength) switch {
             (0, 0) => HtmlType.Wrapper,
             (> 0, 0) => HtmlType.Template,
@@ -76,7 +74,7 @@ public ref partial struct Html : IDisposable
             AppendLiteral(string.Empty);
     }
 
-    private Html(int iteratorCount, BaseComposer composer)
+    private Html(BaseComposer composer, int iteratorCount)
     {
         Length = iteratorCount * 2 + 1;
         Type = HtmlType.Element;
@@ -88,8 +86,8 @@ public ref partial struct Html : IDisposable
     // PARTIAL MARKUP
     // Ex (opening): <div id="something"><figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
     // or (closing): </div></div></div></div></div></div></div>
-    public bool AppendLiteral(string literal)
-        => composer.OnMarkup(ref this, ref literal);
+    public bool AppendLiteral(string literal, [CallerLineNumber] int relativeOrder = 0)
+        => composer.OnMarkup(ref this, ref literal, relativeOrder);
 
 
     // MUTABLE VALUES
@@ -175,8 +173,7 @@ public ref partial struct Html : IDisposable
         // Possible point of confusion: 
         // By this line, the `scoped Html html` has already set its own keyholes.
 
-        html.RelativeOrder = alignment;
-        return composer.OnHtmlKeyhole(ref this, html, format, expression);
+        return composer.OnHtmlKeyhole(ref this, html, alignment, format, expression);
     }
 
     // EX: { names.Select(n => new MyComponent(name: n)) }
@@ -185,7 +182,7 @@ public ref partial struct Html : IDisposable
         string? format = null, 
         [CallerArgumentExpression(nameof(enumerable))] string? expression = null)
     {
-        var htmls = new Html(enumerable.Count, composer);
+        var htmls = new Html(composer, enumerable.Count);
         return composer.OnIteratorKeyhole(ref this, ref htmls, enumerable, format, expression);
     }
 

@@ -40,9 +40,9 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnMarkup(ref Html parent, ref string literal)
+    public override bool OnMarkup(ref Html parent, ref string literal, int relativeOrder = -1)
     {
-        base.OnMarkup(ref parent, ref literal);
+        base.OnMarkup(ref parent, ref literal, relativeOrder);
 
         // This makes the assumption that keyholes preceeded with an '=' are always attributes.  
         // Attributes need different sentinels than regular keyholes and boolean attributes 
@@ -226,9 +226,9 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
     public override bool OnUriKeyhole(ref Html parent, Uri value, string? format = null)
         => OnStringKeyhole(ref parent, value.ToString()); // TODO: Memory allocation!
         
-    public override bool OnHtmlBegin(ref Html html)
+    public override bool OnHtmlBegin(ref Html html, int relativeOrder = -1)
     {
-        base.OnHtmlBegin(ref html);
+        base.OnHtmlBegin(ref html, relativeOrder);
 
         switch (attributeStatus)
         {
@@ -247,9 +247,9 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
     {
-        base.OnHtmlEnd(ref parent, html, format, expression);
+        base.OnHtmlEnd(ref parent, html, relativeOrder, format, expression);
 
         switch (attributeStatus)
         {

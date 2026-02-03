@@ -50,14 +50,14 @@ public class FindKeyComposer : BaseKeyComposer
     protected override bool OnKeyhole(ref Html parent)
         => !isFound && base.OnKeyhole(ref parent);
 
-    public override bool OnHtmlBegin(ref Html html)
-        => !isFound && base.OnHtmlBegin(ref html);
+    public override bool OnHtmlBegin(ref Html html, int relativeOrder = -1)
+        => !isFound && base.OnHtmlBegin(ref html, relativeOrder);
 
-    public override bool OnHtmlKeyhole(ref Html parent, scoped Html html, string? format = null, string? expression = null)
-        => !isFound && base.OnHtmlKeyhole(ref parent, html, format, expression);
+    public override bool OnHtmlKeyhole(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+        => !isFound && base.OnHtmlKeyhole(ref parent, html, relativeOrder, format, expression);
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
-        => !isFound && base.OnHtmlEnd(ref parent, html, format, expression);
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+        => !isFound && base.OnHtmlEnd(ref parent, html, relativeOrder, format, expression);
 
     public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
         => !isFound && base.OnIteratorBegin(ref parent, ref htmls, format, expression);

@@ -8,7 +8,7 @@ public class HtmlComposer(IBufferWriter<byte> writer) : BaseComposer, IStreaming
 {
     public IBufferWriter<byte> Writer { get; set; } = writer;
 
-    public override bool OnMarkup(ref Html parent, ref string literal) => Writer.Write(literal);
+    public override bool OnMarkup(ref Html parent, ref string literal, int relativeOrder = -1) => Writer.Write(literal);
     public override bool OnStringKeyhole(ref Html parent, string value) => Writer.Write(value);
     public override bool OnBoolKeyhole(ref Html parent, bool value) => Writer.Write(value ? "true" : "false");
     public override bool OnIntKeyhole(ref Html parent, int value, string? format = null) => Writer.Write(value, format);

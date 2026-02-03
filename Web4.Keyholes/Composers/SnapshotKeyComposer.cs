@@ -64,9 +64,9 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnMarkup(ref Html parent, ref string literal)
+    public override bool OnMarkup(ref Html parent, ref string literal, int relativeOrder = -1)
     {
-        base.OnMarkup(ref parent, ref literal);
+        base.OnMarkup(ref parent, ref literal, relativeOrder);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
@@ -110,37 +110,39 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnHtmlBegin(ref Html html)
+    public override bool OnHtmlBegin(ref Html html, int relativeOrder = -1)
     {
         EnsureOddIndex();
         int index = Cursor;
-        base.OnHtmlBegin(ref html);
+        base.OnHtmlBegin(ref html, relativeOrder);
 
         ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = html.Length;
-        keyhole.RelativeOrder = html.RelativeOrder;
         keyhole.Type = isWritingAttribute ? KeyholeType.Attribute : KeyholeType.Html;
+        keyhole.RelativeOrder = relativeOrder;
 
         Cursor = writeHead;
         writeHead += html.Length + 1;
         return true;
     }
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
     {
         // Prevent bleeding
         ref var tail = ref buffer[Cursor];
         tail.String = string.Empty;
         tail.Type = KeyholeType.StringLiteral;
 
-        base.OnHtmlEnd(ref parent, html, format, expression);
+        base.OnHtmlEnd(ref parent, html, relativeOrder, format, expression);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
         keyhole.Format = format;
         keyhole.Expression = expression;
+        if (relativeOrder >= 0)
+            keyhole.RelativeOrder = relativeOrder;
 
         Cursor = index + 1;
         return true;
