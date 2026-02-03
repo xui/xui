@@ -21,9 +21,9 @@ public struct Keyhole
     // However, some keyhole types use it for purposes other than formatting.
     // KeyholeType.EventListener uses it to trim event properties before serialization.
     // KeyholeType.Html/Iterator uses it to indicate viewTransitionName.
-    public string? Format { readonly get => modifier; set => modifier = value; }
-    public string? Transition { readonly get => modifier; set => modifier = value; }
-    public string? Trim { readonly get => modifier; set => modifier = value; }
+    public string? FormatModifier { readonly get => modifier; set => modifier = value; }
+    public string? TransitionModifier { readonly get => modifier; set => modifier = value; }
+    public string? TrimModifier { readonly get => modifier; set => modifier = value; }
 
     // --- shared backing field: reference ---
     // These properties all use `reference` as their backing field.  Since each keyhole
@@ -74,7 +74,7 @@ public struct Keyhole
             KeyholeType.String
                 => left.reference == right.reference,
             KeyholeType.Uri
-                => left.reference == right.reference && left.Format == right.Format,
+                => left.reference == right.reference && left.FormatModifier == right.FormatModifier,
             KeyholeType.Boolean
                 => left.value1 == right.value1,
             KeyholeType.Integer or
@@ -87,7 +87,7 @@ public struct Keyhole
             KeyholeType.TimeSpan or
             KeyholeType.TimeOnly or
             KeyholeType.Color
-                => left.value1 == right.value1 && left.Format == right.Format,
+                => left.value1 == right.value1 && left.FormatModifier == right.FormatModifier,
             _ => throw new NotSupportedException()
         };
 

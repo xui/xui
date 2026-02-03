@@ -41,7 +41,7 @@ public ref struct Reconciler(IRpcClient mutator, Keyhole[] oldBuffer, Keyhole[] 
                     newParent.Key,
                     newSpan
                 );
-            else if (newParent.Transition is null)
+            else if (newParent.TransitionModifier is null)
                 mutator.SetNode(
                     newBuffer,
                     newParent.Key,
@@ -98,7 +98,7 @@ public ref struct Reconciler(IRpcClient mutator, Keyhole[] oldBuffer, Keyhole[] 
                         newParent.Key,
                         newSpan
                     );
-                else if (newParent.Transition == null)
+                else if (newParent.TransitionModifier == null)
                     mutator.SetNode(
                         newBuffer,
                         newParent.Key,
@@ -209,7 +209,7 @@ public ref struct Reconciler(IRpcClient mutator, Keyhole[] oldBuffer, Keyhole[] 
         var minLength = Math.Min(oldItems.Length, newItems.Length);
 
         var tagChanges = oldItems.Length != newItems.Length ? 1 : 0;
-        if (newKeyhole.Transition is not null)
+        if (newKeyhole.TransitionModifier is not null)
         {
             for (var d = 1; d < minLength; d += 2)
             {
@@ -254,7 +254,7 @@ public ref struct Reconciler(IRpcClient mutator, Keyhole[] oldBuffer, Keyhole[] 
                 ref var newItem = ref newItems[d];
                 var newItemSpan = newBuffer.AsSpan(newItem.Sequence);
 
-                if (newKeyhole.Transition is null || newItem.Tag is null)
+                if (newKeyhole.TransitionModifier is null || newItem.Tag is null)
                     mutator.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key);
                 else
                     mutator.PushNode(newBuffer, newKeyhole.Key, newItemSpan, newItem.Key, ("web4-move-", newItem.Tag.GetHashCode()));
@@ -268,7 +268,7 @@ public ref struct Reconciler(IRpcClient mutator, Keyhole[] oldBuffer, Keyhole[] 
             for (var d = minLength; d < oldItems.Length; d += 2)
             {
                 ref var item = ref oldItems[d];
-                if (newKeyhole.Transition is null || item.Tag is null)
+                if (newKeyhole.TransitionModifier is null || item.Tag is null)
                     mutator.PopNode(item.Key);
                 else
                     mutator.PopNode(item.Key, ("web4-move-", item.Tag.GetHashCode()));

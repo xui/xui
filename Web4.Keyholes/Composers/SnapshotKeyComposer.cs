@@ -103,7 +103,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         keyhole.Key = Key;
         keyhole.SetValue(value);
         keyhole.Type = type;
-        keyhole.Format = format;
+        keyhole.FormatModifier = format;
         keyhole.IsValueAnAttribute = isWritingAttribute;
 
         Cursor = index + 1;
@@ -139,7 +139,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
-        keyhole.Transition = format;
+        keyhole.TransitionModifier = format;
         keyhole.Expression = expression;
         if (relativeOrder >= 0)
             keyhole.RelativeOrder = relativeOrder;
@@ -157,7 +157,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
-        keyhole.Transition = format;
+        keyhole.TransitionModifier = format;
         keyhole.Expression = expression;
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = htmls.FormattedCount * 2 + 1;
@@ -211,7 +211,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.EventListener;
-        keyhole.Trim = format;
+        keyhole.TrimModifier = format;
         keyhole.Expression = expression;
         
         Cursor = index + 1;
