@@ -166,7 +166,7 @@ public ref partial struct Html : IDisposable
     // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
     public bool AppendFormatted(
         [InterpolatedStringHandlerArgument("")] scoped Html html, 
-        int alignment = -1, 
+        int alignment = -1, // TODO: This doesn't work yet, probably because of empty/wrapper Htmls
         string? format = null, 
         [CallerArgumentExpression(nameof(html))] string? expression = null)
     {
