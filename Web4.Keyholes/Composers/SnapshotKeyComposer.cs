@@ -60,7 +60,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
     {
         base.OnTemplateBegin(ref html, ref markup);
         Cursor = 0;
-        writeHead += html.Length + 1;
+        writeHead += html.FormattedCount * 2 + 2;
         return true;
     }
 
@@ -73,7 +73,7 @@ public class SnapshotKeyComposer : BaseKeyComposer
         keyhole.String = literal;
         keyhole.Type = KeyholeType.StringLiteral;
         keyhole.SequenceStart = index;
-        keyhole.SequenceLength = parent.Length;
+        keyhole.SequenceLength = parent.FormattedCount * 2 + 1;
         isWritingAttribute = literal.EndsWith('=');
        
         Cursor = index + 1;
@@ -119,12 +119,12 @@ public class SnapshotKeyComposer : BaseKeyComposer
         ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.SequenceStart = writeHead;
-        keyhole.SequenceLength = html.Length;
+        keyhole.SequenceLength = html.FormattedCount * 2 + 1;
         keyhole.Type = isWritingAttribute ? KeyholeType.Attribute : KeyholeType.Html;
         keyhole.RelativeOrder = relativeOrder;
 
         Cursor = writeHead;
-        writeHead += html.Length + 1;
+        writeHead += html.FormattedCount * 2 + 2;
         return true;
     }
 
@@ -160,10 +160,10 @@ public class SnapshotKeyComposer : BaseKeyComposer
         keyhole.Format = format;
         keyhole.Expression = expression;
         keyhole.SequenceStart = writeHead;
-        keyhole.SequenceLength = htmls.Length;
+        keyhole.SequenceLength = htmls.FormattedCount * 2 + 1;
 
         Cursor = writeHead;
-        writeHead += htmls.Length + 1;
+        writeHead += htmls.FormattedCount * 2 + 2;
         return true;
     }
 
