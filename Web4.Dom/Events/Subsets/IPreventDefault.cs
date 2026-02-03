@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IPreventDefault : ISubset
         {
-            const string Format = "preventDefault";
+            const string TRIM = "preventDefault";
 
             /// <summary>
             /// Cancels the event (if it is cancelable).

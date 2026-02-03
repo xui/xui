@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ITarget<T> : ISubset, IView
         {
-            new const string Format = "target";
+            new const string TRIM = "target";
 
             /// <summary>
             /// A reference to the object to which the event was originally dispatched.

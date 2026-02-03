@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IMovementXY : ISubset, IView
         {
-            new const string Format = "movementX,movementY";
+            new const string TRIM = "movementX,movementY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the last mousemove event.

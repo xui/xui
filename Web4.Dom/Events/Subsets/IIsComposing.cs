@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IIsComposing : ISubset, IView
         {
-            new const string Format = "isComposing";
+            new const string TRIM = "isComposing";
 
             /// <summary>
             /// Returns a boolean value that is true if the event is fired between after compositionstart and before compositionend.

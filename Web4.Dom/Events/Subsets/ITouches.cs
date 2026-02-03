@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ITouches : ISubset, IView
         {
-            new const string Format = "changedTouches,targetTouches,touches";
+            new const string TRIM = "changedTouches,targetTouches,touches";
 
             /// <summary>
             /// A TouchList of all the Touch objects representing individual points of contact 

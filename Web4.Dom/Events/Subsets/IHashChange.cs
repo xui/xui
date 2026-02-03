@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IHashChange : ISubset, IView
         {
-            new const string Format = "newUrl,oldUrl";
+            new const string TRIM = "newUrl,oldUrl";
 
             /// <summary>
             /// The new URL to which the window is navigating.

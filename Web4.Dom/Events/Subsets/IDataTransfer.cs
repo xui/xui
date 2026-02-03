@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IDataTransfer : ISubset, IView
         {
-            new const string Format = "dataTransfer";
+            new const string TRIM = "dataTransfer";
 
             /// <summary>
             /// Returns a DataTransfer object containing contextual information.

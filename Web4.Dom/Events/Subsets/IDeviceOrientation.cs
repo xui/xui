@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IDeviceOrientation : ISubset, IView
         {
-            new const string Format = "absolute,alpha,beta,gamma";
+            new const string TRIM = "absolute,alpha,beta,gamma";
 
             /// <summary>
             /// A boolean that indicates whether or not the device is providing 

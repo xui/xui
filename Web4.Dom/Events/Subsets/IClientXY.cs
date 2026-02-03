@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IClientXY : ISubset, IView
         {
-            new const string Format = "clientX,clientY";
+            new const string TRIM = "clientX,clientY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer in viewport coordinates.

@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IModifierAlt : ISubset, IView
         {
-            new const string Format = "altKey";
+            new const string TRIM = "altKey";
 
             /// <summary>
             /// Returns true if the alt key was down when the event was fired.

@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IStates : ISubset, IView
         {
-            new const string Format = "newState,oldState";
+            new const string TRIM = "newState,oldState";
 
             /// <summary>
             /// A string (either "open" or "closed"), representing the state the element is transitioning to.

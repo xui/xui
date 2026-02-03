@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IWidthHeight : ISubset, IView
         {
-            new const string Format = "width,height";
+            new const string TRIM = "width,height";
 
             /// <summary>
             /// The width (magnitude on the X axis), in CSS pixels, 

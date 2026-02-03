@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IKeys : ISubset, IView
         {
-            new const string Format = "code,key,location,repeat";
+            new const string TRIM = "code,key,location,repeat";
 
             /// <summary>
             /// Returns a string with the code value of the physical key represented by the event.

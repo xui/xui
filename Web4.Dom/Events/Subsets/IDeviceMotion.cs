@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IDeviceMotion : ISubset, IView
         {
-            new const string Format = "acceleration,acceleratinIncludingGravity,rotationRate,interval";
+            new const string TRIM = "acceleration,acceleratinIncludingGravity,rotationRate,interval";
 
             /// <summary>
             /// An object giving the acceleration of the device on the three axis X, Y and Z. 

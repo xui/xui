@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IButtons : ISubset, IView
         {
-            new const string Format = "button,buttons";
+            new const string TRIM = "button,buttons";
 
             /// <summary>
             /// The button number that was pressed (if applicable) when the mouse event was fired.

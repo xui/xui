@@ -9,412 +9,412 @@ public ref partial struct Html
 {
     public bool AppendFormatted(
         Action<Angles> listener, 
-        string? format = Angles.Format, 
+        string? format = Angles.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Angles, Task> listener, 
-        string? format = Angles.Format, 
+        string? format = Angles.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Animation> listener, 
-        string? format = Animation.Format, 
+        string? format = Animation.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Animation, Task> listener, 
-        string? format = Animation.Format, 
+        string? format = Animation.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Buttons> listener, 
-        string? format = Buttons.Format, 
+        string? format = Buttons.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Buttons, Task> listener, 
-        string? format = Buttons.Format, 
+        string? format = Buttons.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ClientXY> listener, 
-        string? format = ClientXY.Format, 
+        string? format = ClientXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ClientXY, Task> listener, 
-        string? format = ClientXY.Format, 
+        string? format = ClientXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Coordinates> listener, 
-        string? format = Coordinates.Format, 
+        string? format = Coordinates.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Coordinates, Task> listener, 
-        string? format = Coordinates.Format, 
+        string? format = Coordinates.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<CurrentTarget> listener, 
-        string? format = CurrentTarget.Format, 
+        string? format = CurrentTarget.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<CurrentTarget, Task> listener, 
-        string? format = CurrentTarget.Format, 
+        string? format = CurrentTarget.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Data> listener, 
-        string? format = Data.Format, 
+        string? format = Data.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Data, Task> listener, 
-        string? format = Data.Format, 
+        string? format = Data.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<DataTransfer> listener, 
-        string? format = DataTransfer.Format, 
+        string? format = DataTransfer.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<DataTransfer, Task> listener, 
-        string? format = DataTransfer.Format, 
+        string? format = DataTransfer.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Deltas> listener, 
-        string? format = Deltas.Format, 
+        string? format = Deltas.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Deltas, Task> listener, 
-        string? format = Deltas.Format, 
+        string? format = Deltas.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Detail> listener, 
-        string? format = Detail.Format, 
+        string? format = Detail.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Detail, Task> listener, 
-        string? format = Detail.Format, 
+        string? format = Detail.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<DeviceMotion> listener, 
-        string? format = DeviceMotion.Format, 
+        string? format = DeviceMotion.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<DeviceMotion, Task> listener, 
-        string? format = DeviceMotion.Format, 
+        string? format = DeviceMotion.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<DeviceOrientation> listener, 
-        string? format = DeviceOrientation.Format, 
+        string? format = DeviceOrientation.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<DeviceOrientation, Task> listener, 
-        string? format = DeviceOrientation.Format, 
+        string? format = DeviceOrientation.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Error> listener, 
-        string? format = Error.Format, 
+        string? format = Error.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Error, Task> listener, 
-        string? format = Error.Format, 
+        string? format = Error.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<HashChange> listener, 
-        string? format = HashChange.Format, 
+        string? format = HashChange.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<HashChange, Task> listener, 
-        string? format = HashChange.Format, 
+        string? format = HashChange.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<IsComposing> listener, 
-        string? format = IsComposing.Format, 
+        string? format = IsComposing.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<IsComposing, Task> listener, 
-        string? format = IsComposing.Format, 
+        string? format = IsComposing.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Keys> listener, 
-        string? format = Keys.Format, 
+        string? format = Keys.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Keys, Task> listener, 
-        string? format = Keys.Format, 
+        string? format = Keys.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Length> listener, 
-        string? format = Event.Subsets.Length.Format, 
+        string? format = Event.Subsets.Length.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Length, Task> listener, 
-        string? format = Event.Subsets.Length.Format, 
+        string? format = Event.Subsets.Length.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ModifierAlt> listener, 
-        string? format = ModifierAlt.Format, 
+        string? format = ModifierAlt.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ModifierAlt, Task> listener, 
-        string? format = ModifierAlt.Format, 
+        string? format = ModifierAlt.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ModifierCtrl> listener, 
-        string? format = ModifierCtrl.Format, 
+        string? format = ModifierCtrl.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ModifierCtrl, Task> listener, 
-        string? format = ModifierCtrl.Format, 
+        string? format = ModifierCtrl.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ModifierMeta> listener, 
-        string? format = ModifierMeta.Format, 
+        string? format = ModifierMeta.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ModifierMeta, Task> listener, 
-        string? format = ModifierMeta.Format, 
+        string? format = ModifierMeta.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Modifiers> listener, 
-        string? format = Modifiers.Format, 
+        string? format = Modifiers.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Modifiers, Task> listener, 
-        string? format = Modifiers.Format, 
+        string? format = Modifiers.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ModifierShift> listener, 
-        string? format = ModifierShift.Format, 
+        string? format = ModifierShift.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ModifierShift, Task> listener, 
-        string? format = ModifierShift.Format, 
+        string? format = ModifierShift.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<MovementXY> listener, 
-        string? format = MovementXY.Format, 
+        string? format = MovementXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<MovementXY, Task> listener, 
-        string? format = MovementXY.Format, 
+        string? format = MovementXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<OffsetXY> listener, 
-        string? format = OffsetXY.Format, 
+        string? format = OffsetXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<OffsetXY, Task> listener, 
-        string? format = OffsetXY.Format, 
+        string? format = OffsetXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<PageXY> listener, 
-        string? format = PageXY.Format, 
+        string? format = PageXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<PageXY, Task> listener, 
-        string? format = PageXY.Format, 
+        string? format = PageXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Persisted> listener, 
-        string? format = Persisted.Format, 
+        string? format = Persisted.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Persisted, Task> listener, 
-        string? format = Persisted.Format, 
+        string? format = Persisted.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Pointer> listener, 
-        string? format = Pointer.Format, 
+        string? format = Pointer.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Pointer, Task> listener, 
-        string? format = Pointer.Format, 
+        string? format = Pointer.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Pressures> listener, 
-        string? format = Pressures.Format, 
+        string? format = Pressures.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Pressures, Task> listener, 
-        string? format = Pressures.Format, 
+        string? format = Pressures.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<PreventDefault> listener, 
-        string? format = PreventDefault.Format, 
+        string? format = PreventDefault.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<PreventDefault, Task> listener, 
-        string? format = PreventDefault.Format, 
+        string? format = PreventDefault.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Progress> listener, 
-        string? format = Progress.Format, 
+        string? format = Progress.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Progress, Task> listener, 
-        string? format = Progress.Format, 
+        string? format = Progress.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<RelatedTarget> listener, 
-        string? format = RelatedTarget.Format, 
+        string? format = RelatedTarget.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<RelatedTarget, Task> listener, 
-        string? format = RelatedTarget.Format, 
+        string? format = RelatedTarget.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<ScreenXY> listener, 
-        string? format = ScreenXY.Format, 
+        string? format = ScreenXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<ScreenXY, Task> listener, 
-        string? format = ScreenXY.Format, 
+        string? format = ScreenXY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Skipped> listener, 
-        string? format = Skipped.Format, 
+        string? format = Skipped.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Skipped, Task> listener, 
-        string? format = Skipped.Format, 
+        string? format = Skipped.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<States> listener, 
-        string? format = States.Format, 
+        string? format = States.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<States, Task> listener, 
-        string? format = States.Format, 
+        string? format = States.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Submitter> listener, 
-        string? format = Submitter.Format, 
+        string? format = Submitter.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Submitter, Task> listener, 
-        string? format = Submitter.Format, 
+        string? format = Submitter.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Target> listener, 
-        string? format = Target.Format, 
+        string? format = Target.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Target, Task> listener, 
-        string? format = Target.Format, 
+        string? format = Target.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<string>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<bool>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<int>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     // TODO: I think converting `Func<Event, T>` to `Action<Event>` (e => listener(e)) is allocating.  
@@ -424,102 +424,102 @@ public ref partial struct Html
     // "call is ambiguous" due to these types' ability to cast to other types.
     public bool AppendFormatted(
         Func<Target<long>, long> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(e => listener(e), format, expression);
     public bool AppendFormatted(
         Func<Target<float>, float> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(e => listener(e), format, expression);
     public bool AppendFormatted(
         Func<Target<double>, double> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(e => listener(e), format, expression);
     public bool AppendFormatted(
         Func<Target<decimal>, decimal> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(e => listener(e), format, expression);
     public bool AppendFormatted(
         Action<Target<DateTime>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<DateOnly>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<TimeOnly>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<Color>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Action<Target<Uri>> listener,
-        string? format = Target.Format,
+        string? format = Target.TRIM,
         [CallerArgumentExpression(nameof(listener))] string? expression = null)
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Tilts> listener, 
-        string? format = Tilts.Format, 
+        string? format = Tilts.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Tilts, Task> listener, 
-        string? format = Tilts.Format, 
+        string? format = Tilts.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<Touches> listener, 
-        string? format = Touches.Format, 
+        string? format = Touches.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<Touches, Task> listener, 
-        string? format = Touches.Format, 
+        string? format = Touches.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<View> listener, 
-        string? format = View.Format, 
+        string? format = View.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<View, Task> listener, 
-        string? format = View.Format, 
+        string? format = View.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<WidthHeight> listener, 
-        string? format = WidthHeight.Format, 
+        string? format = WidthHeight.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<WidthHeight, Task> listener, 
-        string? format = WidthHeight.Format, 
+        string? format = WidthHeight.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 
     public bool AppendFormatted(
         Action<XY> listener, 
-        string? format = XY.Format, 
+        string? format = XY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
     public bool AppendFormatted(
         Func<XY, Task> listener, 
-        string? format = XY.Format, 
+        string? format = XY.TRIM, 
         [CallerArgumentExpression(nameof(listener))] string? expression = null) 
             => AppendEventListener(listener, format, expression);
 }

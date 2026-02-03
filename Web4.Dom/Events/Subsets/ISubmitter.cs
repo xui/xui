@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ISubmitter : ISubset, IView
         {
-            new const string Format = "submitter";
+            new const string TRIM = "submitter";
 
             /// <summary>
             /// An HTMLElement object which identifies the button or other element 

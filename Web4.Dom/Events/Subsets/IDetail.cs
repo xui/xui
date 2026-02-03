@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IDetail : ISubset, IView
         {
-            new const string Format = "detail";
+            new const string TRIM = "detail";
 
             /// <summary>
             /// Returns a long with details about the event, depending on the event type.

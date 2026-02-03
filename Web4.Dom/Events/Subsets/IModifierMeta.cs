@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IModifierMeta : ISubset, IView
         {
-            new const string Format = "metaKey";
+            new const string TRIM = "metaKey";
 
             /// <summary>
             /// Returns true if the meta key was down when the event was fired.

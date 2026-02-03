@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ISkipped : ISubset, IView
         {
-            new const string Format = "skipped";
+            new const string TRIM = "skipped";
 
             /// <summary>
             /// Returns true if the user agent is skipping the element's rendering, or false otherwise.

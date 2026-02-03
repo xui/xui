@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IDeltas : ISubset, IView
         {
-            new const string Format = "deltaX,deltaY,deltaZ,deltaMode";
+            new const string TRIM = "deltaX,deltaY,deltaZ,deltaMode";
 
             /// <summary>
             /// Returns a double representing the horizontal scroll amount.

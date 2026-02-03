@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IXY : ISubset, IView
         {
-            new const string Format = "x,y";
+            new const string TRIM = "x,y";
 
             /// <summary>
             /// Alias for MouseEvent.clientX.

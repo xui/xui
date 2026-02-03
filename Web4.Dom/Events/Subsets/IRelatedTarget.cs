@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IRelatedTarget : ISubset, IView
         {
-            new const string Format = "relatedTarget";
+            new const string TRIM = "relatedTarget";
 
             /// <summary>
             /// The secondary target for the event, if there is one.

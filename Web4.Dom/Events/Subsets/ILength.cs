@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ILength : ISubset, IView
         {
-            new const string Format = "length";
+            new const string TRIM = "length";
 
             /// <summary>
             /// Returns an integer representing the number of data items stored in the Storage object.

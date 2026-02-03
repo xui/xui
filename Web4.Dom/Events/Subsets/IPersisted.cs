@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IPersisted : ISubset, IView
         {
-            new const string Format = "persisted";
+            new const string TRIM = "persisted";
 
             /// <summary>
             /// Indicates if the document is loading from a cache.

@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IOffsetXY : ISubset, IView
         {
-            new const string Format = "offsetX,offsetY";
+            new const string TRIM = "offsetX,offsetY";
             
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the position of the padding edge of the target node.

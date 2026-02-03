@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IError : ISubset, IView
         {
-            new const string Format = "error";
+            new const string TRIM = "error";
 
             string Message { get; }
             string FileName { get; }

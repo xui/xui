@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ICurrentTarget : ISubset, IView
         {
-            new const string Format = "currentTarget";
+            new const string TRIM = "currentTarget";
 
             /// <summary>
             /// A reference to the currently registered target for the event. This is the 

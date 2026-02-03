@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IPointer : ISubset, IView
         {
-            new const string Format = "pointerID,twist,pointerType,isPrimary";
+            new const string TRIM = "pointerID,twist,pointerType,isPrimary";
 
             /// <summary>
             /// A unique identifier for the pointer causing the event.

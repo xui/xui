@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IPageXY : ISubset, IView
         {
-            new const string Format = "pageX,pageY";
+            new const string TRIM = "pageX,pageY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer relative to the whole document.

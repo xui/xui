@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IScreenXY : ISubset, IView
         {
-            new const string Format = "screenX,screenY";
+            new const string TRIM = "screenX,screenY";
 
             /// <summary>
             /// The X coordinate of the mouse pointer in screen coordinates.

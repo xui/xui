@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IModifierShift : ISubset, IView
         {
-            new const string Format = "shiftKey";
+            new const string TRIM = "shiftKey";
 
             /// <summary>
             /// Returns true if the shift key was down when the event was fired.

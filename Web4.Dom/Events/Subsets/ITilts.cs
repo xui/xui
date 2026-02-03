@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface ITilts : ISubset, IView
         {
-            new const string Format = "tiltX,tiltY";
+            new const string TRIM = "tiltX,tiltY";
 
             /// <summary>
             /// The plane angle (in degrees, in the range of -90 to 90) between 

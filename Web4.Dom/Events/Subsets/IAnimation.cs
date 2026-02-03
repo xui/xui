@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IAnimation : ISubset, IView
         {
-            new const string Format = "animationName,elapsedTime,propertyName,pseudoElement";
+            new const string TRIM = "animationName,elapsedTime,propertyName,pseudoElement";
 
             /// <summary>
             /// A string containing the value of the animation-name that generated the animation.

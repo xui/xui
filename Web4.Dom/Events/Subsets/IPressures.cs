@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IPressures : ISubset, IView
         {
-            new const string Format = "pressure,tangentialPressure";
+            new const string TRIM = "pressure,tangentialPressure";
 
             /// <summary>
             /// The normalized pressure of the pointer input in the range 0 to 1, 

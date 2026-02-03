@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IAngles : ISubset, IView
         {
-            new const string Format = "altitudeAngle,azimuthAngle";
+            new const string TRIM = "altitudeAngle,azimuthAngle";
 
             /// <summary>
             /// Represents the angle between a transducer (a pointer or stylus) axis 

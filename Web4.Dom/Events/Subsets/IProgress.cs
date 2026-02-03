@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IProgress : ISubset, IView
         {
-            new const string Format = "lengthComputable,loaded,total";
+            new const string TRIM = "lengthComputable,loaded,total";
 
             /// <summary>
             /// A boolean flag indicating if the ratio between the size of the data 

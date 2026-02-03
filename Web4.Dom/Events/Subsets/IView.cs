@@ -4,7 +4,7 @@ namespace Web4.Dom
     {
         public interface IView : ISubset
         {
-            const string Format = "view";
+            const string TRIM = "view";
 
             /// <summary>
             /// Read-only property returns the WindowProxy object from which the event was generated. This is the Window object the event happened in.
