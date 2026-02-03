@@ -22,7 +22,7 @@ public abstract class BaseKeyComposer : BaseComposer
 
     public override bool OnMarkup(ref Html parent, ref string literal, int relativeOrder = -1) => (isHtmlPrepared, parent.Type) switch {
         (false, HtmlType.Template) => isHtmlPrepared = OnTemplateBegin(ref parent, ref literal),
-        (false, HtmlType.Element) => isHtmlPrepared = OnHtmlBegin(ref parent, relativeOrder),
+        (false, HtmlType.Default) => isHtmlPrepared = OnHtmlBegin(ref parent, relativeOrder),
         _ => true,
     };
 
@@ -51,7 +51,7 @@ public abstract class BaseKeyComposer : BaseComposer
         => html.Type switch {
             HtmlType.Wrapper => true, // ignore
             HtmlType.Template => OnTemplateEnd(ref html),
-            HtmlType.Element or _ => OnHtmlEnd(ref parent, html, relativeOrder, format, expression),
+            HtmlType.Default or _ => OnHtmlEnd(ref parent, html, relativeOrder, format, expression),
         };
 
     public virtual bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
@@ -95,7 +95,7 @@ public abstract class BaseKeyComposer : BaseComposer
         var discard = string.Empty;
         _ = (isHtmlPrepared, parent.Type) switch {
             (false, HtmlType.Template) => isHtmlPrepared = OnTemplateBegin(ref parent, ref discard),
-            (false, HtmlType.Element) => isHtmlPrepared = OnHtmlBegin(ref parent),
+            (false, HtmlType.Default) => isHtmlPrepared = OnHtmlBegin(ref parent),
             _ => true,
         };
 

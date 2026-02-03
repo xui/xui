@@ -6,7 +6,7 @@ using Web4.Dom;
 
 namespace MicroHtml;
 
-public enum HtmlType { Element, Wrapper, Template }
+public enum HtmlType { Default, Template, Wrapper }
 
 [InterpolatedStringHandler]
 [StructLayout(LayoutKind.Auto)]
@@ -64,7 +64,7 @@ public ref partial struct Html : IDisposable
         Type = (literalLength, composer.LiteralLength) switch {
             (0, 0) => HtmlType.Wrapper,
             (> 0, 0) => HtmlType.Template,
-            _ => HtmlType.Element
+            _ => HtmlType.Default
         };
 
         composer.Grow(literalLength, formattedCount);
@@ -77,7 +77,7 @@ public ref partial struct Html : IDisposable
     private Html(BaseComposer composer, int iteratorCount)
     {
         FormattedCount = iteratorCount;
-        Type = HtmlType.Element;
+        Type = HtmlType.Default;
         this.composer = composer;
         // composer.Grow(0, iteratorCount);
     }
@@ -161,9 +161,9 @@ public ref partial struct Html : IDisposable
         => composer.OnListener(ref this, listener, format, expression);
 
 
-    // MUTABLE ELEMENTS
+    // MUTABLE NODES
 
-    // EX: <div>{ user != null ? Avatar(user: user) : SignIn() }</div>
+    // EX: <div>{ Avatar(user: user) }</div>
     public bool AppendFormatted(
         [InterpolatedStringHandlerArgument("")] scoped Html html, 
         int alignment = -1, // TODO: This doesn't work yet, probably because of empty/wrapper Htmls
