@@ -247,17 +247,17 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? transition = null, string? expression = null)
     {
-        base.OnHtmlEnd(ref parent, html, relativeOrder, format, expression);
+        base.OnHtmlEnd(ref parent, html, relativeOrder, transition, expression);
 
         switch (attributeStatus)
         {
             case AttributeStatus.None:
                 // ex: `<!--/key:{Key}-->`
                 Writer.Write("<!--/key:"u8, Key, "-->"u8);
-                if (format is {} transition)
-                    InjectTransition(transition);
+                if (transition is {} trns)
+                    InjectTransition(trns);
                 break;
 
             case AttributeStatus.InProgress:
@@ -274,15 +274,15 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
-        base.OnIteratorBegin(ref parent, ref htmls, format, expression);
+        base.OnIteratorBegin(ref parent, ref htmls, transition, expression);
         return true;
     }
 
-    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
-        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+        base.OnIteratorEnd(ref parent, ref htmls, transition, expression);
         
         // Keyhole to represent the loop itself, useful for zero-length use cases.
         // ex: `<!--key:{Key} /-->`
@@ -291,10 +291,10 @@ public class HtmlKeyComposer(IBufferWriter<byte> writer, WindowBuilder window)
         return true;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, format);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, format);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, format);
+    public override bool OnListener(ref Html parent, Action listener, string? trim = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, trim);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? trim = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, trim);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? trim = null, string? expression = null) => OnListener(ref parent, includeEventArg: false, trim);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? trim = null, string? expression = null) => OnListener(ref parent, includeEventArg: true, trim);
     private bool OnListener(ref Html parent, bool includeEventArg, string? format = null)
     {
         base.OnKeyhole(ref parent);

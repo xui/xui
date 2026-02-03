@@ -47,41 +47,41 @@ public abstract class BaseKeyComposer : BaseComposer
         return true;
     }
 
-    public override bool OnHtmlKeyhole(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+    public override bool OnHtmlKeyhole(ref Html parent, scoped Html html, int relativeOrder = -1, string? transition = null, string? expression = null)
         => html.Type switch {
             HtmlType.Wrapper => true, // ignore
             HtmlType.Template => OnTemplateEnd(ref html),
-            HtmlType.Default or _ => OnHtmlEnd(ref parent, html, relativeOrder, format, expression),
+            HtmlType.Default or _ => OnHtmlEnd(ref parent, html, relativeOrder, transition, expression),
         };
 
-    public virtual bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+    public virtual bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? transition = null, string? expression = null)
     {
         Key = keyCursor.MoveUp();
         return true;
     }
 
-    public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public virtual bool OnIteratorBegin(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
         Key = keyCursor.MoveNext();
         keyCursor.MoveDown();
         return true;
     }
 
-    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
-        => OnIteratorBegin(ref parent, ref htmls, format, expression)
-        && base.OnIteratorKeyhole(ref parent, ref htmls, enumerable, format, expression)
-        && OnIteratorEnd(ref parent, ref htmls, format, expression);
+    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? transition = null, string? expression = null)
+        => OnIteratorBegin(ref parent, ref htmls, transition, expression)
+        && base.OnIteratorKeyhole(ref parent, ref htmls, enumerable, transition, expression)
+        && OnIteratorEnd(ref parent, ref htmls, transition, expression);
 
-    public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public virtual bool OnIteratorEnd(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
         Key = keyCursor.MoveUp();
         return true;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Action listener, string? trim = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? trim = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? trim = null, string? expression = null) => OnKeyhole(ref parent);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? trim = null, string? expression = null) => OnKeyhole(ref parent);
 
     public override void Reset()
     {

@@ -128,18 +128,18 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? format = null, string? expression = null)
+    public override bool OnHtmlEnd(ref Html parent, scoped Html html, int relativeOrder = -1, string? transition = null, string? expression = null)
     {
         // Prevent bleeding
         ref var tail = ref buffer[Cursor];
         tail.String = string.Empty;
         tail.Type = KeyholeType.StringLiteral;
 
-        base.OnHtmlEnd(ref parent, html, relativeOrder, format, expression);
+        base.OnHtmlEnd(ref parent, html, relativeOrder, transition, expression);
 
         int index = Cursor;
         ref var keyhole = ref buffer[index];
-        keyhole.TransitionModifier = format;
+        keyhole.TransitionModifier = transition;
         keyhole.Expression = expression;
         if (relativeOrder >= 0)
             keyhole.RelativeOrder = relativeOrder;
@@ -148,16 +148,16 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public override bool OnIteratorBegin(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
         EnsureOddIndex();
         int index = Cursor;
-        base.OnIteratorBegin(ref parent, ref htmls, format, expression);
+        base.OnIteratorBegin(ref parent, ref htmls, transition, expression);
 
         ref var keyhole = ref buffer[index];
         keyhole.Key = Key;
         keyhole.Type = KeyholeType.Iterator;
-        keyhole.TransitionModifier = format;
+        keyhole.TransitionModifier = transition;
         keyhole.Expression = expression;
         keyhole.SequenceStart = writeHead;
         keyhole.SequenceLength = htmls.FormattedCount * 2 + 1;
@@ -167,9 +167,9 @@ public class SnapshotKeyComposer : BaseKeyComposer
         return true;
     }
 
-    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? format = null, string? expression = null)
+    public override bool OnIteratorKeyhole<T>(ref Html parent, ref Html htmls, Html.Enumerable<T> enumerable, string? transition = null, string? expression = null)
     {
-        OnIteratorBegin(ref parent, ref htmls, format, expression);
+        OnIteratorBegin(ref parent, ref htmls, transition, expression);
 
         var enumerator = enumerable.GetEnumerator();
         while (enumerator.MoveNext())
@@ -181,27 +181,27 @@ public class SnapshotKeyComposer : BaseKeyComposer
             buffer[Cursor - 1].Tag = item; // TODO: Memory allocation?
         }
 
-        OnIteratorEnd(ref parent, ref htmls, format, expression);
+        OnIteratorEnd(ref parent, ref htmls, transition, expression);
         return true;
     }
 
-    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? format = null, string? expression = null)
+    public override bool OnIteratorEnd(ref Html parent, ref Html htmls, string? transition = null, string? expression = null)
     {
         // Prevent bleeding
         ref var keyhole = ref buffer[Cursor];
         keyhole.String = string.Empty;
         keyhole.Type = KeyholeType.StringLiteral;
 
-        base.OnIteratorEnd(ref parent, ref htmls, format, expression);
+        base.OnIteratorEnd(ref parent, ref htmls, transition, expression);
 
         Cursor++;
         return true;
     }
 
-    public override bool OnListener(ref Html parent, Action listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Action<Event> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
-    public override bool OnListener(ref Html parent, Func<Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
-    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? format = null, string? expression = null) => OnListener(ref parent, format, expression);
+    public override bool OnListener(ref Html parent, Action listener, string? trim = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Action<Event> listener, string? trim = null, string? expression = null) => OnListener(ref parent, trim, expression);
+    public override bool OnListener(ref Html parent, Func<Task> listener, string? trim = null, string? expression = null) => OnListener(ref parent, string.Empty, expression);
+    public override bool OnListener(ref Html parent, Func<Event, Task> listener, string? trim = null, string? expression = null) => OnListener(ref parent, trim, expression);
     private bool OnListener(ref Html parent, string? format = null, string? expression = null)
     {
         EnsureOddIndex();
