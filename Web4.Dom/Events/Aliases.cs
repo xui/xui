@@ -1,5 +1,3 @@
-#pragma warning disable IDE1006 // Naming Styles
-
 using Web4.Dom.Events.Subsets;
 
 namespace Web4.Dom.Events;
