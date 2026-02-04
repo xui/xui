@@ -5,7 +5,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ITarget : 
+        public interface ITargetSubset : 
             ISubset,
             Target<string>,
             Target<bool>,
@@ -19,7 +19,7 @@ namespace Web4.Dom
             Target<TimeOnly>,
             Target<Color>,
             Target<Uri>,
-            IView
+            IViewSubset
         {
             new const string TRIM = "target";
 

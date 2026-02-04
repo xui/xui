@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ISkipped : ISubset, IView
+        public interface ISkippedSubset : ISubset, IViewSubset
         {
             new const string TRIM = "skipped";
 

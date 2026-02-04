@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IAngles : ISubset, IView
+        public interface IAnglesSubset : ISubset, IViewSubset
         {
             new const string TRIM = "altitudeAngle,azimuthAngle";
 

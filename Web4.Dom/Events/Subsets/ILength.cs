@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ILength : ISubset, IView
+        public interface ILengthSubset : ISubset, IViewSubset
         {
             new const string TRIM = "length";
 

@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IHashChange : ISubset, IView
+        public interface IHashChangeSubset : ISubset, IViewSubset
         {
             new const string TRIM = "newUrl,oldUrl";
 

@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IAnimation : ISubset, IView
+        public interface IAnimationSubset : ISubset, IViewSubset
         {
             new const string TRIM = "animationName,elapsedTime,propertyName,pseudoElement";
 

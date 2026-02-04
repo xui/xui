@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IModifierShift : ISubset, IView
+        public interface IModifierShiftSubset : ISubset, IViewSubset
         {
             new const string TRIM = "shiftKey";
 

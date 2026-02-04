@@ -37,48 +37,48 @@ public interface Aliases
     public interface Wheel : IWheelEvent { }
     public interface Subsets
     {
-        public interface Angles : IAngles { }
-        public interface Animation : IAnimation { }
-        public interface Buttons : IButtons { }
-        public interface ClientXY : IClientXY { }
-        public interface Coordinates : ICoordinates { }
-        public interface CurrentTarget: ICurrentTarget { }
-        public interface Data : IData { }
-        public interface DataTransfer : IDataTransfer { }
-        public interface Deltas : IDeltas { }
-        public interface Detail : IDetail { }
-        public interface DeviceMotion : IDeviceMotion { }
-        public interface DeviceOrientation : IDeviceOrientation { }
-        public interface Error : IError { }
-        public interface HashChange : IHashChange { }
-        public interface IsComposing : IIsComposing { }
-        public interface Keys : IKeys { }
-        public interface Length: ILength { }
-        public interface ModifierAlt : IModifierAlt { }
-        public interface ModifierCtrl : IModifierCtrl { }
-        public interface ModifierMeta : IModifierMeta { }
-        public interface Modifiers : IModifiers { }
-        public interface ModifierShift : IModifierShift { }
-        public interface MovementXY : IMovementXY { }
-        public interface OffsetXY : IOffsetXY { }
-        public interface PageXY : IPageXY { }
-        public interface Persisted : IPersisted { }
-        public interface Pointer : IPointer { }
-        public interface Pressures : IPressures { }
-        public interface PreventDefault : IPreventDefault { }
-        public interface Progress : IProgress { }
-        public interface RelatedTarget: IRelatedTarget { }
-        public interface ScreenXY : IScreenXY { }
-        public interface Skipped : ISkipped { }
-        public interface States: IStates { }
-        public interface Submitter : ISubmitter { }
-        public interface Target : ITarget { }
-        public interface Target<T> : ITarget<T> { }
-        public interface Tilts : ITilts { }
-        public interface Touches : ITouches { }
-        public interface View : IView { }
-        public interface WidthHeight : IWidthHeight { }
-        public interface XY : IXY { }
+        public interface Angles : IAnglesSubset { }
+        public interface Animation : IAnimationSubset { }
+        public interface Buttons : IButtonsSubset { }
+        public interface ClientXY : IClientXYSubset { }
+        public interface Coordinates : ICoordinatesSubset { }
+        public interface CurrentTarget: ICurrentTargetSubset { }
+        public interface Data : IDataSubset { }
+        public interface DataTransfer : IDataTransferSubset { }
+        public interface Deltas : IDeltasSubset { }
+        public interface Detail : IDetailSubset { }
+        public interface DeviceMotion : IDeviceMotionSubset { }
+        public interface DeviceOrientation : IDeviceOrientationSubset { }
+        public interface Error : IErrorSubset { }
+        public interface HashChange : IHashChangeSubset { }
+        public interface IsComposing : IIsComposingSubset { }
+        public interface Keys : IKeysSubset { }
+        public interface Length: ILengthSubset { }
+        public interface ModifierAlt : IModifierAltSubset { }
+        public interface ModifierCtrl : IModifierCtrlSubset { }
+        public interface ModifierMeta : IModifierMetaSubset { }
+        public interface Modifiers : IModifiersSubset { }
+        public interface ModifierShift : IModifierShiftSubset { }
+        public interface MovementXY : IMovementXYSubset { }
+        public interface OffsetXY : IOffsetXYSubset { }
+        public interface PageXY : IPageXYSubset { }
+        public interface Persisted : IPersistedSubset { }
+        public interface Pointer : IPointerSubset { }
+        public interface Pressures : IPressuresSubset { }
+        public interface PreventDefault : IPreventDefaultSubset { }
+        public interface Progress : IProgressSubset { }
+        public interface RelatedTarget: IRelatedTargetSubset { }
+        public interface ScreenXY : IScreenXYSubset { }
+        public interface Skipped : ISkippedSubset { }
+        public interface States: IStatesSubset { }
+        public interface Submitter : ISubmitterSubset { }
+        public interface Target : ITargetSubset { }
+        public interface Target<T> : ITargetSubset<T> { }
+        public interface Tilts : ITiltsSubset { }
+        public interface Touches : ITouchesSubset { }
+        public interface View : IViewSubset { }
+        public interface WidthHeight : IWidthHeightSubset { }
+        public interface XY : IXYSubset { }
     }
 }
 

@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IModifierAlt : ISubset, IView
+        public interface IModifierAltSubset : ISubset, IViewSubset
         {
             new const string TRIM = "altKey";
 

@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ITouches : ISubset, IView
+        public interface ITouchesSubset : ISubset, IViewSubset
         {
             new const string TRIM = "changedTouches,targetTouches,touches";
 

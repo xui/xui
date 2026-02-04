@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IModifierCtrl : ISubset, IView
+        public interface IModifierCtrlSubset : ISubset, IViewSubset
         {
             new const string TRIM = "ctrlKey";
 

@@ -4,7 +4,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ICoordinates : ISubset, XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY, IView
+        public interface ICoordinatesSubset : ISubset, XY, ClientXY, MovementXY, OffsetXY, PageXY, ScreenXY, IViewSubset
         {
             new const string TRIM = $"{XY.TRIM},{ClientXY.TRIM},{MovementXY.TRIM},{OffsetXY.TRIM},{PageXY.TRIM},{ScreenXY.TRIM}";
         }

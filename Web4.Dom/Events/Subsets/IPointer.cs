@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IPointer : ISubset, IView
+        public interface IPointerSubset : ISubset, IViewSubset
         {
             new const string TRIM = "pointerID,twist,pointerType,isPrimary";
 

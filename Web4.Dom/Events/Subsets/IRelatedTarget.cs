@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IRelatedTarget : ISubset, IView
+        public interface IRelatedTargetSubset : ISubset, IViewSubset
         {
             new const string TRIM = "relatedTarget";
 

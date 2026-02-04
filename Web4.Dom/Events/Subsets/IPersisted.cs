@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IPersisted : ISubset, IView
+        public interface IPersistedSubset : ISubset, IViewSubset
         {
             new const string TRIM = "persisted";
 

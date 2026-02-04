@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IDeltas : ISubset, IView
+        public interface IDeltasSubset : ISubset, IViewSubset
         {
             new const string TRIM = "deltaX,deltaY,deltaZ,deltaMode";
 

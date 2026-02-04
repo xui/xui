@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IKeys : ISubset, IView
+        public interface IKeysSubset : ISubset, IViewSubset
         {
             new const string TRIM = "code,key,location,repeat";
 

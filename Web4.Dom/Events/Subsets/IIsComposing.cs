@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IIsComposing : ISubset, IView
+        public interface IIsComposingSubset : ISubset, IViewSubset
         {
             new const string TRIM = "isComposing";
 

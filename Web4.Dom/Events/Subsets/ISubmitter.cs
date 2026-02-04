@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ISubmitter : ISubset, IView
+        public interface ISubmitterSubset : ISubset, IViewSubset
         {
             new const string TRIM = "submitter";
 

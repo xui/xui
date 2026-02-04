@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IProgress : ISubset, IView
+        public interface IProgressSubset : ISubset, IViewSubset
         {
             new const string TRIM = "lengthComputable,loaded,total";
 

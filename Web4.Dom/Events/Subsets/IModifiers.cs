@@ -4,7 +4,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IModifiers : ISubset, ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift, IView
+        public interface IModifiersSubset : ISubset, ModifierAlt, ModifierCtrl, ModifierMeta, ModifierShift, IViewSubset
         {
             new const string TRIM = $"{ModifierAlt.TRIM},{ModifierCtrl.TRIM},{ModifierMeta.TRIM},{ModifierShift.TRIM}";
         }

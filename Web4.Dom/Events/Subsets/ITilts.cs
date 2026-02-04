@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface ITilts : ISubset, IView
+        public interface ITiltsSubset : ISubset, IViewSubset
         {
             new const string TRIM = "tiltX,tiltY";
 

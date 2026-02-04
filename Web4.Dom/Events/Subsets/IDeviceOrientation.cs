@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IDeviceOrientation : ISubset, IView
+        public interface IDeviceOrientationSubset : ISubset, IViewSubset
         {
             new const string TRIM = "absolute,alpha,beta,gamma";
 

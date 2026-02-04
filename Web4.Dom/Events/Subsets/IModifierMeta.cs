@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IModifierMeta : ISubset, IView
+        public interface IModifierMetaSubset : ISubset, IViewSubset
         {
             new const string TRIM = "metaKey";
 

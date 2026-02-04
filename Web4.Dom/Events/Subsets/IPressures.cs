@@ -2,7 +2,7 @@ namespace Web4.Dom
 {
     namespace Events.Subsets
     {
-        public interface IPressures : ISubset, IView
+        public interface IPressuresSubset : ISubset, IViewSubset
         {
             new const string TRIM = "pressure,tangentialPressure";
 
