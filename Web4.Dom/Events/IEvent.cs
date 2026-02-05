@@ -2,7 +2,8 @@ using static Web4.Dom.Events.Aliases.Subsets;
 
 namespace Web4.Dom.Events;
 
-public interface IEvent : Target, CurrentTarget
+public interface IEvent 
+    : Target, CurrentTarget
 {
     /// <summary>
     /// A boolean value indicating whether or not the event bubbles up through the DOM.
