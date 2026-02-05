@@ -39,11 +39,6 @@ Html GetList() => $"""
     </list>
     """;
 
-void Test1(Event.Subsets.Buttons e)
-{
-    Console.WriteLine($"{e}");
-}
-
 async Task DoThingAsync(Event.Subsets.XY e)
 {
     var window = e.View;
