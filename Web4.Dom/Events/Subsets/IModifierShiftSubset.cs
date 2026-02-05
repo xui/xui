@@ -1,15 +1,11 @@
-namespace Web4.Dom
-{
-    namespace Events.Subsets
-    {
-        public interface IModifierShiftSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "shiftKey";
+namespace Web4.Dom.Events.Subsets;
 
-            /// <summary>
-            /// Returns true if the shift key was down when the event was fired.
-            /// </summary>
-            bool ShiftKey { get; }
-        }
-    }
+public interface IModifierShiftSubset : ISubset, IViewSubset
+{
+    new const string TRIM = "shiftKey";
+
+    /// <summary>
+    /// Returns true if the shift key was down when the event was fired.
+    /// </summary>
+    bool ShiftKey { get; }
 }

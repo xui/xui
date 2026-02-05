@@ -1,16 +1,12 @@
-namespace Web4.Dom
-{
-    namespace Events.Subsets
-    {
-        public interface ISubmitterSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "submitter";
+namespace Web4.Dom.Events.Subsets;
 
-            /// <summary>
-            /// An HTMLElement object which identifies the button or other element 
-            /// which was invoked to trigger the form being submitted.
-            /// </summary>
-            EventTarget Submitter { get; }
-        }
-    }
+public interface ISubmitterSubset : ISubset, IViewSubset
+{
+    new const string TRIM = "submitter";
+
+    /// <summary>
+    /// An HTMLElement object which identifies the button or other element 
+    /// which was invoked to trigger the form being submitted.
+    /// </summary>
+    EventTarget Submitter { get; }
 }

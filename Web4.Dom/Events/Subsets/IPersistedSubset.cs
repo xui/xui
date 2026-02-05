@@ -1,15 +1,11 @@
-namespace Web4.Dom
-{
-    namespace Events.Subsets
-    {
-        public interface IPersistedSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "persisted";
+namespace Web4.Dom.Events.Subsets;
 
-            /// <summary>
-            /// Indicates if the document is loading from a cache.
-            /// </summary>
-            bool Persisted { get; }
-        }
-    }
+public interface IPersistedSubset : ISubset, IViewSubset
+{
+    new const string TRIM = "persisted";
+
+    /// <summary>
+    /// Indicates if the document is loading from a cache.
+    /// </summary>
+    bool Persisted { get; }
 }

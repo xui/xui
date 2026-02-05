@@ -1,20 +1,16 @@
-namespace Web4.Dom
+namespace Web4.Dom.Events.Subsets;
+
+public interface IClientXYSubset : ISubset, IViewSubset
 {
-    namespace Events.Subsets
-    {
-        public interface IClientXYSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "clientX,clientY";
+    new const string TRIM = "clientX,clientY";
 
-            /// <summary>
-            /// The X coordinate of the mouse pointer in viewport coordinates.
-            /// </summary>
-            double ClientX { get; }
+    /// <summary>
+    /// The X coordinate of the mouse pointer in viewport coordinates.
+    /// </summary>
+    double ClientX { get; }
 
-            /// <summary>
-            /// The Y coordinate of the mouse pointer in viewport coordinates.
-            /// </summary>
-            double ClientY { get; }
-        }
-    }
+    /// <summary>
+    /// The Y coordinate of the mouse pointer in viewport coordinates.
+    /// </summary>
+    double ClientY { get; }
 }

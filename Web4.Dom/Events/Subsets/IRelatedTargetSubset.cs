@@ -1,15 +1,11 @@
-namespace Web4.Dom
-{
-    namespace Events.Subsets
-    {
-        public interface IRelatedTargetSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "relatedTarget";
+namespace Web4.Dom.Events.Subsets;
 
-            /// <summary>
-            /// The secondary target for the event, if there is one.
-            /// </summary>
-            EventTarget RelatedTarget { get; }
-        }
-    }
+public interface IRelatedTargetSubset : ISubset, IViewSubset
+{
+    new const string TRIM = "relatedTarget";
+
+    /// <summary>
+    /// The secondary target for the event, if there is one.
+    /// </summary>
+    EventTarget RelatedTarget { get; }
 }

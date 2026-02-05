@@ -1,15 +1,11 @@
-namespace Web4.Dom
-{
-    namespace Events.Subsets
-    {
-        public interface ISkippedSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "skipped";
+namespace Web4.Dom.Events.Subsets;
 
-            /// <summary>
-            /// Returns true if the user agent is skipping the element's rendering, or false otherwise.
-            /// </summary>
-            bool Skipped { get; }
-        }
-    }
+public interface ISkippedSubset : ISubset, IViewSubset
+{
+    new const string TRIM = "skipped";
+
+    /// <summary>
+    /// Returns true if the user agent is skipping the element's rendering, or false otherwise.
+    /// </summary>
+    bool Skipped { get; }
 }

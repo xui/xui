@@ -1,20 +1,16 @@
-namespace Web4.Dom
+namespace Web4.Dom.Events.Subsets;
+
+public interface IXYSubset : ISubset, IViewSubset
 {
-    namespace Events.Subsets
-    {
-        public interface IXYSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "x,y";
+    new const string TRIM = "x,y";
 
-            /// <summary>
-            /// Alias for MouseEvent.clientX.
-            /// </summary>
-            double X { get; }
+    /// <summary>
+    /// Alias for MouseEvent.clientX.
+    /// </summary>
+    double X { get; }
 
-            /// <summary>
-            /// Alias for MouseEvent.clientY.
-            /// </summary>
-            double Y { get; }
-        }
-    }
+    /// <summary>
+    /// Alias for MouseEvent.clientY.
+    /// </summary>
+    double Y { get; }
 }

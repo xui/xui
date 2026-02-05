@@ -1,20 +1,16 @@
-namespace Web4.Dom
+namespace Web4.Dom.Events.Subsets;
+
+public interface IPageXYSubset : ISubset, IViewSubset
 {
-    namespace Events.Subsets
-    {
-        public interface IPageXYSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "pageX,pageY";
+    new const string TRIM = "pageX,pageY";
 
-            /// <summary>
-            /// The X coordinate of the mouse pointer relative to the whole document.
-            /// </summary>
-            double PageX { get; }
+    /// <summary>
+    /// The X coordinate of the mouse pointer relative to the whole document.
+    /// </summary>
+    double PageX { get; }
 
-            /// <summary>
-            /// The Y coordinate of the mouse pointer relative to the whole document.
-            /// </summary>
-            double PageY { get; }
-        }
-    }
+    /// <summary>
+    /// The Y coordinate of the mouse pointer relative to the whole document.
+    /// </summary>
+    double PageY { get; }
 }
