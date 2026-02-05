@@ -1,22 +1,18 @@
-namespace Web4.Dom
+namespace Web4.Dom.Events.Subsets;
+
+public interface IAnglesSubset : ISubset, IViewSubset
 {
-    namespace Events.Subsets
-    {
-        public interface IAnglesSubset : ISubset, IViewSubset
-        {
-            new const string TRIM = "altitudeAngle,azimuthAngle";
+    new const string TRIM = "altitudeAngle,azimuthAngle";
 
-            /// <summary>
-            /// Represents the angle between a transducer (a pointer or stylus) axis 
-            /// and the X-Y plane of a device screen.
-            /// </summary>
-            double AltitudeAngle { get; }
+    /// <summary>
+    /// Represents the angle between a transducer (a pointer or stylus) axis 
+    /// and the X-Y plane of a device screen.
+    /// </summary>
+    double AltitudeAngle { get; }
 
-            /// <summary>
-            /// Represents the angle between the Y-Z plane and the plane containing 
-            /// both the transducer (a pointer or stylus) axis and the Y axis.
-            /// </summary>
-            double AzimuthAngle { get; }
-        }
-    }
+    /// <summary>
+    /// Represents the angle between the Y-Z plane and the plane containing 
+    /// both the transducer (a pointer or stylus) axis and the Y axis.
+    /// </summary>
+    double AzimuthAngle { get; }
 }
