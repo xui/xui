@@ -6,3 +6,8 @@ public interface IErrorEvent
     : IEvent, Error
 {
 }
+
+public record struct DOMException(string Name = "", string Message = "")
+{
+    public static readonly DOMException Empty = new();
+}

@@ -10,10 +10,3 @@ public interface IErrorSubset : ISubset, IViewSubset
     int ColNo { get; }
     DOMException Error { get; }
 }
-
-public record struct DOMException(
-    string Name = "",
-    string Message = ""
-) {
-    public static readonly DOMException Empty = new();
-}

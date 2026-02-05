@@ -9,12 +9,3 @@ public interface ITargetSubset<T> : ISubset, IViewSubset
     /// </summary>
     EventTarget<T> Target { get; }
 }
-
-public interface EventTarget<T>
-{
-    public string ID { get; }
-    public string Name { get; }
-    public string Type { get; }
-    public bool? Checked { get; }
-    public T Value { get; }
-}
