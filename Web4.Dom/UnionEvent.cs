@@ -2,7 +2,6 @@
 
 using System.Drawing;
 using Web4.Dom.Events;
-using Web4.Dom.Events.Subsets;
 
 namespace Web4.Dom;
 
