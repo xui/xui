@@ -665,6 +665,129 @@ public class Tests
 
 
 
+
+    // https://github.com/rosetta-rs/template-benchmarks-rs
+    // // Equivalent to passing `size: &usize` into big_table(...)
+    // [Params(10, 100)]
+    // public int Size { get; set; }
+
+    private List<List<int>> _table = default!;
+    private TeamsModel _teams = default!;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        int size = 100;
+        // Build the big table once (like Rust code does outside b.iter)
+        _table = new List<List<int>>(size);
+        for (int r = 0; r < size; r++)
+        {
+            var inner = new List<int>(size);
+            for (int i = 0; i < size; i++)
+                inner.Add(i);
+
+            _table.Add(inner);
+        }
+
+        // Build Teams once
+        _teams = new TeamsModel(
+            Year: 2015,
+            Teams: new List<Team>
+            {
+                new Team("Jiangsu",   43, 0),
+                new Team("Beijing",   27, 1),
+                new Team("Guangzhou", 22, 2),
+                new Team("Shandong",  12, 3),
+            }
+        );
+    }
+
+    [Benchmark]
+    public void RustBigTable_NoOp()
+    {
+        noOpComposer.Compose($"""
+            <table>
+            {_table.Select(row => (Html)$"""
+                <tr>{row.Select(col => (Html)$"""
+                    <td>{ col }</td>
+                """)}</tr>
+            """)}
+            </table>
+            """);
+    }
+    
+    [Benchmark]
+    public void RustBigTable_Html()
+    {
+        htmlComposer.Writer = noOpWriter;
+        noOpWriter.Write(htmlComposer, $"""
+            <table>
+            {_table.Select(row => (Html)$"""
+                <tr>{row.Select(col => (Html)$"""
+                    <td>{ col }</td>
+                """)}</tr>
+            """)}
+            </table>
+            """);
+    }
+
+    [Benchmark]
+    public void RustTeams_NoOp()
+    {
+        noOpComposer.Compose($"""
+            <html>
+              <head>
+                <title>{ _teams.Year }</title>
+              </head>
+              <body>
+                <h1>CSL { _teams.Year }</h1>
+                <ul>
+                { _teams.Teams.Select(team => (Html)$"""
+                    <li class="{(team.Index == 0 ? "champion" : "")}">
+                    <b>{ team.Name }</b>: { team.Score }
+                    </li>
+                """)}
+                </ul>
+              </body>
+            </html>
+            """);
+    }
+    
+    [Benchmark]
+    public void RustTeams_Html()
+    {
+        htmlComposer.Writer = noOpWriter;
+        noOpWriter.Write(htmlComposer, $"""
+            <html>
+              <head>
+                <title>{ _teams.Year }</title>
+              </head>
+              <body>
+                <h1>CSL { _teams.Year }</h1>
+                <ul>
+                { _teams.Teams.Select(team => (Html)$"""
+                    <li class="{(team.Index == 0 ? "champion" : "")}">
+                    <b>{ team.Name }</b>: { team.Score }
+                    </li>
+                """)}
+                </ul>
+              </body>
+            </html>
+            """);
+    }
+
+// ----------------- Data models -----------------
+
+public record struct TeamsModel(ushort Year, List<Team> Teams);
+public record struct Team(string Name, byte Score, int Index);
+
+
+
+
+
+
+
+
     static Html GuidTableBody() => $"""
         <main>
           <table>
