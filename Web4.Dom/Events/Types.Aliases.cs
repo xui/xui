@@ -18,13 +18,13 @@ public interface Aliases
     public interface Focus : IFocusEvent { }
     public interface FormData : IFormDataEvent { }
     public interface Gamepad : IGamepadEvent { }
-    public interface HashChange: IHashChangeEvent { }
+    public interface HashChange : IHashChangeEvent { }
     public interface Input<T> : IInputEvent<T> { }
     public interface Keyboard : IKeyboardEvent { }
     public interface Message : IMessageEvent { }
     public interface Mouse : IMouseEvent { }
     public interface PageTransition : IPageTransitionEvent { }
-    public interface Pointer: IPointerEvent { }
+    public interface Pointer : IPointerEvent { }
     public interface PopState : IPopStateEvent { }
     public interface PreventDefault : IPreventDefaultEvent { }
     public interface Progress : IProgressEvent { }
@@ -42,7 +42,7 @@ public interface Aliases
         public interface Buttons : IButtonsSubset { }
         public interface ClientXY : IClientXYSubset { }
         public interface Coordinates : ICoordinatesSubset { }
-        public interface CurrentTarget: ICurrentTargetSubset { }
+        public interface CurrentTarget : ICurrentTargetSubset { }
         public interface Data : IDataSubset { }
         public interface DataTransfer : IDataTransferSubset { }
         public interface Deltas : IDeltasSubset { }
@@ -53,7 +53,7 @@ public interface Aliases
         public interface HashChange : IHashChangeSubset { }
         public interface IsComposing : IIsComposingSubset { }
         public interface Keys : IKeysSubset { }
-        public interface Length: ILengthSubset { }
+        public interface Length : ILengthSubset { }
         public interface ModifierAlt : IModifierAltSubset { }
         public interface ModifierCtrl : IModifierCtrlSubset { }
         public interface ModifierMeta : IModifierMetaSubset { }
@@ -67,10 +67,10 @@ public interface Aliases
         public interface Pressures : IPressuresSubset { }
         public interface PreventDefault : IPreventDefaultSubset { }
         public interface Progress : IProgressSubset { }
-        public interface RelatedTarget: IRelatedTargetSubset { }
+        public interface RelatedTarget : IRelatedTargetSubset { }
         public interface ScreenXY : IScreenXYSubset { }
         public interface Skipped : ISkippedSubset { }
-        public interface States: IStatesSubset { }
+        public interface States : IStatesSubset { }
         public interface Submitter : ISubmitterSubset { }
         public interface Target : ITargetSubset { }
         public interface Target<T> : ITargetSubset<T> { }
